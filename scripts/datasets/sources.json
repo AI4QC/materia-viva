@@ -1,0 +1,1783 @@
+{
+  "schema_version": 1,
+  "updated": "2026-07-26",
+  "sources": [
+    {
+      "id": "materials-project",
+      "name": "Materials Project",
+      "access": "api-key",
+      "official_url": "https://docs.materialsproject.org/downloading-data/how-do-i-download-the-materials-project-database",
+      "license": "Materials Project terms",
+      "data_path": "raw/acquired/materials-project",
+      "status": "downloaded-verified-154377-summary-documents-2026-07-26",
+      "downloads": []
+    },
+    {
+      "id": "oqmd",
+      "name": "Open Quantum Materials Database",
+      "access": "open",
+      "official_url": "https://oqmd.org/download/",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/oqmd",
+      "status": "downloaded-verified-21034479961-byte-v1-8-sql-gzip-2026-07-26",
+      "downloads": [
+        {
+          "filename": "qmdb__v1_8__022026.sql.gz",
+          "url": "https://static.oqmd.org/static/downloads/qmdb__v1_8__022026.sql.gz",
+          "bytes": 21034479961
+        }
+      ]
+    },
+    {
+      "id": "aflow",
+      "name": "AFLOW",
+      "access": "open",
+      "official_url": "https://aflow.org/documentation/",
+      "license": "AFLOW academic non-commercial terms",
+      "data_path": "raw/acquired/aflow",
+      "status": "downloaded-verified-2981853-aflux-structures-plus-property-snapshot-2026-07-26",
+      "downloads": [
+        {
+          "filename": "CFID_AFLOW2.json.zip",
+          "url": "https://ndownloader.figshare.com/files/25453265",
+          "bytes": 3110072547
+        }
+      ]
+    },
+    {
+      "id": "nomad",
+      "name": "NOMAD Repository and Archive",
+      "access": "federated",
+      "official_url": "https://nomad-lab.eu/prod/v1/docs/howto/manage/program/download.html",
+      "license": "per-upload licence and NOMAD terms",
+      "data_path": "raw/acquired/nomad",
+      "status": "too-large-for-full-mirror",
+      "downloads": []
+    },
+    {
+      "id": "optimade",
+      "name": "OPTIMADE provider federation",
+      "access": "federated",
+      "official_url": "https://www.optimade.org/providers-dashboard/",
+      "license": "provider-specific",
+      "data_path": "raw/acquired/optimade",
+      "status": "registry-downloaded-verified-2026-07-26-provider-data-is-federated",
+      "downloads": [
+        {
+          "filename": "providers-2026-07-26.json",
+          "url": "https://providers.optimade.org/providers.json"
+        }
+      ]
+    },
+    {
+      "id": "cod",
+      "name": "Crystallography Open Database",
+      "access": "open",
+      "official_url": "https://wiki.crystallography.net/howtoobtaincod",
+      "license": "CC0",
+      "data_path": "raw/external_structs/cod",
+      "status": "already-present",
+      "downloads": []
+    },
+    {
+      "id": "icsd",
+      "name": "Inorganic Crystal Structure Database",
+      "access": "licensed",
+      "official_url": "https://icsd.products.fiz-karlsruhe.de/",
+      "license": "FIZ Karlsruhe ICSD licence",
+      "data_path": "raw/icsd_extracted",
+      "status": "already-present-user-licensed",
+      "downloads": []
+    },
+    {
+      "id": "csd",
+      "name": "Cambridge Structural Database",
+      "access": "licensed",
+      "official_url": "https://www.ccdc.cam.ac.uk/structures/",
+      "license": "CCDC licence",
+      "data_path": "raw/acquired/csd",
+      "status": "user-action-required",
+      "downloads": []
+    },
+    {
+      "id": "mpds",
+      "name": "Materials Platform for Data Science / Pauling File",
+      "access": "api-key",
+      "official_url": "https://developer.mpds.io/",
+      "license": "MPDS subscription terms",
+      "data_path": "raw/acquired/mpds",
+      "status": "user-action-required",
+      "downloads": []
+    },
+    {
+      "id": "jarvis-dft",
+      "name": "NIST JARVIS-DFT 3D",
+      "access": "open",
+      "official_url": "https://pages.nist.gov/jarvis/databases/",
+      "license": "NIST/JARVIS dataset terms",
+      "data_path": "raw/acquired/jarvis-dft",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "jdft_3d-9-24-2025.json.zip",
+          "url": "https://ndownloader.figshare.com/files/64391379",
+          "bytes": 48447610
+        }
+      ]
+    },
+    {
+      "id": "alexandria",
+      "name": "Alexandria Materials Database",
+      "access": "open",
+      "official_url": "https://alexandria.icams.rub.de/datasets.html",
+      "license": "Alexandria dataset terms",
+      "data_path": "raw/acquired/alexandria",
+      "status": "downloaded-verified-all-official-pbe-3d-pbe-2d-pbe-1d-pbesol-and-scan-files-2026-07-26",
+      "estimated_bytes": 4300000000,
+      "downloads": [],
+      "indexes": [
+        {
+          "url": "https://alexandria.icams.rub.de/data/pbe/2025.07.02/",
+          "destination": "pbe-3d-2025.07.02",
+          "suffixes": [".json.bz2"]
+        },
+        {
+          "url": "https://alexandria.icams.rub.de/data/pbe_2d/",
+          "destination": "pbe-2d",
+          "suffixes": [".json.bz2"]
+        },
+        {
+          "url": "https://alexandria.icams.rub.de/data/pbe_1d/",
+          "destination": "pbe-1d",
+          "suffixes": [".json.bz2"]
+        },
+        {
+          "url": "https://alexandria.icams.rub.de/data/pbesol/",
+          "destination": "pbesol-3d",
+          "suffixes": [".json.bz2"]
+        },
+        {
+          "url": "https://alexandria.icams.rub.de/data/scan/",
+          "destination": "scan-3d",
+          "suffixes": [".json.bz2"]
+        }
+      ]
+    },
+    {
+      "id": "gnome",
+      "name": "GNoME materials discovery dataset",
+      "access": "open",
+      "official_url": "https://github.com/google-deepmind/materials_discovery/blob/main/DATASET.md",
+      "license": "CC BY-NC 4.0",
+      "data_path": "raw/acquired/gnome",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "stable_materials_summary.csv",
+          "url": "https://storage.googleapis.com/gdm_materials_discovery/gnome_data/stable_materials_summary.csv",
+          "bytes": 151452777
+        },
+        {
+          "filename": "stable_materials_r2scan.csv",
+          "url": "https://storage.googleapis.com/gdm_materials_discovery/gnome_data/stable_materials_r2scan.csv",
+          "bytes": 22004293
+        },
+        {
+          "filename": "by_id.zip",
+          "url": "https://storage.googleapis.com/gdm_materials_discovery/gnome_data/by_id.zip",
+          "bytes": 455074116
+        }
+      ]
+    },
+    {
+      "id": "alexandria-jarvis-snapshot",
+      "name": "Alexandria 2024.10.1 JARVIS repack",
+      "access": "open",
+      "official_url": "https://figshare.com/articles/dataset/27174897",
+      "license": "Alexandria and NIST JARVIS dataset terms",
+      "data_path": "raw/acquired/alexandria-jarvis-snapshot",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "alexandria_pbe_3d_2024.10.1_jarvis_tools.json.zip",
+          "url": "https://ndownloader.figshare.com/files/49622946",
+          "bytes": 1138500060
+        },
+        {
+          "filename": "alexandria_pbe_2d_2024.10.1_jarvis_tools.json.zip",
+          "url": "https://ndownloader.figshare.com/files/49622988",
+          "bytes": 39652364
+        },
+        {
+          "filename": "alexandria_pbe_1d_2024.10.1_jarvis_tools.json.zip",
+          "url": "https://ndownloader.figshare.com/files/49622991",
+          "bytes": 3848439
+        },
+        {
+          "filename": "alexandria_scan_3d_2024.10.1_jarvis_tools.json.zip",
+          "url": "https://ndownloader.figshare.com/files/49623090",
+          "bytes": 97154834
+        },
+        {
+          "filename": "alexandria_ps_3d_2024.10.1_jarvis_tools.json.zip",
+          "url": "https://ndownloader.figshare.com/files/49623096",
+          "bytes": 96831999
+        },
+        {
+          "filename": "alexandria_convex_hull_pbe_2023.12.29_jarvis_tools.json.zip",
+          "url": "https://ndownloader.figshare.com/files/49622718",
+          "bytes": 27217362
+        }
+      ]
+    },
+    {
+      "id": "c2db",
+      "name": "Computational 2D Materials Database",
+      "access": "open",
+      "official_url": "https://2dhub.org/",
+      "license": "CC BY-SA 4.0",
+      "data_path": "raw/acquired/c2db",
+      "status": "downloaded-verified-2026-07-26-via-jarvis-mirror",
+      "downloads": [
+        {
+          "filename": "c2db_atoms.json.zip",
+          "url": "https://ndownloader.figshare.com/files/28682010",
+          "bytes": 5516628
+        }
+      ]
+    },
+    {
+      "id": "2dmatpedia",
+      "name": "2DMatPedia",
+      "access": "open",
+      "official_url": "https://www.2dmatpedia.org/download",
+      "license": "2DMatPedia terms",
+      "data_path": "raw/acquired/2dmatpedia",
+      "status": "downloaded-verified-2026-07-26-via-jarvis-mirror",
+      "downloads": [
+        {
+          "filename": "twodmatpd.json.zip",
+          "url": "https://ndownloader.figshare.com/files/26789006",
+          "bytes": 1564047
+        }
+      ]
+    },
+    {
+      "id": "omdb",
+      "name": "Organic Materials Database",
+      "access": "free-registration",
+      "official_url": "https://omdb.mathub.io/dataset/",
+      "license": "OMDB terms",
+      "data_path": "raw/acquired/omdb",
+      "status": "downloaded-verified-2026-07-26-via-jarvis-mirror-official-login-required",
+      "downloads": [
+        {
+          "filename": "omdbv1.json.zip",
+          "url": "https://ndownloader.figshare.com/files/28501761",
+          "bytes": 18367165
+        }
+      ]
+    },
+    {
+      "id": "hmof",
+      "name": "Hypothetical MOF database",
+      "access": "open",
+      "official_url": "https://figshare.com/articles/dataset/15127758",
+      "license": "Figshare record licence",
+      "data_path": "raw/acquired/hmof",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "hmof_db_9_18_2021.json.zip",
+          "url": "https://ndownloader.figshare.com/files/30972655",
+          "bytes": 387532201
+        }
+      ]
+    },
+    {
+      "id": "qmof",
+      "name": "Quantum MOF Database",
+      "access": "open",
+      "official_url": "https://github.com/Andrew-S-Rosen/QMOF",
+      "license": "CC BY 4.0",
+      "data_path": "raw/external_structs/frameworks/qmof",
+      "status": "already-present",
+      "downloads": []
+    },
+    {
+      "id": "core-mof",
+      "name": "CoRE MOF",
+      "access": "open",
+      "official_url": "https://zenodo.org/communities/coremof/",
+      "license": "release-specific open licence",
+      "data_path": "raw/external_structs/frameworks/core_mof",
+      "status": "already-present",
+      "downloads": []
+    },
+    {
+      "id": "curated-cof",
+      "name": "Curated COF structures",
+      "access": "open",
+      "official_url": "https://github.com/lipelopesoliveira/curatedCOFs",
+      "license": "repository licence",
+      "data_path": "raw/external_structs/frameworks/curated_cofs",
+      "status": "already-present",
+      "downloads": []
+    },
+    {
+      "id": "mc3d",
+      "name": "Materials Cloud MC3D",
+      "access": "open",
+      "official_url": "https://mc3d.materialscloud.org/",
+      "license": "Materials Cloud record licence",
+      "data_path": "raw/external_structs/mc3d",
+      "status": "already-present",
+      "downloads": []
+    },
+    {
+      "id": "mc2d",
+      "name": "Materials Cloud MC2D",
+      "access": "open",
+      "official_url": "https://mc2d.materialscloud.org/",
+      "license": "Materials Cloud record licence",
+      "data_path": "raw/acquired/mc2d",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "as_extracted_2d_structures.zip",
+          "url": "https://archive.materialscloud.org/api/records/17gf6-84915/files/as_extracted_2d_structures.zip/content",
+          "bytes": 5918052
+        },
+        {
+          "filename": "optimized_2d_structures.zip",
+          "url": "https://archive.materialscloud.org/api/records/17gf6-84915/files/optimized_2d_structures.zip/content",
+          "bytes": 5309505
+        },
+        {
+          "filename": "structure_2d.json",
+          "url": "https://archive.materialscloud.org/api/records/17gf6-84915/files/structure_2d.json/content",
+          "bytes": 4771483
+        }
+      ]
+    },
+    {
+      "id": "omat24",
+      "name": "Open Materials 2024",
+      "access": "open",
+      "official_url": "https://huggingface.co/datasets/facebook/OMAT24",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/omat24",
+      "status": "excluded-by-scope-existing-legacy-trajectory-data-not-ingested",
+      "downloads": []
+    },
+    {
+      "id": "mattergen",
+      "name": "MatterGen Alex-MP and MP-20 releases",
+      "access": "open",
+      "official_url": "https://github.com/microsoft/mattergen",
+      "license": "MIT and dataset-specific licences",
+      "data_path": "raw/acquired/mattergen",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "mp_20.zip",
+          "url": "https://media.githubusercontent.com/media/microsoft/mattergen/main/data-release/mp-20/mp_20.zip",
+          "bytes": 12254159
+        },
+        {
+          "filename": "alex_mp_20.zip",
+          "url": "https://media.githubusercontent.com/media/microsoft/mattergen/main/data-release/alex-mp/alex_mp_20.zip",
+          "bytes": 186506244
+        }
+      ]
+    },
+    {
+      "id": "mptrj",
+      "name": "Materials Project trajectory dataset (MPtrj)",
+      "access": "open",
+      "official_url": "https://figshare.com/articles/dataset/23713842",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/mptrj",
+      "status": "excluded-by-scope-trajectory-dataset",
+      "downloads": []
+    },
+    {
+      "id": "matbench-discovery",
+      "name": "Matbench Discovery / WBM",
+      "access": "open",
+      "official_url": "https://figshare.com/articles/dataset/Matbench_Discovery_v1_0_0/22715158",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/matbench-discovery",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "2023-02-07-mp-computed-structure-entries.json.gz",
+          "url": "https://ndownloader.figshare.com/files/40344436",
+          "bytes": 179351659
+        },
+        {
+          "filename": "2022-10-19-wbm-computed-structure-entries+init-structs.json.bz2",
+          "url": "https://ndownloader.figshare.com/files/40344469",
+          "bytes": 104049739
+        },
+        {
+          "filename": "2024-08-04-wbm-relaxed-atoms.extxyz.zip",
+          "url": "https://ndownloader.figshare.com/files/48169600",
+          "bytes": 99522982
+        },
+        {
+          "filename": "2024-08-04-wbm-initial-atoms.extxyz.zip",
+          "url": "https://ndownloader.figshare.com/files/48169597",
+          "bytes": 98164028
+        },
+        {
+          "filename": "2023-12-13-wbm-summary.csv.gz",
+          "url": "https://ndownloader.figshare.com/files/44225498",
+          "bytes": 12745632
+        }
+      ]
+    },
+    {
+      "id": "atomwork-adv",
+      "name": "NIMS AtomWork-Adv",
+      "access": "paid",
+      "official_url": "https://atomwork-adv.nims.go.jp/en/service.html",
+      "license": "paid NIMS licence; annual download cap",
+      "data_path": "raw/acquired/atomwork-adv",
+      "status": "user-action-required",
+      "downloads": []
+    },
+    {
+      "id": "springer-materials",
+      "name": "SpringerMaterials",
+      "access": "paid",
+      "official_url": "https://materials.springer.com/",
+      "license": "SpringerMaterials institutional licence",
+      "data_path": "raw/acquired/springer-materials",
+      "status": "user-action-required",
+      "downloads": []
+    },
+    {
+      "id": "pearsons-crystal-data",
+      "name": "Pearson's Crystal Data",
+      "access": "paid",
+      "official_url": "https://www.crystalimpact.com/pcd/",
+      "license": "Crystal Impact licence",
+      "data_path": "raw/acquired/pearsons-crystal-data",
+      "status": "user-action-required",
+      "downloads": []
+    },
+    {
+      "id": "snumat",
+      "name": "SNUMAT hybrid-functional database",
+      "access": "open",
+      "official_url": "https://figshare.com/articles/dataset/21713885",
+      "license": "Figshare record licence",
+      "data_path": "raw/acquired/snumat",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "snumat.json.zip",
+          "url": "https://ndownloader.figshare.com/files/38521736",
+          "bytes": 7909016
+        }
+      ]
+    },
+    {
+      "id": "3dsc",
+      "name": "3DSC superconductors with crystal structures",
+      "access": "open",
+      "official_url": "https://github.com/aimat-lab/3DSC",
+      "license": "3DSC repository licence and upstream MP/ICSD terms",
+      "data_path": "raw/acquired/3dsc",
+      "status": "downloaded-verified-2026-07-26-mp-structures-icsd-ids-only",
+      "downloads": [
+        {
+          "filename": "3DSC-main.zip",
+          "url": "https://codeload.github.com/aimat-lab/3DSC/zip/refs/heads/main"
+        }
+      ]
+    },
+    {
+      "id": "amcsd",
+      "name": "American Mineralogist Crystal Structure Database",
+      "access": "open",
+      "official_url": "https://www.rruff.net/about/download-data/",
+      "license": "AMCSD terms",
+      "data_path": "raw/acquired/amcsd",
+      "status": "download-ready-official-bulk-cif-amc-and-diffraction-records",
+      "downloads": [
+        {
+          "filename": "amc.zip",
+          "url": "https://www.rruff.net/AMS/zipped_files/amc.zip",
+          "bytes": 13368270
+        },
+        {
+          "filename": "cif.zip",
+          "url": "https://www.rruff.net/AMS/zipped_files/cif.zip",
+          "bytes": 69005638
+        },
+        {
+          "filename": "dif.zip",
+          "url": "https://www.rruff.net/AMS/zipped_files/dif.zip",
+          "bytes": 41460709
+        }
+      ]
+    },
+    {
+      "id": "topological-materials",
+      "name": "Topological Materials Database",
+      "access": "free-registration",
+      "official_url": "https://topologicalquantumchemistry.org/",
+      "license": "derived from licensed ICSD data",
+      "data_path": "raw/acquired/topological-materials",
+      "status": "browser-access-no-redistributable-bulk-structures",
+      "downloads": []
+    },
+    {
+      "id": "fair-mofs",
+      "name": "FAIR-MOFs experimental and optimized structures",
+      "access": "open",
+      "official_url": "https://zenodo.org/records/13254307",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/fair-mofs",
+      "status": "downloaded-verified-structure-and-property-release-2026-07-26",
+      "downloads": [
+        {
+          "filename": "FAIR-MOFs_exp.zip",
+          "url": "https://zenodo.org/api/records/13254307/files/FAIR-MOFs_exp.zip/content",
+          "bytes": 148581070
+        },
+        {
+          "filename": "FAIR-MOFs_opt.zip",
+          "url": "https://zenodo.org/api/records/13254307/files/FAIR-MOFs_opt.zip/content",
+          "bytes": 101105641
+        },
+        {
+          "filename": "FAIR-MOFS_ligands_and_metal_cluster.gz",
+          "url": "https://zenodo.org/api/records/13254307/files/FAIR-MOFS_ligands_and_metal_cluster.gz/content",
+          "bytes": 651581440
+        },
+        {
+          "filename": "complete_experimental_synthetic_conditions.json",
+          "url": "https://zenodo.org/api/records/13254307/files/complete_experimental_synthetic_conditions.json/content",
+          "bytes": 7221731
+        },
+        {
+          "filename": "DIO_2021_and_other_properties.csv",
+          "url": "https://zenodo.org/api/records/13254307/files/DIO_2021_and_other_properties.csv/content",
+          "bytes": 46704664
+        },
+        {
+          "filename": "porosity_data_of_optimised_mof.json",
+          "url": "https://zenodo.org/api/records/13254307/files/porosity_data_of_optimised_mof.json/content",
+          "bytes": 5675476
+        },
+        {
+          "filename": "porosity_of_unoptimised_mof.json",
+          "url": "https://zenodo.org/api/records/13254307/files/porosity_of_unoptimised_mof.json/content",
+          "bytes": 9537015
+        },
+        {
+          "filename": "mof_formation_energy_sbu.json",
+          "url": "https://zenodo.org/api/records/13254307/files/mof_formation_energy_sbu.json/content",
+          "bytes": 8148291
+        },
+        {
+          "filename": "mof_formation_energy_ligand.json",
+          "url": "https://zenodo.org/api/records/13254307/files/mof_formation_energy_ligand.json/content",
+          "bytes": 8149001
+        },
+        {
+          "filename": "Topology.csv",
+          "url": "https://zenodo.org/api/records/13254307/files/Topology.csv/content",
+          "bytes": 1499127
+        }
+      ]
+    },
+    {
+      "id": "mofx-db",
+      "name": "MOFX-DB adsorption structures and isotherms",
+      "access": "open",
+      "official_url": "https://mof.tech.northwestern.edu/databases",
+      "license": "MOFX-DB dataset terms",
+      "data_path": "raw/acquired/mofx-db",
+      "status": "downloaded-verified-property-overlays-structures-overlap-existing-mof-sources-2026-07-26",
+      "downloads": [
+        {
+          "filename": "CoREMOF-2014-dc8a0295db.zip",
+          "url": "https://mof.tech.northwestern.edu/Datasets/CoREMOF%202014-mofdb-version%3Adc8a0295db.zip",
+          "bytes": 40230469
+        },
+        {
+          "filename": "CoREMOF-2019-dc8a0295db.zip",
+          "url": "https://mof.tech.northwestern.edu/Datasets/CoREMOF%202019-mofdb-version%3Adc8a0295db.zip",
+          "bytes": 118116979
+        },
+        {
+          "filename": "hMOF-dc8a0295db.zip",
+          "url": "https://mof.tech.northwestern.edu/Datasets/hMOF-mofdb-version%3Adc8a0295db.zip",
+          "bytes": 1094774584
+        },
+        {
+          "filename": "IZA-dc8a0295db.zip",
+          "url": "https://mof.tech.northwestern.edu/Datasets/IZA-mofdb-version%3Adc8a0295db.zip",
+          "bytes": 678846
+        },
+        {
+          "filename": "PCOD-syn-dc8a0295db.zip",
+          "url": "https://mof.tech.northwestern.edu/Datasets/PCOD%20syn-mofdb-version%3Adc8a0295db.zip",
+          "bytes": 290483
+        },
+        {
+          "filename": "Tobacco-dc8a0295db.zip",
+          "url": "https://mof.tech.northwestern.edu/Datasets/Tobacco-mofdb-version%3Adc8a0295db.zip",
+          "bytes": 355574135
+        }
+      ]
+    },
+    {
+      "id": "mosaec-db",
+      "name": "MOSAEC experimental MOF validation database",
+      "access": "open",
+      "official_url": "https://zenodo.org/records/15808197",
+      "license": "CC BY-NC-SA 4.0 for record files; CIF structures require a CSD licence",
+      "data_path": "raw/acquired/mosaec-db",
+      "status": "downloaded-verified-open-descriptors-structure-cifs-require-csd-licence-2026-07-26",
+      "downloads": [
+        {
+          "filename": "mosaec-db.csv",
+          "url": "https://zenodo.org/api/records/15808197/files/mosaec-db.csv/content",
+          "bytes": 57344406
+        },
+        {
+          "filename": "mosaec-db.xlsx",
+          "url": "https://zenodo.org/api/records/15808197/files/mosaec-db.xlsx/content",
+          "bytes": 35662257
+        },
+        {
+          "filename": "descriptors.tar.gz",
+          "url": "https://zenodo.org/api/records/15808197/files/descriptors.tar.gz/content",
+          "bytes": 928085369
+        },
+        {
+          "filename": "subsets.tar.gz",
+          "url": "https://zenodo.org/api/records/15808197/files/subsets.tar.gz/content",
+          "bytes": 121325132
+        },
+        {
+          "filename": "misc_data.tar.gz",
+          "url": "https://zenodo.org/api/records/15808197/files/misc_data.tar.gz/content",
+          "bytes": 1042613
+        }
+      ]
+    },
+    {
+      "id": "phonix",
+      "name": "Phonix anharmonic phonon and thermal-conductivity database",
+      "access": "open",
+      "official_url": "https://phonix-db.org/",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/phonix",
+      "status": "downloaded-verified-summary-full-force-constant-archive-too-large-2026-07-26",
+      "downloads": [
+        {
+          "filename": "phonix-summary-2026.03.28.parquet",
+          "url": "https://huggingface.co/datasets/phonix-db/phonix-summary/resolve/main/summary.parquet",
+          "bytes": 156222664
+        }
+      ]
+    },
+    {
+      "id": "novomag",
+      "name": "NovoMag magnetic materials database",
+      "access": "open",
+      "official_url": "https://www.novomag.physics.iastate.edu/structure-database",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/novomag",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "magdb-v1.json",
+          "url": "https://zenodo.org/api/records/17399362/files/magdb.json/content",
+          "bytes": 25704157
+        },
+        {
+          "filename": "fecozr-paper-v1.zip",
+          "url": "https://zenodo.org/api/records/17477290/files/fecozr_paper.zip/content",
+          "bytes": 4787514
+        }
+      ]
+    },
+    {
+      "id": "topomat",
+      "name": "Materials Cloud TopoMat",
+      "access": "open",
+      "official_url": "https://www.materialscloud.org/discover/topomat",
+      "license": "CC BY-NC 4.0",
+      "data_path": "raw/acquired/topomat",
+      "status": "downloaded-verified-derived-from-icsd-and-cod-2026-07-26",
+      "downloads": [
+        {
+          "filename": "topomat-v1-media.tar.gz",
+          "url": "https://archive.materialscloud.org/api/records/g7242-h7s69/files/media.tar.gz/content",
+          "bytes": 4020038106
+        }
+      ]
+    },
+    {
+      "id": "pcod",
+      "name": "Predicted Crystallography Open Database",
+      "access": "open",
+      "official_url": "https://www.crystallography.net/pcod/",
+      "license": "public domain",
+      "data_path": "raw/acquired/pcod",
+      "status": "rsync-endpoint-verified-compact-ingestion-required-for-one-million-small-cifs",
+      "downloads": []
+    },
+    {
+      "id": "magndata",
+      "name": "MAGNDATA published magnetic structures",
+      "access": "open",
+      "official_url": "https://cryst.ehu.es/magndata/",
+      "license": "Bilbao Crystallographic Server terms and source publications",
+      "data_path": "raw/acquired/magndata",
+      "status": "per-entry-mcif-download-no-documented-bulk-endpoint",
+      "downloads": []
+    },
+    {
+      "id": "iza-zeolite",
+      "name": "IZA Database of Zeolite Structures",
+      "access": "open",
+      "official_url": "https://www.iza-structure.org/databases/",
+      "license": "IZA Structure Commission terms",
+      "data_path": "raw/acquired/iza-zeolite",
+      "status": "per-framework-download-mofx-iza-snapshot-queued",
+      "downloads": []
+    },
+    {
+      "id": "qpod",
+      "name": "Quantum Point Defects Database",
+      "access": "open",
+      "official_url": "https://www.2dhub.org/qpod/qpod.html",
+      "license": "2DHub and QPOD terms",
+      "data_path": "raw/acquired/qpod",
+      "status": "browse-api-available-no-current-documented-bulk-file",
+      "downloads": []
+    },
+    {
+      "id": "bidb",
+      "name": "2DHub van der Waals Bilayer Database",
+      "access": "open",
+      "official_url": "https://www.2dhub.org/bidb/bidb.html",
+      "license": "2DHub dataset terms",
+      "data_path": "raw/acquired/bidb",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "bidb-2026-06-25.db",
+          "url": "https://www.2dhub.org/_downloads/ba35c7912de53128685d9d560a3a2f87/bidb.db",
+          "bytes": 49745920
+        }
+      ]
+    },
+    {
+      "id": "hetdb",
+      "name": "2DHub van der Waals Heterostructure Database",
+      "access": "open",
+      "official_url": "https://www.2dhub.org/hetdb/hetdb.html",
+      "license": "2DHub dataset terms",
+      "data_path": "raw/acquired/hetdb",
+      "status": "browse-database-no-current-documented-bulk-file",
+      "downloads": []
+    },
+    {
+      "id": "2dalloys",
+      "name": "2DHub 2D-alloy database",
+      "access": "open",
+      "official_url": "https://www.2dhub.org/2dalloys/2dalloys.html",
+      "license": "2DHub dataset terms",
+      "data_path": "raw/acquired/2dalloys",
+      "status": "downloaded-verified-2026-07-26",
+      "downloads": [
+        {
+          "filename": "2dalloys-2026-06-25.db",
+          "url": "https://www.2dhub.org/_downloads/93db2a0b33028278cf5e22b17a3994f7/2dalloys.db",
+          "bytes": 13877248
+        }
+      ]
+    },
+    {
+      "id": "x2db",
+      "name": "2DHub experimental 2D materials database",
+      "access": "open",
+      "official_url": "https://www.2dhub.org/x2db/x2db.html",
+      "license": "2DHub dataset terms",
+      "data_path": "raw/acquired/x2db",
+      "status": "browse-metadata-database-no-current-documented-bulk-file",
+      "downloads": []
+    },
+    {
+      "id": "sacada",
+      "name": "Samara Carbon Allotrope Database",
+      "access": "open",
+      "official_url": "https://www.sacada.info/",
+      "license": "SACADA site terms and source-publication provenance",
+      "data_path": "raw/acquired/sacada",
+      "status": "downloaded-1644-static-structure-archives-17-official-entries-have-no-archive-2026-07-26",
+      "downloads": [
+        {
+          "filename": "sacada-metadata.json",
+          "url": "https://www.sacada.info/scd_ajax.php"
+        }
+      ]
+    },
+    {
+      "id": "deem-zeolites",
+      "name": "Michael Deem PCOD hypothetical zeolite structures v2.1",
+      "access": "open",
+      "official_url": "https://mwdeem.org/PCOD/index.html",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/deem-zeolites",
+      "status": "downloaded-verified-331k-unique-zeolite-like-structures-2026-07-26",
+      "downloads": [
+        {
+          "filename": "database_2.1_slc_good_1_of_3.tgz",
+          "url": "https://zenodo.org/api/records/8035241/files/database_2.1_slc_good_1_of_3.tgz/content",
+          "bytes": 194490365
+        },
+        {
+          "filename": "database_2.1_slc_good_2_of_3.tgz",
+          "url": "https://zenodo.org/api/records/8035241/files/database_2.1_slc_good_2_of_3.tgz/content",
+          "bytes": 183154071
+        },
+        {
+          "filename": "database_2.1_slc_good_3_of_3.tgz",
+          "url": "https://zenodo.org/api/records/8035241/files/database_2.1_slc_good_3_of_3.tgz/content",
+          "bytes": 228045377
+        }
+      ]
+    },
+    {
+      "id": "arc-mof",
+      "name": "ab initio REPEAT Charge MOF Database",
+      "access": "open",
+      "official_url": "https://zenodo.org/records/7600474",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/arc-mof",
+      "status": "downloaded-verified-24-structure-charge-descriptor-and-adsorption-files-2026-07-26",
+      "downloads": [
+        {
+          "filename": "all_structures_1.tar.gz",
+          "url": "https://zenodo.org/api/records/7600474/files/all_structures_1.tar.gz/content",
+          "bytes": 962709692
+        },
+        {
+          "filename": "all_structures_2.tar.gz",
+          "url": "https://zenodo.org/api/records/7600474/files/all_structures_2.tar.gz/content",
+          "bytes": 1201450213
+        },
+        {
+          "filename": "ARCMOF_20220610.tar.gz",
+          "url": "https://zenodo.org/api/records/7600474/files/ARCMOF_20220610.tar.gz/content",
+          "bytes": 739976400
+        },
+        {
+          "filename": "all_topology_lists.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/all_topology_lists.csv/content",
+          "bytes": 11683716
+        },
+        {
+          "filename": "geometric_properties.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/geometric_properties.csv/content",
+          "bytes": 110395714
+        },
+        {
+          "filename": "RACs.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/RACs.csv/content",
+          "bytes": 838376934
+        },
+        {
+          "filename": "RDFs.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/RDFs.csv/content",
+          "bytes": 2129693042
+        },
+        {
+          "filename": "flig-clusters.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/flig-clusters.csv/content",
+          "bytes": 21787993
+        },
+        {
+          "filename": "func-clusters.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/func-clusters.csv/content",
+          "bytes": 18684175
+        },
+        {
+          "filename": "geo-clusters.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/geo-clusters.csv/content",
+          "bytes": 24172478
+        },
+        {
+          "filename": "mc-clusters.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/mc-clusters.csv/content",
+          "bytes": 21200601
+        },
+        {
+          "filename": "func-diverse-set.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/func-diverse-set.csv/content",
+          "bytes": 6001983
+        },
+        {
+          "filename": "mc-diverse-set.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/mc-diverse-set.csv/content",
+          "bytes": 733580
+        },
+        {
+          "filename": "ML_test_set.tar.gz",
+          "url": "https://zenodo.org/api/records/7600474/files/ML_test_set.tar.gz/content",
+          "bytes": 22293100
+        },
+        {
+          "filename": "post_comb_vsa-N2.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/post_comb_vsa-N2.csv/content",
+          "bytes": 111574088
+        },
+        {
+          "filename": "post_comb_vsa-CO2.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/post_comb_vsa-CO2.csv/content",
+          "bytes": 112294467
+        },
+        {
+          "filename": "methane_purification-CH4.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/methane_purification-CH4.csv/content",
+          "bytes": 111902026
+        },
+        {
+          "filename": "methane_purification-CO2.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/methane_purification-CO2.csv/content",
+          "bytes": 111991241
+        },
+        {
+          "filename": "methane.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/methane.csv/content",
+          "bytes": 99056022
+        },
+        {
+          "filename": "landfill-CH4.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/landfill-CH4.csv/content",
+          "bytes": 111738653
+        },
+        {
+          "filename": "landfill-CO2.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/landfill-CO2.csv/content",
+          "bytes": 112091657
+        },
+        {
+          "filename": "pre_comb_4040-CO2.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/pre_comb_4040-CO2.csv/content",
+          "bytes": 115050255
+        },
+        {
+          "filename": "pre_comb_4040-H2.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/pre_comb_4040-H2.csv/content",
+          "bytes": 112675331
+        },
+        {
+          "filename": "overall_process.csv",
+          "url": "https://zenodo.org/api/records/7600474/files/overall_process.csv/content",
+          "bytes": 228656569
+        }
+      ]
+    },
+    {
+      "id": "jarvis-specialized-structures",
+      "name": "NIST JARVIS specialized crystal endpoint and property datasets",
+      "access": "open",
+      "official_url": "https://pages.nist.gov/jarvis/databases/",
+      "license": "NIST/JARVIS dataset terms",
+      "data_path": "raw/acquired/jarvis-specialized-structures",
+      "status": "downloaded-verified-endpoint-structures-no-force-field-or-ocp-trajectories-2026-07-26",
+      "downloads": [
+        {
+          "filename": "dft_2d-2022.json.zip",
+          "url": "https://ndownloader.figshare.com/files/38521268",
+          "bytes": 8394653
+        },
+        {
+          "filename": "vacancydb.json.zip",
+          "url": "https://ndownloader.figshare.com/files/40750811",
+          "bytes": 311294
+        },
+        {
+          "filename": "surface_db_dd.json.zip",
+          "url": "https://ndownloader.figshare.com/files/46355689",
+          "bytes": 3076691
+        },
+        {
+          "filename": "polymer_genome.json.zip",
+          "url": "https://ndownloader.figshare.com/files/26809907",
+          "bytes": 581572
+        },
+        {
+          "filename": "interface_db_dd.json.zip",
+          "url": "https://ndownloader.figshare.com/files/46355692",
+          "bytes": 853973
+        },
+        {
+          "filename": "tinnet_N.json.zip",
+          "url": "https://ndownloader.figshare.com/files/40934285",
+          "bytes": 25517
+        },
+        {
+          "filename": "tinnet_O.json.zip",
+          "url": "https://ndownloader.figshare.com/files/40978943",
+          "bytes": 112139
+        },
+        {
+          "filename": "tinnet_OH.json.zip",
+          "url": "https://ndownloader.figshare.com/files/40978949",
+          "bytes": 150205
+        },
+        {
+          "filename": "AGRA_O.json.zip",
+          "url": "https://ndownloader.figshare.com/files/41923284",
+          "bytes": 311739
+        },
+        {
+          "filename": "AGRA_OH.json.zip",
+          "url": "https://ndownloader.figshare.com/files/41923287",
+          "bytes": 298459
+        },
+        {
+          "filename": "AGRA_CO.json.zip",
+          "url": "https://ndownloader.figshare.com/files/41923278",
+          "bytes": 212786
+        },
+        {
+          "filename": "AGRA_CHO.json.zip",
+          "url": "https://ndownloader.figshare.com/files/41923275",
+          "bytes": 229334
+        },
+        {
+          "filename": "AGRA_COOH.json.zip",
+          "url": "https://ndownloader.figshare.com/files/41923281",
+          "bytes": 302767
+        },
+        {
+          "filename": "supercon_3d.json.zip",
+          "url": "https://ndownloader.figshare.com/files/38307921",
+          "bytes": 8828364
+        },
+        {
+          "filename": "supercon_2d.json.zip",
+          "url": "https://ndownloader.figshare.com/files/38950433",
+          "bytes": 636970
+        },
+        {
+          "filename": "mxene275.json.zip",
+          "url": "https://ndownloader.figshare.com/files/41266233",
+          "bytes": 53256
+        }
+      ]
+    },
+    {
+      "id": "rruff",
+      "name": "RRUFF mineral chemistry, diffraction, Raman, and infrared database",
+      "access": "open",
+      "official_url": "https://www.rruff.net/about/download-data/",
+      "license": "RRUFF terms and source-citation provenance",
+      "data_path": "raw/acquired/rruff",
+      "status": "downloaded-verified-official-bulk-structure-and-property-archives-2026-07-26",
+      "downloads": [
+        {
+          "filename": "chemistry/Microprobe_Data.zip",
+          "url": "https://www.rruff.net/zipped_data_files/chemistry/Microprobe_Data.zip",
+          "bytes": 19502213
+        },
+        {
+          "filename": "chemistry/Reference_PDF.zip",
+          "url": "https://www.rruff.net/zipped_data_files/chemistry/Reference_PDF.zip",
+          "bytes": 1851562
+        },
+        {
+          "filename": "infrared/RAW.zip",
+          "url": "https://www.rruff.net/zipped_data_files/infrared/RAW.zip",
+          "bytes": 14730362
+        },
+        {
+          "filename": "powder/DIF.zip",
+          "url": "https://www.rruff.net/zipped_data_files/powder/DIF.zip",
+          "bytes": 7986964
+        },
+        {
+          "filename": "powder/Refinement_Data.zip",
+          "url": "https://www.rruff.net/zipped_data_files/powder/Refinement_Data.zip",
+          "bytes": 591440
+        },
+        {
+          "filename": "powder/Refinement_Output_Data.zip",
+          "url": "https://www.rruff.net/zipped_data_files/powder/Refinement_Output_Data.zip",
+          "bytes": 1447673
+        },
+        {
+          "filename": "powder/XY_Processed.zip",
+          "url": "https://www.rruff.net/zipped_data_files/powder/XY_Processed.zip",
+          "bytes": 70340433
+        },
+        {
+          "filename": "powder/XY_RAW.zip",
+          "url": "https://www.rruff.net/zipped_data_files/powder/XY_RAW.zip",
+          "bytes": 91779732
+        },
+        {
+          "filename": "raman/LR-Raman.zip",
+          "url": "https://www.rruff.net/zipped_data_files/raman/LR-Raman.zip",
+          "bytes": 238134984
+        },
+        {
+          "filename": "raman/excellent_oriented.zip",
+          "url": "https://www.rruff.net/zipped_data_files/raman/excellent_oriented.zip",
+          "bytes": 80871357
+        },
+        {
+          "filename": "raman/excellent_unoriented.zip",
+          "url": "https://www.rruff.net/zipped_data_files/raman/excellent_unoriented.zip",
+          "bytes": 240547259
+        },
+        {
+          "filename": "raman/fair_oriented.zip",
+          "url": "https://www.rruff.net/zipped_data_files/raman/fair_oriented.zip",
+          "bytes": 277354
+        },
+        {
+          "filename": "raman/fair_unoriented.zip",
+          "url": "https://www.rruff.net/zipped_data_files/raman/fair_unoriented.zip",
+          "bytes": 61534507
+        },
+        {
+          "filename": "raman/poor_unoriented.zip",
+          "url": "https://www.rruff.net/zipped_data_files/raman/poor_unoriented.zip",
+          "bytes": 34808272
+        },
+        {
+          "filename": "raman/unrated_oriented.zip",
+          "url": "https://www.rruff.net/zipped_data_files/raman/unrated_oriented.zip",
+          "bytes": 41353106
+        },
+        {
+          "filename": "raman/unrated_unoriented.zip",
+          "url": "https://www.rruff.net/zipped_data_files/raman/unrated_unoriented.zip",
+          "bytes": 12910186
+        }
+      ]
+    },
+    {
+      "id": "mpod",
+      "name": "Material Properties Open Database",
+      "access": "open",
+      "official_url": "https://mpod.cimav.edu.mx/",
+      "license": "MPOD terms and source-publication provenance",
+      "data_path": "raw/acquired/mpod",
+      "status": "per-record-mpod-files-no-stable-bulk-endpoint-found",
+      "downloads": []
+    },
+    {
+      "id": "ec-mof",
+      "name": "EC-MOF Phase-I electrically conductive MOFs",
+      "access": "open",
+      "official_url": "https://ec-mof.njit.edu/",
+      "license": "EC-MOF site terms and source-publication provenance",
+      "data_path": "raw/acquired/ec-mof",
+      "status": "downloaded-verified-1071-static-structure-property-pairs-one-official-candidate-404-2026-07-26",
+      "downloads": []
+    },
+    {
+      "id": "aflow-prototypes",
+      "name": "AFLOW Encyclopedia of Crystallographic Prototypes",
+      "access": "open",
+      "official_url": "https://aflowlib.duke.edu/p/index.html",
+      "license": "Apache-2.0",
+      "data_path": "raw/acquired/aflow-prototypes",
+      "status": "downloaded-verified-2050-canonical-prototype-definitions-2026-07-26",
+      "downloads": [
+        {
+          "filename": "aflow_prototype_encyclopedia-main.tar.gz",
+          "url": "https://codeload.github.com/aflow-org/aflow_prototype_encyclopedia/tar.gz/refs/heads/main"
+        }
+      ]
+    },
+    {
+      "id": "matterverse",
+      "name": "Matterverse hypothetical crystal structures",
+      "access": "open",
+      "official_url": "https://matterverse.ai/",
+      "license": "Matterverse terms and source-model provenance",
+      "data_path": "raw/acquired/matterverse",
+      "status": "cataloged-31791192-optimade-structures-page-limit-500-no-official-bulk-file-found",
+      "estimated_documents": 31791192,
+      "downloads": []
+    },
+    {
+      "id": "odbx",
+      "name": "Open Databases Integration for Materials Design",
+      "access": "open",
+      "official_url": "https://odbx.science/",
+      "license": "ODBX provider terms and source-dataset provenance",
+      "data_path": "raw/acquired/odbx",
+      "status": "downloaded-verified-137909-optimade-structures-with-formation-energy-and-hull-distance-2026-07-26",
+      "estimated_documents": 137909,
+      "downloads": []
+    },
+    {
+      "id": "tcod",
+      "name": "Theoretical Crystallography Open Database",
+      "access": "open",
+      "official_url": "https://www.crystallography.net/tcod/",
+      "license": "CC0",
+      "data_path": "raw/acquired/tcod",
+      "status": "downloaded-verified-7499-final-structure-cifs-via-official-directory-tree-2026-07-26",
+      "estimated_documents": 7499,
+      "downloads": []
+    },
+    {
+      "id": "mpdd",
+      "name": "Materials Properties and Devices Database",
+      "access": "open",
+      "official_url": "https://phaseslab.com/mpdd/",
+      "license": "MPDD terms and source-publication provenance",
+      "data_path": "raw/acquired/mpdd",
+      "status": "user-action-required-legacy-optimade-endpoint-is-http-only-and-currently-unavailable",
+      "downloads": []
+    },
+    {
+      "id": "materials-cloud-specialized",
+      "name": "Materials Cloud specialized static structure databases",
+      "access": "open",
+      "official_url": "https://www.materialscloud.org/discover",
+      "license": "provider-dataset-specific open licences",
+      "data_path": "raw/acquired/materials-cloud-specialized",
+      "status": "downloaded-verified-3079-static-2d-topological-mof-interface-wannier-and-chalcohalide-structures-2026-07-26",
+      "estimated_documents": 3079,
+      "downloads": []
+    },
+    {
+      "id": "materials-cloud-archive-static",
+      "name": "Materials Cloud Archive static optical, topological, and electride datasets",
+      "access": "open",
+      "official_url": "https://archive.materialscloud.org/",
+      "license": "record-specific open licences, predominantly CC BY 4.0",
+      "data_path": "raw/acquired/materials-cloud-archive-static",
+      "status": "downloaded-verified-40399-static-structures-with-provider-properties-via-optimade-2026-07-26",
+      "estimated_documents": 40399,
+      "downloads": []
+    },
+    {
+      "id": "materials-cloud-li-ion-trajectories",
+      "name": "Materials Cloud solid-state Li-ion conductor MD dataset",
+      "access": "open",
+      "official_url": "https://archive.materialscloud.org/records/4da2r-xag86",
+      "license": "record-specific open licence",
+      "data_path": "raw/acquired/materials-cloud-li-ion-trajectories",
+      "status": "excluded-by-scope-4396695-optimade-entries-are-mostly-molecular-dynamics-frames",
+      "downloads": []
+    },
+    {
+      "id": "mofdb-ml",
+      "name": "MOF DB H2MOF-ML and hMOF-ML",
+      "access": "free-registration",
+      "official_url": "https://www.mofdb.com/",
+      "license": "dataset-card-specific terms and source provenance",
+      "data_path": "raw/acquired/mofdb-ml",
+      "status": "user-action-required-hugging-face-repositories-return-401-h2mof-has-4034-structures-hmof-has-137953",
+      "estimated_documents": 141987,
+      "downloads": []
+    },
+    {
+      "id": "adaq",
+      "name": "Automatic Defect Analysis and Qualification Database",
+      "access": "open",
+      "official_url": "https://defects.anyterial.se/",
+      "license": "CC BY-SA 4.0 for non-substantial extracts; provider permission required for substantial replication",
+      "data_path": "raw/acquired/adaq",
+      "status": "user-action-required-contact-provider-before-bulk-collection-of-47403-defects",
+      "estimated_documents": 47403,
+      "downloads": []
+    },
+    {
+      "id": "amdb",
+      "name": "Anyterial Altermagnets Database",
+      "access": "open",
+      "official_url": "https://altermagnets.anyterial.se/",
+      "license": "AMDB terms and source-publication provenance",
+      "data_path": "raw/acquired/amdb",
+      "status": "cataloged-180-property-records-linked-to-magndata-structures-no-bulk-endpoint-found",
+      "estimated_documents": 180,
+      "downloads": []
+    },
+    {
+      "id": "hadb",
+      "name": "Hard-coating Alloys Database",
+      "access": "open",
+      "official_url": "https://hadb.funmat-ii.se/",
+      "license": "HADB terms and source-publication provenance",
+      "data_path": "raw/acquired/hadb",
+      "status": "downloaded-verified-165-static-dft-and-mlip-endpoints-79-aimd-entries-excluded-2026-07-26",
+      "estimated_documents": 165,
+      "downloads": []
+    },
+    {
+      "id": "ccpnc-magres",
+      "name": "CCP-NC solid-state NMR Magres Database",
+      "access": "open",
+      "official_url": "https://www.ccpnc.ac.uk/database/",
+      "license": "per-record PDDL 1.0, ODC-By 1.0, or CC BY 4.0",
+      "data_path": "raw/acquired/ccpnc-magres",
+      "status": "downloaded-verified-5804-latest-static-structures-with-nmr-tensors-2026-07-26",
+      "estimated_documents": 5804,
+      "downloads": []
+    },
+    {
+      "id": "cmr-static",
+      "name": "DTU Computational Materials Repository static periodic datasets",
+      "access": "open",
+      "official_url": "https://cmr.fysik.dtu.dk/",
+      "license": "CC BY-SA 4.0",
+      "data_path": "raw/acquired/cmr-static",
+      "status": "downloaded-verified-27-periodic-ase-databases-c1db-currently-404-nonperiodic-molecule-datasets-excluded-2026-07-26",
+      "downloads": [
+        {"filename": "a2bcx4.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/a2bcx4.db", "bytes": 58380288},
+        {"filename": "abs3.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/abs3.db", "bytes": 303951872},
+        {"filename": "abse3.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/abse3.db", "bytes": 13000704},
+        {"filename": "absorption_perovskites.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/absorption_perovskites.db", "bytes": 4213760},
+        {"filename": "abx2.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/abx2.db", "bytes": 141578240},
+        {"filename": "ads1d.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/ads1d.db", "bytes": 294912},
+        {"filename": "adsorption.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/adsorption.db", "bytes": 3719168},
+        {"filename": "surfaces.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/surfaces.db", "bytes": 466944},
+        {"filename": "solids.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/solids.db", "bytes": 1561600},
+        {"filename": "c2dm.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/c2dm.db", "bytes": 16678912},
+        {"filename": "compression.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/compression.db", "bytes": 85362688},
+        {"filename": "cubic_perovskites.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/cubic_perovskites.db", "bytes": 47226880},
+        {"filename": "dcdft.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/dcdft.db", "bytes": 15879168},
+        {"filename": "dcdft_gpaw_pw_paw09.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/dcdft_gpaw_pw_paw09.db", "bytes": 835584},
+        {"filename": "fcc111.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/fcc111.db", "bytes": 5214208},
+        {"filename": "funct_perovskites.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/funct_perovskites.db", "bytes": 294912},
+        {"filename": "gbrv.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/gbrv.db", "bytes": 37895168},
+        {"filename": "htgw.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/htgw.db", "bytes": 23994368},
+        {"filename": "imp2d.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/imp2d.db", "bytes": 71819264},
+        {"filename": "low_symmetry_perovskites.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/low_symmetry_perovskites.db", "bytes": 4262912},
+        {"filename": "lowdim.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/lowdim.db", "bytes": 1072135168},
+        {"filename": "mp_gllbsc.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/mp_gllbsc.db", "bytes": 4542464},
+        {"filename": "oqmd12.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/oqmd12.db", "bytes": 12394496},
+        {"filename": "oqmd123.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/oqmd123.db", "bytes": 22130688},
+        {"filename": "organometal.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/organometal.db", "bytes": 618496},
+        {"filename": "pv_pec_oqmd.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/pv_pec_oqmd.db", "bytes": 9666560},
+        {"filename": "uafd.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/uafd.db", "bytes": 466944}
+      ]
+    },
+    {
+      "id": "mad-static",
+      "name": "Massive Atomic Diversity static structure splits",
+      "access": "open",
+      "official_url": "https://archive.materialscloud.org/records/c4ene-0mv14",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/mad-static",
+      "status": "downloaded-verified-95595-static-structures-mptrj-benchmark-and-aiida-provenance-archives-excluded-2026-07-26",
+      "estimated_documents": 95595,
+      "downloads": [
+        {"filename": "atomic_energies.csv", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/atomic_energies.csv?download=1"},
+        {"filename": "mad-subsets.chemiscope.json.gz", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-subsets.chemiscope.json.gz?download=1"},
+        {"filename": "mad-test.xyz", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-test.xyz?download=1"},
+        {"filename": "mad-train.xyz", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-train.xyz?download=1"},
+        {"filename": "mad-val.xyz", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-val.xyz?download=1"},
+        {"filename": "README.md", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/README.md?download=1"}
+      ]
+    },
+    {
+      "id": "shiftml2-static",
+      "name": "ShiftML2 molecular crystal structures and NMR properties",
+      "access": "open",
+      "official_url": "https://archive.materialscloud.org/records/j2fka-sda13",
+      "license": "Materials Cloud record terms and source-dataset provenance",
+      "data_path": "raw/acquired/shiftml2-static",
+      "status": "downloaded-verified-static-training-benchmark-and-polymorph-structures-relax-vs-md-trajectory-archive-excluded-2026-07-26",
+      "downloads": [
+        {"filename": "files_description.md", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/files_description.md?download=1", "bytes": 1693},
+        {"filename": "Experimental_benchmark_nmr.zip", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/Experimental_benchmark_nmr.zip?download=1", "bytes": 472732},
+        {"filename": "final_training_test_sets.zip", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/final_training_test_sets.zip?download=1", "bytes": 120941801},
+        {"filename": "initial_training_test_sets.zip", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/initial_training_test_sets.zip?download=1", "bytes": 40844081},
+        {"filename": "README.txt", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/README.txt?download=1", "bytes": 1274},
+        {"filename": "ShiftML_poly.zip", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/ShiftML_poly.zip?download=1", "bytes": 550092}
+      ]
+    },
+    {
+      "id": "hex-high-pressure",
+      "name": "HEX high-pressure elemental crystal structures",
+      "access": "open",
+      "official_url": "https://springernature.figshare.com/collections/HEX_a_complete_Database_of_High-Pressure_Elemental_Crystal_Structures/7119778/1",
+      "license": "CC0",
+      "data_path": "raw/acquired/hex-high-pressure",
+      "status": "downloaded-verified-457-static-cifs-first-57-elements-at-0-100-200-300-gpa-2026-07-26",
+      "estimated_documents": 457,
+      "downloads": [
+        {"filename": "HEX.zip", "url": "https://ndownloader.figshare.com/files/45020533", "bytes": 624878}
+      ]
+    },
+    {
+      "id": "hpcsd",
+      "name": "High-Pressure Crystal Structure Database",
+      "access": "free-registration",
+      "official_url": "https://www.calypso.cn/",
+      "license": "HPCSD/CALYPSO terms and source-publication provenance",
+      "data_path": "raw/acquired/hpcsd",
+      "status": "user-action-required-register-or-request-bulk-77346-static-structures",
+      "estimated_documents": 77346,
+      "notes": "The initial HPCSD release reports 77,346 static high-pressure structures spanning 89 elements. The public portal redirects to sign-in and the paper states that additional data are available on request; do not scrape authenticated pages.",
+      "downloads": []
+    },
+    {
+      "id": "hofsyn",
+      "name": "HOFSyn hydrogen-bonded organic framework structures and synthesis",
+      "access": "open",
+      "official_url": "https://figshare.com/articles/dataset/HOFSyn/28856483",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/hofsyn",
+      "status": "downloaded-verified-631-raw-and-p1-static-hof-cifs-with-660-synthesis-records-2026-07-26",
+      "notes": "The raw and P1-standardized archives each contain 631 actual CIF files; the synthesis/property table has 660 rows. The 2.35 GB literature-PDF archive and EndNote export are not crystal structure/property records and are intentionally excluded.",
+      "downloads": [
+        {"filename": "HOF_database.csv", "url": "https://ndownloader.figshare.com/files/53956475", "bytes": 87364},
+        {"filename": "cifs.zip", "url": "https://ndownloader.figshare.com/files/54700850", "bytes": 129366739},
+        {"filename": "hof_database_cifs_raw.zip", "url": "https://ndownloader.figshare.com/files/54700847", "bytes": 2808683}
+      ]
+    },
+    {
+      "id": "open-framework-aluminophosphate",
+      "name": "Open-framework aluminophosphate structure database",
+      "access": "open",
+      "official_url": "https://figshare.com/articles/dataset/Database_of_Open-Framework_Aluminophosphate_Structures/7822574",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/open-framework-aluminophosphate",
+      "status": "downloaded-verified-312-experimental-static-structures-with-topology-and-simulated-xrd-properties-2026-07-26",
+      "estimated_documents": 312,
+      "downloads": [
+        {"filename": "alpo-cif.zip", "url": "https://ndownloader.figshare.com/files/21758073", "bytes": 393515},
+        {"filename": "alpo-312-200219.xlsx", "url": "https://ndownloader.figshare.com/files/21758109", "bytes": 667962}
+      ]
+    },
+    {
+      "id": "opxrd",
+      "name": "opXRD open experimental powder X-ray diffraction database",
+      "access": "open",
+      "official_url": "https://zenodo.org/records/15298026",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/opxrd",
+      "status": "downloaded-verified-92552-experimental-patterns-2179-structure-labeled-total-912-full-and-1267-partial-2026-07-26",
+      "estimated_documents": 92552,
+      "notes": "The verified archive contains exactly 92,552 JSON pattern records and no frame or trajectory files. A content scan found 912 labels with complete lattice plus atomic basis, 1,267 partial phase labels, and 90,373 unlabeled experimental patterns.",
+      "downloads": [
+        {"filename": "opxrd.zip", "url": "https://zenodo.org/api/records/15298026/files/opxrd.zip/content", "bytes": 1400997733}
+      ]
+    },
+    {
+      "id": "simpod",
+      "name": "SIMPOD simulated powder X-ray diffraction open database",
+      "access": "open",
+      "official_url": "https://doi.org/10.57760/sciencedb.09755",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/simpod",
+      "status": "downloaded-verified-467861-static-cod-structures-with-simulated-powder-xrd-json-images-and-redundant-csv-exports-excluded-2026-07-26",
+      "estimated_documents": 467861,
+      "notes": "Structures.zip contains the source structure and simulated one-dimensional diffraction record. Its 467,861 entries pass a full Python Zip64 decompression and CRC scan; legacy Info-ZIP 6.00 misreads this very large Zip64 central directory. The 29.4 GB radial-image rendering and two redundant 5.9/20.5 GB CSV exports are excluded to preserve SSD space without losing the structure/property records.",
+      "downloads": [
+        {"filename": "Structures.zip", "url": "https://china.scidb.cn/download?fileId=d2b55f1d1fcdc0f49d83099e2e795fae", "bytes": 47781765915}
+      ]
+    },
+    {
+      "id": "spse",
+      "name": "High-Throughput Screening Platform for Solid Electrolytes",
+      "access": "open",
+      "official_url": "https://figshare.com/articles/dataset/High-Throughput_Screening_Platform_for_Solid_Electrolytes_Combining_Hierarchical_Ion-Transport_Prediction_Algorithms_/12011412",
+      "license": "CC BY 4.0 record; underlying ICSD-derived structures retain ICSD terms",
+      "data_path": "raw/acquired/spse",
+      "status": "downloaded-verified-91763-static-structures-with-ion-transport-properties-migration-path-arrays-excluded-2026-07-26",
+      "estimated_documents": 91763,
+      "excluded_structure_fields": ["hierarchical_calculation_data.json:paths"],
+      "notes": "The verified archive contains 91,763 newline-delimited static structure records plus BVSE, CAVD, conduction-descriptor, and literature-property tables. Its 49 hierarchical calculation records include migration-path coordinate arrays; those arrays are not structures and are explicitly excluded from CMU ingestion. No images or frame files are present. The code archive is excluded, and ICSD-derived structures remain local-only under their source licence.",
+      "downloads": [
+        {"filename": "SPSE_database_data.zip", "url": "https://ndownloader.figshare.com/files/22067844", "bytes": 50847996},
+        {"filename": "Readme.docx", "url": "https://ndownloader.figshare.com/files/22067850", "bytes": 16671}
+      ]
+    },
+    {
+      "id": "superband",
+      "name": "SuperBand electronic-band and Fermi-surface database of superconductors",
+      "access": "open",
+      "official_url": "https://github.com/ljcj007/SuperBand",
+      "license": "CC BY 4.0 data; MIT software",
+      "data_path": "raw/acquired/superband",
+      "status": "downloaded-verified-2474-static-superconductor-structures-and-electronic-band-data-2026-07-26",
+      "estimated_documents": 2474,
+      "notes": "The full Science Data Bank HDF5 and the accompanying GitHub snapshot are collected. Structures originate mainly from Materials Project and OQMD and will be matched later; SuperBand-specific band and Fermi-surface properties are retained.",
+      "downloads": [
+        {"filename": "0724.hdf5", "url": "https://china.scidb.cn/download?fileId=c2487ff51a6230ba2ff55f0b5a8bfe8f", "bytes": 13292718528},
+        {"filename": "SuperBand-main.zip", "url": "https://github.com/ljcj007/SuperBand/archive/refs/heads/main.zip"}
+      ]
+    },
+    {
+      "id": "obelix",
+      "name": "OBELiX solid-state electrolyte structures and ionic conductivity",
+      "access": "open",
+      "official_url": "https://github.com/NRC-Mila/OBELiX",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/obelix",
+      "status": "downloaded-verified-599-synthesized-electrolytes-321-with-full-cif-and-experimental-conductivity-2026-07-26",
+      "estimated_documents": 599,
+      "downloads": [
+        {"filename": "all.csv", "url": "https://raw.githubusercontent.com/NRC-Mila/OBELiX/main/data/downloads/all.csv", "bytes": 114856},
+        {"filename": "all_cifs.tar.gz", "url": "https://raw.githubusercontent.com/NRC-Mila/OBELiX/main/data/downloads/all_cifs.tar.gz", "bytes": 106813}
+      ]
+    },
+    {
+      "id": "atomwork-open",
+      "name": "NIMS AtomWork open inorganic materials database",
+      "access": "free-registration",
+      "official_url": "https://crystdb.nims.go.jp/en/",
+      "license": "NIMS MatNavi terms; web scraping prohibited",
+      "data_path": "raw/acquired/atomwork-open",
+      "status": "user-action-required-dice-registration-and-matnavi-application-for-82000-open-structures",
+      "estimated_documents": 82000,
+      "notes": "The public catalog reports 82,000 crystal structures, 55,000 property records, and 15,000 phase diagrams. Register a DICE account and submit the MatNavi usage application; do not scrape the site.",
+      "downloads": []
+    },
+    {
+      "id": "hybrid-perovskite-2d",
+      "name": "Experimental 2D hybrid perovskite structure database",
+      "access": "open",
+      "official_url": "https://arxiv.org/abs/2006.14302",
+      "license": "database and underlying crystallographic-source terms",
+      "data_path": "raw/acquired/hybrid-perovskite-2d",
+      "status": "user-action-required-515-entry-site-is-http-only-and-no-redistributable-bulk-archive-found",
+      "estimated_documents": 515,
+      "notes": "The paper points to pdb.nmse-lab.ru and reports CIFs, band gaps, structural descriptors, and predicted partial charges. The live database is HTTP-only and no documented bulk archive or redistribution licence was found.",
+      "downloads": []
+    },
+    {
+      "id": "openmx-2d-ab2",
+      "name": "OpenMX AB2 two-dimensional structure map",
+      "access": "open",
+      "official_url": "https://www.openmx-square.org/2d-ab2/",
+      "license": "OpenMX database and source-publication terms",
+      "data_path": "raw/acquired/openmx-2d-ab2",
+      "status": "cataloged-3844-static-ab2-candidates-interactive-per-entry-access-no-bulk-file-found",
+      "estimated_documents": 3844,
+      "notes": "The interactive structure and spin map provides relaxed structures and calculated properties by composition. No stable documented bulk archive was found.",
+      "downloads": []
+    },
+    {
+      "id": "mof-carbon-capture",
+      "name": "Hypothetical MOFs for wet flue-gas carbon capture",
+      "access": "open",
+      "official_url": "https://archive.materialscloud.org/record/2018.0016/v3",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/mof-carbon-capture",
+      "status": "downloaded-verified-324426-static-mof-structures-with-partial-charges-and-adsorption-properties-2026-07-26",
+      "estimated_documents": 324426,
+      "downloads": [
+        {"filename": "MOF_database.tar.gz", "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/MOF_database.tar.gz/content", "bytes": 1237868795},
+        {"filename": "screening_data.tar.gz", "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/screening_data.tar.gz/content", "bytes": 58177360},
+        {"filename": "experimental_structures.zip", "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/experimental_structures.zip/content", "bytes": 2382},
+        {"filename": "files_description.md", "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/files_description.md/content", "bytes": 415}
+      ]
+    },
+    {
+      "id": "nlr-matdb",
+      "name": "NLR Computational Materials Database",
+      "access": "open",
+      "official_url": "https://materials.nlr.gov/",
+      "license": "US Department of Energy laboratory terms and cited source provenance",
+      "data_path": "raw/acquired/nlr-matdb",
+      "status": "cataloged-interactive-query-and-csv-export-no-documented-bulk-structure-endpoint-found",
+      "notes": "The database exposes relaxed structures and thermochemical, stability, GW, dielectric, and effective-mass properties. Its public form supports CSV output, but no complete bulk structure export is documented.",
+      "downloads": []
+    },
+    {
+      "id": "matgen",
+      "name": "NSCC-GZ MatGen crystal databases",
+      "access": "free-registration",
+      "official_url": "https://matgen.nscc-gz.cn/index_ch.html",
+      "license": "MatGen service and per-application terms",
+      "data_path": "raw/acquired/matgen",
+      "status": "user-action-required-register-or-contact-matgen-at-nscc-gz-cn-for-bulk-api",
+      "notes": "The portal contains inorganic, hypothetical, 2D, superconductor, solid-electrolyte, porous-material, and ABACUS structure/property databases. The advertised API documentation returned 404 and no public bulk endpoint was found.",
+      "downloads": []
+    },
+    {
+      "id": "matcloud",
+      "name": "MatCloud+ materials databases",
+      "access": "free-registration",
+      "official_url": "https://www.matcloud.com.cn/newDataBase/structure",
+      "license": "MatCloud+ service and per-dataset terms",
+      "data_path": "raw/acquired/matcloud",
+      "status": "user-action-required-registration-and-provider-approved-bulk-export-no-public-bulk-api-found",
+      "notes": "The public site exposes a JavaScript search application, but no documented redistributable bulk structure endpoint was found. Request an account-level export or provider-approved API before collection.",
+      "downloads": []
+    },
+    {
+      "id": "atomly",
+      "name": "Atomly materials science database",
+      "access": "free-registration",
+      "official_url": "https://atomly.net/",
+      "license": "Atomly service terms and source-dataset provenance",
+      "data_path": "raw/acquired/atomly",
+      "status": "user-action-required-api-is-limited-to-internal-testing-and-collaborators-contact-atomly-at-iphy-ac-cn",
+      "estimated_documents": 349043,
+      "notes": "The official web client states that API access is currently limited to internal testing and collaborators. Contact atomly@iphy.ac.cn; the site certificate was expired when verified on 2026-07-26.",
+      "downloads": []
+    },
+    {
+      "id": "matcraft",
+      "name": "MatCraft Materials API",
+      "access": "api-key",
+      "official_url": "https://matcraft.ai/docs/materials-api/overview",
+      "license": "MatCraft terms of service and upstream MP, AFLOW, and JARVIS provenance",
+      "data_path": "raw/acquired/matcraft",
+      "status": "user-action-required-request-provider-bulk-export-api-is-rate-limited-and-current-endpoint-tls-failed",
+      "estimated_documents": 205000,
+      "notes": "Documented records aggregate MP, AFLOW, and JARVIS structures already collected here. The list endpoint returns no atomic positions, detail retrieval would require one request per material, guest access is limited to 100 requests/hour, and bulk downloading beyond API limits is prohibited. Request a licensed bulk export before mirroring.",
+      "downloads": []
+    },
+    {
+      "id": "b-incstrdb",
+      "name": "Bilbao Incommensurate Structures Database",
+      "access": "open",
+      "official_url": "https://cryst.ehu.es/bincstrdb/",
+      "license": "Bilbao Crystallographic Server terms and source-publication provenance",
+      "data_path": "raw/acquired/b-incstrdb",
+      "status": "downloaded-verified-282-published-static-modulated-and-composite-mscif-structures-2026-07-26",
+      "estimated_documents": 282,
+      "notes": "The dedicated collector saves exactly one published msCIF per entry from the official download view. It does not collect JSmol images, animations, or structure trajectories.",
+      "downloads": []
+    },
+    {
+      "id": "mincryst",
+      "name": "MinCryst mineral crystal structure database",
+      "access": "open",
+      "official_url": "https://database.iem.ac.ru/mincryst/",
+      "license": "MinCryst and underlying publication terms",
+      "data_path": "raw/acquired/mincryst",
+      "status": "user-action-required-official-host-unreachable-no-current-bulk-export-found",
+      "estimated_documents": 5000,
+      "notes": "The IUCr catalog describes more than 5,000 mineral phase records representing about 2,500 mineral names. The official host did not complete a TLS connection during the 2026-07-26 audit; no mirror is substituted without provider permission.",
+      "downloads": []
+    },
+    {
+      "id": "webmineral",
+      "name": "Webmineral mineralogy database",
+      "access": "open",
+      "official_url": "https://webmineral.com/",
+      "license": "Webmineral site and cited-source terms",
+      "data_path": "raw/acquired/webmineral",
+      "status": "cataloged-4714-interactive-mineral-descriptions-no-documented-bulk-atomic-structure-export",
+      "estimated_documents": 4714,
+      "notes": "The site provides searchable mineral descriptions and crystallographic properties but no documented redistributable bulk atomic-coordinate archive. It is cataloged for later provider-approved export rather than scraped.",
+      "downloads": []
+    },
+    {
+      "id": "powbase",
+      "name": "PowBase powder diffraction database",
+      "access": "open",
+      "official_url": "https://www.cristal.org/powbase/index.html",
+      "license": "PowBase site and contributed-record terms",
+      "data_path": "raw/acquired/powbase",
+      "status": "user-action-required-contact-owner-before-mirroring-169-static-powder-pattern-archives",
+      "estimated_documents": 169,
+      "notes": "The official index exposes 169 per-record ZIP archives containing CIF or powder-pattern data and asks prospective mirrors to contact the owner. CMU will request permission instead of bulk-scraping the archive sequence.",
+      "downloads": []
+    },
+    {
+      "id": "nist-crystal-data",
+      "name": "NIST Crystal Data",
+      "access": "paid",
+      "official_url": "https://www.nist.gov/publications/nist-3-nist-crystal-data",
+      "license": "NIST SRD commercial licence",
+      "data_path": "raw/acquired/nist-crystal-data",
+      "status": "user-action-required-purchase-or-institutional-license-for-237671-record-legacy-database",
+      "estimated_documents": 237671,
+      "notes": "The published NIST-3 release contains 237,671 crystallographic records. No open bulk redistribution path was found; obtain the licensed database from NIST or through an institutional subscription.",
+      "downloads": []
+    },
+    {
+      "id": "nist-surface-structure",
+      "name": "NIST Surface Structure Database",
+      "access": "licensed",
+      "official_url": "https://www.nist.gov/publications/nist-42-nist-surface-structure-database-version-30",
+      "license": "NIST SRD licence",
+      "data_path": "raw/acquired/nist-surface-structure",
+      "status": "user-action-required-contact-nist-for-current-licensed-release-nearly-1400-static-surface-structures",
+      "estimated_documents": 1400,
+      "notes": "The current NIST release reports nearly 1,400 experimentally determined surface structures. It is legacy licensed software/data rather than an open bulk download; contact NIST for access before ingestion.",
+      "downloads": []
+    },
+    {
+      "id": "phonondb",
+      "name": "NIMS MDR harmonic phonon calculation database",
+      "access": "open",
+      "official_url": "https://mdr.nims.go.jp/collections/8g84ms862?locale=en",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/phonondb",
+      "status": "user-action-required-request-collection-level-bulk-snapshot-for-10034-static-mp-structures-and-phonon-properties",
+      "estimated_documents": 10034,
+      "notes": "The NIMS collection exposes 10,034 per-material datasets but no collection-level bulk archive. Each phonopy_params.yaml.xz contains the initial static unit cell plus harmonic phonon displacement/force data. CMU will create only one static structure record per MP material ID; displacement supercells are property inputs, not structures or trajectories. Request a bulk snapshot instead of issuing roughly 10,000 record-page and file requests.",
+      "downloads": []
+    },
+    {
+      "id": "catalysis-hub",
+      "name": "Catalysis-Hub surface reactions and structures",
+      "access": "open",
+      "official_url": "https://www.catalysis-hub.org/",
+      "license": "dataset-specific licences and Catalysis-Hub terms",
+      "data_path": "raw/acquired/catalysis-hub",
+      "status": "graphql-api-export-planned-dataset-specific-provenance-required",
+      "downloads": []
+    },
+    {
+      "id": "matnavi",
+      "name": "NIMS MatNavi AtomWork and property databases",
+      "access": "free-registration",
+      "official_url": "https://mits.nims.go.jp/en/",
+      "license": "NIMS MatNavi service terms",
+      "data_path": "raw/acquired/matnavi",
+      "status": "user-registration-required-mass-downloading-explicitly-prohibited",
+      "downloads": []
+    },
+    {
+      "id": "perovskite-database",
+      "name": "Perovskite Database Project",
+      "access": "open",
+      "official_url": "https://www.perovskitedatabase.com/Download",
+      "license": "NOMAD upload and Perovskite Database terms",
+      "data_path": "raw/acquired/perovskite-database",
+      "status": "nomad-query-access-cataloged",
+      "downloads": []
+    },
+    {
+      "id": "starrydata",
+      "name": "NIMS Starrydata literature property curves",
+      "access": "free-registration",
+      "official_url": "https://starrydata.nims.go.jp/",
+      "license": "NIMS Starrydata terms and source-publication provenance",
+      "data_path": "raw/acquired/starrydata",
+      "status": "interactive-filtered-download-user-registration-may-be-required",
+      "downloads": []
+    },
+    {
+      "id": "icdd-pdf",
+      "name": "ICDD Powder Diffraction File",
+      "access": "paid",
+      "official_url": "https://www.icdd.com/pdf-4/",
+      "license": "ICDD commercial licence",
+      "data_path": "raw/acquired/icdd-pdf",
+      "status": "user-action-required",
+      "downloads": []
+    }
+  ]
+}

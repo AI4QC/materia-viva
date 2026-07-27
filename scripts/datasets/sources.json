@@ -1501,7 +1501,7 @@
       "status": "downloaded-verified-91763-static-structures-with-ion-transport-properties-migration-path-arrays-excluded-2026-07-26",
       "estimated_documents": 91763,
       "excluded_structure_fields": ["hierarchical_calculation_data.json:paths"],
-      "notes": "The verified archive contains 91,763 newline-delimited static structure records plus BVSE, CAVD, conduction-descriptor, and literature-property tables. Its 49 hierarchical calculation records include migration-path coordinate arrays; those arrays are not structures and are explicitly excluded from CMU ingestion. No images or frame files are present. The code archive is excluded, and ICSD-derived structures remain local-only under their source licence.",
+      "notes": "The verified archive contains 91,763 newline-delimited static structure records plus BVSE, CAVD, conduction-descriptor, and literature-property tables. Its 49 hierarchical calculation records include migration-path coordinate arrays; those arrays are not structures and are explicitly excluded from MateriaViva ingestion. No images or frame files are present. The code archive is excluded, and ICSD-derived structures remain local-only under their source licence.",
       "downloads": [
         {"filename": "SPSE_database_data.zip", "url": "https://ndownloader.figshare.com/files/22067844", "bytes": 50847996},
         {"filename": "Readme.docx", "url": "https://ndownloader.figshare.com/files/22067850", "bytes": 16671}
@@ -1690,7 +1690,7 @@
       "data_path": "raw/acquired/powbase",
       "status": "user-action-required-contact-owner-before-mirroring-169-static-powder-pattern-archives",
       "estimated_documents": 169,
-      "notes": "The official index exposes 169 per-record ZIP archives containing CIF or powder-pattern data and asks prospective mirrors to contact the owner. CMU will request permission instead of bulk-scraping the archive sequence.",
+      "notes": "The official index exposes 169 per-record ZIP archives containing CIF or powder-pattern data and asks prospective mirrors to contact the owner. MateriaViva will request permission instead of bulk-scraping the archive sequence.",
       "downloads": []
     },
     {
@@ -1726,7 +1726,7 @@
       "data_path": "raw/acquired/phonondb",
       "status": "user-action-required-request-collection-level-bulk-snapshot-for-10034-static-mp-structures-and-phonon-properties",
       "estimated_documents": 10034,
-      "notes": "The NIMS collection exposes 10,034 per-material datasets but no collection-level bulk archive. Each phonopy_params.yaml.xz contains the initial static unit cell plus harmonic phonon displacement/force data. CMU will create only one static structure record per MP material ID; displacement supercells are property inputs, not structures or trajectories. Request a bulk snapshot instead of issuing roughly 10,000 record-page and file requests.",
+      "notes": "The NIMS collection exposes 10,034 per-material datasets but no collection-level bulk archive. Each phonopy_params.yaml.xz contains the initial static unit cell plus harmonic phonon displacement/force data. MateriaViva will create only one static structure record per MP material ID; displacement supercells are property inputs, not structures or trajectories. Request a bulk snapshot instead of issuing roughly 10,000 record-page and file requests.",
       "downloads": []
     },
     {

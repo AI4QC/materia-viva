@@ -132,7 +132,7 @@ def _read_page(path: Path) -> dict:
 
 
 def _fetch_json(url: str, *, attempts: int = 5) -> dict:
-    request = Request(url, headers={"User-Agent": "CMU-dataset-acquisition/1.0"})
+    request = Request(url, headers={"User-Agent": "MateriaViva-dataset-acquisition/1.0"})
     last_error: Exception | None = None
     for attempt in range(attempts):
         try:

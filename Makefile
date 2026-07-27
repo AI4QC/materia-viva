@@ -1,7 +1,7 @@
 PYTHON ?= python
 NPM ?= npm
-CMU_HOST ?= 127.0.0.1
-CMU_PORT ?= 8000
+MV_HOST ?= 127.0.0.1
+MV_PORT ?= 8000
 
 .PHONY: validate-data test test-backend test-frontend build serve demo
 
@@ -20,7 +20,7 @@ build:
 	cd frontend && $(NPM) run build
 
 serve:
-	$(PYTHON) scripts/serve.py --host $(CMU_HOST) --port $(CMU_PORT)
+	$(PYTHON) scripts/serve.py --host $(MV_HOST) --port $(MV_PORT)
 
 demo:
 	$(PYTHON) scripts/record_demo.py

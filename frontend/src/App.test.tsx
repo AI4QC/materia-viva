@@ -26,12 +26,12 @@ beforeEach(() => {
   delete document.documentElement.dataset.theme
 })
 
-test('presents the database as CMU with a unified deduplicated-data promise', () => {
+test('presents the database as MateriaViva with a unified deduplicated-data promise', () => {
   render(<App />)
 
-  expect(screen.getByRole('link', { name: 'Crystal Material Universe 首页' })).toBeInTheDocument()
-  expect(screen.getAllByText('CMU').length).toBeGreaterThan(0)
-  expect(screen.getAllByText('Crystal Material Universe').length).toBeGreaterThan(0)
+  expect(screen.getByRole('link', { name: 'MateriaViva 首页' })).toBeInTheDocument()
+  expect(screen.getAllByText('MateriaViva').length).toBeGreaterThan(0)
+  expect(screen.getAllByText('MateriaViva').length).toBeGreaterThan(0)
   expect(screen.getByRole('heading', {
     name: /汇聚全部晶体数据集，\s*发现 621 万种独特结构。/,
   })).toBeInTheDocument()
@@ -46,12 +46,12 @@ test('switches from the night theme to the day theme and remembers it', async ()
   fireEvent.click(screen.getByRole('button', { name: '切换到日间模式' }))
 
   await waitFor(() => expect(document.documentElement).toHaveAttribute('data-theme', 'light'))
-  expect(window.localStorage.getItem('cmu-theme')).toBe('light')
+  expect(window.localStorage.getItem('mv-theme')).toBe('light')
   expect(screen.getByRole('button', { name: '切换到夜间模式' })).toBeInTheDocument()
 })
 
 test('restores the stored day theme on the next visit', async () => {
-  window.localStorage.setItem('cmu-theme', 'light')
+  window.localStorage.setItem('mv-theme', 'light')
 
   render(<App />)
 

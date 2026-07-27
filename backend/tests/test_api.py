@@ -98,7 +98,7 @@ def test_openapi_uses_crystal_material_universe_brand(tmp_path):
     response = _request(app, "/api/openapi.json")
 
     assert response.status_code == 200
-    assert response.json()["info"]["title"] == "Crystal Material Universe API"
+    assert response.json()["info"]["title"] == "MateriaViva API"
 
 
 def test_detail_structure_and_cif_endpoints(tmp_path):

@@ -324,14 +324,14 @@ def test_ec_mof_candidate_stems_match_the_official_selector_space():
 
 
 def test_default_data_root_resolves_the_selected_repositories_data_link(tmp_path, monkeypatch):
-    monkeypatch.delenv("CMU_DATA_ROOT", raising=False)
+    monkeypatch.delenv("MV_DATA_ROOT", raising=False)
 
     assert default_data_root(tmp_path) == (tmp_path / "data").resolve()
 
 
 def test_default_data_root_honors_an_external_storage_override(tmp_path, monkeypatch):
     external = tmp_path / "external-data"
-    monkeypatch.setenv("CMU_DATA_ROOT", str(external))
+    monkeypatch.setenv("MV_DATA_ROOT", str(external))
 
     assert default_data_root(tmp_path) == external.resolve()
 

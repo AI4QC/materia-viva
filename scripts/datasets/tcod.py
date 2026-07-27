@@ -65,7 +65,7 @@ def extract_tcod_links(base_url: str, html: str) -> tuple[list[str], list[str]]:
 
 
 def _fetch_text(url: str) -> str:
-    request = Request(url, headers={"User-Agent": "CMU-dataset-acquisition/1.0"})
+    request = Request(url, headers={"User-Agent": "MateriaViva-dataset-acquisition/1.0"})
     with urlopen(request, timeout=120) as response:
         return response.read().decode("utf-8")
 

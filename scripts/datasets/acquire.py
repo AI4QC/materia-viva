@@ -36,7 +36,7 @@ class CapacityError(RuntimeError):
 
 def default_data_root(repo_root: Path | None = None) -> Path:
     """Return the configured data root, resolving the repository data link."""
-    override = os.environ.get("CMU_DATA_ROOT")
+    override = os.environ.get("MV_DATA_ROOT")
     repository = Path(repo_root).resolve() if repo_root is not None else REPOSITORY_ROOT
     root = Path(override).expanduser() if override else repository / "data"
     return root.resolve()
@@ -188,7 +188,7 @@ def extract_index_downloads(
 
 
 def _fetch_text(url: str) -> str:
-    request = Request(url, headers={"User-Agent": "CMU-dataset-acquisition/1.0"})
+    request = Request(url, headers={"User-Agent": "MateriaViva-dataset-acquisition/1.0"})
     with urlopen(request, timeout=120) as response:
         return response.read().decode("utf-8")
 

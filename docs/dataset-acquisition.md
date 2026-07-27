@@ -2,7 +2,7 @@
 
 更新时间：2026-07-26
 
-本文件记录 Crystal Material Universe（CMU）的外部晶体数据库覆盖范围、实际下载状态、许可边界和人工操作。机器可读目录位于 [`scripts/datasets/sources.json`](../scripts/datasets/sources.json)。
+本文件记录 MateriaViva的外部晶体数据库覆盖范围、实际下载状态、许可边界和人工操作。机器可读目录位于 [`scripts/datasets/sources.json`](../scripts/datasets/sources.json)。
 
 来源登记不等于已下载；各来源的状态和许可限制见机器可读目录。
 
@@ -11,12 +11,12 @@
 所有数据库文件，包括 `.part` 断点文件、API 分页、压缩包、收据和后续标准化结果，都只放在：
 
 ```text
-/path/to/user/SSD/workspace_data/matdata/data
+/path/to/user/SSD/workspace_data/materia-viva/data
 ```
 
 仓库中的 `data` 是指向上述目录的符号链接。下载器默认保留至少 50 GiB 空闲空间，目标文件先写成 `.part`，完成并检查字节数后再原子改名。大文件的重试由 Python 外层启动新的 curl 进程完成；每个 curl 进程禁用内部重试并从 `.part` 的当前实际字节偏移续传，避免 SSL 中断后内部重试重新打开并截断文件。每个完成的静态文件旁边都有 `*.receipt.json`，记录来源 URL、字节数、SHA-256 和完成时间。
 
-下载层保留各来源的原始格式，这是审计和重建所必需的。原始 JSON、SQL、LMDB、CIF、ASE DB 等不会直接进入网站索引。进入 CMU 前统一执行两层转换：
+下载层保留各来源的原始格式，这是审计和重建所必需的。原始 JSON、SQL、LMDB、CIF、ASE DB 等不会直接进入网站索引。进入 MateriaViva 前统一执行两层转换：
 
 1. 结构主记录转换为 `Crystal Record v1`，核心字段为 `index, material_id, cif, pbes_gap`。
 2. 来源专有性质写入 provenance/property sidecar，再进入统一 SQLite 属性列或 JSON 扩展字段；单位在适配器中转换，原始值、原始单位、来源 ID 和版本始终保留。
@@ -143,7 +143,7 @@ Materials Project 这里的“全量”是当前主 API 的全部材料级 `Summ
 下载命令均可重复运行，已完成文件会跳过，未完成文件从 `.part` 继续：
 
 ```bash
-cd /path/to/user/workspace/matdata
+cd /path/to/user/workspace/materia-viva
 
 # 查看全部来源
 PYTHONPATH=. python scripts/datasets/acquire.py --list
@@ -206,7 +206,7 @@ curl -X POST 'https://nomad-lab.eu/prod/v1/api/v1/entries/query' \
 
 ### OMat24、MPtrj、Open Catalyst 与其他轨迹库
 
-这些数据主要由同一体系的弛豫、扰动、分子动力学或反应路径中间构型组成，不符合 CMU 当前“独特材料结构 + 对应性质”的采集范围，因此不下载、不转换、不计入统一结构库。旧 SSD 中已存在的 OMat24 全量归档仅保留原文件和 provenance 登记，不参与入库。对于同时提供初始结构和最终弛豫结构的材料数据库，可以保留两个端点并标注 `structure_role`；中间轨迹帧一律排除，端点间是否结构等价留到后续统一指纹去重阶段判断。
+这些数据主要由同一体系的弛豫、扰动、分子动力学或反应路径中间构型组成，不符合 MateriaViva 当前“独特材料结构 + 对应性质”的采集范围，因此不下载、不转换、不计入统一结构库。旧 SSD 中已存在的 OMat24 全量归档仅保留原文件和 provenance 登记，不参与入库。对于同时提供初始结构和最终弛豫结构的材料数据库，可以保留两个端点并标注 `structure_role`；中间轨迹帧一律排除，端点间是否结构等价留到后续统一指纹去重阶段判断。
 
 ## 5. 需要用户操作或受许可限制
 

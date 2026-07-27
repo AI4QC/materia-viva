@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://crystal-material-universe.local/schemas/crystal-record-v1.schema.json",
+  "$id": "https://materia-viva.local/schemas/crystal-record-v1.schema.json",
   "title": "Crystal Record v1",
-  "description": "Logical schema shared by every CMU source CSV split.",
+  "description": "Logical schema shared by every MateriaViva source CSV split.",
   "type": "object",
   "additionalProperties": false,
   "required": ["index", "material_id", "cif", "pbes_gap"],

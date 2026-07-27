@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Record a polished browser walkthrough of Crystal Material Universe."""
+"""Record a polished browser walkthrough of MateriaViva."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         type=Path,
-        default=PROJECT_ROOT / "demo" / "CMU_Crystal_Material_Universe_demo_2K_source.webm",
+        default=PROJECT_ROOT / "demo" / "MateriaViva_demo_2K_source.webm",
     )
     return parser.parse_args()
 
@@ -43,9 +43,9 @@ def show_caption(
     page.evaluate(
         """
         ({ title, subtitle, chapter, centered }) => {
-          document.querySelector('#cmu-demo-overlay')?.remove()
+          document.querySelector('#materiaviva-demo-overlay')?.remove()
           const overlay = document.createElement('div')
-          overlay.id = 'cmu-demo-overlay'
+          overlay.id = 'materiaviva-demo-overlay'
           overlay.style.cssText = centered
             ? `position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;
                pointer-events:none;background:rgba(2,14,12,.82);backdrop-filter:blur(7px);
@@ -97,7 +97,7 @@ def hide_caption(page: Page) -> None:
     page.evaluate(
         """
         () => {
-          const overlay = document.querySelector('#cmu-demo-overlay')
+          const overlay = document.querySelector('#materiaviva-demo-overlay')
           if (!overlay) return
           overlay.style.opacity = '0'
           overlay.style.transform = 'translateY(10px)'
@@ -135,7 +135,7 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
     output.parent.mkdir(parents=True, exist_ok=True)
     console_errors: list[str] = []
 
-    with tempfile.TemporaryDirectory(prefix="cmu-demo-video-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="materiaviva-demo-video-") as temporary:
         with sync_playwright() as playwright:
             chrome = shutil.which("google-chrome")
             browser = playwright.chromium.launch(
@@ -161,7 +161,7 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
 
             show_caption(
                 page,
-                "CMU · Crystal Material Universe",
+                "MateriaViva",
                 "全部晶体数据集统一汇聚与去重，构成 6,219,302 条可检索结构索引。",
                 "UNIFIED CRYSTAL DATABASE · DEMO",
                 centered=True,
@@ -332,14 +332,14 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
                 page.mouse.up()
                 pause(page, 2_800)
 
-            page.screenshot(path="/tmp/cmu-demo-interactive.png")
+            page.screenshot(path="/tmp/materiaviva-demo-interactive.png")
             page.get_by_role("button", name="关闭材料详情").click()
             dialog.wait_for(state="detached")
             page.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})")
             pause(page, 1_800)
             show_caption(
                 page,
-                "CMU · Crystal Material Universe",
+                "MateriaViva",
                 "在统一去重的 621 万种晶体结构中检索、比较并发现目标材料。",
                 "READY FOR EXPLORATION · 127.0.0.1:8000",
                 centered=True,

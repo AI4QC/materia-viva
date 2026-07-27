@@ -1,13 +1,13 @@
 cff-version: 1.2.0
-message: "If you use Crystal Material Universe, please cite this software and the original data sources."
-title: "Crystal Material Universe"
+message: "If you use MateriaViva, please cite this software and the original data sources."
+title: "MateriaViva"
 type: software
 authors:
   - family-names: "Song"
     given-names: "Zhilong"
     affiliation: "AI4QC"
-repository-code: "https://github.com/AI4QC/matdata"
-url: "https://huggingface.co/datasets/AI4QC/matdata"
+repository-code: "https://github.com/AI4QC/materia-viva"
+url: "https://huggingface.co/datasets/AI4QC/materia-viva"
 version: 0.1.0
 date-released: 2026-07-26
 keywords:

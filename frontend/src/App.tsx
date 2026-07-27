@@ -7,7 +7,7 @@ import { parseQuery, serializeQuery, type MaterialQuery } from './lib/query'
 
 type Theme = 'dark' | 'light'
 
-const THEME_STORAGE_KEY = 'cmu-theme'
+const THEME_STORAGE_KEY = 'mv-theme'
 
 function initialTheme(): Theme {
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
@@ -37,9 +37,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <a className="brand" href="/" aria-label="Crystal Material Universe 首页">
+        <a className="brand" href="/" aria-label="MateriaViva 首页">
           <span className="brand__mark"><Atom size={21} /></span>
-          <span><b>CMU</b><small>Crystal Material Universe</small></span>
+          <span><b>MateriaViva</b><small>自进化材料数据库</small></span>
         </a>
         <nav aria-label="主导航">
           <a href="#element-lab-title">元素检索</a>
@@ -66,8 +66,8 @@ export default function App() {
       {selectedMaterial && <MaterialDetail materialId={selectedMaterial} onClose={() => setSelectedMaterial(null)} />}
 
       <footer className="site-footer">
-        <div><Atom size={17} /><span>CMU</span></div>
-        <p>Crystal Material Universe · 多源晶体数据统一整合、去重与检索。</p>
+        <div><Atom size={17} /><span>MateriaViva</span></div>
+        <p>MateriaViva · 多源晶体数据统一整合、去重与检索。</p>
         <a href="https://github.com" aria-label="GitHub"><Github size={17} /></a>
       </footer>
     </div>

@@ -1,4 +1,4 @@
-"""FastAPI application for Crystal Material Universe."""
+"""FastAPI application for MateriaViva."""
 
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ def create_app(
     blob_path = Path(blob_path)
     render_service = renderer or OvitoRenderService(database_path.parent / "renders")
     app = FastAPI(
-        title="Crystal Material Universe API",
+        title="MateriaViva API",
         version="0.1.0",
         docs_url="/api/docs",
         openapi_url="/api/openapi.json",

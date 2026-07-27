@@ -52,7 +52,7 @@ def _post_json(url: str, payload: dict, *, timeout: int = 600, attempts: int = 5
                 data=body,
                 headers={
                     "Content-Type": "application/json",
-                    "User-Agent": "CMU-dataset-acquisition/1.0",
+                    "User-Agent": "MateriaViva-dataset-acquisition/1.0",
                 },
             )
             return urlopen(request, timeout=timeout)

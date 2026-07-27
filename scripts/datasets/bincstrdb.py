@@ -99,7 +99,7 @@ def extract_cif_text(html: str) -> str:
 
 
 def _fetch_text(url: str, *, attempts: int = 5) -> str:
-    request = Request(url, headers={"User-Agent": "CMU-dataset-acquisition/1.0"})
+    request = Request(url, headers={"User-Agent": "MateriaViva-dataset-acquisition/1.0"})
     last_error: Exception | None = None
     for attempt in range(attempts):
         try:

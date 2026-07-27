@@ -1,16 +1,16 @@
-# CMU · Crystal Material Universe
+# MateriaViva
 
-[![CI](https://github.com/AI4QC/matdata/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/matdata/actions/workflows/ci.yml)
-[![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2Fmatdata-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/matdata)
+[![CI](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml)
+[![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2Fmateria-viva-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/materia-viva)
 
-> **材料发现不该从逐个调用数据库 API 和维护多套账户开始。** CMU 用一个 Hugging Face
+> **材料发现不该从逐个调用数据库 API 和维护多套账户开始。** MateriaViva 用一个 Hugging Face
 > 下载入口交付经过统一、去重和许可审查的数据快照。
 >
-> **CMU 也不会停在一次性数据合集。** 下一阶段将建立可审计的自我进化闭环，持续发现
+> **MateriaViva 也不会停在一次性数据合集。** 下一阶段将建立可审计的自我进化闭环，持续发现
 > 新数据库和新版本并完成准入检查、格式映射与结构去重。自动发现与整合目前正在开发，
 > 尚未上线。
 
-## About CMU
+## About MateriaViva
 
 ### 问题：材料数据很多，但材料仍然难找
 
@@ -25,12 +25,12 @@
 
 ### 我们如何解决
 
-Crystal Material Universe（CMU）先用 Hugging Face 版本快照替代分散的批量 API 与账户
+MateriaViva先用 Hugging Face 版本快照替代分散的批量 API 与账户
 登录，再把晶体数据整理成一个可检索、可追溯的统一入口。研究者从元素周期表开始选择
 化学空间，使用 Materials Project 风格的性质条件缩小结果，最后通过浏览器 3D 或
 OVITO/Tachyon 检查结构。
 
-| 原来的障碍 | CMU 的处理方式 |
+| 原来的障碍 | MateriaViva 的处理方式 |
 |---|---|
 | 每个数据库都有自己的 API、账户和下载流程 | 允许再分发的数据统一发布为 Hugging Face 版本快照 |
 | CIF、JSON、SQL、LMDB 和属性表无法直接混用 | 结构进入统一模式，来源性质保留原值、单位和 provenance |
@@ -45,11 +45,11 @@ OVITO/Tachyon 检查结构。
 |---:|---:|---:|
 | 99,162 | 6,120,140 | 6,219,302 |
 
-[![播放 Crystal Material Universe 2K60 演示视频](demo/CMU_Crystal_Material_Universe_demo_preview.gif)](demo/CMU_Crystal_Material_Universe_demo_2K60.mp4)
+[![播放 MateriaViva 2K60 演示视频](demo/MateriaViva_demo_preview.gif)](demo/MateriaViva_demo_2K60.mp4)
 
-<p align="center"><a href="demo/CMU_Crystal_Material_Universe_demo_2K60.mp4">播放完整 2560×1440 · 60 FPS 演示视频</a></p>
+<p align="center"><a href="demo/MateriaViva_demo_2K60.mp4">播放完整 2560×1440 · 60 FPS 演示视频</a></p>
 
-## CMU 不只是把文件放在一起
+## MateriaViva 不只是把文件放在一起
 
 - 实验可合成结构和计算候选结构拥有独立标签，不用候选数量冒充实验覆盖。
 - 只把材料的静态周期结构端点纳入结构库。弛豫、扰动、分子动力学和反应路径中间帧不计为
@@ -61,7 +61,7 @@ OVITO/Tachyon 检查结构。
 
 ## 自我进化的材料整合数据库
 
-CMU 的长期目标不是维护一次性的静态合集，而是持续发现新的材料数据库和已有来源的新版本，
+MateriaViva 的长期目标不是维护一次性的静态合集，而是持续发现新的材料数据库和已有来源的新版本，
 完成许可判断、格式映射、结构去重和质量检查后，再发布新的统一快照。
 
 > [!IMPORTANT]
@@ -91,11 +91,11 @@ CMU 的长期目标不是维护一次性的静态合集，而是持续发现新�
 
 ## 一次下载，而不是重复抓取一百个数据库
 
-在公开发布层，CMU 取消“由每个用户分别调用传统数据库批量 API 或登录来源账户”的使用
+在公开发布层，MateriaViva 取消“由每个用户分别调用传统数据库批量 API 或登录来源账户”的使用
 方式。所有明确允许开放再分发且通过检查的数据，统一整理为带版本、哈希、来源清单和许可
 清单的快照，直接发布在：
 
-### [Hugging Face Dataset · AI4QC/matdata](https://huggingface.co/datasets/AI4QC/matdata)
+### [Hugging Face Dataset · AI4QC/materia-viva](https://huggingface.co/datasets/AI4QC/materia-viva)
 
 GitHub 仓库只保存代码、数据模式、来源目录、文档、测试和演示资产，不包含数据库文件、
 统一索引、渲染缓存或未完成下载。
@@ -126,12 +126,12 @@ GitHub 仓库只保存代码、数据模式、来源目录、文档、测试和�
 ## 获取代码和数据
 
 ```bash
-git clone https://github.com/AI4QC/matdata.git
-cd matdata
+git clone https://github.com/AI4QC/materia-viva.git
+cd materia-viva
 
 # 从 Hugging Face 下载数据后，把本地数据根目录链接到仓库
-export CMU_DATA_ROOT=/path/on/ssd/cmu-data
-ln -s "$CMU_DATA_ROOT" data
+export MV_DATA_ROOT=/path/on/ssd/materia-viva-data
+ln -s "$MV_DATA_ROOT" data
 ```
 
 `data` 和兼容入口 `runtime` 均不受 Git 管理。原始归档、SQLite/blob 索引、`.part`、receipt、
@@ -151,7 +151,7 @@ data/
 
 ## 统一数据格式
 
-进入 CMU 的结构主记录采用 `Crystal Record v1`：
+进入 MateriaViva 的结构主记录采用 `Crystal Record v1`：
 
 ```text
 index,material_id,cif,pbes_gap
@@ -247,7 +247,7 @@ python scripts/browser_smoke.py
 ## 仓库结构
 
 ```text
-matdata/
+materia-viva/
 ├── backend/                 FastAPI、SQLite 查询、结构解析和 OVITO 渲染
 ├── frontend/                React、TypeScript、Vite 和交互式晶体工作台
 ├── scripts/                 校验、索引、采集、服务和演示录制工具
@@ -259,25 +259,25 @@ matdata/
 
 ## 演示视频
 
-- [首页动态预览](demo/CMU_Crystal_Material_Universe_demo_preview.gif)：800×450，点击后播放完整视频。
-- [2K60 MP4](demo/CMU_Crystal_Material_Universe_demo_2K60.mp4)：2560×1440、60 FPS、H.264 High。
-- [2K 封面](demo/CMU_Crystal_Material_Universe_demo_2K60_cover.png)。
-- `demo/CMU_Crystal_Material_Universe_demo_2K_source.webm`：浏览器源录屏。
+- [首页动态预览](demo/MateriaViva_demo_preview.gif)：800×450，点击后播放完整视频。
+- [2K60 MP4](demo/MateriaViva_demo_2K60.mp4)：2560×1440、60 FPS、H.264 High。
+- [2K 封面](demo/MateriaViva_demo_2K60_cover.png)。
+- `demo/MateriaViva_demo_2K_source.webm`：浏览器源录屏。
 
 重新录制和转码：
 
 ```bash
 python scripts/record_demo.py
-ffmpeg -y -i demo/CMU_Crystal_Material_Universe_demo_2K_source.webm \
+ffmpeg -y -i demo/MateriaViva_demo_2K_source.webm \
   -vf "minterpolate=fps=60:mi_mode=blend" \
   -c:v libx264 -profile:v high -level:v 5.1 -preset slow -crf 13 \
   -pix_fmt yuv420p -movflags +faststart -an \
-  demo/CMU_Crystal_Material_Universe_demo_2K60.mp4
+  demo/MateriaViva_demo_2K60.mp4
 
 # 生成 GitHub README 动态预览
-ffmpeg -y -ss 1 -i demo/CMU_Crystal_Material_Universe_demo_2K60.mp4 \
+ffmpeg -y -ss 1 -i demo/MateriaViva_demo_2K60.mp4 \
   -filter_complex "fps=5,scale=800:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=72:stats_mode=diff[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" \
-  -loop 0 demo/CMU_Crystal_Material_Universe_demo_preview.gif
+  -loop 0 demo/MateriaViva_demo_preview.gif
 ```
 
 ## 许可、贡献和引用

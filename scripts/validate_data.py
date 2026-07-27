@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate both CMU source datasets and write canonical manifests."""
+"""Validate both MateriaViva source datasets and write canonical manifests."""
 
 from __future__ import annotations
 

@@ -1,0 +1,39 @@
+# Large datasets and generated indexes live on the secondary SSD.
+/data
+/runtime
+*.part
+*.receipt.json
+materials.sqlite
+materials.sqlite-*
+structures.blob
+renders/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Frontend
+/frontend/node_modules/
+/frontend/*.tsbuildinfo
+/backend/static/
+
+# Local configuration and migration intermediates
+.env
+.env.*
+!.env.example
+*.building
+*.migrating
+
+# Local implementation plans can contain machine-specific migration history.
+/docs/plans/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

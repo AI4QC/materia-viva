@@ -1,0 +1,8 @@
+crystal_system,exp_count,exp_frac,pool_count_sampled,pool_frac
+triclinic,7238,0.07331,13884,0.04537
+monoclinic,26505,0.26847,48066,0.15708
+orthorhombic,25594,0.25924,51042,0.1668
+tetragonal,12313,0.12472,74360,0.243
+trigonal,7981,0.08084,34322,0.11216
+hexagonal,8086,0.0819,12415,0.04057
+cubic,11010,0.11152,71916,0.23502

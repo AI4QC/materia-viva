@@ -1,0 +1,10 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+pydantic>=2.9,<3
+pymatgen>=2025.1
+ase>=3.23
+pytest>=8,<9
+httpx>=0.27,<1
+
+# OVITO is intentionally run from an isolated interpreter. Set, for example:
+# MATERIALS_OVITO_PYTHON=/path/to/ovito-enabled/python

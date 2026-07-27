@@ -1,6 +1,6 @@
-# Contributing to Crystal Material Universe
+# Contributing to MateriaViva
 
-感谢为 CMU 提交代码、文档或数据来源信息。提交前请遵守以下边界。
+感谢为 MateriaViva 提交代码、文档或数据来源信息。提交前请遵守以下边界。
 
 ## 开发流程
 
@@ -15,7 +15,7 @@
   `.part`、receipt、API token 或许可证受限的数据。
 - 新来源必须在 `scripts/datasets/sources.json` 登记官方 URL、访问模式、许可、目标路径、
   当前状态和 provenance 说明。
-- CMU 当前只接收独特的周期结构端点；分子动力学、弛豫过程、扰动和反应路径中间帧
+- MateriaViva 当前只接收独特的周期结构端点；分子动力学、弛豫过程、扰动和反应路径中间帧
   不应作为独立结构导入。
 - 原始来源格式可以保留，但进入服务索引前必须转换为 `Crystal Record v1`，并保留来源
   ID、来源记录 ID、版本、单位和许可信息。
@@ -33,4 +33,4 @@ npm run build
 
 数据模式或索引器变化还需运行 `make validate-data`，或在无法访问完整数据时使用最小的
 合成 fixture 覆盖变化。完整数据发布到
-[Hugging Face Dataset](https://huggingface.co/datasets/AI4QC/matdata)，不通过 Git PR 传输。
+[Hugging Face Dataset](https://huggingface.co/datasets/AI4QC/materia-viva)，不通过 Git PR 传输。

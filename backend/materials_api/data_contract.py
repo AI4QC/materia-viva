@@ -1,4 +1,4 @@
-"""Canonical source-data contract for Crystal Material Universe datasets."""
+"""Canonical source-data contract for MateriaViva datasets."""
 
 from __future__ import annotations
 

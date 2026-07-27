@@ -2,9 +2,9 @@
 
 ## Result
 
-CMU application code was moved from the former nested web directory into the
-standalone `/home/zhilong/workspace/matdata` Git repository. Active database files
-were moved to `/home/zhilong/SSD/workspace_data/matdata/data` on the secondary NVMe
+MateriaViva application code was moved from the former nested web directory into the
+standalone `/home/zhilong/workspace/materia-viva` Git repository. Active database files
+were moved to `/home/zhilong/SSD/workspace_data/materia-viva/data` on the secondary NVMe
 SSD. Repository and legacy paths resolve to this single active data tree.
 
 ## Migrated assets

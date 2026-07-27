@@ -56,7 +56,7 @@ def parse_total(payload: dict) -> int:
 
 def _fetch_json(url: str, *, attempts: int = 5) -> dict:
     last_error: Exception | None = None
-    request = Request(url, headers={"User-Agent": "CMU-dataset-acquisition/1.0"})
+    request = Request(url, headers={"User-Agent": "MateriaViva-dataset-acquisition/1.0"})
     for attempt in range(attempts):
         try:
             with urlopen(request, timeout=300) as response:

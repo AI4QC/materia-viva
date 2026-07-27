@@ -1,1 +1,1 @@
-"""Dataset acquisition helpers for Crystal Material Universe."""
+"""Dataset acquisition helpers for MateriaViva."""

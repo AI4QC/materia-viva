@@ -81,7 +81,7 @@ class OvitoRenderService:
             if self._valid_png(target):
                 return target
             input_handle = tempfile.NamedTemporaryFile(
-                mode="w", suffix=".cif", prefix="cmu-", delete=False,
+                mode="w", suffix=".cif", prefix="materiaviva-", delete=False,
                 encoding="utf-8",
             )
             temp_input = Path(input_handle.name)
@@ -133,11 +133,11 @@ class OvitoRenderService:
             return target
 
         input_handle = tempfile.NamedTemporaryFile(
-            mode="w", suffix=".cif", prefix="cmu-", delete=False,
+            mode="w", suffix=".cif", prefix="materiaviva-", delete=False,
             encoding="utf-8",
         )
         output_handle = tempfile.NamedTemporaryFile(
-            suffix=".png", prefix="cmu-", dir=self.cache_dir, delete=False
+            suffix=".png", prefix="materiaviva-", dir=self.cache_dir, delete=False
         )
         temp_input = Path(input_handle.name)
         temp_output = Path(output_handle.name)

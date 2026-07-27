@@ -2,7 +2,7 @@
 
 更新时间：2026-07-26
 
-本文件记录 Crystal Material Universe（CMU）的外部晶体数据库覆盖范围、实际下载状态、许可边界和人工操作。机器可读目录位于 [`scripts/datasets/sources.json`](../scripts/datasets/sources.json)。
+本文件记录 MateriaViva的外部晶体数据库覆盖范围、实际下载状态、许可边界和人工操作。机器可读目录位于 [`scripts/datasets/sources.json`](../scripts/datasets/sources.json)。
 
 这里的“覆盖”不等于“已经下载”。当前目录恰好登记 **100 个来源**：60 个来源路径已在本机存在，其中 54 个位于 `data/raw/acquired/`，5 个复用 `data/raw/external_structs/` 中的既有数据，授权 ICSD 位于 `data/raw/icsd_extracted/`；其余 40 个尚无本地来源路径，原因包括账号或付费许可、没有官方批量接口、提供方禁止批量下载，以及按项目范围排除轨迹。每一项的真实状态以机器可读目录的 `status` 和 `data_path` 为准，不能把来源发现数当作下载完成数。
 
@@ -13,12 +13,12 @@
 所有数据库文件，包括 `.part` 断点文件、API 分页、压缩包、收据和后续标准化结果，都只放在：
 
 ```text
-/home/zhilong/SSD/workspace_data/matdata/data
+/home/zhilong/SSD/workspace_data/materia-viva/data
 ```
 
 仓库中的 `data` 是指向上述目录的符号链接。下载器默认保留至少 50 GiB 空闲空间，目标文件先写成 `.part`，完成并检查字节数后再原子改名。大文件的重试由 Python 外层启动新的 curl 进程完成；每个 curl 进程禁用内部重试并从 `.part` 的当前实际字节偏移续传，避免 SSL 中断后内部重试重新打开并截断文件。每个完成的静态文件旁边都有 `*.receipt.json`，记录来源 URL、字节数、SHA-256 和完成时间。
 
-下载层保留各来源的原始格式，这是审计和重建所必需的。原始 JSON、SQL、LMDB、CIF、ASE DB 等不会直接进入网站索引。进入 CMU 前统一执行两层转换：
+下载层保留各来源的原始格式，这是审计和重建所必需的。原始 JSON、SQL、LMDB、CIF、ASE DB 等不会直接进入网站索引。进入 MateriaViva 前统一执行两层转换：
 
 1. 结构主记录转换为 `Crystal Record v1`，核心字段为 `index, material_id, cif, pbes_gap`。
 2. 来源专有性质写入 provenance/property sidecar，再进入统一 SQLite 属性列或 JSON 扩展字段；单位在适配器中转换，原始值、原始单位、来源 ID 和版本始终保留。
@@ -61,7 +61,7 @@
 | [MatterGen data release](https://github.com/microsoft/mattergen) | MP-20 约 45k；Alex-MP-20 约 600k | `raw/acquired/mattergen/` | 下载 Git LFS 中的两个训练集 ZIP。|
 | [MPtrj](https://figshare.com/articles/dataset/23713842) | 约 1.58M 条结构轨迹，12.19 GB | 不采集 | 属于弛豫轨迹数据，不是独特材料结构；已从下载队列排除。|
 | [Matbench Discovery / WBM](https://figshare.com/articles/dataset/Matbench_Discovery_v1_0_0/22715158) | WBM 256,963 个候选结构 | `raw/acquired/matbench-discovery/` | 下载 MP 快照、WBM 初始/弛豫结构、combined entries 与 summary。|
-| [OMat24](https://huggingface.co/datasets/facebook/OMAT24) | 全训练集 100,824,585 个构型 | 仅登记旧 SSD 数据，不纳入 CMU | 属于轨迹/扰动构型数据；既有约 188 GiB 原文件保持不动，但排除在独特结构采集与统一入库之外。|
+| [OMat24](https://huggingface.co/datasets/facebook/OMAT24) | 全训练集 100,824,585 个构型 | 仅登记旧 SSD 数据，不纳入 MateriaViva | 属于轨迹/扰动构型数据；既有约 188 GiB 原文件保持不动，但排除在独特结构采集与统一入库之外。|
 
 ### 3.1 实际下载状态快照
 
@@ -72,13 +72,13 @@
 - SACADA 已取得 1,644 个静态结构归档；目录中另外 17 个编号的官方 ZIP 返回 404，作为 unavailable 记录，不用伪造缺失结构补齐。
 - AFLOW AFLUX 已完成 2,981,853 / 2,981,853 条；TCOD 已完成 7,499 / 7,499 个最终 CIF；SuperBand 的 13,292,718,528 字节 HDF5 已完成并通过 HDF5 打开检查，根层包含 2,474 个材料。EC-MOF 已取得 1,071 个完整结构/性质对，唯一缺项 `ZnHTTX_Bulk` 的官方结构端点返回 404。
 - OQMD 和 SIMPOD 在修复重试逻辑后分别从 18,565,977,758 与 33,863,725,056 字节恢复，并已完成为 21,034,479,961 字节 SQL gzip 和 47,781,765,915 字节 `Structures.zip`。下载器已原子移除 `.part` 后缀并写入 SHA-256 收据；OQMD 通过全流 `gzip -t`，SIMPOD 使用 Python Zip64 读取器对 467,861 个条目完成全量解压和 CRC 校验。续传过程使用 `--retry 0 --continue-at -`，没有截断既有字节。
-- MPtrj 和 OMat24 均已按“只收集独特结构、不收集轨迹”的范围排除；两个未完成 `.part` 已于 2026-07-26 删除，约释放 6.1 GB。既有 `/home/zhilong/SSD/material_data/OMAT24` 原文件保持不动，但不会进入 CMU 统一结构库。
+- MPtrj 和 OMat24 均已按“只收集独特结构、不收集轨迹”的范围排除；两个未完成 `.part` 已于 2026-07-26 删除，约释放 6.1 GB。既有 `/home/zhilong/SSD/material_data/OMAT24` 原文件保持不动，但不会进入 MateriaViva 统一结构库。
 - 运行中的文件保留 `.part` 后缀；只有字节数验证完成并原子改名后才会产生 `*.receipt.json`。API 数据只有 manifest 同时满足 `complete: true` 和下载数等于总数才算完成。
 
 实时查看状态：
 
 ```bash
-cd /home/zhilong/workspace/matdata
+cd /home/zhilong/workspace/materia-viva
 find data/raw/acquired -type f -name '*.part' -printf '%p\t%s bytes\n'
 jq '{downloaded_documents,total_documents,complete,updated_at}' \
   data/raw/acquired/materials-project/summary-2026-07-26/manifest.json \
@@ -169,7 +169,7 @@ Materials Project 这里的“全量”是当前主 API 的全部材料级 `Summ
 下载命令均可重复运行，已完成文件会跳过，未完成文件从 `.part` 继续：
 
 ```bash
-cd /home/zhilong/workspace/matdata
+cd /home/zhilong/workspace/materia-viva
 
 # 查看全部来源
 PYTHONPATH=. python scripts/datasets/acquire.py --list
@@ -232,7 +232,7 @@ curl -X POST 'https://nomad-lab.eu/prod/v1/api/v1/entries/query' \
 
 ### OMat24、MPtrj、Open Catalyst 与其他轨迹库
 
-这些数据主要由同一体系的弛豫、扰动、分子动力学或反应路径中间构型组成，不符合 CMU 当前“独特材料结构 + 对应性质”的采集范围，因此不下载、不转换、不计入统一结构库。旧 SSD 中已存在的 OMat24 全量归档仅保留原文件和 provenance 登记，不参与入库。对于同时提供初始结构和最终弛豫结构的材料数据库，可以保留两个端点并标注 `structure_role`；中间轨迹帧一律排除，端点间是否结构等价留到后续统一指纹去重阶段判断。
+这些数据主要由同一体系的弛豫、扰动、分子动力学或反应路径中间构型组成，不符合 MateriaViva 当前“独特材料结构 + 对应性质”的采集范围，因此不下载、不转换、不计入统一结构库。旧 SSD 中已存在的 OMat24 全量归档仅保留原文件和 provenance 登记，不参与入库。对于同时提供初始结构和最终弛豫结构的材料数据库，可以保留两个端点并标注 `structure_role`；中间轨迹帧一律排除，端点间是否结构等价留到后续统一指纹去重阶段判断。
 
 ## 5. 需要用户操作或受许可限制
 

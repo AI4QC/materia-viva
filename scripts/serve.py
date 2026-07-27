@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Serve the built Crystal Material Universe frontend and API."""
+"""Serve the built MateriaViva frontend and API."""
 
 from __future__ import annotations
 

@@ -25,7 +25,7 @@ def build_request(*, skip: int, limit: int, api_key: str) -> Request:
     query = urlencode({"_skip": skip, "_limit": limit, "_all_fields": "true"})
     return Request(
         f"{SUMMARY_ENDPOINT}?{query}",
-        headers={"X-API-KEY": api_key, "User-Agent": "CMU-dataset-acquisition/1.0"},
+        headers={"X-API-KEY": api_key, "User-Agent": "MateriaViva-dataset-acquisition/1.0"},
     )
 
 

@@ -10,7 +10,7 @@
 /home/zhilong/SSD/material_data
 ```
 
-CMU 数据根目录中增加只占一个目录项的兼容链接：
+MateriaViva 数据根目录中增加只占一个目录项的兼容链接：
 
 ```text
 data/raw/legacy-material-data -> /home/zhilong/SSD/material_data
@@ -55,7 +55,7 @@ SHA-256: 3c778b77556ab273eb25150fa322b78f57133f7c9103684ea427b88530d2070b
 ### 内容级高度重合但不是同一文件
 
 - 旧 MP、OQMD、ICSD、JARVIS 结构库与当前采集版本存在大范围结构重合，但字段、版本和计算方法不同，不能按文件名或材料 ID 直接覆盖。
-- 旧 OMat24 已包含完整训练、验证和 sAlex 归档，但它属于轨迹/扰动构型数据，不纳入 CMU 独特结构库。本轮重复的 `omat24_1M_251210.tar.gz.part` 已于 2026-07-26 删除；旧全量原文件未改动，仅保留 provenance 登记。
+- 旧 OMat24 已包含完整训练、验证和 sAlex 归档，但它属于轨迹/扰动构型数据，不纳入 MateriaViva 独特结构库。本轮重复的 `omat24_1M_251210.tar.gz.part` 已于 2026-07-26 删除；旧全量原文件未改动，仅保留 provenance 登记。
 - `sample_*`、`train_*`、同一泛函的多个 split 以及图神经网络 LMDB 是训练划分，不是新的材料数据库；接入时只作为 property/ML-artifact sidecar。
 
 ## 4. 不能丢失的独有性质

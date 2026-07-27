@@ -1,6 +1,6 @@
 # Crystal Record v1
 
-Crystal Record v1 is the only accepted source format for CMU indexing. Each
+Crystal Record v1 is the only accepted source format for MateriaViva indexing. Each
 dataset provides UTF-8 `train.csv` and `val.csv` files with this exact header:
 
 ```text

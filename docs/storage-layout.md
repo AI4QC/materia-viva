@@ -3,10 +3,10 @@
 The Git repository and large data are intentionally separated:
 
 ```text
-/home/zhilong/workspace/matdata/             Git working tree
-└── data -> /home/zhilong/SSD/workspace_data/matdata/data
+/home/zhilong/workspace/materia-viva/             Git working tree
+└── data -> /home/zhilong/SSD/workspace_data/materia-viva/data
 
-/home/zhilong/SSD/workspace_data/matdata/data/
+/home/zhilong/SSD/workspace_data/materia-viva/data/
 ├── sources/
 │   ├── experimental/                        99,162 records
 │   └── candidate/                           6,120,140 records
@@ -20,7 +20,7 @@ Compatibility links keep earlier workflows operational:
 
 | Legacy path | Target |
 |---|---|
-| `CSAgent/materials_web` | the MatData repository |
+| `CSAgent/materials_web` | the MateriaViva repository |
 | `CSAgent/data/synthesizable_structs` | `data/sources/experimental` |
 | `matgenbench/data/unique_structs_lemat_merged` | `data/sources/candidate` |
 | `CSAgent/data/external_structs` | `data/raw/external_structs` |

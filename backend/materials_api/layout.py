@@ -1,4 +1,4 @@
-"""Filesystem layout for the standalone MatData repository."""
+"""Filesystem layout for the standalone MateriaViva repository."""
 
 from __future__ import annotations
 

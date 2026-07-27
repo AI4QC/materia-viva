@@ -11,11 +11,72 @@ renders/
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Python packaging and build artifacts
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Python tests, coverage, and profiling
 .pytest_cache/
 .coverage
+.coverage.*
+coverage.xml
+*.cover
+*.py,cover
 htmlcov/
+.hypothesis/
+.tox/
+.nox/
+prof/
+
+# Python type-checker, linter, and tool caches
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.pyright/
+.ruff_cache/
+.cache/
+
+# Jupyter and IPython
+.ipynb_checkpoints/
+profile_default/
+ipython_config.py
+
+# Python environments and local interpreter selection
 .venv/
 venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+__pypackages__/
+.pdm.toml
+
+# Python runtime state
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+celerybeat-schedule
+celerybeat.pid
+*.sage.py
 
 # Frontend
 /frontend/node_modules/
@@ -32,8 +93,63 @@ venv/
 # Local implementation plans can contain machine-specific migration history.
 /docs/plans/
 
-# Editors and operating systems
+# Editors
 .idea/
 .vscode/
+
+# macOS metadata and filesystem artifacts
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.apdisk
+Network Trash Folder
+Temporary Items
+
+# Other operating systems
 Thumbs.db
+
+# Local AI coding-agent configuration, memory, and session state
+.agents/
+.aider*
+.claude/
+.cline/
+.codex/
+.continue/
+.cursor/
+.gemini/
+.kilocode/
+.roo/
+.windsurf/
+.mcp.json
+mcp.local.json
+AGENTS.md
+CLAUDE.md
+CLAUDE.local.md
+GEMINI.md
+GEMINI.local.md
+
+# LLM caches, traces, and local usage reports
+.langchain/
+.llm-cache/
+.prompt-cache/
+llm-usage*.json
+token-usage*.json
+
+# Local secrets and API-token files (keep example/template files tracked)
+.secrets/
+.secrets.*
+*.token
+*.tokens
+*_api_key.txt
+*_credentials.json
+!*.example
+!*.example.*

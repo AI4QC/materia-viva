@@ -3,12 +3,41 @@
 [![CI](https://github.com/AI4QC/matdata/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/matdata/actions/workflows/ci.yml)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2Fmatdata-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/matdata)
 
-Crystal Material Universe（CMU）是一个晶体结构数据仓库与可视化检索站点。当前统一
-索引包含 99,162 条实验晶体结构和 6,120,140 条候选结构，共 6,219,302 条记录。系统
-提供交互式元素周期表、多元素包含/排除组合、Materials Project 风格属性筛选、
-OVITO/Tachyon 高质量渲染、浏览器交互式 3D，以及可持久化的日间/夜间主题。
+Crystal Material Universe（CMU）是一个面向持续生长的晶体结构数据仓库与可视化检索
+站点，并以建设**自我进化的材料整合数据库**为长期目标。当前统一索引包含 99,162 条
+实验晶体结构和 6,120,140 条候选结构，共 6,219,302 条记录。系统提供交互式元素周期表、
+多元素包含/排除组合、Materials Project 风格属性筛选、OVITO/Tachyon 高质量渲染、
+浏览器交互式 3D，以及可持久化的日间/夜间主题。
 
-![Crystal Material Universe](demo/CMU_Crystal_Material_Universe_demo_2K60_cover.png)
+[![播放 Crystal Material Universe 2K60 演示视频](demo/CMU_Crystal_Material_Universe_demo_preview.gif)](demo/CMU_Crystal_Material_Universe_demo_2K60.mp4)
+
+<p align="center"><a href="demo/CMU_Crystal_Material_Universe_demo_2K60.mp4">点击播放完整 2560×1440 · 60 FPS 演示视频</a></p>
+
+## About
+
+CMU 面向材料研究人员解决晶体数据分散、字段不一致和跨库重复的问题。它把实验结构、
+计算候选及其来源性质放入同一个可追溯的数据模型，通过元素周期表和组合筛选快速缩小
+化学空间，再以浏览器 3D 与 OVITO/Tachyon 高质量渲染检查具体结构。
+
+项目坚持三个边界：实验结构与计算候选明确区分；只把独特的周期结构端点纳入结构库，
+不把轨迹中间帧扩张为材料数量；跨来源去重时保留全部原始 ID、许可、性质、单位和
+provenance。GitHub 负责代码与可复现流程，Hugging Face 负责大体积数据发布。
+
+### 自我进化路线图（待开发）
+
+CMU 的下一阶段目标是自动发现新发布或更新的材料数据库，并把合格数据持续整合进统一
+宇宙。**这一自动发现与自动整合能力尚未实现**；当前 100 个来源仍由人工检索、审核后，
+再通过可恢复的采集脚本接入。计划中的闭环包括：
+
+1. 定期扫描官方数据库目录、数据论文、开放仓库和材料数据服务，识别新来源与新版本；
+2. 自动判断访问方式、许可、数据规模、静态结构覆盖和轨迹污染风险，不绕过账号或授权；
+3. 为通过准入检查的来源生成或推荐采集适配器，并保留文件哈希、版本和 provenance；
+4. 将结构与性质映射到统一模式，完成单位归一、结构指纹去重和跨库性质合并；
+5. 运行完整性、格式、数量、许可和异常值门禁，经人工批准后发布新索引与变更报告；
+6. 根据失败记录和人工反馈改进下一轮来源发现、字段映射与去重策略。
+
+自动化不会以牺牲可审计性为代价：每个新增来源必须能够追溯到官方页面、原始记录和许可，
+受限数据保持本地边界，无法确认的结构不会自动进入公开版本。
 
 ## 数据获取
 
@@ -178,6 +207,7 @@ python scripts/browser_smoke.py
 
 ## 演示视频
 
+- [仓库首页动态预览](demo/CMU_Crystal_Material_Universe_demo_preview.gif)：800×450，点击后播放完整视频。
 - [2K60 MP4](demo/CMU_Crystal_Material_Universe_demo_2K60.mp4)：2560×1440、60 FPS、H.264 High。
 - [2K 封面](demo/CMU_Crystal_Material_Universe_demo_2K60_cover.png)。
 - `demo/CMU_Crystal_Material_Universe_demo_2K_source.webm`：浏览器源录屏。
@@ -191,6 +221,11 @@ ffmpeg -y -i demo/CMU_Crystal_Material_Universe_demo_2K_source.webm \
   -c:v libx264 -profile:v high -level:v 5.1 -preset slow -crf 13 \
   -pix_fmt yuv420p -movflags +faststart -an \
   demo/CMU_Crystal_Material_Universe_demo_2K60.mp4
+
+# 生成 GitHub README 可直接显示的动态预览
+ffmpeg -y -ss 1 -i demo/CMU_Crystal_Material_Universe_demo_2K60.mp4 \
+  -filter_complex "fps=5,scale=800:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=72:stats_mode=diff[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" \
+  -loop 0 demo/CMU_Crystal_Material_Universe_demo_preview.gif
 ```
 
 ## 数据许可与贡献

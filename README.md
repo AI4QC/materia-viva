@@ -3,83 +3,139 @@
 [![CI](https://github.com/AI4QC/matdata/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/matdata/actions/workflows/ci.yml)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2Fmatdata-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/matdata)
 
-Crystal Material Universe（CMU）是一个面向持续生长的晶体结构数据仓库与可视化检索
-站点，并以建设**自我进化的材料整合数据库**为长期目标。当前统一索引包含 99,162 条
-实验晶体结构和 6,120,140 条候选结构，共 6,219,302 条记录。系统提供交互式元素周期表、
-多元素包含/排除组合、Materials Project 风格属性筛选、OVITO/Tachyon 高质量渲染、
-浏览器交互式 3D，以及可持久化的日间/夜间主题。
+> **材料发现不该从逐个调用数据库 API 和维护多套账户开始。** CMU 用一个 Hugging Face
+> 下载入口交付经过统一、去重和许可审查的数据快照。
+>
+> **CMU 也不会停在一次性数据合集。** 下一阶段将建立可审计的自我进化闭环，持续发现
+> 新数据库和新版本并完成准入检查、格式映射与结构去重。自动发现与整合目前正在开发，
+> 尚未上线。
+
+## About CMU
+
+### 问题：材料数据很多，但材料仍然难找
+
+晶体结构并不稀缺。真正缺少的是一个可以直接搜索、比较并追溯来源的材料空间。
+
+同一种晶体可能同时出现在多个数据库中，却使用不同的 ID、字段、单位和文件格式。研究者
+常常要分别申请账户、调用批量 API、下载归档、清洗数据，再判断哪些记录只是重复结构、
+弛豫中间帧或分子动力学轨迹。即使完成这些工作，性质字段也可能和结构脱节，许可边界还要
+重新核对。
+
+结果是：数据已经存在，但在真正开始筛选候选材料之前，大量时间先消耗在数据获取和整理上。
+
+### 我们如何解决
+
+Crystal Material Universe（CMU）先用 Hugging Face 版本快照替代分散的批量 API 与账户
+登录，再把晶体数据整理成一个可检索、可追溯的统一入口。研究者从元素周期表开始选择
+化学空间，使用 Materials Project 风格的性质条件缩小结果，最后通过浏览器 3D 或
+OVITO/Tachyon 检查结构。
+
+| 原来的障碍 | CMU 的处理方式 |
+|---|---|
+| 每个数据库都有自己的 API、账户和下载流程 | 允许再分发的数据统一发布为 Hugging Face 版本快照 |
+| CIF、JSON、SQL、LMDB 和属性表无法直接混用 | 结构进入统一模式，来源性质保留原值、单位和 provenance |
+| 同一结构跨库重复，轨迹帧又会放大材料数量 | 只接收独特周期结构端点，统一做结构指纹去重 |
+| 实验结构和计算候选容易混在一起 | 两类记录始终分开标注、筛选和统计 |
+| 商业数据与开放数据的边界不清楚 | 许可审查先于发布；受限数据不进入公开包 |
+| 下载后仍缺少直观检查工具 | 周期表检索、组合筛选、交互式 3D 和高质量离线渲染在同一界面完成 |
+
+当前统一索引包含：
+
+| 实验晶体结构 | 计算候选结构 | 统一检索记录 |
+|---:|---:|---:|
+| 99,162 | 6,120,140 | 6,219,302 |
 
 [![播放 Crystal Material Universe 2K60 演示视频](demo/CMU_Crystal_Material_Universe_demo_preview.gif)](demo/CMU_Crystal_Material_Universe_demo_2K60.mp4)
 
-<p align="center"><a href="demo/CMU_Crystal_Material_Universe_demo_2K60.mp4">点击播放完整 2560×1440 · 60 FPS 演示视频</a></p>
+<p align="center"><a href="demo/CMU_Crystal_Material_Universe_demo_2K60.mp4">播放完整 2560×1440 · 60 FPS 演示视频</a></p>
 
-## About
+## CMU 不只是把文件放在一起
 
-CMU 面向材料研究人员解决晶体数据分散、字段不一致和跨库重复的问题。它把实验结构、
-计算候选及其来源性质放入同一个可追溯的数据模型，通过元素周期表和组合筛选快速缩小
-化学空间，再以浏览器 3D 与 OVITO/Tachyon 高质量渲染检查具体结构。
+- 实验可合成结构和计算候选结构拥有独立标签，不用候选数量冒充实验覆盖。
+- 只把材料的静态周期结构端点纳入结构库。弛豫、扰动、分子动力学和反应路径中间帧不计为
+  新材料。
+- 去重不等于丢数据。结构合并后仍保留每个来源的原始 ID、版本、性质、单位、许可和
+  provenance。
+- 原始归档用于审计和重建，网站只读取经过校验的统一索引，不直接混读来源文件。
+- 没有明确开放再分发授权的数据不会出现在 Hugging Face 公开版本中。
 
-项目坚持三个边界：实验结构与计算候选明确区分；只把独特的周期结构端点纳入结构库，
-不把轨迹中间帧扩张为材料数量；跨来源去重时保留全部原始 ID、许可、性质、单位和
-provenance。GitHub 负责代码与可复现流程，Hugging Face 负责大体积数据发布。
+## 自我进化的材料整合数据库
 
-### 自我进化路线图（待开发）
+CMU 的长期目标不是维护一次性的静态合集，而是持续发现新的材料数据库和已有来源的新版本，
+完成许可判断、格式映射、结构去重和质量检查后，再发布新的统一快照。
 
-CMU 的下一阶段目标是自动发现新发布或更新的材料数据库，并把合格数据持续整合进统一
-宇宙。**这一自动发现与自动整合能力尚未实现**；当前 100 个来源仍由人工检索、审核后，
-再通过可恢复的采集脚本接入。计划中的闭环包括：
+> [!IMPORTANT]
+> 自动发现和自动整合功能尚未实现。当前 100 个来源仍由人工发现和审核，再由可恢复的采集
+> 脚本接入。README 将待开发能力与当前实现分开描述。
 
-1. 定期扫描官方数据库目录、数据论文、开放仓库和材料数据服务，识别新来源与新版本；
-2. 自动判断访问方式、许可、数据规模、静态结构覆盖和轨迹污染风险，不绕过账号或授权；
-3. 为通过准入检查的来源生成或推荐采集适配器，并保留文件哈希、版本和 provenance；
-4. 将结构与性质映射到统一模式，完成单位归一、结构指纹去重和跨库性质合并；
-5. 运行完整性、格式、数量、许可和异常值门禁，经人工批准后发布新索引与变更报告；
-6. 根据失败记录和人工反馈改进下一轮来源发现、字段映射与去重策略。
+计划中的闭环是：
 
-自动化不会以牺牲可审计性为代价：每个新增来源必须能够追溯到官方页面、原始记录和许可，
-受限数据保持本地边界，无法确认的结构不会自动进入公开版本。
+```text
+发现新来源或版本
+        ↓
+检查许可、访问方式、静态结构范围和轨迹污染
+        ↓
+生成或推荐采集与字段映射适配器
+        ↓
+统一格式、单位和 provenance
+        ↓
+结构指纹去重并合并跨库性质
+        ↓
+完整性与异常值检查 + 人工批准
+        ↓
+发布新的 Hugging Face 快照和变更报告
+```
 
-## 数据发布与版权政策
+失败记录和人工修正会用于改进下一轮来源识别、字段映射和去重策略。这个过程不会绕过账户、
+付费许可或再分发限制；无法确认授权的数据默认不公开。
 
-为最大化材料数据的可获得性并加速材料发现，CMU 的公开使用路径不再要求研究人员逐个
-调用传统材料数据库的批量 API，也不要求登录各来源网站或维护多套账户凭据。所有**明确
-允许开放再分发**且通过完整性、格式和来源检查的数据集，统一整理为带版本、哈希、来源
-清单和许可证清单的快照，直接发布在
-[Hugging Face Dataset：AI4QC/matdata](https://huggingface.co/datasets/AI4QC/matdata)
-供下载。用户只需获取 CMU 发布快照，不必重复执行来源 API 抓取流程。
+## 一次下载，而不是重复抓取一百个数据库
 
-这一便利不能越过版权和数据库许可边界：
+在公开发布层，CMU 取消“由每个用户分别调用传统数据库批量 API 或登录来源账户”的使用
+方式。所有明确允许开放再分发且通过检查的数据，统一整理为带版本、哈希、来源清单和许可
+清单的快照，直接发布在：
 
-- 没有明确开放再分发授权、受商业许可、付费订阅、机构许可或账户条款限制的数据库，
-  **不进入 Hugging Face 公开数据包，也不以 CMU 名义开源**；
-- 对受限来源只保留数据库名称、官方链接、公开元数据、来源 ID 和许可状态等目录信息，
-  不发布其受保护的结构、性质字段或原始文件；
-- CC0、CC BY、CC BY-SA 等允许再分发的开放数据仍保留原始作者、版本、许可证和引用要求，
-  “统一格式”不改变原数据权利归属；
-- 自动发现功能未来接入新来源时，许可与再分发审查是发布前的强制门禁，无法确认授权的
-  数据默认不公开。
+### [Hugging Face Dataset · AI4QC/matdata](https://huggingface.co/datasets/AI4QC/matdata)
 
-## 数据获取
+GitHub 仓库只保存代码、数据模式、来源目录、文档、测试和演示资产，不包含数据库文件、
+统一索引、渲染缓存或未完成下载。
 
-本 GitHub 仓库**不包含数据库文件、统一索引、渲染缓存或未完成下载**。完整数据通过
-[Hugging Face Dataset：AI4QC/matdata](https://huggingface.co/datasets/AI4QC/matdata)
-统一发布。Git 中只保存应用代码、数据模式、来源目录、文档、测试和演示资产；传统数据库
-API、第三方账户和受限数据库文件都不是公开版本的运行依赖。
+### 版权和再分发边界
 
-下载数据后，将数据目录挂载或链接为仓库根目录下的 `data`：
+- CC0、CC BY、CC BY-SA 等明确允许再分发的数据可以进入公开快照，同时保留原作者、版本、
+  许可证和引用要求。
+- 商业许可、付费订阅、机构许可、账户条款限制以及没有明确再分发授权的数据库不予开源。
+- 对受限来源只发布数据库名称、官方链接、公开元数据、来源 ID 和许可状态，不发布受保护的
+  结构、性质字段或原始文件。
+- 统一格式不会改变原数据的权利归属。未来的自动发现流程同样必须先通过许可门禁。
+
+## 当前覆盖范围
+
+机器可读目录目前登记 100 个晶体结构或性质来源。“登记”不等于“公开下载完成”：
+
+- 57 个已完成采集或复用本机已有数据；
+- 18 个仅登记，或仍在等待合适的官方批量采集方案；
+- 22 个需要账户、提供方授权或付费许可，只保留目录信息；
+- 3 个轨迹数据源按项目范围排除；
+- 当前没有未完成的后台下载。
+
+完整来源、许可、下载状态和人工操作说明见
+[`docs/dataset-acquisition.md`](docs/dataset-acquisition.md)。既有 SSD 数据及重复关系见
+[`docs/legacy-ssd-data-inventory.md`](docs/legacy-ssd-data-inventory.md)。
+
+## 获取代码和数据
 
 ```bash
 git clone https://github.com/AI4QC/matdata.git
 cd matdata
 
+# 从 Hugging Face 下载数据后，把本地数据根目录链接到仓库
 export CMU_DATA_ROOT=/path/on/ssd/cmu-data
 ln -s "$CMU_DATA_ROOT" data
 ```
 
-不要把 `data` 替换成需要提交的普通目录。`.gitignore` 会排除 `data`、`runtime`、原始
-归档、索引、`.part`、收据、缓存和本机密钥。
-
-预期的数据目录结构为：
+`data` 和兼容入口 `runtime` 均不受 Git 管理。原始归档、SQLite/blob 索引、`.part`、receipt、
+渲染缓存和本机密钥也不会进入提交。预期目录为：
 
 ```text
 data/
@@ -88,59 +144,30 @@ data/
 │   └── candidate/           6,120,140 条候选结构
 ├── index/                   SQLite 检索库与压缩 CIF blob
 ├── manifests/               Crystal Record v1 校验报告
-└── raw/                     外部来源原始归档与 provenance
+└── raw/                     来源归档与 provenance
 ```
 
-本机 SSD 迁移与旧路径兼容关系见
-[`docs/storage-layout.md`](docs/storage-layout.md)。
+本机 SSD 迁移和旧路径兼容关系见 [`docs/storage-layout.md`](docs/storage-layout.md)。
 
 ## 统一数据格式
 
-进入 CMU 的结构主记录统一采用 `Crystal Record v1`：
+进入 CMU 的结构主记录采用 `Crystal Record v1`：
 
 ```text
 index,material_id,cif,pbes_gap
 ```
 
-字段顺序、数据类型、非空约束和 split 计数由流式校验器强制执行。完整规范见
-[`docs/data-format.md`](docs/data-format.md)，机器可读模式见
-[`schemas/crystal-record-v1.schema.json`](schemas/crystal-record-v1.schema.json)。来源专有
-性质作为带单位和 provenance 的 sidecar 保留，再映射到统一索引；原始值不会因标准化
-而被覆盖。
+流式校验器检查字段顺序、数据类型、非空约束和 split 计数。来源专有性质以 sidecar 保留，
+随后映射到统一 SQLite 属性列或 JSON 扩展字段。原始值、单位和来源不会被覆盖。
 
-网站使用 `data/index/materials.sqlite` 与 `data/index/structures.blob`。SQLite 保存检索
-字段和压缩块偏移，blob 顺序保存 zlib 压缩的 CIF，构建过程不需要一次性加载全部源 CSV。
+- 格式说明：[`docs/data-format.md`](docs/data-format.md)
+- JSON Schema：[`schemas/crystal-record-v1.schema.json`](schemas/crystal-record-v1.schema.json)
+- 服务索引：`data/index/materials.sqlite` + `data/index/structures.blob`
 
-## 外部数据库覆盖
+SQLite 保存检索字段和压缩块偏移，blob 顺序保存 zlib 压缩的 CIF。索引器以流式方式处理源
+CSV，不需要一次加载全部数据。
 
-机器可读来源目录当前登记 100 个晶体结构/性质来源。状态快照为：
-
-- 57 个已完成或复用既有数据；
-- 当前没有未完成的后台下载；
-- 18 个仅登记或等待官方批量采集方案；
-- 22 个需要账号、提供方授权或付费许可，仅保留目录信息，不予公开数据；
-- 3 个轨迹数据源按范围排除。
-
-当前采集只接收独特周期结构及其对应性质。同一计算的弛豫、分子动力学、扰动和反应
-路径中间帧不进入结构库；不同来源暂时完整保留，后续统一按晶格、占位和坐标指纹去重，
-同时保留所有来源的多值性质与 provenance。完整来源、许可、下载状态和人工操作链接见
-[`docs/dataset-acquisition.md`](docs/dataset-acquisition.md)，既有 SSD 数据盘点见
-[`docs/legacy-ssd-data-inventory.md`](docs/legacy-ssd-data-inventory.md)。
-
-## 仓库结构
-
-```text
-matdata/
-├── backend/                 FastAPI、SQLite 查询、结构解析和 OVITO 渲染
-├── frontend/                React、TypeScript、Vite 和交互式晶体工作台
-├── scripts/                 校验、索引、采集、服务和演示录制工具
-├── schemas/                 Crystal Record v1 JSON Schema
-├── docs/                    数据、迁移、采集和设计文档
-├── demo/                    2K60 演示视频与封面
-└── data/                    本地数据链接；不受 Git 管理
-```
-
-## 安装
+## 安装与启动
 
 需要 Python 3.10+ 和 Node.js 20+：
 
@@ -155,30 +182,22 @@ npm ci
 cd ..
 ```
 
-OVITO 建议安装在独立 Python 环境中，以隔离原生渲染依赖：
+OVITO 建议放在独立 Python 环境中：
 
 ```bash
 export MATERIALS_OVITO_PYTHON=/path/to/ovito-enabled/python
 ```
 
-可复制 [`.env.example`](.env.example) 保存本机路径；`.env` 不进入 Git。未配置 OVITO 时，
-浏览器交互式 3D 仍可使用，但服务端 Tachyon 图片渲染不可用。
+未配置 OVITO 时，浏览器交互式 3D 仍可使用，服务端 Tachyon 图片渲染不可用。
 
-## 校验与构建索引
-
-流式检查全部 6,219,302 条发布记录：
+校验全部 6,219,302 条发布记录并构建索引：
 
 ```bash
 make validate-data
-```
-
-构建完整索引：
-
-```bash
 python scripts/build_index.py
 ```
 
-开发时可以构建小样本；只有在源数据已单独通过完整校验时才能跳过源扫描：
+开发时可以构建小样本。只有源数据已经单独通过完整校验时，才应跳过源扫描：
 
 ```bash
 python scripts/build_index.py \
@@ -187,9 +206,7 @@ python scripts/build_index.py \
   --output /tmp/cmu-sample-index
 ```
 
-索引先写入 `.building` 临时文件，完成后原子替换，中断不会破坏现有服务索引。
-
-## 启动网站
+构建完成后启动网站：
 
 ```bash
 make build
@@ -202,6 +219,8 @@ MATERIALS_OVITO_PYTHON=/path/to/ovito-enabled/python \
 - API 文档：`http://127.0.0.1:8000/api/docs`
 - 健康检查：`http://127.0.0.1:8000/api/health`
 
+索引先写入 `.building` 临时文件，完成后原子替换；中断不会破坏当前服务索引。
+
 ## 测试
 
 ```bash
@@ -209,7 +228,7 @@ make test
 make build
 ```
 
-也可分别运行：
+分别运行：
 
 ```bash
 PYTHONPATH=backend:. python -m pytest backend/tests -q
@@ -219,15 +238,28 @@ npm run typecheck
 npm run build
 ```
 
-连接真实索引和 OVITO 后，可执行浏览器验收：
+连接真实索引和 OVITO 后，可以执行浏览器验收：
 
 ```bash
 python scripts/browser_smoke.py
 ```
 
+## 仓库结构
+
+```text
+matdata/
+├── backend/                 FastAPI、SQLite 查询、结构解析和 OVITO 渲染
+├── frontend/                React、TypeScript、Vite 和交互式晶体工作台
+├── scripts/                 校验、索引、采集、服务和演示录制工具
+├── schemas/                 Crystal Record v1 JSON Schema
+├── docs/                    数据、迁移、采集和设计文档
+├── demo/                    2K60 演示视频、动态预览和封面
+└── data/                    本地数据链接，不受 Git 管理
+```
+
 ## 演示视频
 
-- [仓库首页动态预览](demo/CMU_Crystal_Material_Universe_demo_preview.gif)：800×450，点击后播放完整视频。
+- [首页动态预览](demo/CMU_Crystal_Material_Universe_demo_preview.gif)：800×450，点击后播放完整视频。
 - [2K60 MP4](demo/CMU_Crystal_Material_Universe_demo_2K60.mp4)：2560×1440、60 FPS、H.264 High。
 - [2K 封面](demo/CMU_Crystal_Material_Universe_demo_2K60_cover.png)。
 - `demo/CMU_Crystal_Material_Universe_demo_2K_source.webm`：浏览器源录屏。
@@ -242,17 +274,17 @@ ffmpeg -y -i demo/CMU_Crystal_Material_Universe_demo_2K_source.webm \
   -pix_fmt yuv420p -movflags +faststart -an \
   demo/CMU_Crystal_Material_Universe_demo_2K60.mp4
 
-# 生成 GitHub README 可直接显示的动态预览
+# 生成 GitHub README 动态预览
 ffmpeg -y -ss 1 -i demo/CMU_Crystal_Material_Universe_demo_2K60.mp4 \
   -filter_complex "fps=5,scale=800:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=72:stats_mode=diff[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" \
   -loop 0 demo/CMU_Crystal_Material_Universe_demo_preview.gif
 ```
 
-## 数据许可与贡献
+## 许可、贡献和引用
 
-外部数据库保留各自的许可和引用要求。不要因为结构已经标准化或与开放来源匹配，就
-重新分发 ICSD、CSD 等受限来源的原始字段。GitHub 仓库当前不声明统一的软件许可证；
-在项目维护者正式选择许可证前，默认保留全部代码权利。
+外部数据库保留各自的许可和引用要求。不要因为结构已经标准化或与开放来源匹配，就重新
+分发 ICSD、CSD 等受限来源的原始字段。GitHub 仓库目前不声明统一的软件许可证；在项目
+维护者正式选择许可证前，默认保留全部代码权利。
 
-开发和数据来源提交规则见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。引用本项目时可使用
-[`CITATION.cff`](CITATION.cff)。
+- 开发与数据来源提交：[`CONTRIBUTING.md`](CONTRIBUTING.md)
+- 项目引用：[`CITATION.cff`](CITATION.cff)

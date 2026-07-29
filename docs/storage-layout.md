@@ -1,5 +1,7 @@
 # Storage layout
 
+**English** · [简体中文](storage-layout.zh-CN.md)
+
 The Git repository and large data are intentionally separated:
 
 ```text
@@ -26,7 +28,7 @@ Compatibility links keep earlier workflows operational:
 | `CSAgent/data/external_structs` | `data/raw/external_structs` |
 | `CSAgent/data/icsd_extracted` | `data/raw/icsd_extracted` |
 | `CSAgent/data/ICSD_data.zip` | `data/raw/ICSD_data.zip` |
-| `data/raw/legacy-material-data` | `/home/zhilong/SSD/material_data`（245 GiB 既有数据，不复制） |
+| `data/raw/legacy-material-data` | `/home/zhilong/SSD/material_data` (245 GiB of existing data, linked rather than copied) |
 
 Do not replace the repository `data` link with a normal directory: the system NVMe
 has substantially less free space than the secondary SSD. Git ignores both `data`

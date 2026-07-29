@@ -1,5 +1,7 @@
 # Migration report — 2026-07-26
 
+**English** · [简体中文](migration-report.zh-CN.md)
+
 ## Result
 
 MateriaViva application code was moved from the former nested web directory into the
@@ -23,6 +25,8 @@ The source CSV validation produced these released counts:
 - Experimental: 94,204 train + 4,958 validation = 99,162.
 - Candidate: 5,814,133 train + 306,007 validation = 6,120,140.
 - Combined searchable index: 6,219,302 records.
+
+These figures are the state at the 2026-07-26 migration. The candidate pool has since ingested ELEMENTA; for current counts see [`dataset-acquisition.md`](dataset-acquisition.md) and the README.
 
 ## Compatibility and recovery
 

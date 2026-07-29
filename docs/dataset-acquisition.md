@@ -1,81 +1,136 @@
-# 晶体结构与性质数据库采集说明
+# Crystal structure and property database acquisition notes
 
-更新时间：2026-07-26
+**English** · [简体中文](dataset-acquisition.zh-CN.md)
 
-本文件记录 MateriaViva的外部晶体数据库覆盖范围、实际下载状态、许可边界和人工操作。机器可读目录位于 [`scripts/datasets/sources.json`](../scripts/datasets/sources.json)。
+Updated: 2026-07-28
 
-这里的“覆盖”不等于“已经下载”。当前目录恰好登记 **100 个来源**：60 个来源路径已在本机存在，其中 54 个位于 `data/raw/acquired/`，5 个复用 `data/raw/external_structs/` 中的既有数据，授权 ICSD 位于 `data/raw/icsd_extracted/`；其余 40 个尚无本地来源路径，原因包括账号或付费许可、没有官方批量接口、提供方禁止批量下载，以及按项目范围排除轨迹。每一项的真实状态以机器可读目录的 `status` 和 `data_path` 为准，不能把来源发现数当作下载完成数。
+This file records MateriaViva's coverage of external crystal databases, actual download status,
+licence boundaries and required manual steps. The machine-readable catalog lives at
+[`scripts/datasets/sources.json`](../scripts/datasets/sources.json).
 
-按目录状态拆分为：57 个已完成或复用既有数据，18 个仅登记/待实现官方批量采集，22 个需要用户账号、提供方授权或付费许可，3 个轨迹数据源按范围排除；当前没有未完成的后台下载。四类合计 100 个来源。
+"Coverage" here is not the same as "already downloaded". The catalog currently registers exactly
+**101 sources**: 61 source paths already exist on this machine, of which 55 sit under
+`data/raw/acquired/`, 5 reuse existing data in `data/raw/external_structs/`, and the licensed ICSD
+sits in `data/raw/icsd_extracted/`. The remaining 40 have no local source path yet, for reasons
+including account or paid licences, no official bulk interface, provider prohibitions on bulk
+download, and trajectories excluded by project scope. The true state of each entry is whatever the
+catalog's `status` and `data_path` say; a source-discovery count must never be read as a
+download-completion count.
 
-## 1. 存储与格式约定
+Split by catalog status: 58 acquired or reusing existing data, 18 registered only or awaiting an
+official bulk route, 22 requiring a user account, provider authorization or a paid licence, and 3
+trajectory sources excluded by scope. There are no unfinished background downloads. The four groups
+total 101 sources.
 
-所有数据库文件，包括 `.part` 断点文件、API 分页、压缩包、收据和后续标准化结果，都只放在：
+## 1. Storage and format conventions
+
+All database files — including `.part` resume files, API pages, archives, receipts and later
+normalisation results — live only under:
 
 ```text
 /home/zhilong/SSD/workspace_data/materia-viva/data
 ```
 
-仓库中的 `data` 是指向上述目录的符号链接。下载器默认保留至少 50 GiB 空闲空间，目标文件先写成 `.part`，完成并检查字节数后再原子改名。大文件的重试由 Python 外层启动新的 curl 进程完成；每个 curl 进程禁用内部重试并从 `.part` 的当前实际字节偏移续传，避免 SSL 中断后内部重试重新打开并截断文件。每个完成的静态文件旁边都有 `*.receipt.json`，记录来源 URL、字节数、SHA-256 和完成时间。
+`data` in the repository is a symlink to that directory. The downloader keeps at least 50 GiB free
+by default; target files are written as `.part` first and atomically renamed once the byte count
+checks out. Retries for large files are driven by an outer Python layer starting a new curl
+process; each curl process disables its internal retry and resumes from the current real byte
+offset of the `.part` file, which prevents an internal retry from reopening and truncating the file
+after an SSL interruption. Every completed static file has a `*.receipt.json` beside it recording
+the source URL, byte count, SHA-256 and completion time.
 
-下载层保留各来源的原始格式，这是审计和重建所必需的。原始 JSON、SQL、LMDB、CIF、ASE DB 等不会直接进入网站索引。进入 MateriaViva 前统一执行两层转换：
+The download layer preserves each source's original format, which is required for auditing and
+rebuilding. Raw JSON, SQL, LMDB, CIF, ASE DB and similar files never enter the website index
+directly. Two conversion layers run before anything enters MateriaViva:
 
-1. 结构主记录转换为 `Crystal Record v1`，核心字段为 `index, material_id, cif, pbes_gap`。
-2. 来源专有性质写入 provenance/property sidecar，再进入统一 SQLite 属性列或 JSON 扩展字段；单位在适配器中转换，原始值、原始单位、来源 ID 和版本始终保留。
+1. Structure master records convert to `Crystal Record v1`, whose core fields are
+   `index, material_id, cif, pbes_gap`.
+2. Source-specific properties are written to a provenance/property sidecar, then into unified
+   SQLite property columns or JSON extension fields. Units are converted in the adapter, while the
+   original value, original unit, source ID and version are always retained.
 
-因此，“原始归档格式不同”不等于“对外数据库格式不同”。网站和下游程序只读取标准化层，不能直接混读 `data/raw`。
+So "the raw archive formats differ" does not mean "the published database formats differ". The
+website and downstream programs read only the normalised layer and must never read `data/raw`
+directly.
 
-## 2. 已有数据，不重复下载
+## 2. Data already present, not downloaded again
 
-| 数据库 | 本机内容 | 当前状态 | 许可/备注 |
+| Database | Local contents | Current status | Licence / notes |
 |---|---:|---|---|
-| [COD](https://wiki.crystallography.net/howtoobtaincod) | 533,486 条，约 30.4 GB Parquet | 已有完整快照 | CC0；官方也支持 rsync。|
-| ICSD | 203,830 个 CIF | 已有用户提供的授权副本 | 商业许可数据；只在本机使用，不自动重新抓取或再分发。|
-| Materials Project experimental-origin | 49,235 条 | 已有 | 本轮另行下载 MP 全量 summary。|
-| AFLOW-ICSD 派生子集 | 60,386 条 | 已有 | AFLOW 学术/非商业条款。|
-| [MC3D](https://archive.materialscloud.org/record/2025.139) | 多个版本的 CIF/metadata 归档 | 已有 | 最新档案的完整 provenance 合计约 95.4 GiB；本机已有结构级数据，因此不重复拉取全部 provenance。|
-| [QMOF](https://github.com/Andrew-S-Rosen/QMOF) | 20k+ QMOF | 已有 | CC BY 4.0。|
-| [CoRE MOF](https://zenodo.org/communities/coremof/) | 多个发布归档 | 已有 | 版本许可随 Zenodo 记录保存。|
-| [Curated COFs](https://github.com/lipelopesoliveira/curatedCOFs) | 984 个 CIF | 已有 | 保留仓库版本与来源。|
+| [COD](https://wiki.crystallography.net/howtoobtaincod) | 533,486 records, about 30.4 GB of Parquet | Complete snapshot present | CC0; rsync is also officially supported. |
+| ICSD | 203,830 CIFs | User-provided licensed copy present | Commercially licensed data; local use only, never re-fetched automatically or redistributed. |
+| Materials Project experimental-origin | 49,235 records | Present | The full MP summary is downloaded separately this round. |
+| AFLOW-ICSD derived subset | 60,386 records | Present | AFLOW academic / non-commercial terms. |
+| [MC3D](https://archive.materialscloud.org/record/2025.139) | CIF/metadata archives across several versions | Present | Full provenance of the latest archive totals about 95.4 GiB; structure-level data is already local, so the full provenance is not pulled again. |
+| [QMOF](https://github.com/Andrew-S-Rosen/QMOF) | 20k+ QMOF | Present | CC BY 4.0. |
+| [CoRE MOF](https://zenodo.org/communities/coremof/) | Several release archives | Present | Version licences are stored with the Zenodo record. |
+| [Curated COFs](https://github.com/lipelopesoliveira/curatedCOFs) | 984 CIFs | Present | Repository version and source retained. |
 
-这些目录位于 `data/raw/external_structs/`。已有副本不会为了“形式统一”被解压重写；统一发生在派生索引层，避免损失原始证据。
+These directories live under `data/raw/external_structs/`. Existing copies are not decompressed and
+rewritten for the sake of uniformity; unification happens in the derived index layer so that the
+original evidence is not lost.
 
-## 3. 本轮自动采集的开放数据
+## 3. Open data acquired automatically this round
 
-| 数据库 | 官方规模/本轮范围 | 本机目标 | 状态与方法 |
+| Database | Official scale / scope this round | Local target | Status and method |
 |---|---:|---|---|
-| [Materials Project](https://docs.materialsproject.org/downloading-data/how-do-i-download-the-materials-project-database) | 当前 API 实测 154,377 条 summary | `raw/acquired/materials-project/summary-2026-07-26/` | 使用本机 `MP_API_KEY`，每 1,000 条一个 gzip 页；包含结构以及 summary 中的能量、稳定性、带隙、磁性、弹性、介电等字段。|
-| [OQMD v1.8](https://oqmd.org/download/) | 21,034,479,961 字节 SQL gzip；2026-02 发布 | `raw/acquired/oqmd/` | 官方整库归档，CC BY 4.0；只保存压缩包，暂不导入，官方估计导入还需约 100 GB。|
-| [AFLOW](https://aflow.org/documentation/) | AFLUX 实测 2,981,853 条 | `raw/acquired/aflow/` | 两路采集：JARVIS/Figshare 的 400k 属性快照，以及 AFLUX 全量结构+性质分页。后者请求 geometry、fractional positions、species、形成焓、带隙、密度等字段。|
-| [Alexandria](https://alexandria.icams.rub.de/datasets.html) | PBE 3D 约 5M，2D 约 200k，1D 约 100k；另有 PBEsol/SCAN 各约 500k | `raw/acquired/alexandria/` | 镜像官方 2025.07.02 PBE 分片以及 PBE-2D、PBE-1D、PBEsol、SCAN；压缩后约 4.3 GB。|
-| [Alexandria JARVIS repack](https://figshare.com/articles/dataset/27174897) | 同类数据的 2024.10.1 快照 | `raw/acquired/alexandria-jarvis-snapshot/` | 同时下载 NIST JARVIS 的 1.4 GB 重打包版本，作为官方分片下载较慢时的完整可用备份；接入时按版本去重。|
-| [GNoME](https://github.com/google-deepmind/materials_discovery/blob/main/DATASET.md) | 约 381k 新稳定结构 | `raw/acquired/gnome/` | 下载 `by_id.zip`、主性质表和 r2SCAN 表；CC BY-NC 4.0。|
-| [NIST JARVIS-DFT](https://pages.nist.gov/jarvis/databases/) | 2025 版 3D 结构/性质 | `raw/acquired/jarvis-dft/` | 下载 Figshare 最新 2025 JSON ZIP。|
-| [C2DB / 2DHub](https://2dhub.org/) | JARVIS 快照 3,514 条 | `raw/acquired/c2db/` | 通过 NIST JARVIS 的公开 Figshare 镜像下载；2DHub 还提供在线性质与 API。|
-| [2DMatPedia](https://www.2dmatpedia.org/download) | 约 6k 条 | `raw/acquired/2dmatpedia/` | 官方站当前 TLS/可用性不稳定，使用 NIST JARVIS 的公开 Figshare 镜像。|
-| [OMDB-GAP1](https://omdb.mathub.io/dataset/) | 12,500 个有机晶体 | `raw/acquired/omdb/` | 官方下载会跳转登录页；同时尝试官方登录入口，并下载 NIST JARVIS/Figshare 公开镜像。|
-| [hMOF](https://figshare.com/articles/dataset/15127758) | 137,651 个假想 MOF | `raw/acquired/hmof/` | Figshare JSON ZIP。|
-| [SNUMAT](https://figshare.com/articles/dataset/21713885) | 约 10k 条杂化泛函数据 | `raw/acquired/snumat/` | Figshare JSON ZIP。|
-| [MC2D](https://archive.materialscloud.org/record/2022.84) | 3,077 个抽取结构，2,710 个优化结构 | `raw/acquired/mc2d/` | 已下载抽取结构、优化结构及 `structure_2d.json`，不下载 8.4 GiB AiiDA 全 provenance。|
-| [3DSC](https://github.com/aimat-lab/3DSC) | 3DSC-MP 5,759 条及超导临界温度 | `raw/acquired/3dsc/` | 已下载代码与开放数据；受 ICSD 许可限制的部分只有 ICSD ID，不包含可再分发结构。|
-| [MatterGen data release](https://github.com/microsoft/mattergen) | MP-20 约 45k；Alex-MP-20 约 600k | `raw/acquired/mattergen/` | 下载 Git LFS 中的两个训练集 ZIP。|
-| [MPtrj](https://figshare.com/articles/dataset/23713842) | 约 1.58M 条结构轨迹，12.19 GB | 不采集 | 属于弛豫轨迹数据，不是独特材料结构；已从下载队列排除。|
-| [Matbench Discovery / WBM](https://figshare.com/articles/dataset/Matbench_Discovery_v1_0_0/22715158) | WBM 256,963 个候选结构 | `raw/acquired/matbench-discovery/` | 下载 MP 快照、WBM 初始/弛豫结构、combined entries 与 summary。|
-| [OMat24](https://huggingface.co/datasets/facebook/OMAT24) | 全训练集 100,824,585 个构型 | 仅登记旧 SSD 数据，不纳入 MateriaViva | 属于轨迹/扰动构型数据；既有约 188 GiB 原文件保持不动，但排除在独特结构采集与统一入库之外。|
+| [Materials Project](https://docs.materialsproject.org/downloading-data/how-do-i-download-the-materials-project-database) | 154,377 summary documents measured through the current API | `raw/acquired/materials-project/summary-2026-07-26/` | Uses the local `MP_API_KEY`, one gzip page per 1,000 records; includes structures plus the energy, stability, band gap, magnetism, elasticity and dielectric fields in the summary. |
+| [OQMD v1.8](https://oqmd.org/download/) | 21,034,479,961 byte SQL gzip; released 2026-02 | `raw/acquired/oqmd/` | Official full-database archive, CC BY 4.0; only the archive is stored, not yet imported, as the official estimate needs about another 100 GB. |
+| [AFLOW](https://aflow.org/documentation/) | 2,981,853 records measured through AFLUX | `raw/acquired/aflow/` | Two acquisition paths: the 400k property snapshot from JARVIS/Figshare, and full AFLUX structure+property paging. The latter requests geometry, fractional positions, species, formation enthalpy, band gap, density and more. |
+| [Alexandria](https://alexandria.icams.rub.de/datasets.html) | PBE 3D about 5M, 2D about 200k, 1D about 100k; plus PBEsol/SCAN at about 500k each | `raw/acquired/alexandria/` | Mirrors the official 2025.07.02 PBE shards plus PBE-2D, PBE-1D, PBEsol and SCAN; about 4.3 GB compressed. |
+| [Alexandria JARVIS repack](https://figshare.com/articles/dataset/27174897) | A 2024.10.1 snapshot of the same kind of data | `raw/acquired/alexandria-jarvis-snapshot/` | The 1.4 GB NIST JARVIS repack is downloaded too, as a complete usable backup when the official shards are slow; deduplicated by version at ingestion. |
+| [GNoME](https://github.com/google-deepmind/materials_discovery/blob/main/DATASET.md) | About 381k new stable structures | `raw/acquired/gnome/` | Downloads `by_id.zip`, the main property table and the r2SCAN table; CC BY-NC 4.0. |
+| [NIST JARVIS-DFT](https://pages.nist.gov/jarvis/databases/) | 2025 edition 3D structures/properties | `raw/acquired/jarvis-dft/` | Downloads the latest 2025 JSON ZIP from Figshare. |
+| [C2DB / 2DHub](https://2dhub.org/) | JARVIS snapshot, 3,514 records | `raw/acquired/c2db/` | Downloaded through the public NIST JARVIS Figshare mirror; 2DHub also offers online properties and an API. |
+| [2DMatPedia](https://www.2dmatpedia.org/download) | About 6k records | `raw/acquired/2dmatpedia/` | The official site currently has unstable TLS/availability, so the public NIST JARVIS Figshare mirror is used. |
+| [OMDB-GAP1](https://omdb.mathub.io/dataset/) | 12,500 organic crystals | `raw/acquired/omdb/` | The official download redirects to a login page; the official login route is attempted while also downloading the public NIST JARVIS/Figshare mirror. |
+| [hMOF](https://figshare.com/articles/dataset/15127758) | 137,651 hypothetical MOFs | `raw/acquired/hmof/` | Figshare JSON ZIP. |
+| [SNUMAT](https://figshare.com/articles/dataset/21713885) | About 10k hybrid-functional records | `raw/acquired/snumat/` | Figshare JSON ZIP. |
+| [MC2D](https://archive.materialscloud.org/record/2022.84) | 3,077 exfoliated and 2,710 optimised structures | `raw/acquired/mc2d/` | Exfoliated structures, optimised structures and `structure_2d.json` downloaded; the 8.4 GiB full AiiDA provenance is not. |
+| [3DSC](https://github.com/aimat-lab/3DSC) | 3DSC-MP 5,759 records with superconducting critical temperatures | `raw/acquired/3dsc/` | Code and open data downloaded; the ICSD-restricted portion carries only ICSD IDs, no redistributable structures. |
+| [MatterGen data release](https://github.com/microsoft/mattergen) | MP-20 about 45k; Alex-MP-20 about 600k | `raw/acquired/mattergen/` | Downloads the two training-set ZIPs from Git LFS. |
+| [MPtrj](https://figshare.com/articles/dataset/23713842) | About 1.58M structure trajectories, 12.19 GB | Not acquired | Relaxation trajectory data rather than unique material structures; excluded from the download queue. |
+| [Matbench Discovery / WBM](https://figshare.com/articles/dataset/Matbench_Discovery_v1_0_0/22715158) | WBM 256,963 candidate structures | `raw/acquired/matbench-discovery/` | Downloads the MP snapshot, WBM initial/relaxed structures, combined entries and summary. |
+| [OMat24](https://huggingface.co/datasets/facebook/OMAT24) | 100,824,585 configurations in the full training set | Old SSD data registered only, not ingested into MateriaViva | Trajectory/rattled configuration data; the existing roughly 188 GiB of original files stay untouched but are excluded from unique-structure acquisition and unified ingestion. |
+| [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) | 43,521,713 frames across 2,235,193 relaxations | `raw/acquired/elementa/` | Trajectory data ingested endpoint-only: 2,005,836 unique final structures merged into the candidate pool. CC BY-NC 4.0. See section 4. |
 
-### 3.1 实际下载状态快照
+### 3.1 Actual download status snapshot
 
-以下是 2026-07-26 22:05 CDT 的落盘状态。所有路径均位于 SSD 数据根目录下。
+The following reflects on-disk state at 2026-07-26 22:05 CDT. All paths sit under the SSD data root.
 
-- Materials Project summary 已完成 154,377 / 154,377 条，155 个 gzip 分页全部通过解码检查，manifest 为 `complete: true`。
-- 已下载并通过字节数、SHA-256、压缩流、SQLite quick check 或分页 manifest 检查：GNoME、JARVIS-DFT 与专题静态端点、C2DB、2DMatPedia、OMDB 镜像、hMOF、SNUMAT、MC2D、3DSC、MatterGen、Matbench/WBM、Alexandria 全部官方 PBE/PBEsol/SCAN 分片、ODBX 137,909 条、Materials Cloud 静态 OPTIMADE 43,478 条、HADB 165 条静态端点、CCP-NC 5,804 条 Magres、MAD 95,595 条、ShiftML2 静态部分、OBELiX、324,426 条 MOF 碳捕集整库、HEX 457 个高压 CIF、HOFSyn 631 个原始及 631 个 P1 CIF、开放骨架磷酸铝 312 个 CIF、SPSE 91,763 条静态结构、opXRD 92,552 个实验图谱（912 个完整结构）、B‑IncStrDB 282 个 msCIF、FAIR-MOF、MOFX、MOSAEC、Phonix summary、NovoMag、TopoMat、BiDB、2D-alloys、Deem zeolites、ARC-MOF、CMR 27 个周期 ASE DB、RRUFF 和 AFLOW 原型库。
-- SACADA 已取得 1,644 个静态结构归档；目录中另外 17 个编号的官方 ZIP 返回 404，作为 unavailable 记录，不用伪造缺失结构补齐。
-- AFLOW AFLUX 已完成 2,981,853 / 2,981,853 条；TCOD 已完成 7,499 / 7,499 个最终 CIF；SuperBand 的 13,292,718,528 字节 HDF5 已完成并通过 HDF5 打开检查，根层包含 2,474 个材料。EC-MOF 已取得 1,071 个完整结构/性质对，唯一缺项 `ZnHTTX_Bulk` 的官方结构端点返回 404。
-- OQMD 和 SIMPOD 在修复重试逻辑后分别从 18,565,977,758 与 33,863,725,056 字节恢复，并已完成为 21,034,479,961 字节 SQL gzip 和 47,781,765,915 字节 `Structures.zip`。下载器已原子移除 `.part` 后缀并写入 SHA-256 收据；OQMD 通过全流 `gzip -t`，SIMPOD 使用 Python Zip64 读取器对 467,861 个条目完成全量解压和 CRC 校验。续传过程使用 `--retry 0 --continue-at -`，没有截断既有字节。
-- MPtrj 和 OMat24 均已按“只收集独特结构、不收集轨迹”的范围排除；两个未完成 `.part` 已于 2026-07-26 删除，约释放 6.1 GB。既有 `/home/zhilong/SSD/material_data/OMAT24` 原文件保持不动，但不会进入 MateriaViva 统一结构库。
-- 运行中的文件保留 `.part` 后缀；只有字节数验证完成并原子改名后才会产生 `*.receipt.json`。API 数据只有 manifest 同时满足 `complete: true` 和下载数等于总数才算完成。
+- Materials Project summary completed 154,377 / 154,377 records; all 155 gzip pages passed decode
+  checks and the manifest reads `complete: true`.
+- Downloaded and verified by byte count, SHA-256, compressed stream, SQLite quick check or paging
+  manifest: GNoME, JARVIS-DFT and its specialized static endpoints, C2DB, 2DMatPedia, the OMDB
+  mirror, hMOF, SNUMAT, MC2D, 3DSC, MatterGen, Matbench/WBM, all official Alexandria PBE/PBEsol/SCAN
+  shards, ODBX 137,909 records, Materials Cloud static OPTIMADE 43,478 records, HADB 165 static
+  endpoints, CCP-NC 5,804 Magres, MAD 95,595 records, the ShiftML2 static portion, OBELiX, the
+  324,426-record MOF carbon-capture set, HEX 457 high-pressure CIFs, HOFSyn 631 raw and 631 P1
+  CIFs, 312 open-framework aluminophosphate CIFs, SPSE 91,763 static structures, opXRD 92,552
+  experimental patterns (912 complete structures), B‑IncStrDB 282 msCIFs, FAIR-MOF, MOFX, MOSAEC,
+  the Phonix summary, NovoMag, TopoMat, BiDB, 2D-alloys, Deem zeolites, ARC-MOF, CMR's 27 periodic
+  ASE DBs, RRUFF and the AFLOW prototype library.
+- SACADA yielded 1,644 static structure archives; 17 further numbered official ZIPs in the catalog
+  return 404 and are recorded as unavailable rather than padded with fabricated structures.
+- AFLOW AFLUX completed 2,981,853 / 2,981,853 records; TCOD completed 7,499 / 7,499 final CIFs;
+  SuperBand's 13,292,718,528 byte HDF5 completed and passed an HDF5 open check, with 2,474 materials
+  at the root level. EC-MOF yielded 1,071 complete structure/property pairs, the sole missing entry
+  `ZnHTTX_Bulk` returning 404 from the official structure endpoint.
+- OQMD and SIMPOD recovered from 18,565,977,758 and 33,863,725,056 bytes respectively after the
+  retry logic was fixed, completing at 21,034,479,961 bytes of SQL gzip and 47,781,765,915 bytes of
+  `Structures.zip`. The downloader atomically removed the `.part` suffix and wrote SHA-256 receipts;
+  OQMD passed a full-stream `gzip -t`, and SIMPOD passed full extraction and CRC verification of
+  467,861 entries using a Python Zip64 reader. Resumption used `--retry 0 --continue-at -` and never
+  truncated existing bytes.
+- MPtrj and OMat24 are both excluded under the "collect unique structures only, not trajectories"
+  scope; two unfinished `.part` files were deleted on 2026-07-26, freeing about 6.1 GB. The existing
+  `/home/zhilong/SSD/material_data/OMAT24` originals stay untouched but never enter the MateriaViva
+  unified structure pool.
+- Files in flight keep the `.part` suffix; a `*.receipt.json` appears only after byte-count
+  verification and the atomic rename. API data counts as complete only when the manifest satisfies
+  both `complete: true` and downloaded count equal to total count.
 
-实时查看状态：
+To check status live:
 
 ```bash
 cd /home/zhilong/workspace/materia-viva
@@ -86,137 +141,164 @@ jq '{downloaded_documents,total_documents,complete,updated_at}' \
 find data/raw/acquired -type f -name '*.receipt.json' | sort
 ```
 
-### 3.2 第二轮扩展来源
+### 3.2 Second-round expansion sources
 
-机器可读目录现包含 100 个来源。以下项目是第二轮加入的专题结构/性质库：
+The machine-readable catalog now contains 101 sources. The following were added in the second round
+as specialized structure/property libraries:
 
-| 来源 | 规模/内容 | 自动化状态 | 重合处理 |
+| Source | Scale / contents | Automation status | Overlap handling |
 |---|---|---|---|
-| [FAIR-MOFs](https://zenodo.org/records/13254307) | 45,699 个实验 MOF、33,361 个优化 MOF，以及合成条件、孔隙、形成能、拓扑和配体/金属簇 | CC BY 4.0，10 个发布文件已下载并校验 | 与 CoRE/CSD 派生 MOF 做结构匹配，合成条件作为 property/provenance sidecar |
-| [MOFX-DB](https://mof.tech.northwestern.edu/databases) | CoREMOF、hMOF、IZA、PCOD-syn、ToBaCCo 的 CIF 和 300 万级吸附数据点 | 六个官方 bulk ZIP 已下载并校验 | CIF 与已有 MOF/zeolite 去重，气体等温线不丢弃 |
-| [MOSAEC-DB](https://zenodo.org/records/15808197) | 约 124k 实验 MOF 的化学有效性、描述符和子集 | 5 个开放描述符文件已下载并校验 | 原始 CIF 来自 CSD，需 CSD 许可；不会把开放描述符误当作可再分发结构 |
-| [Phonix](https://phonix-db.org/) | 约 20k 目标材料、6,800+ 热导率结果；summary 含结构、声子 DOS 和热输运 | 156 MB Parquet summary 已下载；全 force-constant tar 集远超当前空间边界 | 通过 MP ID 和结构指纹联接 MP，不重复计为新材料 |
-| [NovoMag](https://www.novomag.physics.iastate.edu/structure-database) | 3,826 个稀土自由磁性材料及 Fe-Co-Zr 补充结构 | 两个 CC BY 4.0 官方 Zenodo 包已下载并校验 | 保留磁各向异性和磁性来源 |
-| [TopoMat](https://www.materialscloud.org/discover/topomat) | 13,628 个结构的能带与拓扑指标，4.02 GB | Materials Cloud bulk tar 已下载并校验 | 结构源自 ICSD/COD；只增加拓扑性质，不增加实验材料计数 |
-| [BiDB](https://www.2dhub.org/bidb/bidb.html) / [2D-alloys](https://www.2dhub.org/2dalloys/2dalloys.html) | 8,451 个双层堆垛及 400 个二维合金 | 两个官方 ASE DB 已下载并校验 | 二维单层、双层、异质结和体相使用不同 `structure_role` |
-| [SACADA](https://www.sacada.info/) | 当前官方元数据列出 1,661 个已整理的三维碳同素异形体及密度、能隙、相对能、体模量和硬度 | 1,644 个官方 CIF ZIP 已下载；17 个编号在官网没有 ZIP | 缺失项明确记录 unavailable，不将它们误计为已取得结构 |
-| [Deem hypothetical zeolites](https://mwdeem.org/PCOD/index.html) | v2.1 `slc/good` 子集含 331k 个 zeolite-like 独特结构 | 三个 CC BY 4.0 bulk 包已下载并校验 | 与 PCOD、IZA、MOFX 中的 zeolite 结构后续统一去重 |
-| [ARC-MOF](https://zenodo.org/records/7600474) | 约 280k 个实验或计算 MOF，含 REPEAT 电荷、几何/RAC/RDF 描述符和吸附性质 | CC BY 4.0 的 24 个结构、电荷、描述符和吸附文件已全部下载；4 个 tar.gz 通过压缩流检查 | 先完整保留结构和性质；与 hMOF、CoRE、FAIR-MOF、MOFX 的重合后续再处理 |
-| [NIST JARVIS specialized datasets](https://pages.nist.gov/jarvis/databases/) | 1.1k 二维材料、空位/表面/界面、晶态聚合物、MXene、超导和 AGRA/TinNet 催化端点 | 16 个官方 Figshare ZIP 已下载并校验 | 仅采集静态结构端点和对应性质；明确跳过 OCP、ALIGNN-FF、M3GNet-MPF 等重复/力场训练构型 |
-| [AMCSD / RRUFF](https://www.rruff.net/about/download-data/) | 矿物 CIF/AMC、衍射记录，以及显微探针、Raman、红外和粉末 XRD 性质 | 16 个结构/性质整库 ZIP 已下载并校验 | 以 AMCSD CIF 为结构本体，RRUFF 光谱/化学/衍射作为同一矿物的多值性质；与 COD 后续匹配 |
-| [MPOD](https://mpod.cimav.edu.mx/) | 晶态材料的实验张量性质，采用 CIF/STAR 风格 `.mpod` 文件并链接结构信息 | 已登记；官网支持逐条文件，但本轮未发现稳定 bulk 端点 | 作为实验张量性质 overlay，不把同一 COD 结构重复计数 |
-| [EC-MOF Phase-I](https://ec-mof.njit.edu/) | 官方选择器覆盖 1,072 个 bulk/monolayer 候选，论文数据库报告 1,061 个有效结构 | 已取得 1,071 个静态 CIF/性质对；`ZnHTTX_Bulk` 官方结构端点为 404，manifest 显式保留 | bulk 与 monolayer 分开标注；不伪造缺失候选，不下载任何优化轨迹 |
-| [AFLOW Prototype Encyclopedia](https://aflowlib.duke.edu/p/index.html) | 2,050 个规范化晶体结构原型，覆盖全部空间群 | Apache-2.0 官方原型定义仓库已下载并校验 | 原型是结构类型参考，不和真实材料条目相加；用于后续 prototype 分类 |
-| [QPOD](https://www.2dhub.org/qpod/qpod.html) / [HetDB](https://www.2dhub.org/hetdb/hetdb.html) / [X2DB](https://www.2dhub.org/x2db/x2db.html) | 二维缺陷、异质结和实验二维材料元数据 | 官方浏览/API 可用，但当前文档没有稳定 bulk 文件 | 不抓网页；等待官方 bulk/API 游标导出方案 |
-| [PCOD](https://www.crystallography.net/pcod/) | 1,062,771 个公共领域预测 CIF | 官方 rsync 端点已实测可列目录 | 一百万小文件不直接散落到 NTFS；先设计可恢复的 tar/索引流式接入 |
-| [MAGNDATA](https://cryst.ehu.es/magndata/) / [IZA](https://www.iza-structure.org/databases/) | 2,000+ 磁结构和已批准 zeolite framework | 官方支持逐条 `.mcif` / CIF，未发现说明清楚的 bulk 端点 | 不做高频网页抓取；IZA 的开放结构+吸附快照由 MOFX-DB 包补充 |
-| [Catalysis-Hub](https://www.catalysis-hub.org/) | 表面反应、吸附结构、能量与计算参数 | 官方 GraphQL API 已登记，后续按 publication/dataset 分页导出 | slab、adsorbate、transition state 不与体相晶体合并 |
+| [FAIR-MOFs](https://zenodo.org/records/13254307) | 45,699 experimental and 33,361 optimised MOFs, plus synthesis conditions, porosity, formation energy, topology and ligand/metal clusters | CC BY 4.0, 10 release files downloaded and verified | Structure-matched against CoRE/CSD-derived MOFs; synthesis conditions kept as property/provenance sidecars |
+| [MOFX-DB](https://mof.tech.northwestern.edu/databases) | CIFs from CoREMOF, hMOF, IZA, PCOD-syn and ToBaCCo plus 3 million adsorption data points | Six official bulk ZIPs downloaded and verified | CIFs deduplicated against existing MOF/zeolite structures; gas isotherms retained |
+| [MOSAEC-DB](https://zenodo.org/records/15808197) | Chemical validity, descriptors and subsets for about 124k experimental MOFs | 5 open descriptor files downloaded and verified | Original CIFs come from CSD and need a CSD licence; open descriptors are never mistaken for redistributable structures |
+| [Phonix](https://phonix-db.org/) | About 20k target materials and 6,800+ thermal conductivity results; the summary carries structures, phonon DOS and thermal transport | 156 MB Parquet summary downloaded; the full force-constant tar set far exceeds current space limits | Joined to MP by MP ID and structural fingerprint, never counted again as new materials |
+| [NovoMag](https://www.novomag.physics.iastate.edu/structure-database) | 3,826 rare-earth-free magnetic materials plus supplementary Fe-Co-Zr structures | Two CC BY 4.0 official Zenodo packages downloaded and verified | Magnetic anisotropy and magnetic provenance retained |
+| [TopoMat](https://www.materialscloud.org/discover/topomat) | Band structures and topological indices for 13,628 structures, 4.02 GB | Materials Cloud bulk tar downloaded and verified | Structures originate from ICSD/COD; adds topological properties only, not experimental material counts |
+| [BiDB](https://www.2dhub.org/bidb/bidb.html) / [2D-alloys](https://www.2dhub.org/2dalloys/2dalloys.html) | 8,451 bilayer stackings and 400 two-dimensional alloys | Two official ASE DBs downloaded and verified | 2D monolayers, bilayers, heterostructures and bulk use distinct `structure_role` values |
+| [SACADA](https://www.sacada.info/) | Official metadata currently lists 1,661 curated 3D carbon allotropes with density, band gap, relative energy, bulk modulus and hardness | 1,644 official CIF ZIPs downloaded; 17 numbers have no ZIP on the site | Missing entries recorded explicitly as unavailable, never counted as acquired structures |
+| [Deem hypothetical zeolites](https://mwdeem.org/PCOD/index.html) | The v2.1 `slc/good` subset holds 331k unique zeolite-like structures | Three CC BY 4.0 bulk packages downloaded and verified | Deduplicated later against zeolite structures in PCOD, IZA and MOFX |
+| [ARC-MOF](https://zenodo.org/records/7600474) | About 280k experimental or computed MOFs with REPEAT charges, geometric/RAC/RDF descriptors and adsorption properties | All 24 CC BY 4.0 structure, charge, descriptor and adsorption files downloaded; 4 tar.gz passed stream checks | Structures and properties retained in full first; overlap with hMOF, CoRE, FAIR-MOF and MOFX handled later |
+| [NIST JARVIS specialized datasets](https://pages.nist.gov/jarvis/databases/) | 1.1k 2D materials, vacancy/surface/interface, crystalline polymers, MXene, superconductors and AGRA/TinNet catalysis endpoints | 16 official Figshare ZIPs downloaded and verified | Only static structure endpoints and their properties are collected; OCP, ALIGNN-FF, M3GNet-MPF and other duplicate/force-field training configurations are explicitly skipped |
+| [AMCSD / RRUFF](https://www.rruff.net/about/download-data/) | Mineral CIF/AMC files, diffraction records, plus microprobe, Raman, infrared and powder XRD properties | 16 full structure/property ZIPs downloaded and verified | AMCSD CIFs are the structural entity; RRUFF spectra/chemistry/diffraction become multi-valued properties of the same mineral, matched against COD later |
+| [MPOD](https://mpod.cimav.edu.mx/) | Experimental tensor properties of crystalline materials in CIF/STAR-style `.mpod` files linked to structure information | Registered; the site supports per-record files but no stable bulk endpoint was found this round | An experimental tensor property overlay that never double-counts the same COD structure |
+| [EC-MOF Phase-I](https://ec-mof.njit.edu/) | The official selector covers 1,072 bulk/monolayer candidates; the paper reports 1,061 valid structures | 1,071 static CIF/property pairs acquired; `ZnHTTX_Bulk` returns 404 and is kept explicitly in the manifest | Bulk and monolayer labelled separately; missing candidates are never fabricated and no optimization trajectories are downloaded |
+| [AFLOW Prototype Encyclopedia](https://aflowlib.duke.edu/p/index.html) | 2,050 canonical crystal structure prototypes covering all space groups | Apache-2.0 official prototype definition repository downloaded and verified | Prototypes are structure-type references, never added to real material entries; used for later prototype classification |
+| [QPOD](https://www.2dhub.org/qpod/qpod.html) / [HetDB](https://www.2dhub.org/hetdb/hetdb.html) / [X2DB](https://www.2dhub.org/x2db/x2db.html) | 2D defects, heterostructures and experimental 2D material metadata | Official browsing/API available, but current documentation lists no stable bulk file | No page scraping; awaiting an official bulk/API cursor export route |
+| [PCOD](https://www.crystallography.net/pcod/) | 1,062,771 public-domain predicted CIFs | The official rsync endpoint was confirmed listable | A million small files are not scattered onto NTFS directly; a resumable tar/index streaming route is being designed first |
+| [MAGNDATA](https://cryst.ehu.es/magndata/) / [IZA](https://www.iza-structure.org/databases/) | 2,000+ magnetic structures and approved zeolite frameworks | Both officially support per-record `.mcif` / CIF, with no clearly documented bulk endpoint | No high-frequency page scraping; IZA's open structures and adsorption snapshot are covered by the MOFX-DB packages |
+| [Catalysis-Hub](https://www.catalysis-hub.org/) | Surface reactions, adsorption structures, energies and calculation parameters | The official GraphQL API is registered, to be exported by publication/dataset paging | Slabs, adsorbates and transition states are never merged with bulk crystals |
 
-### 3.3 第三轮扩展来源
+### 3.3 Third-round expansion sources
 
-第三轮重点检查大规模联邦接口、专题静态结构库以及容易混入轨迹的数据集。采集策略是先保存来源原貌、完整性质和 provenance，统一格式转换及跨库结构去重后置。
+The third round focused on large federated interfaces, specialized static structure libraries and
+datasets that easily mix in trajectories. The strategy is to preserve each source as-is with full
+properties and provenance, deferring format conversion and cross-database structural deduplication.
 
-| 来源 | 规模/内容 | 当前状态 | 范围说明 |
+| Source | Scale / contents | Current status | Scope note |
 |---|---:|---|---|
-| [ODBX](https://odbx.science/) | 主库 56 条，misc 137,853 条，含形成能和凸包距离 | 137,909 / 137,909 条 OPTIMADE 静态结构已下载，分页 manifest 完整 | 后续与结构预测库去重，保留 ODBX 专有性质 |
-| [Materials Cloud OPTIMADE](https://optimade.materialscloud.org/) | 5 个专题库 3,079 条，4 个 Archive 静态库 40,399 条 | 43,478 条已完整下载，使用 provider 默认全字段保留专有性质 | `jk-9v` 的 4,396,695 条 Li-ion 数据主要是 MD 帧，明确排除 |
-| [TCOD](https://www.crystallography.net/tcod/) | 7,499 个最终理论 CIF | 官方目录树低频、可恢复下载中 | 只取最终 CIF，不采集计算过程轨迹 |
-| [HADB](https://hadb.funmat-ii.se/) | 244 个 hard-coating 条目 | 165 个 DFT/MLIP 静态端点已下载；79 个 AIMD 条目排除 | CIF 与网页性质表、页面哈希一起保留 |
-| [CCP-NC Magres](https://www.ccpnc.ac.uk/database/) | 5,804 个最新晶体记录，含 NMR shielding/EFG | PDDL 3,212 条与 CC BY 2,592 条已分块下载并校验 | 每个 immutable record 只保留最新静态 `.magres` 版本 |
-| [CMR 静态周期库](https://cmr.fysik.dtu.dk/) | 27 个 ASE DB，覆盖低维、表面、吸附、钙钛矿、OQMD 派生等 | 27 / 27 个周期 ASE SQLite DB 已下载，逐库 `PRAGMA quick_check` 通过；非周期分子、染料、纳米粒子库排除 | C1DB 页面仍在，但官方 `c1db.db` 当前返回 404 |
-| [MAD static](https://archive.materialscloud.org/records/c4ene-0mv14) | 95,595 个周期静态结构，含能量及 train/test/val 标签 | train/test/val、子集元数据和原子能已下载并校验 | 不下载 MPtrj benchmark 与大型 AiiDA provenance 归档 |
-| [ShiftML2](https://archive.materialscloud.org/records/j2fka-sda13) | 分子晶体训练/测试、实验 NMR benchmark 和 polymorph | 静态部分已下载并校验 | `relax_vs_md.zip` 是轨迹比较包，明确排除 |
-| [OBELiX](https://github.com/NRC-Mila/OBELiX) | 599 个已合成固态电解质，321 条带完整 CIF | 全量 CSV 与全 CIF tar 已下载并校验 | 保留实验室温离子电导率、DOI、近似结构标记和 ICSD ID |
-| [MOF carbon capture](https://archive.materialscloud.org/record/2018.0016/v3) | 324,426 个假想 MOF，含部分电荷和 CO₂/N₂ 吸附性质 | CC BY 4.0 的 1.2 GiB 结构包、55.5 MiB 性质包及实验结构已下载并通过 tar/ZIP 检查 | 与 hMOF、ARC-MOF、MOFX 等重合后续统一去重 |
-| [HEX high-pressure structures](https://springernature.figshare.com/collections/HEX_a_complete_Database_of_High-Pressure_Elemental_Crystal_Structures/7119778/1) | 前 57 个元素在 0、100、200、300 GPa 下的基态和结构搜索候选 | CC0；官方 ZIP 已下载，MD5 匹配并通过 ZIP 检查；排除 macOS 资源叉后有 457 个真实 CIF | 同一元素在不同压力或不同候选结构先分别保留，后续再按结构指纹去重 |
-| [HPCSD](https://www.calypso.cn/) | 首发 77,346 个静态高压结构，覆盖 89 种元素 | 门户要求登录，论文说明更多数据需申请；已登记但不抓取认证页面 | 注册并申请 bulk 后仅收集静态结构，不采集结构搜索过程轨迹 |
-| [Matterverse](https://optimade.matterverse.ai/) | 实测 31,791,192 个假想材料 | 已验证 OPTIMADE，但每页上限 500、无整库文件；未启动约 63,583 次请求的无边界镜像 | 向提供方申请 bulk snapshot 后再收集 |
-| [MOF DB ML](https://mofdb.org/) | H2MOF-ML 4,034 条，hMOF-ML 137,953 条 | 官方 Hugging Face 仓库当前返回 401 | 登录并确认 token/许可后下载；hMOF 与本机副本后续去重 |
-| [ADAQ](https://defects.anyterial.se/) | 47,403 个缺陷、79 个 host | 完整或 substantial replication 需提供方许可 | 先联系提供方；不以网页抓取绕过授权边界 |
-| [AMDB](https://altermagnets.anyterial.se/) | 180 个 altermagnet 性质记录 | 已登记，结构链接到 MAGNDATA，未发现 bulk | 作为 MAGNDATA 的性质 overlay，不重复计数结构 |
-| [NLR MatDB](https://materials.nlr.gov/) | 可再生能源材料的 relaxed structure、稳定性、GW、介电和有效质量 | 支持交互查询/CSV，未发现完整 bulk structure 端点 | 需向 NLR 申请整库导出 |
-| [NIMS AtomWork open](https://crystdb.nims.go.jp/en/) | 官方列出 82,000 条开放结构、55,000 条性质、15,000 张相图 | 需要 DICE 注册和 MatNavi 申请；官网明确禁止 scraping | 完成用户注册后使用官方导出，不抓网页 |
-| [MatGen](https://matgen.nscc-gz.cn/index_ch.html) | 无机、假想、二维、超导、固态电解质、多孔和 ABACUS 等专题库 | API 文档入口当前 404；需注册或联系 `matgen@nscc-gz.cn` | 申请 bulk/API 后采集静态结构，熔盐 MD 不纳入 |
-| [MatCloud+](https://www.matcloud.com.cn/newDataBase/structure) | 多类结构与性质库 | JavaScript 检索页，无公开可再分发 bulk 端点 | 注册后向提供方申请账户级导出 |
-| [Atomly](https://atomly.net/) | 官网展示约 349,043 个 compounds | 官方前端写明 API 仅供内部测试和合作者；联系 `atomly@iphy.ac.cn` | 站点证书在 2026-07-26 检查时已过期，不使用不安全自动镜像 |
-| [MatCraft](https://matcraft.ai/docs/materials-api/overview) | 文档称 205,000+ 条，主要来源为 MP、AFLOW、JARVIS | guest 100 请求/小时，详情需逐条取结构，条款禁止超限 bulk；API TLS 实测失败 | 这些上游本机已有，申请提供方授权 bulk 后再决定是否镜像 |
-| [2D hybrid perovskites](https://arxiv.org/abs/2006.14302) | 515 个实验二维杂化钙钛矿，含 CIF、带隙和预测电荷 | 论文数据库站点仅 HTTP，未发现有明确再分发许可的 bulk 包 | 联系作者取得安全整库包和许可 |
-| [OpenMX AB₂ 2D map](https://www.openmx-square.org/2d-ab2/) | 3,844 个 AB₂ 二维候选 | 可交互逐条访问，未发现 bulk archive | 请求 bulk 文件，避免高频逐页抓取 |
-| [MPDD](https://providers.optimade.org/index-metadbs/mpdd) | 结构/descriptor 数据库 | registry 的子端点目前仅 HTTP 且不可用 | 联系 Phases Research Lab 获取当前 HTTPS/bulk 地址 |
+| [ODBX](https://odbx.science/) | 56 records in the main library, 137,853 in misc, with formation energies and hull distances | 137,909 / 137,909 OPTIMADE static structures downloaded, paging manifest complete | Deduplicated later against structure prediction libraries, keeping ODBX-specific properties |
+| [Materials Cloud OPTIMADE](https://optimade.materialscloud.org/) | 3,079 records across 5 specialized libraries, 40,399 across 4 Archive static libraries | 43,478 downloaded in full, keeping provider default full fields for source-specific properties | The 4,396,695 Li-ion records in `jk-9v` are mostly MD frames and are explicitly excluded |
+| [TCOD](https://www.crystallography.net/tcod/) | 7,499 final theoretical CIFs | Low-rate resumable download from the official directory tree | Final CIFs only, no calculation-process trajectories |
+| [HADB](https://hadb.funmat-ii.se/) | 244 hard-coating entries | 165 DFT/MLIP static endpoints downloaded; 79 AIMD entries excluded | CIFs retained together with the web property table and page hashes |
+| [CCP-NC Magres](https://www.ccpnc.ac.uk/database/) | 5,804 latest crystal records with NMR shielding/EFG | 3,212 PDDL and 2,592 CC BY records downloaded in chunks and verified | Only the latest static `.magres` version of each immutable record is kept |
+| [CMR static periodic libraries](https://cmr.fysik.dtu.dk/) | 27 ASE DBs covering low-dimensional, surface, adsorption, perovskite and OQMD-derived data | 27 / 27 periodic ASE SQLite DBs downloaded, each passing `PRAGMA quick_check`; non-periodic molecule, dye and nanoparticle libraries excluded | The C1DB page still exists, but the official `c1db.db` currently returns 404 |
+| [MAD static](https://archive.materialscloud.org/records/c4ene-0mv14) | 95,595 periodic static structures with energies and train/test/val labels | train/test/val, subset metadata and atomic energies downloaded and verified | The MPtrj benchmark and large AiiDA provenance archives are not downloaded |
+| [ShiftML2](https://archive.materialscloud.org/records/j2fka-sda13) | Molecular crystal training/test sets, an experimental NMR benchmark and polymorphs | The static portion downloaded and verified | `relax_vs_md.zip` is a trajectory comparison package and is explicitly excluded |
+| [OBELiX](https://github.com/NRC-Mila/OBELiX) | 599 synthesised solid electrolytes, 321 with complete CIFs | Full CSV and the complete CIF tar downloaded and verified | Experimental room-temperature ionic conductivity, DOI, approximate-structure flags and ICSD IDs retained |
+| [MOF carbon capture](https://archive.materialscloud.org/record/2018.0016/v3) | 324,426 hypothetical MOFs with partial charges and CO₂/N₂ adsorption properties | The CC BY 4.0 1.2 GiB structure package, 55.5 MiB property package and experimental structures downloaded and passing tar/ZIP checks | Overlap with hMOF, ARC-MOF and MOFX deduplicated later |
+| [HEX high-pressure structures](https://springernature.figshare.com/collections/HEX_a_complete_Database_of_High-Pressure_Elemental_Crystal_Structures/7119778/1) | Ground states and structure-search candidates for the first 57 elements at 0, 100, 200 and 300 GPa | CC0; official ZIP downloaded, MD5 matching and passing ZIP checks; 457 genuine CIFs after excluding macOS resource forks | The same element at different pressures or as different candidates is retained separately first, then deduplicated by structural fingerprint |
+| [HPCSD](https://www.calypso.cn/) | 77,346 static high-pressure structures in the first release, covering 89 elements | The portal requires login and the paper notes that more data must be requested; registered without scraping authenticated pages | After registering and requesting bulk, only static structures are collected, never structure-search trajectories |
+| [Matterverse](https://optimade.matterverse.ai/) | 31,791,192 hypothetical materials measured | OPTIMADE verified, but capped at 500 per page with no full-database file; an unbounded mirror of about 63,583 requests was not started | Collect after requesting a bulk snapshot from the provider |
+| [MOF DB ML](https://mofdb.org/) | H2MOF-ML 4,034 records, hMOF-ML 137,953 records | The official Hugging Face repository currently returns 401 | Download after logging in and confirming token/licence; hMOF deduplicated against the local copy later |
+| [ADAQ](https://defects.anyterial.se/) | 47,403 defects, 79 hosts | Complete or substantial replication needs provider permission | Contact the provider first; do not bypass the authorization boundary by scraping |
+| [AMDB](https://altermagnets.anyterial.se/) | 180 altermagnet property records | Registered, structures link to MAGNDATA, no bulk found | A property overlay on MAGNDATA that does not double-count structures |
+| [NLR MatDB](https://materials.nlr.gov/) | Relaxed structures, stability, GW, dielectric and effective mass for renewable-energy materials | Supports interactive query/CSV, no complete bulk structure endpoint found | A full-database export must be requested from NLR |
+| [NIMS AtomWork open](https://crystdb.nims.go.jp/en/) | Officially lists 82,000 open structures, 55,000 properties and 15,000 phase diagrams | Requires DICE registration and a MatNavi application; the site explicitly prohibits scraping | Use the official export after user registration, never scrape |
+| [MatGen](https://matgen.nscc-gz.cn/index_ch.html) | Inorganic, hypothetical, 2D, superconductor, solid-electrolyte, porous and ABACUS libraries | The API documentation entry currently 404s; registration or contacting `matgen@nscc-gz.cn` required | Collect static structures after requesting bulk/API; molten-salt MD is out of scope |
+| [MatCloud+](https://www.matcloud.com.cn/newDataBase/structure) | Several structure and property libraries | A JavaScript search page with no public redistributable bulk endpoint | Request an account-level export from the provider after registering |
+| [Atomly](https://atomly.net/) | The site advertises about 349,043 compounds | The official frontend states the API is for internal testing and collaborators only; contact `atomly@iphy.ac.cn` | The site certificate had expired when checked on 2026-07-26; no insecure automated mirroring |
+| [MatCraft](https://matcraft.ai/docs/materials-api/overview) | Documentation claims 205,000+ records, mainly sourced from MP, AFLOW and JARVIS | 100 guest requests per hour, details require per-record structure fetches, terms prohibit over-limit bulk; the API TLS handshake failed in testing | These upstreams are already local; decide on mirroring only after obtaining provider bulk authorization |
+| [2D hybrid perovskites](https://arxiv.org/abs/2006.14302) | 515 experimental 2D hybrid perovskites with CIFs, band gaps and predicted charges | The paper's database site is HTTP-only with no bulk package under a clear redistribution licence | Contact the authors for a secure full-database package and licence |
+| [OpenMX AB₂ 2D map](https://www.openmx-square.org/2d-ab2/) | 3,844 AB₂ two-dimensional candidates | Interactive per-record access, no bulk archive found | Request the bulk file rather than scraping page by page |
+| [MPDD](https://providers.optimade.org/index-metadbs/mpdd) | Structure/descriptor database | The registry sub-endpoint is currently HTTP-only and unavailable | Contact Phases Research Lab for the current HTTPS/bulk address |
 
-### 3.4 第四轮静态结构与衍射/电子性质来源
+### 3.4 Fourth-round static structure and diffraction/electronic property sources
 
-这一轮继续扩大到有机框架、矿物、调制晶体、实验/模拟粉末衍射及超导电子结构。原始包先按来源完整保存，但只有静态结构端点会成为结构记录；衍射、能带、输运等作为性质关联，NEB/迁移路径坐标不转换成晶体记录。目录已增至 100 个来源。
+This round extended to organic frameworks, minerals, modulated crystals, experimental/simulated
+powder diffraction and superconductor electronic structure. Raw packages are preserved per source in
+full, but only static structure endpoints become structure records; diffraction, band structure and
+transport data are attached as properties, and NEB/migration path coordinates are never converted
+into crystal records.
 
-| 来源 | 规模/内容 | 当前状态 | 独特结构边界 |
+| Source | Scale / contents | Current status | Unique-structure boundary |
 |---|---:|---|---|
-| [HOFSyn](https://figshare.com/articles/dataset/HOFSyn/28856483) | 660 条合成表记录，两个结构包各含 631 个实际 CIF | CSV、原始 CIF 和 P1 标准化 CIF 均已下载并通过 ZIP 检查 | 同一 HOF 的 raw/P1 版本先保留来源关系，后续结构指纹去重；2.35 GB 文献 PDF 包不下载 |
-| [Open-framework AlPO](https://figshare.com/articles/dataset/Database_of_Open-Framework_Aluminophosphate_Structures/7822574) | 312 个实验开放骨架磷酸铝，含 topology 和模拟 XRD | 312 个 CIF 与 XLSX 性质表已下载、可完整解压 | 每个发布结构只作为一个静态端点；XRD 是性质，不生成额外结构 |
-| [opXRD](https://zenodo.org/records/15298026) | 92,552 个实验粉末图谱；2,179 个带结构标签，其中 912 个完整结构、1,267 个部分标签 | 1.40 GB 官方 ZIP 已下载并通过完整 ZIP 检查；逐条解析计数与发布规模一致 | 只有 912 个含晶格和完整原子 basis 的标签进入结构层；部分标签和其余图谱作为实验性质数据，不产生结构 |
-| [SIMPOD](https://doi.org/10.57760/sciencedb.09755) | 467,861 个 COD 静态结构及模拟一维粉末衍射 | 47,781,765,915 字节 `Structures.zip` 已完成，SHA-256 收据和全量 Zip64 CRC 校验通过 | COD 重合暂不删；下载承载结构和一维衍射的主包，排除 29.4 GB 派生图片及两个冗余 CSV 导出；旧版 Info-ZIP 6.00 会误判该超大 Zip64 文件，应使用 Python `zipfile` 校验 |
-| [SPSE](https://figshare.com/articles/dataset/High-Throughput_Screening_Platform_for_Solid_Electrolytes_Combining_Hierarchical_Ion-Transport_Prediction_Algorithms_/12011412) | 91,763 条静态结构以及 BVSE/CAVD/电导描述符 | 数据 ZIP 与 README 已下载并校验；实际为 6 个 NDJSON 表 | `cifs.json` 的 91,763 条进入候选结构层；49 条 hierarchical 记录里的 `paths` 坐标数组明确排除，不当作轨迹帧或结构 |
-| [SuperBand](https://github.com/ljcj007/SuperBand) | 2,474 个超导体的结构、能带和费米面 | 13.29 GB 官方 HDF5 与代码快照均已完成并校验 | 结构主要源自 MP/OQMD，先保留 SuperBand 专有电子性质，后续按结构联接而不重复计数 |
-| [NIMS PhononDB](https://mdr.nims.go.jp/collections/8g84ms862?locale=en) | 10,034 个 MP 静态材料的 harmonic phonon、DOS 和热力学性质 | CC BY 4.0；目前逐条数据集开放但没有 collection-level bulk 文件，已登记申请整包 | 每个 MP ID 只生成一个静态结构记录；`phonopy_params.yaml.xz` 中的 displacement supercells 只作为声子性质输入，不生成额外结构 |
-| [B-IncStrDB](https://cryst.ehu.es/bincstrdb/) | 282 个调制或复合晶体，包括 47 个 composite entries | 282 / 282 个官方 msCIF 已下载；29 个索引页、282 份收据及逐文件 SHA‑256 全部校验通过 | 每个数据库 ID 只收一个发布 msCIF；不收 JSmol 图片、动画或任何轨迹 |
-| [MinCryst](https://database.iem.ac.ru/mincryst/) / [Webmineral](https://webmineral.com/) | IUCr 目录分别记载 5,000+ mineral phases；Webmineral 有 4,714 个描述条目 | MinCryst 官方主机当前不可达；Webmineral 无明确 bulk 原子坐标导出 | 不抓交互页面；等待提供方恢复或授权 bulk |
-| [PowBase](https://www.cristal.org/powbase/index.html) | 169 个 CIF/粉末图谱 ZIP | 官网明确请镜像方联系维护者，故先登记未批量抓取 | 获得镜像许可后再收静态结构/图谱，不从编号序列强行下载 |
-| [NIST Crystal Data](https://www.nist.gov/publications/nist-3-nist-crystal-data) / [NIST Surface Structure Database](https://www.nist.gov/publications/nist-42-nist-surface-structure-database-version-30) | 237,671 个晶体记录；近 1,400 个实验表面结构 | 均为 NIST SRD 许可/遗留产品，需要购买或联系 NIST | 取得机构许可后导入最终结构，不绕过许可复制 |
+| [HOFSyn](https://figshare.com/articles/dataset/HOFSyn/28856483) | 660 synthesis-table records, two structure packages of 631 real CIFs each | CSV, raw CIFs and P1-normalised CIFs downloaded and passing ZIP checks | The raw/P1 versions of one HOF keep their source relationship first, then deduplicate by fingerprint; the 2.35 GB literature PDF package is not downloaded |
+| [Open-framework AlPO](https://figshare.com/articles/dataset/Database_of_Open-Framework_Aluminophosphate_Structures/7822574) | 312 experimental open-framework aluminophosphates with topology and simulated XRD | 312 CIFs and the XLSX property table downloaded and fully extractable | Each published structure is one static endpoint; XRD is a property and generates no extra structures |
+| [opXRD](https://zenodo.org/records/15298026) | 92,552 experimental powder patterns; 2,179 with structure labels, of which 912 are complete structures and 1,267 partial | The 1.40 GB official ZIP downloaded and passing a full ZIP check; per-record parsed counts match the published scale | Only the 912 labels with a lattice and complete atomic basis enter the structure layer; partial labels and remaining patterns are experimental property data producing no structures |
+| [SIMPOD](https://doi.org/10.57760/sciencedb.09755) | 467,861 static COD structures with simulated 1D powder diffraction | The 47,781,765,915 byte `Structures.zip` completed, with a SHA-256 receipt and full Zip64 CRC verification | COD overlap is not removed yet; the main package carrying structures and 1D diffraction is downloaded while the 29.4 GB derived images and two redundant CSV exports are excluded. Older Info-ZIP 6.00 misjudges this oversized Zip64 file, so verify with Python `zipfile` |
+| [SPSE](https://figshare.com/articles/dataset/High-Throughput_Screening_Platform_for_Solid_Electrolytes_Combining_Hierarchical_Ion-Transport_Prediction_Algorithms_/12011412) | 91,763 static structures plus BVSE/CAVD/conduction descriptors | The data ZIP and README downloaded and verified; in practice 6 NDJSON tables | The 91,763 records in `cifs.json` enter the candidate structure layer; the `paths` coordinate arrays in 49 hierarchical records are explicitly excluded, treated as neither trajectory frames nor structures |
+| [SuperBand](https://github.com/ljcj007/SuperBand) | Structures, band structures and Fermi surfaces for 2,474 superconductors | The 13.29 GB official HDF5 and a code snapshot both completed and verified | Structures come mainly from MP/OQMD; SuperBand's specific electronic properties are retained first, then joined by structure rather than double-counted |
+| [NIMS PhononDB](https://mdr.nims.go.jp/collections/8g84ms862?locale=en) | Harmonic phonons, DOS and thermodynamic properties for 10,034 static MP materials | CC BY 4.0; per-record datasets are open but there is no collection-level bulk file, so a full package has been requested | Each MP ID produces exactly one static structure record; displacement supercells in `phonopy_params.yaml.xz` serve only as phonon property inputs and generate no extra structures |
+| [B-IncStrDB](https://cryst.ehu.es/bincstrdb/) | 282 modulated or composite crystals, including 47 composite entries | 282 / 282 official msCIFs downloaded; 29 index pages, 282 receipts and per-file SHA‑256 all verified | One published msCIF per database ID; no JSmol images, animations or trajectories |
+| [MinCryst](https://database.iem.ac.ru/mincryst/) / [Webmineral](https://webmineral.com/) | The IUCr catalog records 5,000+ mineral phases each; Webmineral has 4,714 descriptive entries | The MinCryst official host is currently unreachable; Webmineral has no clear bulk atomic-coordinate export | No interactive page scraping; awaiting provider recovery or bulk authorization |
+| [PowBase](https://www.cristal.org/powbase/index.html) | 169 CIF/powder pattern ZIPs | The site explicitly asks mirrors to contact the maintainer, so it is registered without bulk fetching | Collect static structures/patterns after mirroring permission, never by brute-forcing a number sequence |
+| [NIST Crystal Data](https://www.nist.gov/publications/nist-3-nist-crystal-data) / [NIST Surface Structure Database](https://www.nist.gov/publications/nist-42-nist-surface-structure-database-version-30) | 237,671 crystal records; nearly 1,400 experimental surface structures | Both are NIST SRD licensed/legacy products requiring purchase or contact with NIST | Import final structures after obtaining an institutional licence, never copy around the licence |
 
-`/home/zhilong/SSD/material_data` 的 245 GiB 既有数据已通过 `data/raw/legacy-material-data` 符号链接登记，没有复制。文件级完全重复、MP/OQMD/ICSD/JARVIS 的内容级重合和性质保留规则，以及 OMat24 的排除说明见 [`legacy-ssd-data-inventory.md`](legacy-ssd-data-inventory.md)。
+The 245 GiB of existing data in `/home/zhilong/SSD/material_data` is registered through the
+`data/raw/legacy-material-data` symlink without copying. Exact file-level duplicates, content-level
+overlap for MP/OQMD/ICSD/JARVIS, property retention rules and the OMat24 exclusion are described in
+[`legacy-ssd-data-inventory.md`](legacy-ssd-data-inventory.md).
 
-Materials Project 这里的“全量”是当前主 API 的全部材料级 `SummaryDoc`，不是原始 VASP 任务、构建中间对象、图片及所有用户附件的无差别复制。[MP AWS Open Data](https://docs.materialsproject.org/downloading-data/aws-opendata) 的旧版 parsed/build 对象已有约 55.9 GB，结构图片另约 58 GB；这些内容与材料级结构/性质检索大量重复，本轮不下载。MPContribs 还包含按项目独立维护的公开、私有和不同许可数据；官方建议通过 `mpcontribs-client` 按项目调用 `download_contributions()`。本轮单独收集 QMOF 等独特结构项目，明确排除 MPtrj 等轨迹项目，也不会越权下载私有项目或把不同项目附件混为主库数据。
+"Full" for Materials Project here means all material-level `SummaryDoc` records from the current
+main API, not an indiscriminate copy of raw VASP tasks, build intermediates, images and every user
+attachment. The legacy parsed/build objects on [MP AWS Open
+Data](https://docs.materialsproject.org/downloading-data/aws-opendata) already amount to about
+55.9 GB, with roughly another 58 GB of structure images; these overlap heavily with material-level
+structure/property search and are not downloaded this round. MPContribs additionally holds public,
+private and differently licensed data maintained per project; the official recommendation is to call
+`download_contributions()` per project through `mpcontribs-client`. This round collects unique
+structure projects such as QMOF separately, explicitly excludes trajectory projects such as MPtrj,
+and neither downloads private projects without authorization nor mixes per-project attachments into
+main-database data.
 
-下载命令均可重复运行，已完成文件会跳过，未完成文件从 `.part` 继续：
+All download commands are re-runnable: completed files are skipped and unfinished ones resume from
+`.part`:
 
 ```bash
 cd /home/zhilong/workspace/materia-viva
 
-# 查看全部来源
+# list all sources
 PYTHONPATH=. python scripts/datasets/acquire.py --list
 
-# 静态归档；--source 可以重复
+# static archives; --source may repeat
 PYTHONPATH=. python scripts/datasets/acquire.py \
   --source oqmd --source alexandria --source gnome
 
-# MP 全量 summary API
-MP_API_KEY='你的密钥' PYTHONPATH=. \
+# full MP summary API
+MP_API_KEY='your-key' PYTHONPATH=. \
   python scripts/datasets/materials_project.py
 
-# AFLOW 全量 AFLUX；10,000 条/页
+# full AFLOW AFLUX; 10,000 records per page
 PYTHONPATH=. python scripts/datasets/aflow.py --page-size 10000
 
-# SACADA 独特碳结构；自动跳过已完成条目和官方缺失的单条 ZIP
+# SACADA unique carbon structures; automatically skips completed entries and officially missing ZIPs
 PYTHONPATH=. python scripts/datasets/sacada.py --delay 0.25
 
-# EC-MOF 的 bulk/monolayer 结构端点和对应性质
+# EC-MOF bulk/monolayer structure endpoints and matching properties
 PYTHONPATH=. python scripts/datasets/ec_mof.py --delay 0.25
 
-# 通用 OPTIMADE 静态结构导出，例如 ODBX；每页 gzip、可断点续传
+# generic OPTIMADE static structure export, e.g. ODBX; gzip per page, resumable
 PYTHONPATH=. python scripts/datasets/optimade_export.py --provider odbx-misc
 
-# TCOD 最终 CIF、HADB 静态端点、CCP-NC 最新 Magres
+# TCOD final CIFs, HADB static endpoints, CCP-NC latest Magres
 PYTHONPATH=. python scripts/datasets/tcod.py --request-delay 0.02
 PYTHONPATH=. python scripts/datasets/hadb.py --request-delay 0.1
 PYTHONPATH=. python scripts/datasets/ccpnc_magres.py --chunk-size 250 --request-delay 0.1
 
-# B-IncStrDB：每个 ID 只保存一个发布 msCIF
+# B-IncStrDB: one published msCIF per ID
 PYTHONPATH=. python scripts/datasets/bincstrdb.py --request-delay 0.1
 
-# OBELiX 与 MOF carbon-capture 等官方静态 bulk 文件
+# OBELiX, MOF carbon-capture and other official static bulk files
 PYTHONPATH=. python scripts/datasets/acquire.py \
   --source obelix --source mof-carbon-capture --source hex-high-pressure \
   --source hofsyn --source open-framework-aluminophosphate --source spse
 ```
 
-不要把密钥写进命令历史时，可先在未纳入 Git 的 `.env` 或当前 shell 中设置；脚本只从环境变量读取，收据和 manifest 均不保存密钥。
+To keep keys out of shell history, set them in a `.env` outside Git or in the current shell first;
+the scripts read only from environment variables, and neither receipts nor manifests store keys.
 
-## 4. 已探测但不做无边界全量镜像
+## 4. Probed but not mirrored without bounds
 
 ### NOMAD
 
-[NOMAD API](https://nomad-lab.eu/prod/v1/docs/howto/manage/program/download.html) 当前空查询实测返回 19,393,938 个 entry。公开数据通常不需要 token，但每条上传的许可可能不同，且 raw files、archive 与 entry 之间是一对多/多版本关系。将全部原始计算盲目落盘会远超剩余 SSD 容量。
+The [NOMAD API](https://nomad-lab.eu/prod/v1/docs/howto/manage/program/download.html) currently
+returns 19,393,938 entries for an empty query. Public data usually needs no token, but each upload
+may carry a different licence, and raw files, archive and entry form one-to-many/multi-version
+relationships. Blindly writing every raw calculation to disk would far exceed the remaining SSD
+capacity.
 
-建议先定义子集，例如仅下载包含规范晶体结构、指定程序或指定元素体系的数据；官方 API 可以流式返回 raw ZIP 或 archive：
+Define a subset first — for example only data containing canonical crystal structures, a given code
+or a given elemental system. The official API can stream raw ZIP or archive:
 
 ```bash
 curl -X POST 'https://nomad-lab.eu/prod/v1/api/v1/entries/query' \
@@ -224,92 +306,183 @@ curl -X POST 'https://nomad-lab.eu/prod/v1/api/v1/entries/query' \
   -d '{"query":{},"pagination":{"page_size":1}}'
 ```
 
-若需要私有/embargo 数据，再在 NOMAD 用户页面取得 token 并设置 `NOMAD_TOKEN`。当前机器没有该 token，但这不影响公开数据查询。
+For private/embargoed data, obtain a token from the NOMAD user page and set `NOMAD_TOKEN`. This
+machine has no such token, which does not affect public data queries.
 
-### OPTIMADE 联邦
+### OPTIMADE federation
 
-[OPTIMADE provider registry](https://providers.optimade.org/providers.json) 当前实测列出 29 个 provider。OPTIMADE 是跨数据库统一查询层，不是一个可以一次性下载的独立数据库；其中不少 provider 已在本表单独采集。后续应以 provider ID + structure ID 保存游标，避免把 MP、OQMD、Alexandria、NOMAD 等重复镜像多次。
+The [OPTIMADE provider registry](https://providers.optimade.org/providers.json) currently lists 29
+providers. OPTIMADE is a cross-database unified query layer, not a standalone database that can be
+downloaded in one go, and many of its providers are already acquired separately in this table.
+Cursors should be stored as provider ID + structure ID so that MP, OQMD, Alexandria and NOMAD are
+not mirrored repeatedly.
 
-### OMat24、MPtrj、Open Catalyst 与其他轨迹库
+### OMat24, MPtrj, Open Catalyst and other trajectory libraries
 
-这些数据主要由同一体系的弛豫、扰动、分子动力学或反应路径中间构型组成，不符合 MateriaViva 当前“独特材料结构 + 对应性质”的采集范围，因此不下载、不转换、不计入统一结构库。旧 SSD 中已存在的 OMat24 全量归档仅保留原文件和 provenance 登记，不参与入库。对于同时提供初始结构和最终弛豫结构的材料数据库，可以保留两个端点并标注 `structure_role`；中间轨迹帧一律排除，端点间是否结构等价留到后续统一指纹去重阶段判断。
+This data consists mainly of relaxation, rattled, molecular-dynamics or reaction-path intermediate
+configurations of the same system. It does not match MateriaViva's current "unique material
+structure + matching properties" scope, so it is not downloaded, not converted and not counted in
+the unified structure pool. The existing full OMat24 archive on the old SSD keeps only its original
+files and provenance registration and takes no part in ingestion. For databases that publish both
+initial and final relaxed structures, both endpoints may be kept and labelled with `structure_role`;
+intermediate trajectory frames are always excluded, and whether the two endpoints are structurally
+equivalent is left to the later unified fingerprint deduplication stage.
 
-### ELEMENTA 与 ELEMENTA Spin
+### ELEMENTA and ELEMENTA Spin
 
-[ELEMENTA](https://huggingface.co/datasets/kairosmaterial/ELEMENTA)（[论文](https://www.kairosmaterials.com/papers/ELEMENTA.pdf)）同样是轨迹数据，但它按“每条弛豫一个终点”提供了明确的轨迹边界和收敛信息，因此按上一段的端点规则接入：只取每条优化轨迹的最后一个 ionic step，中间帧全部丢弃。核心包 38,808,603 帧对应 2,028,008 条弛豫，spin 包 4,713,110 帧对应 207,185 条弛豫，端点合计 2,235,193 个。
+[ELEMENTA](https://huggingface.co/datasets/kairosmaterial/ELEMENTA)
+([paper](https://www.kairosmaterials.com/papers/ELEMENTA.pdf)) is also trajectory data, but it
+supplies explicit trajectory boundaries and convergence information on a "one endpoint per
+relaxation" basis, so it is ingested under the endpoint rule above: only the last ionic step of each
+optimization trajectory is taken and every intermediate frame is discarded. The core archive holds
+38,808,603 frames across 2,028,008 relaxations and the spin archive 4,713,110 frames across 207,185
+relaxations, for 2,235,193 endpoints in total.
 
-轨迹身份是 `(material, structure, spin)` 三元组，不是 `material` 单字段。两个包的标注方式并不一致：核心包和 spin 包开头把磁性状态写进 `material`（`Cl2V_01_spin_00`）并另有 `spin` 字段，而 spin 包后段改为一个组成共用一个 `material`（`Al12Mn4Y4_01`），仅靠 `structure`（`Al12Mn4Y4_01_mag24`）区分，且不再有 `spin` 字段。只按 `material` 分组会把相邻的多条磁性弛豫并成一条，spin 包会因此丢掉约 62% 的轨迹。提取脚本同时以 `ionic_step` 回落作为轨迹边界的兜底判据。
+Trajectory identity is the `(material, structure, spin)` triple, not the `material` field alone. The
+two archives are not labelled consistently: the core archive and the head of the spin archive encode
+the magnetic state inside `material` (`Cl2V_01_spin_00`) and carry a separate `spin` field, while
+the rest of the spin archive reuses one `material` per composition (`Al12Mn4Y4_01`) and distinguishes
+runs only through `structure` (`Al12Mn4Y4_01_mag24`), with no `spin` field at all. Grouping by
+`material` alone merges adjacent magnetic relaxations into one and loses about 62% of the spin
+archive's trajectories. The extraction script also treats an `ionic_step` reset as a fallback
+trajectory boundary.
 
-ELEMENTA Spin 对同一几何做多种磁性初始化，这些弛豫终点的 BAWL 指纹相同；去重时按能量取最低的一条作为代表，其余按重复结构合并。ELEMENTA 只标注总能量、受力、应力和磁矩，没有 PBEsol 带隙，因此入库行的 `pbes_gap` 留空。
+ELEMENTA Spin runs several magnetic initializations of the same geometry, and those relaxation
+endpoints share a BAWL fingerprint; deduplication keeps the lowest-energy one as representative and
+merges the rest as duplicate structures. ELEMENTA labels only total energy, forces, stress and
+magnetic moment, with no PBEsol band gap, so ingested rows leave `pbes_gap` empty.
 
-许可为 CC BY-NC 4.0，比 CC BY 更严格，接入后整个公开快照按非商业条款发布，见 README 的版权和再分发边界。
+The licence is CC BY-NC 4.0, stricter than CC BY, so after ingestion the whole public snapshot is
+released under non-commercial terms; see the copyright and redistribution boundary in the README.
 
-## 5. 需要用户操作或受许可限制
+## 5. Requiring user action or restricted by licence
 
 ### MPDS / Pauling File
 
-入口：[MPDS API 文档](https://developer.mpds.io/)；数据浏览与账户：[MPDS](https://mpds.io/)。
+Entry points: [MPDS API documentation](https://developer.mpds.io/); data browsing and accounts:
+[MPDS](https://mpds.io/).
 
-当前机器没有 `MPDS_API_KEY`。需要你：
+This machine has no `MPDS_API_KEY`. You need to:
 
-1. 登录或申请 MPDS/Pauling File 账户及 API 权限。
-2. 在账户页面复制 API key。
-3. 在终端设置 `export MPDS_API_KEY='...'`，不要把 key 发到聊天或提交 Git。
-4. 通知我继续；我会先调用官方 facet/download API 核对许可与配额，再按可恢复分片下载。
+1. Log in to or apply for an MPDS/Pauling File account with API access.
+2. Copy the API key from the account page.
+3. Run `export MPDS_API_KEY='...'` in the terminal; never paste the key into chat or commit it.
+4. Tell me to continue; I will first call the official facet/download API to check licence and quota,
+   then download in resumable shards.
 
 ### CSD / CCDC
 
-入口：[CSD 许可条件](https://downloads.ccdc.cam.ac.uk/documentation/API/conditions_of_use.html)、[Access Structures](https://www.ccdc.cam.ac.uk/structures/)。
+Entry points: [CSD conditions of
+use](https://downloads.ccdc.cam.ac.uk/documentation/API/conditions_of_use.html), [Access
+Structures](https://www.ccdc.cam.ac.uk/structures/).
 
-CSD 整库和 CSD Python API 需要有效机构/商业许可，不能在无许可情况下批量下载或再分发。Access Structures 可以按已知 DOI、CCDC deposition number 或 refcode 获取已公开的单条 deposited CIF，但不是不受限整库接口。需要你确认本机是否已有 CSD 安装和机构许可；有许可后再用 CCDC 官方 API 导出到 `raw/acquired/csd/`。
+The full CSD and the CSD Python API require a valid institutional/commercial licence and cannot be
+bulk-downloaded or redistributed without one. Access Structures can retrieve individual published
+deposited CIFs by known DOI, CCDC deposition number or refcode, but it is not an unrestricted
+full-database interface. Confirm whether this machine already has a CSD installation and
+institutional licence; with a licence, export through the official CCDC API into
+`raw/acquired/csd/`.
 
 ### ICSD
 
-入口：[ICSD 官方站](https://icsd.products.fiz-karlsruhe.de/en)、[API 许可条件](https://icsd.products.fiz-karlsruhe.de/sites/default/files/ICSD/documents/terms/ICSD_API_License_2019.pdf)。
+Entry points: [ICSD official site](https://icsd.products.fiz-karlsruhe.de/en), [API licence
+conditions](https://icsd.products.fiz-karlsruhe.de/sites/default/files/ICSD/documents/terms/ICSD_API_License_2019.pdf).
 
-本机已有你提供的 203,830 个 CIF。ICSD 现行站点显示数据库仍在持续增加，批量/API 使用需要单独授权；因此不会通过网页自动抓取。若你希望更新到当前版本，需要提供有批量/API 权限的机构访问方式，并确认许可允许本机离线副本。
+The 203,830 CIFs you provided are already local. The current ICSD site shows the database still
+growing, and bulk/API use requires separate authorization, so nothing is scraped automatically. To
+update to the current version you must supply institutional access with bulk/API rights and confirm
+that the licence permits a local offline copy.
 
 ### NIMS AtomWork-Adv
 
-入口：[服务与许可](https://atomwork-adv.nims.go.jp/en/service.html)、[购买/申请](https://purchase-atomwork.nims.go.jp/index)。
+Entry points: [service and
+licence](https://atomwork-adv.nims.go.jp/en/service.html), [purchase /
+application](https://purchase-atomwork.nims.go.jp/index).
 
-官方当前列出约 409,723 条结构和 568,195 条性质。72 小时试用只能检索/浏览，不能下载；付费许可通常每年最多下载 5,000 条，整库需联系 NIMS 另行协商。需要你完成 DICE 账户、试用申请和许可购买，或直接向 AtomWork-Adv 咨询整库授权。
+The site currently lists about 409,723 structures and 568,195 properties. The 72-hour trial allows
+search/browse only, not download; a paid licence typically caps downloads at 5,000 records per year,
+and the full database must be negotiated separately with NIMS. You need to complete DICE account
+setup, the trial application and licence purchase, or ask AtomWork-Adv directly about full-database
+authorization.
 
-### SpringerMaterials、Pearson's Crystal Data、ICDD PDF-4+
+### SpringerMaterials, Pearson's Crystal Data, ICDD PDF-4+
 
-- [SpringerMaterials](https://materials.springer.com/)：需要个人或机构订阅；批量/API 权限取决于合同。
-- [Pearson's Crystal Data](https://www.crystalimpact.com/pcd/)：商业数据库，需要 Crystal Impact 许可。
-- [ICDD PDF-4+](https://www.icdd.com/pdf-4/)：商业粉末衍射数据库，需要 ICDD 许可，不能以网页抓取替代授权导出。
+- [SpringerMaterials](https://materials.springer.com/): needs a personal or institutional
+  subscription; bulk/API rights depend on the contract.
+- [Pearson's Crystal Data](https://www.crystalimpact.com/pcd/): a commercial database requiring a
+  Crystal Impact licence.
+- [ICDD PDF-4+](https://www.icdd.com/pdf-4/): a commercial powder diffraction database requiring an
+  ICDD licence; scraping is not a substitute for an authorized export.
 
-如果学校已有机构许可，需要你先确认许可证是否允许批量导出、离线保存和内部检索；得到明确许可后再接入。
+If the university already holds an institutional licence, first confirm whether it permits bulk
+export, offline storage and internal search; ingest only after explicit permission.
 
-### 第三轮来源所需操作
+### Actions required for third-round sources
 
-- [NIMS AtomWork open](https://crystdb.nims.go.jp/en/)：注册 DICE 账户，完成邮箱域名登记并提交 MatNavi usage application。批准后使用页面提供的 TSV/结构导出；官网明确禁止 web scraping。
-- [Matterverse](https://optimade.matterverse.ai/)：请联系提供方申请 31,791,192 条结构的 bulk snapshot。公开 OPTIMADE 每页最多 500 条，直接全镜像需要约 63,583 个请求，不应以高频请求替代正式 bulk。
-- [MOF DB](https://mofdb.org/)：登录关联的 Hugging Face 账户，确认已接受 H2MOF-ML/hMOF-ML 仓库条件，然后把 token 仅设置在本机环境变量中；不要把 token 写进 Git 或聊天。
-- [ADAQ](https://defects.anyterial.se/)：先向站点维护者说明要建立本机研究镜像并申请 substantial replication 许可；当前许可页面只明确允许非实质性摘录。
-- [MatGen](https://matgen.nscc-gz.cn/index_ch.html)：注册账户或邮件联系 `matgen@nscc-gz.cn`，申请无机、假想、二维、超导和固态电解质库的 bulk/API；熔盐 MD 库不在本项目范围。
-- [Atomly](https://atomly.net/)：邮件联系 `atomly@iphy.ac.cn` 申请合作者 API。官方前端写明 API 当前只供内部测试和合作者使用。
-- [MatCloud+](https://www.matcloud.com.cn/newDataBase/structure)：注册后向提供方申请账户级批量导出，并确认各专题库是否允许离线保存和再分发。
-- [MatCraft](https://matcraft.ai/docs/materials-api/authentication)：若仍需保存其 MP/AFLOW/JARVIS 聚合记录，先登录生成 API token，再向提供方申请超出常规 rate limit 的 bulk export 授权；条款禁止超限抓取。
-- [2D hybrid perovskites](https://arxiv.org/abs/2006.14302)、[OpenMX AB₂](https://www.openmx-square.org/2d-ab2/) 和 [NLR MatDB](https://materials.nlr.gov/)：当前都能交互访问，但未找到安全、许可清楚的整库结构包。建议分别联系作者/维护方索取 bulk 文件，而不是逐页抓取。
-- [HPCSD](https://www.calypso.cn/)：注册 CALYPSO/HPCSD 账户并向论文作者或站点维护者申请首发 77,346 条结构的 bulk snapshot；下载后只接入最终静态结构和性质，不接入搜索种群或演化轨迹。
-- [PowBase](https://www.cristal.org/powbase/index.html)：官网要求镜像方先联系维护者。请取得 169 个静态结构/粉末图谱包的本机研究镜像许可后通知我继续。
-- [MinCryst](https://database.iem.ac.ru/mincryst/) 与 [Webmineral](https://webmineral.com/)：前者当前主机不可达，后者没有明确 bulk 原子坐标导出；需向维护者索取当前静态结构快照和使用条件。
-- [NIST Crystal Data](https://www.nist.gov/publications/nist-3-nist-crystal-data) 与 [NIST Surface Structure Database](https://www.nist.gov/publications/nist-42-nist-surface-structure-database-version-30)：确认学校是否有 NIST SRD 许可；无许可时需要向 NIST 购买或申请当前发布包，不能以网页抓取代替。
-- [NIMS PhononDB](https://mdr.nims.go.jp/collections/8g84ms862?locale=en)：联系 NIMS MDR 或数据作者申请 10,034 条记录的 collection-level bulk snapshot；当前逐条下载需要约 10,000 个页面和文件请求，不以高频抓取替代整包。取得后只接入每个 MP ID 的静态 unit cell 和声子性质，位移超胞不作为独特结构。
+- [NIMS AtomWork open](https://crystdb.nims.go.jp/en/): register a DICE account, complete email
+  domain registration and submit the MatNavi usage application. After approval, use the TSV/structure
+  export the page provides; the site explicitly prohibits web scraping.
+- [Matterverse](https://optimade.matterverse.ai/): contact the provider for a bulk snapshot of the
+  31,791,192 structures. Public OPTIMADE caps pages at 500 records, so a direct full mirror would
+  need about 63,583 requests, which must not substitute for a proper bulk transfer.
+- [MOF DB](https://mofdb.org/): log in to the linked Hugging Face account, accept the H2MOF-ML/hMOF-ML
+  repository conditions, then set the token only in a local environment variable; never write the
+  token into Git or chat.
+- [ADAQ](https://defects.anyterial.se/): explain to the site maintainers that you intend to build a
+  local research mirror and request substantial replication permission; the current licence page only
+  clearly permits non-substantial extracts.
+- [MatGen](https://matgen.nscc-gz.cn/index_ch.html): register an account or email
+  `matgen@nscc-gz.cn` to request bulk/API access for the inorganic, hypothetical, 2D, superconductor
+  and solid-electrolyte libraries; the molten-salt MD library is out of scope.
+- [Atomly](https://atomly.net/): email `atomly@iphy.ac.cn` for collaborator API access. The official
+  frontend states the API is currently for internal testing and collaborators only.
+- [MatCloud+](https://www.matcloud.com.cn/newDataBase/structure): after registering, request an
+  account-level bulk export and confirm whether each library permits offline storage and
+  redistribution.
+- [MatCraft](https://matcraft.ai/docs/materials-api/authentication): if their aggregated
+  MP/AFLOW/JARVIS records are still wanted, log in to generate an API token, then request bulk export
+  authorization beyond the normal rate limit; the terms prohibit over-limit scraping.
+- [2D hybrid perovskites](https://arxiv.org/abs/2006.14302), [OpenMX
+  AB₂](https://www.openmx-square.org/2d-ab2/) and [NLR MatDB](https://materials.nlr.gov/): all are
+  interactively accessible today, but no secure, clearly licensed full-database package was found.
+  Contact the authors/maintainers for bulk files rather than scraping page by page.
+- [HPCSD](https://www.calypso.cn/): register a CALYPSO/HPCSD account and ask the paper authors or
+  site maintainers for a bulk snapshot of the 77,346 first-release structures; ingest only final
+  static structures and properties, never search populations or evolutionary trajectories.
+- [PowBase](https://www.cristal.org/powbase/index.html): the site requires mirrors to contact the
+  maintainer first. Obtain permission for a local research mirror of the 169 static
+  structure/powder-pattern packages, then tell me to continue.
+- [MinCryst](https://database.iem.ac.ru/mincryst/) and [Webmineral](https://webmineral.com/): the
+  former's host is currently unreachable and the latter has no clear bulk atomic-coordinate export;
+  request the current static structure snapshot and usage terms from the maintainers.
+- [NIST Crystal Data](https://www.nist.gov/publications/nist-3-nist-crystal-data) and [NIST Surface
+  Structure Database](https://www.nist.gov/publications/nist-42-nist-surface-structure-database-version-30):
+  confirm whether the university holds a NIST SRD licence; without one, purchase or request the
+  current release package from NIST rather than scraping.
+- [NIMS PhononDB](https://mdr.nims.go.jp/collections/8g84ms862?locale=en): contact NIMS MDR or the
+  data authors for a collection-level bulk snapshot of the 10,034 records; downloading per record
+  would need about 10,000 page and file requests, which must not replace a proper package. Once
+  obtained, ingest only the static unit cell and phonon properties per MP ID, treating displacement
+  supercells as non-unique structures.
 
-### OMDB、MPOD 与拓扑材料数据库
+### OMDB, MPOD and the topological materials database
 
-- [OMDB](https://omdb.mathub.io/dataset/) 的官方 bulk 按钮当前跳转登录；本轮已从 NIST JARVIS/Figshare 镜像取得相同 12.5k 级开放数据。若要官方最新版本，需要注册 OMDB 账户后手工下载。
-- [AMCSD / RRUFF](https://www.rruff.net/about/download-data/) 的新下载页已经公开 CIF、AMC、DIF 和各类性质 ZIP，本轮已加入可恢复整库下载，不再需要逐页抓取。
-- [MPOD](https://mpod.cimav.edu.mx/) 提供逐条 `.mpod` 张量性质文件，但站点响应较慢且未发现官方 bulk 索引；已记录为后续低频/API 接入项。
-- [Topological Materials Database](https://topologicalquantumchemistry.org/) 当前展示约 38,184 个材料，但结构和分类源自 ICSD 等许可数据，未发现可再分发的整库结构下载。可在获得对应 ICSD 权限后按 ID 联接本机 ICSD，而不是抓取网页。
+- The official bulk button on [OMDB](https://omdb.mathub.io/dataset/) currently redirects to login;
+  this round obtained the same 12.5k-scale open data from the NIST JARVIS/Figshare mirror. The
+  official latest version requires registering an OMDB account and downloading manually.
+- The new [AMCSD / RRUFF](https://www.rruff.net/about/download-data/) download page now publishes
+  CIF, AMC, DIF and assorted property ZIPs, so this round added resumable full-database downloads and
+  no longer needs page-by-page scraping.
+- [MPOD](https://mpod.cimav.edu.mx/) offers per-record `.mpod` tensor property files, but the site is
+  slow and no official bulk index was found; recorded as a later low-frequency/API ingestion item.
+- The [Topological Materials Database](https://topologicalquantumchemistry.org/) currently shows about
+  38,184 materials, but its structures and classifications derive from ICSD and other licensed data,
+  and no redistributable full-database download was found. With the corresponding ICSD rights it can
+  be joined to the local ICSD by ID rather than scraped.
 
-## 6. 完整性检查
+## 6. Integrity checks
 
-静态文件完成后执行：
+After static files complete:
 
 ```bash
 find -L data/raw/acquired -type f -name '*.receipt.json' -print
@@ -317,14 +490,25 @@ find -L data/raw/acquired -type f -name '*.part' -print
 df -h /home/zhilong/SSD
 ```
 
-API 任务以 `manifest.json` 中的 `complete: true`、`downloaded_documents == total_documents` 为完成条件。压缩包随后使用 `gzip -t`、`bzip2 -t`、`unzip -t` 或 `tar -tzf` 做全文件校验；数据库内容通过各来源适配器转换后，再进行结构解析、元素/化学式一致性、单位和重复结构检查。
+API tasks count as complete when `manifest.json` holds `complete: true` and
+`downloaded_documents == total_documents`. Archives are then fully verified with `gzip -t`,
+`bzip2 -t`, `unzip -t` or `tar -tzf`; database contents are converted through each source's adapter
+and then checked for structure parsing, element/formula consistency, units and duplicate structures.
 
-## 7. 去重与来源优先级
+## 7. Deduplication and source priority
 
-同一结构可能同时出现在 ICSD、COD、MPDS、MP、OQMD、AFLOW、Alexandria、GNoME 和训练集快照中。接入时不按材料名称直接覆盖，采用以下键和规则：
+The same structure may appear simultaneously in ICSD, COD, MPDS, MP, OQMD, AFLOW, Alexandria, GNoME
+and training-set snapshots. Ingestion never overwrites by material name; it uses the following keys
+and rules:
 
-1. 保留 `source`, `source_version`, `source_id`, `license`, `retrieved_at`。
-2. 对标准化后的占位、晶格和分数坐标计算结构指纹；先做完全哈希，再做容差结构匹配。
-3. 实验结构、计算初始/最终弛豫结构分开标注，不能把计算候选写成实验已合成；轨迹中间构型不采集。
-4. 重复结构只合并检索实体，不丢弃来源专有性质；性质保留计算方法、泛函、温压条件和单位。
-5. 许可更严格的数据不向许可更宽松的数据集“传染式再分发”；前端只暴露当前授权允许的字段和下载动作。
+1. Retain `source`, `source_version`, `source_id`, `license`, `retrieved_at`.
+2. Compute a structural fingerprint over normalised occupancies, lattice and fractional coordinates;
+   hash exactly first, then run tolerance-based structure matching.
+3. Label experimental structures and computational initial/final relaxed structures separately; a
+   computational candidate must never be written up as experimentally synthesised, and intermediate
+   trajectory configurations are not collected.
+4. Duplicate structures merge only the retrieval entity and never discard source-specific properties;
+   properties keep their calculation method, functional, temperature/pressure conditions and units.
+5. More strictly licensed data must never be redistributed "contagiously" through a more permissive
+   dataset; the frontend exposes only the fields and download actions the current authorization
+   permits.

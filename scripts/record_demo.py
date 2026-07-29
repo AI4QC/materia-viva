@@ -162,7 +162,7 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
             show_caption(
                 page,
                 "MateriaViva",
-                "全部晶体数据集统一汇聚与去重，构成 6,219,302 条可检索结构索引。",
+                "Every crystal dataset unified and deduplicated into 8,225,138 searchable structures.",
                 "UNIFIED CRYSTAL DATABASE · DEMO",
                 centered=True,
             )
@@ -173,8 +173,8 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
             smooth_scroll_to(page, ".element-lab", -24)
             show_caption(
                 page,
-                "从元素周期表进入化学空间",
-                "118 个元素支持包含、排除与未选择三态，并可组合多个元素。",
+                "Enter chemical space from the periodic table",
+                "All 118 elements support include, exclude and unselected states, and combine freely.",
                 "01 · ELEMENT SEARCH",
             )
             pause(page, 2_800)
@@ -209,8 +209,8 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
                 hover_and_click(page, iron_included)
             show_caption(
                 page,
-                "组合与排除筛选",
-                "当前条件：包含 O，排除 Fe；结果数量随查询实时更新。",
+                "Combine and exclude filters",
+                "Currently including O and excluding Fe; the result count updates with every query.",
                 "01 · ELEMENT SEARCH",
             )
             pause(page, 3_200)
@@ -219,8 +219,8 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
             smooth_scroll_to(page, ".catalog", -30)
             show_caption(
                 page,
-                "MP 风格多维筛选",
-                "支持化学式、数据来源、带隙、密度、空间群、晶系及更多材料属性。",
+                "Materials Project style filtering",
+                "Filter by formula, data source, band gap, density, space group, crystal system and more.",
                 "02 · MATERIAL FILTERS",
             )
             pause(page, 3_000)
@@ -232,7 +232,7 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
             more_filters.click()
             pause(page, 700)
 
-            formula = page.get_by_label("化学式、化学体系或材料 ID")
+            formula = page.get_by_label("Formula, chemical system or material ID")
             formula.hover()
             with page.expect_response(
                 lambda response: "/api/materials?" in response.url
@@ -242,7 +242,7 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
             ):
                 formula.fill("Cr4Te8O22")
             pause(page, 1_400)
-            experimental = page.get_by_label("仅实验结构")
+            experimental = page.get_by_label("Experimental only")
             with page.expect_response(
                 lambda response: "/api/materials?" in response.url
                 and "datasets=experimental" in response.url
@@ -253,8 +253,8 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
             pause(page, 1_500)
             show_caption(
                 page,
-                "精确定位实验晶体",
-                "示例检索 Cr₄Te₈O₂₂，并限定为实验结构。",
+                "Pinpoint an experimental crystal",
+                "Searching Cr\u2084Te\u2088O\u2082\u2082 and restricting the query to experimental structures.",
                 "03 · STRUCTURE CATALOG",
             )
             pause(page, 3_000)
@@ -265,9 +265,9 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
             first_card.hover()
             pause(page, 900)
             first_card.click()
-            dialog = page.get_by_role("dialog", name="材料详情")
+            dialog = page.get_by_role("dialog", name="Material detail")
             dialog.wait_for(state="visible")
-            ovito_image = dialog.get_by_role("img", name=re.compile("OVITO 晶体结构渲染"))
+            ovito_image = dialog.get_by_role("img", name=re.compile("OVITO crystal structure render"))
             ovito_image.wait_for(state="visible", timeout=180_000)
             page.wait_for_function(
                 "element => element.complete && element.naturalWidth > 0",
@@ -277,14 +277,14 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
             pause(page, 2_200)
             show_caption(
                 page,
-                "OVITO / Tachyon 高质量渲染",
-                "结构、晶胞和材料属性在同一工作台中展示，原始 CIF 可直接下载。",
+                "OVITO / Tachyon high-quality rendering",
+                "Structure, unit cell and material properties in one workbench, with the original CIF one click away.",
                 "04 · CRYSTAL WORKBENCH",
             )
             pause(page, 3_300)
             hide_caption(page)
 
-            top_view = dialog.get_by_role("button", name="顶视图")
+            top_view = dialog.get_by_role("button", name="Top")
             with page.expect_response(
                 lambda response: "/render?" in response.url
                 and "view=top" in response.url
@@ -294,20 +294,20 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
                 hover_and_click(page, top_view)
             page.wait_for_function(
                 "element => element.complete && element.naturalWidth > 0",
-                arg=dialog.get_by_role("img", name=re.compile("OVITO 晶体结构渲染")).element_handle(),
+                arg=dialog.get_by_role("img", name=re.compile("OVITO crystal structure render")).element_handle(),
                 timeout=180_000,
             )
             pause(page, 2_800)
 
-            interactive = dialog.get_by_role("tab", name="交互式 3D")
+            interactive = dialog.get_by_role("tab", name="Interactive 3D")
             hover_and_click(page, interactive)
             canvas = dialog.locator("canvas")
             canvas.wait_for(state="visible", timeout=120_000)
             pause(page, 2_000)
             show_caption(
                 page,
-                "浏览器内交互式 3D",
-                "旋转、缩放并检查原子、化学键与晶胞边界。",
+                "Interactive 3D in the browser",
+                "Rotate, zoom and inspect atoms, bonds and cell boundaries.",
                 "05 · INTERACTIVE VIEW",
             )
             pause(page, 2_800)
@@ -333,14 +333,14 @@ def record_demo(url: str, output: Path) -> dict[str, object]:
                 pause(page, 2_800)
 
             page.screenshot(path="/tmp/materiaviva-demo-interactive.png")
-            page.get_by_role("button", name="关闭材料详情").click()
+            page.get_by_role("button", name="Close material detail").click()
             dialog.wait_for(state="detached")
             page.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})")
             pause(page, 1_800)
             show_caption(
                 page,
                 "MateriaViva",
-                "在统一去重的 621 万种晶体结构中检索、比较并发现目标材料。",
+                "Search, compare and discover across 8.22 million unified, deduplicated crystal structures.",
                 "READY FOR EXPLORATION · 127.0.0.1:8000",
                 centered=True,
             )

@@ -223,7 +223,7 @@ export MATERIALS_OVITO_PYTHON=/path/to/ovito-enabled/python
 
 未配置 OVITO 时，浏览器交互式 3D 仍可使用，服务端 Tachyon 图片渲染不可用。
 
-校验全部 6,219,302 条发布记录并构建索引：
+校验全部 8,225,138 条发布记录并构建索引：
 
 ```bash
 make validate-data

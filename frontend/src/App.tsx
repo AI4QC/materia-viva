@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Atom, Github, Moon, Sun } from 'lucide-react'
+import { Atom, Github, Languages, Moon, Sun } from 'lucide-react'
 
 import { MaterialDetail } from './components/MaterialDetail'
 import { SearchWorkspace } from './components/SearchWorkspace'
+import { useI18n } from './i18n'
 import { parseQuery, serializeQuery, type MaterialQuery } from './lib/query'
 
 type Theme = 'dark' | 'light'
@@ -22,6 +23,7 @@ export default function App() {
   const [query, setQuery] = useState<MaterialQuery>(() => parseQuery(new URLSearchParams(window.location.search)))
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null)
   const [theme, setTheme] = useState<Theme>(initialTheme)
+  const { lang, setLang, t } = useI18n()
 
   useEffect(() => {
     const params = serializeQuery(query).toString()
@@ -37,15 +39,24 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <a className="brand" href="/" aria-label="MateriaViva 首页">
+        <a className="brand" href="/" aria-label={t('brand.home')}>
           <span className="brand__mark"><Atom size={21} /></span>
-          <span><b>MateriaViva</b><small>自进化材料数据库</small></span>
+          <span><b>MateriaViva</b><small>{t('brand.tagline')}</small></span>
         </a>
-        <nav aria-label="主导航">
-          <a href="#element-lab-title">元素检索</a>
-          <a href="#catalog-title">结构目录</a>
+        <nav aria-label={t('nav.main')}>
+          <a href="#element-lab-title">{t('nav.elements')}</a>
+          <a href="#catalog-title">{t('nav.catalog')}</a>
           <button
-            aria-label={theme === 'dark' ? '切换到日间模式' : '切换到夜间模式'}
+            aria-label={t('lang.switchTo')}
+            className="lang-toggle"
+            onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+            type="button"
+          >
+            <span className="lang-toggle__icon" aria-hidden="true"><Languages size={14} /></span>
+            <span>{t('lang.short')}</span>
+          </button>
+          <button
+            aria-label={theme === 'dark' ? t('theme.toLight') : t('theme.toDark')}
             aria-pressed={theme === 'light'}
             className="theme-toggle"
             data-theme-target={theme === 'dark' ? 'light' : 'dark'}
@@ -55,9 +66,9 @@ export default function App() {
             <span className="theme-toggle__icon" aria-hidden="true">
               {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
             </span>
-            <span>{theme === 'dark' ? '日间' : '夜间'}</span>
+            <span>{theme === 'dark' ? t('theme.light') : t('theme.dark')}</span>
           </button>
-          <span className="system-status"><i /> UNIFIED INDEX ONLINE</span>
+          <span className="system-status"><i /> {t('nav.status')}</span>
         </nav>
       </header>
 
@@ -67,8 +78,8 @@ export default function App() {
 
       <footer className="site-footer">
         <div><Atom size={17} /><span>MateriaViva</span></div>
-        <p>MateriaViva · 多源晶体数据统一整合、去重与检索。</p>
-        <a href="https://github.com" aria-label="GitHub"><Github size={17} /></a>
+        <p>{t('footer.tagline')}</p>
+        <a href="https://github.com/AI4QC/materia-viva" aria-label="GitHub"><Github size={17} /></a>
       </footer>
     </div>
   )

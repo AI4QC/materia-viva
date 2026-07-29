@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '../test/render'
 import { describe, expect, it } from 'vitest'
 
 import { PeriodicTable, type ElementSelection } from './PeriodicTable'

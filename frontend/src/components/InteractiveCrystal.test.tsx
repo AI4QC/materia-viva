@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen } from '../test/render'
 import { describe, expect, it } from 'vitest'
 
 import { InteractiveCrystal } from './InteractiveCrystal'
@@ -26,7 +26,7 @@ describe('InteractiveCrystal', () => {
   it('offers an OVITO fallback without requiring WebGL', () => {
     render(<InteractiveCrystal structure={structure} showCell representation="ball_stick" />)
 
-    expect(screen.getByText('当前浏览器无法启动 WebGL')).toBeInTheDocument()
-    expect(screen.getByText('仍可使用上方 OVITO 高质量渲染浏览结构。')).toBeInTheDocument()
+    expect(screen.getByText('This browser cannot start WebGL')).toBeInTheDocument()
+    expect(screen.getByText('You can still browse the structure with the OVITO render above.')).toBeInTheDocument()
   })
 })

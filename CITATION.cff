@@ -8,6 +8,7 @@ authors:
     affiliation: "AI4QC"
 repository-code: "https://github.com/AI4QC/materia-viva"
 url: "https://huggingface.co/datasets/AI4QC/materia-viva"
+license: CC-BY-NC-4.0
 version: 0.1.0
 date-released: 2026-07-26
 keywords:

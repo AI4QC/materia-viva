@@ -43,7 +43,30 @@ OVITO/Tachyon 检查结构。
 
 | 实验晶体结构 | 计算候选结构 | 统一检索记录 |
 |---:|---:|---:|
-| 99,162 | 6,120,140 | 6,219,302 |
+| 99,162 | 8,125,976 | 8,225,138 |
+
+### 已整合的数据库
+
+统一结构池目前由以下数据库汇聚而成，全部经过结构指纹（BAWL / entalpic fingerprint）去重后合并：
+
+| 数据库 | 说明 |
+|---|---|
+| [LeMat-BulkUnique](https://huggingface.co/datasets/LeMaterial/LeMat-BulkUnique) | 4,273,800 条，逐条保留 `immutable_id` 与指纹 |
+| [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) | 2,005,836 条，每条弛豫轨迹只取最终稳定结构 |
+| [Materials Project](https://next-gen.materialsproject.org/) | PBE/PBEsol 计算结构与性质 |
+| [OQMD](https://oqmd.org/) | 开放量子材料数据库 |
+| [JARVIS-DFT](https://jarvis.nist.gov/) | NIST JARVIS 计算结构与描述符 |
+| [AFLOW](https://aflow.org/) | 高通量自动流程结构库 |
+| [Alexandria](https://alexandria.icams.rub.de/) | PBE / PBEsol 三维、二维、一维结构 |
+| [NOMAD](https://nomad-lab.eu/) | 联邦归档中的计算结构 |
+| [OMat24](https://huggingface.co/datasets/facebook/OMAT24) | 由其中提取的独特结构端点，中间轨迹帧不入库 |
+| Carolina Materials Database | 214,435 条既有结构库 |
+| [COD](https://www.crystallography.net/cod/) | 开放晶体学数据库，CC0 |
+| [ICSD](https://icsd.products.fiz-karlsruhe.de/) | 需 FIZ Karlsruhe 授权；受限字段不进入公开快照 |
+
+去重与来源优先级规则见
+[`docs/dataset-acquisition.md`](docs/dataset-acquisition.md) 第 7 节。ICSD 等受许可限制的来源
+按“版权和再分发边界”处理：本机可用于统一检索，受保护的原始文件和字段不随公开快照发布。
 
 [![播放 MateriaViva 2K60 演示视频](demo/MateriaViva_demo_preview.gif)](demo/MateriaViva_demo_2K60.mp4)
 
@@ -102,22 +125,28 @@ GitHub 仓库只保存代码、数据模式、来源目录、文档、测试和�
 
 ### 版权和再分发边界
 
-- CC0、CC BY、CC BY-SA 等明确允许再分发的数据可以进入公开快照，同时保留原作者、版本、
-  许可证和引用要求。
+MateriaViva 整体按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商业使用。
+
+- CC0、CC BY、CC BY-SA、CC BY-NC 等明确允许再分发的数据可以进入公开快照，同时保留原作者、
+  版本、许可证和引用要求。
 - 商业许可、付费订阅、机构许可、账户条款限制以及没有明确再分发授权的数据库不予开源。
 - 对受限来源只发布数据库名称、官方链接、公开元数据、来源 ID 和许可状态，不发布受保护的
   结构、性质字段或原始文件。
 - 统一格式不会改变原数据的权利归属。未来的自动发现流程同样必须先通过许可门禁。
+- 快照包含 CC BY-NC 4.0 的来源（如 ELEMENTA），因此整合结果不得用于商业用途；ShareAlike
+  来源如需接入，须单独确认其许可与 NC 条款的兼容性后再决定是否进入公开快照。
 
 ## 当前覆盖范围
 
-机器可读目录目前登记 100 个晶体结构或性质来源。“登记”不等于“公开下载完成”：
+机器可读目录目前登记 101 个晶体结构或性质来源。“登记”不等于“公开下载完成”：
 
-- 57 个已完成采集或复用本机已有数据；
+- 58 个已完成采集或复用本机已有数据；
 - 18 个仅登记，或仍在等待合适的官方批量采集方案；
 - 22 个需要账户、提供方授权或付费许可，只保留目录信息；
 - 3 个轨迹数据源按项目范围排除；
 - 当前没有未完成的后台下载。
+
+其中 ELEMENTA 是轨迹数据集，但按“每条弛豫只取终点”的规则接入，中间帧不计入结构库。
 
 完整来源、许可、下载状态和人工操作说明见
 [`docs/dataset-acquisition.md`](docs/dataset-acquisition.md)。既有 SSD 数据及重复关系见
@@ -141,7 +170,7 @@ ln -s "$MV_DATA_ROOT" data
 data/
 ├── sources/
 │   ├── experimental/        99,162 条实验结构
-│   └── candidate/           6,120,140 条候选结构
+│   └── candidate/           8,125,976 条候选结构
 ├── index/                   SQLite 检索库与压缩 CIF blob
 ├── manifests/               Crystal Record v1 校验报告
 └── raw/                     来源归档与 provenance

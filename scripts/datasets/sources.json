@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-07-26",
+  "updated": "2026-07-28",
   "sources": [
     {
       "id": "materials-project",
@@ -1778,6 +1778,31 @@
       "data_path": "raw/acquired/icdd-pdf",
       "status": "user-action-required",
       "downloads": []
+    },
+    {
+      "id": "elementa",
+      "name": "ELEMENTA and ELEMENTA Spin",
+      "access": "open",
+      "official_url": "https://huggingface.co/datasets/kairosmaterial/ELEMENTA",
+      "license": "CC BY-NC 4.0",
+      "data_path": "raw/acquired/elementa",
+      "status": "downloaded-verified-2235193-relaxation-endpoints-from-43521713-frames-2026-07-28",
+      "estimated_documents": 2235193,
+      "paper_url": "https://www.kairosmaterials.com/papers/ELEMENTA.pdf",
+      "revision": "9de9010715da4f563326f99bf3f7ee829cf4486a",
+      "downloads": [
+        {
+          "filename": "ELEMENTA_open.extxyz.tar.zst",
+          "url": "https://huggingface.co/datasets/kairosmaterial/ELEMENTA/resolve/main/ELEMENTA_open.extxyz.tar.zst",
+          "bytes": 14613451503
+        },
+        {
+          "filename": "ELEMENTA_spin.extxyz.tar.zst",
+          "url": "https://huggingface.co/datasets/kairosmaterial/ELEMENTA/resolve/main/ELEMENTA_spin.extxyz.tar.zst",
+          "bytes": 3097446799
+        }
+      ],
+      "notes": "Fetched with huggingface_hub at revision 9de9010715da4f563326f99bf3f7ee829cf4486a, which is the revision recorded in the local HF download cache; both archives match the remote x-linked-size exactly and both pass a full zstd stream check. The dataset card declares cc-by-nc-4.0 and the repository is public and ungated. This is trajectory data: 38,808,603 frames over 2,028,008 relaxations in the core archive and 4,713,110 frames over 207,185 relaxations in the spin archive. Under section 7 rule 3 only the endpoint of each relaxation enters the structure pool and every intermediate ionic step is discarded. Trajectory identity is the (material, structure, spin) triple rather than material alone: partway through the spin archive the material tag drops its spin suffix, so consecutive magnetic runs share one tag while restarting ionic_step at zero, and keying on material alone silently merges those runs and loses about 62 percent of that archive. CC BY-NC 4.0 restricts the whole published snapshot to non-commercial use."
     }
   ]
 }

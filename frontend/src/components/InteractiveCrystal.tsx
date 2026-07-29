@@ -4,6 +4,7 @@ import { Suspense, useMemo } from 'react'
 import { Quaternion, Vector3 } from 'three'
 
 import type { CrystalStructure } from '../api/client'
+import { useI18n } from '../i18n'
 
 interface InteractiveCrystalProps {
   structure: CrystalStructure
@@ -12,6 +13,7 @@ interface InteractiveCrystalProps {
 }
 
 export function InteractiveCrystal({ structure, showCell, representation }: InteractiveCrystalProps) {
+  const { t } = useI18n()
   const hasWebGL = typeof window !== 'undefined' && (
     typeof window.WebGLRenderingContext !== 'undefined' ||
     typeof window.WebGL2RenderingContext !== 'undefined'
@@ -21,8 +23,8 @@ export function InteractiveCrystal({ structure, showCell, representation }: Inte
     return (
       <div className="viewer-unavailable" role="status">
         <span>WEBGL OFFLINE</span>
-        <strong>当前浏览器无法启动 WebGL</strong>
-        <p>仍可使用上方 OVITO 高质量渲染浏览结构。</p>
+        <strong>{t('viewer.webglFailed')}</strong>
+        <p>{t('viewer.webglFailedBody')}</p>
       </div>
     )
   }

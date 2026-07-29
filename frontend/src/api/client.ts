@@ -109,7 +109,7 @@ export async function getStructure<T = CrystalStructure>(materialId: string, sig
 async function request<T>(input: string, init?: RequestInit): Promise<T> {
   const response = await fetch(input, { ...init, headers: { Accept: 'application/json', ...init?.headers } })
   if (!response.ok) {
-    let message = `请求失败（${response.status}）`
+    let message = `Request failed (${response.status})`
     try {
       const payload = await response.json() as { detail?: { message?: string } | string }
       message = typeof payload.detail === 'string' ? payload.detail : payload.detail?.message ?? message

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '../test/render'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { SearchResponse } from '../api/client'
@@ -33,14 +33,14 @@ describe('MaterialResults', () => {
   it('exposes loading, empty, and error states', () => {
     const common = { onPage: vi.fn(), onSelect: vi.fn(), onRetry: vi.fn() }
     const { rerender } = render(<MaterialResults {...common} loading data={null} error={null} />)
-    expect(screen.getByRole('status')).toHaveTextContent('正在检索材料空间')
+    expect(screen.getByRole('status')).toHaveTextContent('Searching the materials space')
 
     rerender(<MaterialResults {...common} loading={false} data={{ ...response, items: [], total: 0, pages: 0 }} error={null} />)
-    expect(screen.getByText('没有命中结构')).toBeVisible()
+    expect(screen.getByText('No structures matched')).toBeVisible()
 
-    rerender(<MaterialResults {...common} loading={false} data={null} error="索引不可用" />)
-    expect(screen.getByRole('alert')).toHaveTextContent('索引不可用')
-    fireEvent.click(screen.getByRole('button', { name: '重新尝试' }))
+    rerender(<MaterialResults {...common} loading={false} data={null} error="Index unavailable" />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Index unavailable')
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(common.onRetry).toHaveBeenCalledOnce()
   })
 
@@ -58,9 +58,9 @@ describe('MaterialResults', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /查看 LiFePO4/ }))
+    fireEvent.click(screen.getByRole('button', { name: /View LiFePO4/ }))
     expect(onSelect).toHaveBeenCalledWith('exp-train-1')
-    fireEvent.click(screen.getByRole('button', { name: '下一页' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
     expect(onPage).toHaveBeenCalledWith(2)
   })
 })

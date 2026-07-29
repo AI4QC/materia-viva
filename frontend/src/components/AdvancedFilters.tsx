@@ -1,5 +1,6 @@
 import { ChevronDown, Filter, RotateCcw, Search } from 'lucide-react'
 
+import { useI18n, type TranslationKey } from '../i18n'
 import type { MaterialQuery } from '../lib/query'
 
 interface AdvancedFiltersProps {
@@ -9,17 +10,16 @@ interface AdvancedFiltersProps {
 }
 
 const CRYSTAL_SYSTEMS = [
-  ['triclinic', '三斜'], ['monoclinic', '单斜'], ['orthorhombic', '正交'],
-  ['tetragonal', '四方'], ['trigonal', '三方'], ['hexagonal', '六方'], ['cubic', '立方'],
+  'triclinic', 'monoclinic', 'orthorhombic', 'tetragonal', 'trigonal', 'hexagonal', 'cubic',
 ] as const
 
 const PROPERTY_OPTIONS = [
-  ['band_gap', '带隙'], ['density', '密度'], ['spacegroup', '空间群'],
-  ['formation_energy', '形成能'], ['energy_above_hull', '凸包能'],
-  ['magnetism', '磁性'], ['elasticity', '弹性'],
+  'band_gap', 'density', 'spacegroup', 'formation_energy', 'energy_above_hull',
+  'magnetism', 'elasticity',
 ] as const
 
 export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersProps) {
+  const { t } = useI18n()
   const update = (patch: Partial<MaterialQuery>) => onChange({ ...query, ...patch, page: 1 })
   const toggleDataset = (dataset: 'experimental' | 'candidate') => {
     const datasets = query.datasets.includes(dataset)
@@ -59,41 +59,41 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
     <form className="filters" onSubmit={(event) => { event.preventDefault(); onApply() }}>
       <div className="filters__heading">
         <div>
-          <span className="eyebrow"><Filter size={13} /> 参数域</span>
-          <h2>高级筛选</h2>
+          <span className="eyebrow"><Filter size={13} /> {t('filters.eyebrow')}</span>
+          <h2>{t('filters.title')}</h2>
         </div>
-        <button className="icon-button" type="button" onClick={reset} aria-label="重置高级筛选">
+        <button className="icon-button" type="button" onClick={reset} aria-label={t('filters.reset')}>
           <RotateCcw size={16} />
         </button>
       </div>
 
       <label className="field">
-        <span>化学式、化学体系或材料 ID</span>
+        <span>{t('filters.formulaLabel')}</span>
         <div className="input-with-icon">
           <Search size={15} aria-hidden="true" />
           <input
-            aria-label="化学式、化学体系或材料 ID"
+            aria-label={t('filters.formulaLabel')}
             onChange={(event) => update({ formula: event.target.value })}
-            placeholder="如 LiFePO4 / Fe-O"
+            placeholder={t('filters.formulaPlaceholder')}
             value={query.formula}
           />
         </div>
       </label>
 
       <fieldset className="field-group">
-        <legend>数据来源</legend>
+        <legend>{t('filters.datasets')}</legend>
         <label className="check-row">
           <input checked={query.datasets.includes('experimental')} onChange={() => toggleDataset('experimental')} type="checkbox" />
-          <span><i className="source-dot source-dot--exp" />仅实验结构</span>
+          <span><i className="source-dot source-dot--exp" />{t('filters.experimentalOnly')}</span>
         </label>
         <label className="check-row">
           <input checked={query.datasets.includes('candidate')} onChange={() => toggleDataset('candidate')} type="checkbox" />
-          <span><i className="source-dot source-dot--pool" />仅候选结构</span>
+          <span><i className="source-dot source-dot--pool" />{t('filters.candidateOnly')}</span>
         </label>
       </fieldset>
 
       <RangeField
-        label="PBEsol 带隙"
+        label={t('filters.gap')}
         unit="eV"
         min={query.gapMin}
         max={query.gapMax}
@@ -101,7 +101,7 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
         onMax={(gapMax) => update({ gapMax })}
       />
       <RangeField
-        label="密度"
+        label={t('filters.density')}
         unit="g·cm⁻³"
         min={query.densityMin}
         max={query.densityMax}
@@ -109,7 +109,7 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
         onMax={(densityMax) => update({ densityMax })}
       />
       <RangeField
-        label="晶胞原子数"
+        label={t('filters.nAtoms')}
         unit="atoms"
         min={query.nAtomsMin}
         max={query.nAtomsMax}
@@ -118,18 +118,18 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
       />
 
       <label className="field">
-        <span>空间群编号</span>
+        <span>{t('filters.spacegroups')}</span>
         <input
           onChange={(event) => update({ spacegroups: event.target.value })}
-          placeholder="如 62, 225"
+          placeholder={t('filters.spacegroupsPlaceholder')}
           value={query.spacegroups}
         />
       </label>
 
       <fieldset className="field-group">
-        <legend>晶系</legend>
+        <legend>{t('filters.crystalSystem')}</legend>
         <div className="chip-grid">
-          {CRYSTAL_SYSTEMS.map(([value, label]) => (
+          {CRYSTAL_SYSTEMS.map((value) => (
             <button
               className="filter-chip"
               data-active={query.crystalSystems.includes(value)}
@@ -137,86 +137,86 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
               onClick={() => toggleSystem(value)}
               type="button"
             >
-              {label}
+              {t(`system.${value}` as TranslationKey)}
             </button>
           ))}
         </div>
       </fieldset>
 
       <details className="mp-filters">
-        <summary><span>更多 MP 属性</span><ChevronDown size={14} /></summary>
+        <summary><span>{t('filters.more')}</span><ChevronDown size={14} /></summary>
         <div className="mp-filters__body">
           <RangeField
-            label="元素种类数" unit="elements"
+            label={t('filters.nElements')} unit="elements"
             min={query.nElementsMin} max={query.nElementsMax}
             onMin={(nElementsMin) => update({ nElementsMin })}
             onMax={(nElementsMax) => update({ nElementsMax })}
           />
           <RangeField
-            label="晶胞体积" unit="Å³"
+            label={t('filters.volume')} unit="Å³"
             min={query.volumeMin} max={query.volumeMax}
             onMin={(volumeMin) => update({ volumeMin })}
             onMax={(volumeMax) => update({ volumeMax })}
           />
           <RangeField
-            label="形成能 / 原子" unit="eV/atom"
+            label={t('filters.formationEnergy')} unit="eV/atom"
             min={query.formationEnergyMin} max={query.formationEnergyMax}
             onMin={(formationEnergyMin) => update({ formationEnergyMin })}
             onMax={(formationEnergyMax) => update({ formationEnergyMax })}
           />
           <RangeField
-            label="凸包能" unit="eV/atom"
+            label={t('filters.hull')} unit="eV/atom"
             min={query.energyAboveHullMin} max={query.energyAboveHullMax}
             onMin={(energyAboveHullMin) => update({ energyAboveHullMin })}
             onMax={(energyAboveHullMax) => update({ energyAboveHullMax })}
           />
           <label className="field">
-            <span>稳定性</span>
-            <select aria-label="稳定性" value={query.stability} onChange={(event) => update({ stability: event.target.value as MaterialQuery['stability'] })}>
-              <option value="">全部</option><option value="stable">稳定</option><option value="unstable">亚稳 / 不稳定</option>
+            <span>{t('filters.stability')}</span>
+            <select aria-label={t('filters.stability')} value={query.stability} onChange={(event) => update({ stability: event.target.value as MaterialQuery['stability'] })}>
+              <option value="">{t('filters.all')}</option><option value="stable">{t('filters.stable')}</option><option value="unstable">{t('filters.unstable')}</option>
             </select>
           </label>
           <label className="field">
-            <span>金属性</span>
-            <select aria-label="金属性" value={query.metallicity} onChange={(event) => update({ metallicity: event.target.value as MaterialQuery['metallicity'] })}>
-              <option value="">全部</option><option value="metal">金属</option><option value="nonmetal">非金属</option>
+            <span>{t('filters.metallicity')}</span>
+            <select aria-label={t('filters.metallicity')} value={query.metallicity} onChange={(event) => update({ metallicity: event.target.value as MaterialQuery['metallicity'] })}>
+              <option value="">{t('filters.all')}</option><option value="metal">{t('filters.metal')}</option><option value="nonmetal">{t('filters.nonmetal')}</option>
             </select>
           </label>
           <label className="field">
-            <span>磁序</span>
-            <input aria-label="磁序" placeholder="FM, AFM, NM" value={query.magneticOrderings} onChange={(event) => update({ magneticOrderings: event.target.value })} />
+            <span>{t('filters.magneticOrdering')}</span>
+            <input aria-label={t('filters.magneticOrdering')} placeholder="FM, AFM, NM" value={query.magneticOrderings} onChange={(event) => update({ magneticOrderings: event.target.value })} />
           </label>
           <RangeField
-            label="总磁矩" unit="μB"
+            label={t('filters.magnetization')} unit="μB"
             min={query.magnetizationMin} max={query.magnetizationMax}
             onMin={(magnetizationMin) => update({ magnetizationMin })}
             onMax={(magnetizationMax) => update({ magnetizationMax })}
           />
           <RangeField
-            label="体积模量" unit="GPa"
+            label={t('filters.bulkModulus')} unit="GPa"
             min={query.bulkModulusMin} max={query.bulkModulusMax}
             onMin={(bulkModulusMin) => update({ bulkModulusMin })}
             onMax={(bulkModulusMax) => update({ bulkModulusMax })}
           />
           <RangeField
-            label="剪切模量" unit="GPa"
+            label={t('filters.shearModulus')} unit="GPa"
             min={query.shearModulusMin} max={query.shearModulusMax}
             onMin={(shearModulusMin) => update({ shearModulusMin })}
             onMax={(shearModulusMax) => update({ shearModulusMax })}
           />
           <fieldset className="field-group availability-filter">
-            <legend>属性可用性</legend>
-            <div className="availability-grid">{PROPERTY_OPTIONS.map(([value, label]) => (
+            <legend>{t('filters.availability')}</legend>
+            <div className="availability-grid">{PROPERTY_OPTIONS.map((value) => (
               <label key={value}>
                 <input type="checkbox" checked={query.hasProperties.includes(value)} onChange={() => toggleProperty(value)} />
-                <span>{label}</span>
+                <span>{t(`property.${value}` as TranslationKey)}</span>
               </label>
             ))}</div>
           </fieldset>
         </div>
       </details>
-      <p className="filters__note">当前数据源没有提供的属性会保留为空；筛选语义和 API 已就绪，可直接接入后续计算结果。</p>
-      <button aria-label="应用筛选" className="primary-button" type="submit">应用筛选 <span aria-hidden="true">↗</span></button>
+      <p className="filters__note">{t('filters.note')}</p>
+      <button aria-label={t('filters.apply')} className="primary-button" type="submit">{t('filters.apply')} <span aria-hidden="true">↗</span></button>
     </form>
   )
 }
@@ -231,13 +231,14 @@ interface RangeFieldProps {
 }
 
 function RangeField({ label, unit, min, max, onMin, onMax }: RangeFieldProps) {
+  const { t } = useI18n()
   const number = (value: string) => value === '' ? undefined : Number(value)
   return (
     <fieldset className="field-group range-field">
       <legend>{label} <small>{unit}</small></legend>
-      <label><span>最小</span><input type="number" value={min ?? ''} onChange={(event) => onMin(number(event.target.value))} /></label>
+      <label><span>{t('range.min')}</span><input type="number" value={min ?? ''} onChange={(event) => onMin(number(event.target.value))} /></label>
       <span className="range-field__line" />
-      <label><span>最大</span><input type="number" value={max ?? ''} onChange={(event) => onMax(number(event.target.value))} /></label>
+      <label><span>{t('range.max')}</span><input type="number" value={max ?? ''} onChange={(event) => onMax(number(event.target.value))} /></label>
     </fieldset>
   )
 }

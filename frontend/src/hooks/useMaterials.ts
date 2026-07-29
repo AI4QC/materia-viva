@@ -20,7 +20,7 @@ export function useMaterials(query: MaterialQuery) {
         setData(await searchMaterials(query, controller.signal))
       } catch (reason) {
         if (!controller.signal.aborted) {
-          setError(reason instanceof Error ? reason.message : '检索失败')
+          setError(reason instanceof Error ? reason.message : 'Search failed')
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false)

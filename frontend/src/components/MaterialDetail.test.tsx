@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '../test/render'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { MaterialDetail } from './MaterialDetail'
@@ -31,11 +31,11 @@ describe('MaterialDetail', () => {
 
     render(<MaterialDetail materialId="exp-000001" onClose={() => undefined} />)
 
-    expect(screen.getByText('正在解析晶体结构')).toBeInTheDocument()
+    expect(screen.getByText('Parsing crystal structure')).toBeInTheDocument()
     await waitFor(() => expect(screen.getByRole('heading', { name: 'SiO2' })).toBeInTheDocument())
-    expect(screen.getByText('实验结构')).toBeInTheDocument()
+    expect(screen.getByText('Experimental')).toBeInTheDocument()
     expect(screen.getByText('Fd-3m · 227')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '下载 CIF' })).toHaveAttribute('href', '/api/materials/exp-000001/cif')
+    expect(screen.getByRole('link', { name: 'Download CIF' })).toHaveAttribute('href', '/api/materials/exp-000001/cif')
     expect(screen.getByText('train · row 17')).toBeInTheDocument()
   })
 })

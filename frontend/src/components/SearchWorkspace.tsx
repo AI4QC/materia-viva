@@ -3,6 +3,7 @@ import { Activity, Beaker, DatabaseZap, FlaskConical, Layers3 } from 'lucide-rea
 
 import type { MaterialQuery } from '../lib/query'
 import { useAtlasStats, useMaterials } from '../hooks/useMaterials'
+import { useI18n } from '../i18n'
 import { AdvancedFilters } from './AdvancedFilters'
 import { MaterialResults } from './MaterialResults'
 import { PeriodicTable, type ElementSelection } from './PeriodicTable'
@@ -14,6 +15,7 @@ interface SearchWorkspaceProps {
 }
 
 export function SearchWorkspace({ query, onQueryChange, onSelectMaterial }: SearchWorkspaceProps) {
+  const { t, locale } = useI18n()
   const { data, error, loading, refresh } = useMaterials(query)
   const stats = useAtlasStats()
   const selection: ElementSelection = Object.fromEntries([
@@ -30,34 +32,34 @@ export function SearchWorkspace({ query, onQueryChange, onSelectMaterial }: Sear
     <main>
       <section className="hero">
         <div className="hero__copy">
-          <span className="eyebrow"><Activity size={13} /> Unified crystal universe · 01</span>
-          <h1>汇聚全部晶体数据集，<br /><em>发现 822 万种独特结构。</em></h1>
-          <p>跨数据源统一整合与去重，将 99,162 个实验可合成结构和 8,125,976 个候选结构汇入同一检索空间。</p>
+          <span className="eyebrow"><Activity size={13} /> {t('hero.eyebrow')}</span>
+          <h1>{t('hero.titleLead')}<br /><em>{t('hero.titleEm')}</em></h1>
+          <p>{t('hero.subtitle')}</p>
         </div>
-        <div className="hero__metrics" aria-label="数据集规模">
-          <Metric icon={<FlaskConical />} value="99,162" label="实验收录" tone="mint" />
-          <Metric icon={<Layers3 />} value="8.13M" label="候选收录" tone="orange" />
-          <Metric icon={<DatabaseZap />} value={stats ? stats.total.toLocaleString() : '—'} label="统一去重索引" tone="plain" />
+        <div className="hero__metrics" aria-label={t('hero.metricsLabel')}>
+          <Metric icon={<FlaskConical />} value="99,162" label={t('metric.experimental')} tone="mint" />
+          <Metric icon={<Layers3 />} value="8.13M" label={t('metric.candidate')} tone="orange" />
+          <Metric icon={<DatabaseZap />} value={stats ? stats.total.toLocaleString(locale) : '—'} label={t('metric.index')} tone="plain" />
         </div>
       </section>
 
       <section className="element-lab" aria-labelledby="element-lab-title">
         <div className="section-ruler"><span>CHEMICAL SPACE</span><b>01—118</b></div>
         <div className="element-lab__heading">
-          <div><span className="eyebrow">主筛选器</span><h2 id="element-lab-title">选择化学空间</h2></div>
+          <div><span className="eyebrow">{t('lab.eyebrow')}</span><h2 id="element-lab-title">{t('lab.title')}</h2></div>
           <div className="element-legend">
-            <span><i data-tone="include" />包含</span><span><i data-tone="exclude" />排除</span><span><i />未选择</span>
+            <span><i data-tone="include" />{t('legend.include')}</span><span><i data-tone="exclude" />{t('legend.exclude')}</span><span><i />{t('legend.unselected')}</span>
           </div>
         </div>
         <PeriodicTable selection={selection} onChange={changeSelection} />
         <div className="element-lab__footer">
           <div className="selection-readout">
-            <span>IN</span><strong>{[...query.includedElements].sort().join(' · ') || '任意元素'}</strong>
-            <span>OUT</span><strong>{[...query.excludedElements].sort().join(' · ') || '无'}</strong>
+            <span>IN</span><strong>{[...query.includedElements].sort().join(' · ') || t('readout.anyElement')}</strong>
+            <span>OUT</span><strong>{[...query.excludedElements].sort().join(' · ') || t('readout.none')}</strong>
           </div>
-          <div className="mode-switch" aria-label="元素匹配方式">
-            {([['all', '全部包含'], ['any', '包含任一'], ['exact', '精确体系']] as const).map(([value, label]) => (
-              <button data-active={query.elementMode === value} key={value} onClick={() => onQueryChange({ ...query, elementMode: value, page: 1 })} type="button">{label}</button>
+          <div className="mode-switch" aria-label={t('mode.label')}>
+            {([['all', 'mode.all'], ['any', 'mode.any'], ['exact', 'mode.exact']] as const).map(([value, label]) => (
+              <button data-active={query.elementMode === value} key={value} onClick={() => onQueryChange({ ...query, elementMode: value, page: 1 })} type="button">{t(label)}</button>
             ))}
           </div>
         </div>
@@ -68,23 +70,23 @@ export function SearchWorkspace({ query, onQueryChange, onSelectMaterial }: Sear
         <div className="catalog__results">
           <div className="results-toolbar">
             <div>
-              <span className="eyebrow"><Beaker size={13} /> 匹配结构</span>
-              <h2 id="catalog-title">{data ? data.total.toLocaleString() : '—'} <small>results</small></h2>
+              <span className="eyebrow"><Beaker size={13} /> {t('catalog.eyebrow')}</span>
+              <h2 id="catalog-title">{data ? data.total.toLocaleString(locale) : '—'} <small>{t('catalog.results')}</small></h2>
             </div>
-            <label>排序
+            <label>{t('catalog.sort')}
               <select value={`${query.sort}:${query.direction}`} onChange={(event) => {
                 const [sort, direction] = event.target.value.split(':')
                 onQueryChange({ ...query, sort, direction: direction as 'asc' | 'desc', page: 1 })
               }}>
-                <option value="material_id:asc">材料编号</option>
-                <option value="formula:asc">化学式 A–Z</option>
-                <option value="pbes_gap:desc">带隙 高→低</option>
-                <option value="density:desc">密度 高→低</option>
-                <option value="n_atoms:asc">原子数 少→多</option>
-                <option value="volume:asc">体积 小→大</option>
-                <option value="formation_energy_per_atom:asc">形成能 低→高</option>
-                <option value="energy_above_hull:asc">凸包能 低→高</option>
-                <option value="spacegroup_number:asc">空间群编号</option>
+                <option value="material_id:asc">{t('sort.materialId')}</option>
+                <option value="formula:asc">{t('sort.formula')}</option>
+                <option value="pbes_gap:desc">{t('sort.gap')}</option>
+                <option value="density:desc">{t('sort.density')}</option>
+                <option value="n_atoms:asc">{t('sort.atoms')}</option>
+                <option value="volume:asc">{t('sort.volume')}</option>
+                <option value="formation_energy_per_atom:asc">{t('sort.formationEnergy')}</option>
+                <option value="energy_above_hull:asc">{t('sort.hull')}</option>
+                <option value="spacegroup_number:asc">{t('sort.spacegroup')}</option>
               </select>
             </label>
           </div>

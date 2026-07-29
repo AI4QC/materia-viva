@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '../test/render'
 import { describe, expect, it } from 'vitest'
 
 import { CrystalViewer } from './CrystalViewer'
@@ -26,18 +26,18 @@ describe('CrystalViewer', () => {
   it('uses the OVITO render as the primary crystal view and updates the camera', () => {
     render(<CrystalViewer materialId="exp-000001" structure={structure} />)
 
-    const image = screen.getByRole('img', { name: 'SiO2 的 OVITO 晶体结构渲染' })
+    const image = screen.getByRole('img', { name: 'OVITO crystal structure render of SiO2' })
     expect(image).toHaveAttribute('src', expect.stringContaining('/api/materials/exp-000001/render?'))
     expect(image).toHaveAttribute('src', expect.stringContaining('view=isometric'))
 
-    fireEvent.click(screen.getByRole('button', { name: '顶视图' }))
-    expect(screen.getByRole('img', { name: 'SiO2 的 OVITO 晶体结构渲染' })).toHaveAttribute('src', expect.stringContaining('view=top'))
+    fireEvent.click(screen.getByRole('button', { name: 'Top' }))
+    expect(screen.getByRole('img', { name: 'OVITO crystal structure render of SiO2' })).toHaveAttribute('src', expect.stringContaining('view=top'))
   })
 
   it('offers an interactive fallback without loading WebGL', () => {
     render(<CrystalViewer materialId="pool-000001" structure={structure} />)
 
-    fireEvent.click(screen.getByRole('tab', { name: '交互式 3D' }))
-    expect(screen.getByText('当前浏览器无法启动 WebGL')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: 'Interactive 3D' }))
+    expect(screen.getByText('This browser cannot start WebGL')).toBeInTheDocument()
   })
 })

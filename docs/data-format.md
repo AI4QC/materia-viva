@@ -1,5 +1,7 @@
 # Crystal Record v1
 
+**English** · [简体中文](data-format.zh-CN.md)
+
 Crystal Record v1 is the only accepted source format for MateriaViva indexing. Each
 dataset provides UTF-8 `train.csv` and `val.csv` files with this exact header:
 

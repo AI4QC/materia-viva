@@ -27,20 +27,20 @@ def main() -> None:
         page.wait_for_load_state("networkidle")
 
         assert page.title() == "MateriaViva"
-        assert page.get_by_role("link", name="MateriaViva 首页").is_visible()
-        assert page.get_by_role("heading", name=re.compile("汇聚全部晶体数据集")).is_visible()
-        assert page.get_by_text(re.compile("跨数据源统一整合与去重")).is_visible()
+        assert page.get_by_role("link", name="MateriaViva home").is_visible()
+        assert page.get_by_role("heading", name=re.compile("Every crystal dataset in one place")).is_visible()
+        assert page.get_by_text(re.compile("Unified and deduplicated across sources")).is_visible()
         body_text = page.locator("body").inner_text()
         assert "CSAgent" not in body_text
         assert "Materials Atlas" not in body_text
         assert page.locator(".periodic-table .element").count() == 118
-        assert page.get_by_text("6,219,302", exact=True).is_visible()
+        assert page.get_by_text("8,225,138", exact=True).is_visible()
         assert page.locator("html").get_attribute("data-theme") == "dark"
         assert page.locator(".element__symbol").first.evaluate("element => getComputedStyle(element).fontSize") == "19px"
         assert page.locator(".element__number").first.evaluate("element => getComputedStyle(element).fontSize") == "9.5px"
         page.screenshot(path="/tmp/materiaviva-materials-home-night.png", full_page=True)
 
-        page.get_by_role("button", name="切换到日间模式").click()
+        page.get_by_role("button", name="Switch to light mode").click()
         page.locator("html[data-theme='light']").wait_for(state="attached")
         assert page.evaluate("localStorage.getItem('mv-theme')") == "light"
         page.wait_for_function(
@@ -51,11 +51,11 @@ def main() -> None:
         page.reload()
         page.wait_for_load_state("networkidle")
         assert page.locator("html").get_attribute("data-theme") == "light"
-        assert page.get_by_role("button", name="切换到夜间模式").is_visible()
+        assert page.get_by_role("button", name="Switch to dark mode").is_visible()
 
         page.locator(".mp-filters summary").click()
-        assert page.get_by_label("稳定性").is_visible()
-        assert page.get_by_label("金属性").is_visible()
+        assert page.get_by_label("Stability").is_visible()
+        assert page.get_by_label("Metallicity").is_visible()
         page.locator(".filters").screenshot(path="/tmp/materiaviva-materials-filters.png")
         page.locator(".mp-filters summary").click()
 
@@ -66,9 +66,9 @@ def main() -> None:
         assert page.get_by_role("button", name=re.compile(r"Oxygen \(O\): include")).is_visible()
 
         page.locator(".material-card__open").first.click()
-        dialog = page.get_by_role("dialog", name="材料详情")
+        dialog = page.get_by_role("dialog", name="Material detail")
         dialog.wait_for(state="visible")
-        image = dialog.get_by_role("img", name=re.compile("OVITO 晶体结构渲染"))
+        image = dialog.get_by_role("img", name=re.compile("OVITO crystal structure render"))
         image.wait_for(state="visible")
         page.wait_for_function(
             "element => element.complete && element.naturalWidth > 0",
@@ -77,13 +77,13 @@ def main() -> None:
         page.wait_for_timeout(400)
         page.screenshot(path="/tmp/materiaviva-materials-detail.png", full_page=False)
 
-        dialog.get_by_role("tab", name="交互式 3D").click()
+        dialog.get_by_role("tab", name="Interactive 3D").click()
         dialog.locator("canvas").wait_for(state="visible")
         page.wait_for_timeout(1_000)
         page.screenshot(path="/tmp/materiaviva-materials-interactive.png", full_page=False)
-        dialog.get_by_role("button", name="关闭材料详情").click()
+        dialog.get_by_role("button", name="Close material detail").click()
         dialog.wait_for(state="detached")
-        page.get_by_role("button", name="切换到夜间模式").click()
+        page.get_by_role("button", name="Switch to dark mode").click()
         page.locator("html[data-theme='dark']").wait_for(state="attached")
         assert page.evaluate("localStorage.getItem('mv-theme')") == "dark"
 
@@ -91,7 +91,7 @@ def main() -> None:
         mobile.goto(BASE_URL)
         mobile.wait_for_load_state("networkidle")
         assert mobile.locator(".periodic-table .element").count() == 118
-        assert mobile.get_by_role("button", name=re.compile("切换到(日间|夜间)模式")).is_visible()
+        assert mobile.get_by_role("button", name=re.compile("Switch to (light|dark) mode")).is_visible()
         mobile.screenshot(path="/tmp/materiaviva-materials-mobile.png", full_page=True)
         mobile.close()
         browser.close()

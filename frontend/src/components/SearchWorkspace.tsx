@@ -31,12 +31,12 @@ export function SearchWorkspace({ query, onQueryChange, onSelectMaterial }: Sear
       <section className="hero">
         <div className="hero__copy">
           <span className="eyebrow"><Activity size={13} /> Unified crystal universe · 01</span>
-          <h1>汇聚全部晶体数据集，<br /><em>发现 621 万种独特结构。</em></h1>
-          <p>跨数据源统一整合与去重，将 99,162 个实验可合成结构和 6,120,140 个候选结构汇入同一检索空间。</p>
+          <h1>汇聚全部晶体数据集，<br /><em>发现 822 万种独特结构。</em></h1>
+          <p>跨数据源统一整合与去重，将 99,162 个实验可合成结构和 8,125,976 个候选结构汇入同一检索空间。</p>
         </div>
         <div className="hero__metrics" aria-label="数据集规模">
           <Metric icon={<FlaskConical />} value="99,162" label="实验收录" tone="mint" />
-          <Metric icon={<Layers3 />} value="6.12M" label="候选收录" tone="orange" />
+          <Metric icon={<Layers3 />} value="8.13M" label="候选收录" tone="orange" />
           <Metric icon={<DatabaseZap />} value={stats ? stats.total.toLocaleString() : '—'} label="统一去重索引" tone="plain" />
         </div>
       </section>

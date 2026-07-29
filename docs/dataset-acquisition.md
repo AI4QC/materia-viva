@@ -234,6 +234,16 @@ curl -X POST 'https://nomad-lab.eu/prod/v1/api/v1/entries/query' \
 
 这些数据主要由同一体系的弛豫、扰动、分子动力学或反应路径中间构型组成，不符合 MateriaViva 当前“独特材料结构 + 对应性质”的采集范围，因此不下载、不转换、不计入统一结构库。旧 SSD 中已存在的 OMat24 全量归档仅保留原文件和 provenance 登记，不参与入库。对于同时提供初始结构和最终弛豫结构的材料数据库，可以保留两个端点并标注 `structure_role`；中间轨迹帧一律排除，端点间是否结构等价留到后续统一指纹去重阶段判断。
 
+### ELEMENTA 与 ELEMENTA Spin
+
+[ELEMENTA](https://huggingface.co/datasets/kairosmaterial/ELEMENTA)（[论文](https://www.kairosmaterials.com/papers/ELEMENTA.pdf)）同样是轨迹数据，但它按“每条弛豫一个终点”提供了明确的轨迹边界和收敛信息，因此按上一段的端点规则接入：只取每条优化轨迹的最后一个 ionic step，中间帧全部丢弃。核心包 38,808,603 帧对应 2,028,008 条弛豫，spin 包 4,713,110 帧对应 207,185 条弛豫，端点合计 2,235,193 个。
+
+轨迹身份是 `(material, structure, spin)` 三元组，不是 `material` 单字段。两个包的标注方式并不一致：核心包和 spin 包开头把磁性状态写进 `material`（`Cl2V_01_spin_00`）并另有 `spin` 字段，而 spin 包后段改为一个组成共用一个 `material`（`Al12Mn4Y4_01`），仅靠 `structure`（`Al12Mn4Y4_01_mag24`）区分，且不再有 `spin` 字段。只按 `material` 分组会把相邻的多条磁性弛豫并成一条，spin 包会因此丢掉约 62% 的轨迹。提取脚本同时以 `ionic_step` 回落作为轨迹边界的兜底判据。
+
+ELEMENTA Spin 对同一几何做多种磁性初始化，这些弛豫终点的 BAWL 指纹相同；去重时按能量取最低的一条作为代表，其余按重复结构合并。ELEMENTA 只标注总能量、受力、应力和磁矩，没有 PBEsol 带隙，因此入库行的 `pbes_gap` 留空。
+
+许可为 CC BY-NC 4.0，比 CC BY 更严格，接入后整个公开快照按非商业条款发布，见 README 的版权和再分发边界。
+
 ## 5. 需要用户操作或受许可限制
 
 ### MPDS / Pauling File

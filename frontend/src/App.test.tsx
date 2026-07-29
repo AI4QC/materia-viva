@@ -33,7 +33,7 @@ test('presents the database as MateriaViva with a unified deduplicated-data prom
   expect(screen.getAllByText('MateriaViva').length).toBeGreaterThan(0)
   expect(screen.getAllByText('MateriaViva').length).toBeGreaterThan(0)
   expect(screen.getByRole('heading', {
-    name: /汇聚全部晶体数据集，\s*发现 621 万种独特结构。/,
+    name: /汇聚全部晶体数据集，\s*发现 822 万种独特结构。/,
   })).toBeInTheDocument()
   expect(screen.getByText(/跨数据源统一整合与去重/)).toBeInTheDocument()
   expect(screen.queryByText(/CSAgent/i)).not.toBeInTheDocument()

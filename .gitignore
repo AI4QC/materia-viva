@@ -122,6 +122,7 @@ Thumbs.db
 .aider*
 .claude/
 .cline/
+.codegraph/
 .codex/
 .continue/
 .cursor/

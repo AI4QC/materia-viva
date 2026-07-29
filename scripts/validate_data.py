@@ -17,7 +17,7 @@ from materials_api.data_contract import validate_source_dataset, write_manifest 
 from materials_api.layout import RepositoryLayout  # noqa: E402
 
 
-EXPECTED_COUNTS = {"experimental": 99_162, "candidate": 6_120_140}
+EXPECTED_COUNTS = {"experimental": 99_162, "candidate": 8_125_976}
 LAYOUT = RepositoryLayout.from_root(PROJECT_ROOT)
 
 

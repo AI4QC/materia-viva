@@ -9,7 +9,7 @@ The Git repository and large data are intentionally separated:
 /home/zhilong/SSD/workspace_data/materia-viva/data/
 ├── sources/
 │   ├── experimental/                        99,162 records
-│   └── candidate/                           6,120,140 records
+│   └── candidate/                           8,125,976 records
 ├── index/                                   SQLite + compressed CIF blob
 ├── manifests/                               Crystal Record v1 reports
 └── raw/                                     rebuild and provenance inputs

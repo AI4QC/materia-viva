@@ -6,17 +6,31 @@ pull down to tweak a chart. This carves out a slice that is small enough to
 commit-and-forget but still exercises every code path the UI has: every source,
 every property name, every curve type, every material family, both datasets.
 
-Selection is a greedy set cover, not a random sample. A random 1,000 materials
-out of 13.5 million would miss almost every rare property -- there are 165
-property names and 54 sources, and the long tail (obelix's 83 rows, tcod's 357)
-would never appear, so the very panels most likely to be broken are the ones a
-random slice cannot show you. So:
+Selection is deliberately NOT a random sample, on two counts.
+
+*Coverage.* A random 1,000 materials out of 13.5 million would miss almost every
+rare property -- there are 166 property names and 54 sources, and the long tail
+(obelix's 112 rows, tcod's 357) would never appear, so the panels most likely to
+be broken are the ones a random slice cannot show you.
+
+*Density.* The pool's typical material is sparse: only 298,662 of 13.5M carry
+any curve at all. Sampling representatively guarantees the experience this slice
+exists to avoid -- clicking a material and finding three numbers and no spectra.
+So the remaining budget goes to the materials that light up the most UI, ranked
+by curve types, then contributing sources, then property names.
+
+So:
 
 1. cover every (property, source) pair that exists at all;
 2. cover every (curve_type, source) pair;
-3. cover every material_family, crystal system and dataset;
-4. top up to --limit with a spread across the pool so listings, facets and
-   pagination look like the real thing rather than a museum of edge cases.
+3. cover every material_family, crystal system, dataset and element;
+4. fill the rest of --limit with the richest materials in the pool.
+
+At --limit 1000 that floor lands around seven curve types, eight sources and
+forty-odd property names per material. Raising the limit *lowers* it: only 1,049
+materials in the entire pool carry seven or more curve types, so 2,000 would
+admit six-type materials. And "every material has every property" is not
+reachable at any size -- exactly three materials have all ten curve types.
 
 Output is a directory holding materials.sqlite + structures.blob + curves.blob,
 byte-compatible with what scripts/serve.py --runtime expects. Primary keys are
@@ -34,7 +48,7 @@ import shutil
 import sqlite3
 import sys
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -143,19 +157,66 @@ def choose_materials(db: sqlite3.Connection, limit: int) -> list[int]:
     print(f"  + elements: {len(all_elements)} covered, {len(chosen):,} materials",
           flush=True)
 
-    # Top up with a deterministic spread so listings and facets look normal.
-    # Ordering by pk % a large prime scatters across the pool without random().
+    # Fill the remaining budget with the RICHEST materials, not a random spread.
+    #
+    # A slice exists to develop the UI against, and the thing that makes that
+    # painful is opening a material and finding three properties and no spectra.
+    # A representative sample guarantees exactly that, because the pool's median
+    # material is sparse: only 298,662 of 13.5M carry any curve at all, and just
+    # 1,049 carry seven or more curve types. So rank by how much of the UI a
+    # material can actually light up and take the top of that ranking.
+    #
+    # Note "every material has every property" is not reachable at any slice
+    # size: exactly 3 materials in the whole pool have all 10 curve types.
     if len(chosen) < limit:
-        need = limit - len(chosen)
-        for (pk,) in db.execute(
-            "SELECT pk FROM materials ORDER BY (pk * 2654435761) % 4294967296 LIMIT ?",
-            (need + len(chosen),),
+        print("  ranking candidates by richness...", flush=True)
+        curve_types: dict[int, set] = defaultdict(set)
+        curve_count: Counter = Counter()
+        for pk, ctype in db.execute(
+            "SELECT material_pk, curve_type FROM material_curves"
         ):
+            curve_types[pk].add(ctype)
+            curve_count[pk] += 1
+        # Only materials with several curve types are worth scoring against the
+        # 121M-row property table; everything else cannot reach the top anyway.
+        pool = {pk for pk, kinds in curve_types.items() if len(kinds) >= 3}
+        prop_sources: dict[int, set] = defaultdict(set)
+        prop_names: dict[int, set] = defaultdict(set)
+        for pk, prop, src in db.execute(
+            "SELECT material_pk, property_id, source_id FROM material_properties"
+        ):
+            if pk in pool:
+                prop_sources[pk].add(src)
+                prop_names[pk].add(prop)
+        ranked = sorted(
+            pool,
+            key=lambda pk: (
+                len(curve_types[pk]),
+                len(prop_sources.get(pk, ())),
+                len(prop_names.get(pk, ())),
+                curve_count[pk],
+            ),
+            reverse=True,
+        )
+        filled: list[int] = []
+        for pk in ranked:
             if pk not in seen:
                 seen.add(pk)
                 chosen.append(pk)
+                filled.append(pk)
                 if len(chosen) >= limit:
                     break
+        if filled:
+            # Report the FILL's floor, not the whole slice's: the cover and
+            # element passes deliberately pick sparse materials (obelix has 60
+            # materials in the entire pool and none of them are rich), so
+            # including them would understate what the ranking achieved.
+            print(
+                f"  richness fill: {len(filled):,} materials, poorest has"
+                f" {min(len(curve_types[pk]) for pk in filled)} curve types /"
+                f" {min(len(prop_sources.get(pk, ())) for pk in filled)} sources",
+                flush=True,
+            )
     print(f"  final: {len(chosen):,} materials ({time.time()-started:.0f}s)", flush=True)
     return chosen
 

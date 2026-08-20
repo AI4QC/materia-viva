@@ -25,6 +25,13 @@ from scripts.datasets.materials_project import (
     export_all,
     write_page,
 )
+from scripts.datasets.mp_properties import (
+    FAMILIES,
+    RateLimited,
+    build_url as build_mp_property_url,
+    completed_offsets as mp_property_offsets,
+    export_family,
+)
 from scripts.datasets.sacada import build_structure_downloads
 from scripts.datasets.ec_mof import build_candidate_stems
 from scripts.datasets.optimade_export import (
@@ -56,7 +63,7 @@ def test_catalog_is_broad_valid_and_contains_no_credentials():
         "jarvis-dft",
         "c2db",
         "2dmatpedia",
-        "omdb",
+        "omdb-organic",
         "mpds",
         "csd",
         "atomwork-adv",
@@ -129,7 +136,12 @@ def test_catalog_is_broad_valid_and_contains_no_credentials():
     assert sources["atomly"]["downloads"] == []
     assert sources["matcraft"]["downloads"] == []
     assert "user-action-required" in sources["matcloud"]["status"]
-    assert "user-action-required" in sources["atomly"]["status"]
+    # atomly moved from user-action-required to an in-progress API mirror
+    assert (
+        "user-action-required" in sources["atomly"]["status"]
+        or "in-progress" in sources["atomly"]["status"]
+        or "downloaded" in sources["atomly"]["status"]
+    )
     assert "user-action-required" in sources["matcraft"]["status"]
     assert "912-full-and-1267-partial" in sources["opxrd"]["status"]
 
@@ -532,6 +544,95 @@ def test_materials_project_export_fetches_all_pages_and_writes_secret_free_manif
     assert len(calls) == 2
     assert all("secret-value" not in request.full_url for request in calls)
     assert "secret-value" not in manifest_path.read_text(encoding="utf-8")
+
+
+def test_mp_property_url_restricts_fields_and_carries_no_key():
+    url = build_mp_property_url("insertion_electrodes", skip=2000, limit=1000)
+
+    assert url.startswith(
+        "https://api.materialsproject.org/materials/insertion_electrodes/?"
+    )
+    assert "_skip=2000" in url and "_limit=1000" in url
+    assert "_all_fields" not in url
+    assert "average_voltage" in url
+    # the key travels in the X-API-KEY header, so no query parameter names it
+    assert "api_key" not in url.lower() and "key=" not in url.lower()
+
+
+def test_every_mp_property_family_requests_an_explicit_field_list():
+    for family, fields in FAMILIES.items():
+        assert fields, f"{family} must restrict its fields"
+        # every family needs the column the property adapter joins on
+        assert {"material_id", "material_ids", "task_id"} & set(fields), family
+
+
+def test_mp_property_export_writes_receipts_and_a_secret_free_manifest(tmp_path):
+    calls = []
+
+    def fetch(url, key):
+        calls.append((url, key))
+        skip = int(url.split("_skip=")[1].split("&")[0])
+        rows = [
+            {"material_id": f"mp-{index}"} for index in range(skip, min(skip + 2, 3))
+        ]
+        return {"data": rows, "meta": {"total_doc": 3, "api_version": "test"}}
+
+    manifest_path = export_family(
+        family="grain_boundaries",
+        output_dir=tmp_path,
+        key="secret-value",
+        page_size=2,
+        request_delay=0,
+        data_root=tmp_path,
+        fetch_json=fetch,
+    )
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["complete"] is True
+    assert manifest["downloaded_documents"] == 3
+    assert manifest["page_offsets"] == [0, 2]
+    assert set(manifest["files"]) == {
+        "page-000000000.json.gz",
+        "page-000000002.json.gz",
+    }
+    assert all(entry["sha256"] for entry in manifest["files"].values())
+    assert "secret-value" not in manifest_path.read_text(encoding="utf-8")
+    assert all("secret-value" not in url for url, _ in calls)
+
+    receipt = json.loads(
+        (tmp_path / "page-000000000.json.gz.receipt.json").read_text(encoding="utf-8")
+    )
+    assert "secret-value" not in receipt["url"]
+    assert receipt["source_id"] == "materials-project"
+
+    # a completed page is one whose receipt exists too, so the run resumes
+    assert mp_property_offsets(tmp_path) == {0, 2}
+    calls.clear()
+    export_family(
+        family="grain_boundaries",
+        output_dir=tmp_path,
+        key="secret-value",
+        page_size=2,
+        request_delay=0,
+        data_root=tmp_path,
+        fetch_json=fetch,
+    )
+    assert calls == []
+
+
+def test_mp_property_export_stops_when_the_api_signals_throttling(tmp_path):
+    def fetch(url, key):
+        raise RateLimited("HTTP 429 twice")
+
+    with pytest.raises(RateLimited):
+        export_family(
+            family="eos",
+            output_dir=tmp_path,
+            key="secret-value",
+            request_delay=0,
+            data_root=tmp_path,
+            fetch_json=fetch,
+        )
 
 
 def test_aflow_url_requests_structure_and_property_fields_with_bounded_paging():

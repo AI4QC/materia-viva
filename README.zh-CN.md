@@ -7,7 +7,7 @@
 **简体中文** · [English](README.md)
 
 [![CI](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml)
-[![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2Fmateria-viva-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/materia-viva)
+[![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2FMateriaViva-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/MateriaViva)
 
 > **材料发现不该从逐个调用数据库 API 和维护多套账户开始。** MateriaViva 用一个 Hugging Face
 > 下载入口交付经过统一、去重和许可审查的数据快照。
@@ -49,7 +49,18 @@ OVITO/Tachyon 检查结构。
 
 | 实验晶体结构 | 计算候选结构 | 统一检索记录 |
 |---:|---:|---:|
-| 99,162 | 8,125,976 | 8,225,138 |
+| 357,127 | 13,186,150 | 13,543,277 |
+
+结构池之上另有跨数据库性质层：来自 **54 个已整合来源库**、覆盖 **166 种性质**的
+**121,620,776 条性质行**，每个数值都保留来源数据库、原始记录号和计算 / 测量方法；
+12,812,918 个材料至少携带一条跨库性质，其中 **1,190,447 个结构由两个及以上来源库共同
+贡献**——这个重叠正是去重换来的东西。非标量数据——**1,198,897 条已存谱线**（能带、
+声子 / 电子 DOS、粉末 XRD、XAS、拉曼、红外、热导）以及全池按需模拟 XRD——存放于并行
+曲线存储。空间群覆盖全池 99.996%。MOF、COF、沸石、分子晶体、二维材料、碳同素异形体等
+非常规晶体类别均有标注并可筛选。
+详见 [`docs/property-integration.zh-CN.md`](docs/property-integration.zh-CN.md)。
+
+以上为快照数字；运行中实例的 `curl -s http://127.0.0.1:8000/api/stats` 才是准数。
 
 ### 已整合的数据库
 
@@ -94,7 +105,7 @@ MateriaViva 的长期目标不是维护一次性的静态合集，而是持续�
 完成许可判断、格式映射、结构去重和质量检查后，再发布新的统一快照。
 
 > [!IMPORTANT]
-> 自动发现和自动整合功能尚未实现。当前 100 个来源仍由人工发现和审核，再由可恢复的采集
+> 自动发现和自动整合功能尚未实现。当前 102 个来源仍由人工发现和审核，再由可恢复的采集
 > 脚本接入。README 将待开发能力与当前实现分开描述。
 
 计划中的闭环是：
@@ -120,18 +131,32 @@ MateriaViva 的长期目标不是维护一次性的静态合集，而是持续�
 
 ## 一次下载，而不是重复抓取一百个数据库
 
-在公开发布层，MateriaViva 取消“由每个用户分别调用传统数据库批量 API 或登录来源账户”的使用
-方式。所有明确允许开放再分发且通过检查的数据，统一整理为带版本、哈希、来源清单和许可
-清单的快照，直接发布在：
+在发布层，MateriaViva 取消“由每个用户分别调用传统数据库批量 API 或登录来源账户”的使用
+方式。索引整理为带版本、哈希、来源清单和许可清单的数据集，发布在：
 
-### [Hugging Face Dataset · AI4QC/materia-viva](https://huggingface.co/datasets/AI4QC/materia-viva)
+### [Hugging Face Dataset · AI4QC/MateriaViva](https://huggingface.co/datasets/AI4QC/MateriaViva)（私有）
 
-GitHub 仓库只保存代码、数据模式、来源目录、文档、测试和演示资产，不包含数据库文件、
-统一索引、渲染缓存或未完成下载。
+**该仓库是私有的，不是开放再分发快照。** 它包含完整的工作索引，其中含有再分发受限的来源：
+ICSD（FIZ Karlsruhe 按订阅者授权）、以及 CC BY-NC / 学术条款的 ELEMENTA、GNoME 和 AFLOW。
+访问按人授予。要做公开快照，必须先剔除这些来源——每一条性质行都记录了 `source_id`，
+所以那个过滤只是一个 `WHERE` 子句，但**目前发布的内容尚未应用它**。
+
+**代码在 GitHub，数据在 Hugging Face。** GitHub 仓库只保存代码、数据模式、来源目录、文档、
+测试和演示资产，不包含数据库文件、统一索引、渲染缓存或未完成下载。数据集发布两个变体：
+
+| 变体 | 体积 | 用途 |
+|---|---:|---|
+| `index/` | 约 47 GB | 完整索引，线上服务使用 |
+| `slice/` | 数十 MB | 不下载完整数据也能开发网页前端 |
+
+切片**不是随机抽样**，而是贪心集合覆盖：保证每个数据源、每个性质名、每种曲线类型、
+每个结构族都至少出现一次。从一千三百万条里随机取一千条，几乎必然漏掉所有稀有性质，
+而那恰恰是最可能坏掉的前端面板——见 [`scripts/export_slice.py`](scripts/export_slice.py)。
 
 ### 版权和再分发边界
 
-MateriaViva 整体按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商业使用。
+MateriaViva 自身的代码按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商业使用。整合进来的数据
+沿用各自来源的条款，且更严格。
 
 - CC0、CC BY、CC BY-SA、CC BY-NC 等明确允许再分发的数据可以进入公开快照，同时保留原作者、
   版本、许可证和引用要求。
@@ -144,9 +169,9 @@ MateriaViva 整体按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商业使用�
 
 ## 当前覆盖范围
 
-机器可读目录目前登记 101 个晶体结构或性质来源。“登记”不等于“公开下载完成”：
+机器可读目录目前登记 102 个晶体结构或性质来源。“登记”不等于“公开下载完成”：
 
-- 58 个已完成采集或复用本机已有数据；
+- 59 个已完成采集或复用本机已有数据；
 - 18 个仅登记，或仍在等待合适的官方批量采集方案；
 - 22 个需要账户、提供方授权或付费许可，只保留目录信息；
 - 3 个轨迹数据源按项目范围排除；
@@ -163,8 +188,25 @@ MateriaViva 整体按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商业使用�
 ```bash
 git clone https://github.com/AI4QC/materia-viva.git
 cd materia-viva
+pip install -e backend  # 或：pip install -r requirements.txt
 
-# 从 Hugging Face 下载数据后，把本地数据根目录链接到仓库
+# 小切片——开发前端够用
+python scripts/fetch_index.py slice
+python scripts/serve.py --runtime data/slice
+
+# 或完整索引（约 47 GB；下载期间需要约两倍空闲空间，
+# 因为文件链接到位之前 hub 缓存里还有一份）
+python scripts/fetch_index.py full
+python scripts/serve.py --runtime data/index
+```
+
+然后打开 <http://127.0.0.1:8000>。`--runtime` 接受任何含有 `materials.sqlite`、
+`structures.blob` 和 `curves.blob` 的目录，所以在切片和完整索引之间切换只是换一个命令行参数，
+不需要重新构建。
+
+如果数据已经在别的盘上，直接链接进来而不必下载：
+
+```bash
 export MV_DATA_ROOT=/path/on/ssd/materia-viva-data
 ln -s "$MV_DATA_ROOT" data
 ```
@@ -174,12 +216,17 @@ ln -s "$MV_DATA_ROOT" data
 
 ```text
 data/
-├── sources/
-│   ├── experimental/        99,162 条实验结构
-│   └── candidate/           8,125,976 条候选结构
-├── index/                   SQLite 检索库与压缩 CIF blob
+├── sources/                 各数据集的结构导出
+├── index/                   完整索引：materials.sqlite + structures.blob + curves.blob
+├── slice/                   开发切片，同样三个文件
 ├── manifests/               Crystal Record v1 校验报告
 └── raw/                     来源归档与 provenance
+```
+
+这里不写具体数量——本项目里每一个写死的数字都至少过期过一次。要看当前值就问运行中的实例：
+
+```bash
+curl -s http://127.0.0.1:8000/api/stats
 ```
 
 本机 SSD 迁移和旧路径兼容关系见 [`docs/storage-layout.zh-CN.md`](docs/storage-layout.zh-CN.md)。
@@ -225,7 +272,7 @@ export MATERIALS_OVITO_PYTHON=/path/to/ovito-enabled/python
 
 未配置 OVITO 时，浏览器交互式 3D 仍可使用，服务端 Tachyon 图片渲染不可用。
 
-校验全部 8,225,138 条发布记录并构建索引：
+校验全部 13,077,781 条发布记录并构建索引（性质层随后用 scripts/properties/run_all.py 重建）：
 
 ```bash
 make validate-data

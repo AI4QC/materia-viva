@@ -166,6 +166,37 @@ def test_stats_falls_back_to_material_rows_without_build_metadata(tmp_path):
         "magnetism": 1,
         "elasticity": 1,
     }
+    # Absent metadata must degrade to "unknown", never to a live COUNT(*):
+    # material_properties runs to nine figures and /api/stats is on the landing
+    # page's critical path.
+    assert stats["property_rows"] is None
+    assert stats["curve_count"] is None
+
+
+def test_stats_reports_cached_property_and_curve_counts(tmp_path):
+    with _repository(tmp_path) as repo:
+        repo.connection.executemany(
+            "INSERT OR REPLACE INTO metadata(key, value) VALUES (?, ?)",
+            (("property_row_count", "121106364"), ("curve_count", "1198897")),
+        )
+        repo.connection.commit()
+        stats = repo.stats()
+
+    assert stats["property_rows"] == 121_106_364
+    assert stats["curve_count"] == 1_198_897
+
+
+def test_stats_ignores_unparsable_cached_counts(tmp_path):
+    with _repository(tmp_path) as repo:
+        repo.connection.executemany(
+            "INSERT OR REPLACE INTO metadata(key, value) VALUES (?, ?)",
+            (("property_row_count", "not-a-number"), ("curve_count", "")),
+        )
+        repo.connection.commit()
+        stats = repo.stats()
+
+    assert stats["property_rows"] is None
+    assert stats["curve_count"] is None
 
 
 def test_unfiltered_search_uses_precomputed_dataset_counts(tmp_path):
@@ -181,3 +212,73 @@ def test_unfiltered_search_uses_precomputed_dataset_counts(tmp_path):
     assert result.pages == 25
     assert result.facets["datasets"] == {"candidate": 30, "experimental": 20}
     assert len(result.items) == 2
+
+
+def test_search_filters_material_family_including_bulk(tmp_path):
+    with _repository(tmp_path) as repo:
+        repo.add_material(_record(
+            "pool-6", "C2H8N2O4Zn", ("Zn", "O", "C", "H", "N"),
+            material_family="mof",
+        ))
+        mofs = repo.search(SearchQuery(material_families=("mof",)))
+        bulk = repo.search(SearchQuery(material_families=("bulk",)))
+        both = repo.search(SearchQuery(material_families=("mof", "bulk")))
+
+    assert _ids(mofs) == ["pool-6"]
+    assert "pool-6" not in _ids(bulk)
+    assert len(_ids(bulk)) == 5
+    assert len(_ids(both)) == 6
+
+
+def test_search_rejects_unknown_material_family(tmp_path):
+    import pytest
+
+    with _repository(tmp_path) as repo:
+        with pytest.raises(ValueError):
+            repo.search(SearchQuery(material_families=("perovskite",)))
+
+
+def test_detail_returns_per_source_properties_and_refs(tmp_path):
+    with _repository(tmp_path) as repo:
+        connection = repo.connection
+        connection.execute(
+            "INSERT INTO source_defs (key, name, license, url) VALUES "
+            "('jarvis-dft', 'JARVIS-DFT', 'NIST terms', 'https://jarvis.nist.gov/')"
+        )
+        connection.execute(
+            "INSERT INTO property_defs (name, unit, kind) VALUES "
+            "('band_gap', 'eV', 'num')"
+        )
+        pk = connection.execute(
+            "SELECT pk FROM materials WHERE material_id = 'exp-1'"
+        ).fetchone()[0]
+        connection.execute(
+            "INSERT INTO material_properties VALUES (?, 1, 1, 'JVASP-7', 2.05, "
+            "NULL, 'OptB88vdW')",
+            (pk,),
+        )
+        connection.execute(
+            "INSERT INTO material_source_refs VALUES (?, 1, 'JVASP-7', 'hash')",
+            (pk,),
+        )
+        connection.commit()
+
+        detail = repo.get("exp-1")
+        other = repo.get("pool-2")
+
+    assert detail is not None
+    assert detail["properties"] == [{
+        "property": "band_gap", "unit": "eV", "kind": "num",
+        "value_num": 2.05, "value_text": None, "method": "OptB88vdW",
+        "source": "jarvis-dft", "source_name": "JARVIS-DFT",
+        "source_license": "NIST terms", "source_url": "https://jarvis.nist.gov/",
+        "native_id": "JVASP-7",
+    }]
+    assert detail["source_refs"] == [{
+        "source": "jarvis-dft", "source_name": "JARVIS-DFT",
+        "source_license": "NIST terms", "source_url": "https://jarvis.nist.gov/",
+        "native_id": "JVASP-7", "match_via": "hash",
+    }]
+    assert other is not None
+    assert other["properties"] == []
+    assert other["source_refs"] == []

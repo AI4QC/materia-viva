@@ -14,6 +14,7 @@ from .models import ApiStatus, SearchResponse, parse_csv, parse_element_csv
 from .ovito_renderer import OvitoRenderError, OvitoRenderService, RenderOptions
 from .repository import MaterialRepository, SearchQuery
 from .structure import StructureParseError, parse_cif_structure
+from .xrd import XrdComputeError, simulate_xrd
 
 
 def _error(status: int, code: str, message: str) -> HTTPException:
@@ -92,6 +93,7 @@ def create_app(
         stability: Literal["stable", "unstable"] | None = None,
         metallicity: Literal["metal", "nonmetal"] | None = None,
         magnetic_orderings: str = "",
+        material_families: str = "",
         magnetization_min: float | None = None,
         magnetization_max: float | None = None,
         bulk_modulus_min: float | None = None,
@@ -131,6 +133,7 @@ def create_app(
                 stability=stability,
                 metallicity=metallicity,
                 magnetic_orderings=parse_csv(magnetic_orderings),
+                material_families=parse_csv(material_families),
                 magnetization_min=magnetization_min,
                 magnetization_max=magnetization_max,
                 bulk_modulus_min=bulk_modulus_min,
@@ -171,6 +174,33 @@ def create_app(
             return parse_cif_structure(cif)
         except StructureParseError as exc:
             raise _error(422, "structure_parse_failed", str(exc)) from exc
+
+    @app.get("/api/materials/{material_id}/xrd")
+    async def material_xrd(material_id: str, two_theta_max: float = Query(90.0, ge=20.0, le=160.0)):
+        _, cif = _material_and_cif(material_id)
+        try:
+            return simulate_xrd(cif, two_theta_max=two_theta_max)
+        except XrdComputeError as exc:
+            raise _error(422, "xrd_simulation_failed", str(exc)) from exc
+
+    @app.get("/api/materials/{material_id}/curves/{curve_id}")
+    async def material_curve(material_id: str, curve_id: int):
+        with repository() as repo:
+            found = repo.read_curve(material_id, curve_id)
+        if found is None:
+            raise _error(404, "curve_not_found", f"Unknown curve: {curve_id}")
+        fmt, payload = found
+        if fmt == "svg":
+            return Response(
+                content=payload,
+                media_type="image/svg+xml",
+                headers={"Cache-Control": "public, max-age=31536000, immutable"},
+            )
+        return Response(
+            content=payload,
+            media_type="application/json",
+            headers={"Cache-Control": "public, max-age=31536000, immutable"},
+        )
 
     @app.get("/api/materials/{material_id}/cif")
     async def material_cif(material_id: str):

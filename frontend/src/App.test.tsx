@@ -5,9 +5,11 @@ import App from './App'
 
 vi.mock('./hooks/useMaterials', () => ({
   useAtlasStats: () => ({
-    total: 8_225_138,
-    datasets: { experimental: 99_162, candidate: 8_125_976 },
+    total: 13_504_703,
+    datasets: { experimental: 357_124, candidate: 13_147_579 },
     property_counts: {},
+    property_rows: 121_106_364,
+    curve_count: 1_198_897,
     ovito_available: true,
   }),
   useMaterials: () => ({
@@ -32,10 +34,19 @@ test('presents the database as MateriaViva with a unified deduplicated-data prom
   expect(screen.getByRole('link', { name: 'MateriaViva home' })).toBeInTheDocument()
   expect(screen.getAllByText('MateriaViva').length).toBeGreaterThan(0)
   expect(screen.getAllByText('MateriaViva').length).toBeGreaterThan(0)
+  // Driven by the mocked /api/stats payload, never by a literal in the copy:
+  // hardcoded figures here silently went stale every time the pool grew.
   expect(screen.getByRole('heading', {
-    name: /Every crystal dataset in one place,\s*discover 8\.22 million unique structures\./,
+    name: /Every crystal dataset in one place,\s*discover 13\.5 million unique structures\./,
   })).toBeInTheDocument()
-  expect(screen.getByText(/Unified and deduplicated across sources/)).toBeInTheDocument()
+  expect(
+    screen.getByText(/357,124 experimental and 13,147,579 candidate structures/),
+  ).toBeInTheDocument()
+  expect(screen.getByText(/121\.1 million cross-database property records/)).toBeInTheDocument()
+  expect(screen.getByText('357,124')).toBeInTheDocument()
+  expect(screen.getByText('13,147,579')).toBeInTheDocument()
+  expect(screen.queryByText('99,162')).not.toBeInTheDocument()
+  expect(screen.queryByText('8.13M')).not.toBeInTheDocument()
   expect(screen.queryByText(/CSAgent/i)).not.toBeInTheDocument()
   expect(screen.queryByText(/Materials Atlas/i)).not.toBeInTheDocument()
 })

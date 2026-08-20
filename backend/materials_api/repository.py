@@ -44,6 +44,12 @@ PUBLIC_COLUMNS = (
     "lattice_beta", "lattice_gamma", "formation_energy_per_atom",
     "energy_above_hull", "is_stable", "is_metal", "magnetic_ordering",
     "total_magnetization", "bulk_modulus", "shear_modulus", "poisson_ratio",
+    "material_family",
+)
+
+MATERIAL_FAMILIES = (
+    "mof", "cof", "hof", "zeolite", "zeotype", "molecular-crystal",
+    "2d-material", "1d-material", "carbon-allotrope",
 )
 
 INSERT_COLUMNS = PUBLIC_COLUMNS + ("blob_offset", "blob_length")
@@ -75,6 +81,7 @@ class SearchQuery:
     stability: str | None = None
     metallicity: str | None = None
     magnetic_orderings: tuple[str, ...] = ()
+    material_families: tuple[str, ...] = ()
     magnetization_min: float | None = None
     magnetization_max: float | None = None
     bulk_modulus_min: float | None = None
@@ -157,20 +164,100 @@ class MaterialRepository:
 
     def get(self, material_id: str) -> dict[str, Any] | None:
         row = self.connection.execute(
-            f"SELECT {', '.join(PUBLIC_COLUMNS)}, blob_offset, blob_length "
+            f"SELECT pk, {', '.join(PUBLIC_COLUMNS)}, blob_offset, blob_length "
             "FROM materials WHERE material_id = ?",
             (material_id,),
         ).fetchone()
         if row is None:
             return None
+        material_pk = int(row["pk"])
         result = self._row_to_public(row, include_blob=True)
+        result.pop("pk", None)
         result["elements"] = [item[0] for item in self.connection.execute(
             "SELECT element FROM material_elements "
-            "WHERE material_pk = (SELECT pk FROM materials WHERE material_id = ?) "
-            "ORDER BY element",
-            (material_id,),
+            "WHERE material_pk = ? ORDER BY element",
+            (material_pk,),
         ).fetchall()]
+        result["properties"] = self._material_properties(material_pk)
+        result["source_refs"] = self._material_source_refs(material_pk)
+        result["curves"] = self._material_curves(material_pk)
         return result
+
+    def _material_curves(self, material_pk: int) -> list[dict[str, Any]]:
+        """Metadata for stored spectra; payloads stream via read_curve()."""
+
+        if not self._has_table("material_curves"):
+            return []
+        return [dict(row) for row in self.connection.execute(
+            "SELECT c.id, c.curve_type, c.fmt, c.method, c.label, c.native_id, "
+            "s.key AS source, s.name AS source_name "
+            "FROM material_curves c JOIN source_defs s ON s.id = c.source_id "
+            "WHERE c.material_pk = ? ORDER BY c.curve_type, s.key, c.id",
+            (material_pk,),
+        ).fetchall()]
+
+    def read_curve(self, material_id: str, curve_id: int) -> tuple[str, str] | None:
+        """Return (fmt, payload text) for one stored curve of the material."""
+
+        if not self._has_table("material_curves"):
+            return None
+        row = self.connection.execute(
+            "SELECT c.fmt, c.blob_offset, c.blob_length FROM material_curves c "
+            "JOIN materials m ON m.pk = c.material_pk "
+            "WHERE c.id = ? AND m.material_id = ?",
+            (curve_id, material_id),
+        ).fetchone()
+        if row is None:
+            return None
+        curves_blob = self.database_path.parent / "curves.blob"
+        with BlobReader(curves_blob) as reader:
+            return row["fmt"], reader.read(
+                int(row["blob_offset"]), int(row["blob_length"])
+            )
+
+    def _has_table(self, name: str) -> bool:
+        return self.connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+            (name,),
+        ).fetchone() is not None
+
+    def _material_properties(self, material_pk: int) -> list[dict[str, Any]]:
+        """Per-source property rows for the detail view (schema v3)."""
+
+        if not self._has_table("material_properties"):
+            return []
+        rows = self.connection.execute(
+            "SELECT p.name AS property, p.unit AS unit, p.kind AS kind, "
+            "mp.value_num, mp.value_text, mp.method, "
+            "s.key AS source, s.name AS source_name, s.license AS source_license, "
+            "s.url AS source_url, mp.native_id "
+            "FROM material_properties mp "
+            "JOIN property_defs p ON p.id = mp.property_id "
+            "JOIN source_defs s ON s.id = mp.source_id "
+            "WHERE mp.material_pk = ? "
+            "ORDER BY p.name, s.key, mp.method",
+            (material_pk,),
+        ).fetchall()
+        result = []
+        for row in rows:
+            entry = dict(row)
+            if entry["kind"] == "bool" and entry["value_num"] is not None:
+                entry["value_bool"] = bool(entry["value_num"])
+            result.append(entry)
+        return result
+
+    def _material_source_refs(self, material_pk: int) -> list[dict[str, Any]]:
+        if not self._has_table("material_source_refs"):
+            return []
+        return [dict(row) for row in self.connection.execute(
+            "SELECT s.key AS source, s.name AS source_name, "
+            "s.license AS source_license, s.url AS source_url, "
+            "r.native_id, r.match_via "
+            "FROM material_source_refs r "
+            "JOIN source_defs s ON s.id = r.source_id "
+            "WHERE r.material_pk = ? ORDER BY s.key, r.native_id",
+            (material_pk,),
+        ).fetchall()]
 
     def read_cif(self, material_id: str) -> str | None:
         row = self.connection.execute(
@@ -218,11 +305,31 @@ class MaterialRepository:
             facets={"datasets": facets},
         )
 
+    def _counted(self, metadata: dict[str, Any], key: str) -> int | None:
+        """A precomputed row count from ``metadata``, or None if unavailable.
+
+        Deliberately has no live-COUNT fallback. material_properties holds well
+        over a hundred million rows, and /api/stats sits on the landing page's
+        critical path, so a cache miss must degrade to "unknown" rather than to
+        a minute-and-a-half stall. scripts/properties/summarize.py refreshes
+        these keys at the end of every load chain.
+        """
+
+        try:
+            return int(metadata[key])
+        except (KeyError, TypeError, ValueError):
+            return None
+
     def stats(self) -> dict[str, Any]:
         metadata = dict(self.connection.execute(
             "SELECT key, value FROM metadata WHERE key IN "
-            "('experimental_count', 'candidate_count', 'property_counts')"
+            "('experimental_count', 'candidate_count', 'property_counts', "
+            "'property_row_count', 'curve_count')"
         ).fetchall())
+        counted = {
+            "property_rows": self._counted(metadata, "property_row_count"),
+            "curve_count": self._counted(metadata, "curve_count"),
+        }
         if all(key in metadata for key in (
             "experimental_count", "candidate_count", "property_counts",
         )):
@@ -241,6 +348,7 @@ class MaterialRepository:
                     "total": sum(datasets.values()),
                     "datasets": datasets,
                     "property_counts": property_counts,
+                    **counted,
                 }
 
         rows = self.connection.execute(
@@ -260,6 +368,7 @@ class MaterialRepository:
             "total": sum(datasets.values()),
             "datasets": datasets,
             "property_counts": dict(available),
+            **counted,
         }
 
     def _build_where(self, query: SearchQuery) -> tuple[list[str], list[Any]]:
@@ -362,6 +471,21 @@ class MaterialRepository:
             placeholders = ", ".join("?" for _ in query.magnetic_orderings)
             where.append(f"m.magnetic_ordering IN ({placeholders})")
             params.extend(query.magnetic_orderings)
+        if query.material_families:
+            unknown = set(query.material_families) - {*MATERIAL_FAMILIES, "bulk"}
+            if unknown:
+                raise ValueError(
+                    f"unknown material families: {', '.join(sorted(unknown))}"
+                )
+            families = [f for f in query.material_families if f != "bulk"]
+            clauses = []
+            if families:
+                placeholders = ", ".join("?" for _ in families)
+                clauses.append(f"m.material_family IN ({placeholders})")
+                params.extend(families)
+            if "bulk" in query.material_families:
+                clauses.append("m.material_family IS NULL")
+            where.append("(" + " OR ".join(clauses) + ")")
         for property_name in dict.fromkeys(query.has_properties):
             try:
                 where.append(PROPERTY_FILTERS[property_name])

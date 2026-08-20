@@ -7,7 +7,7 @@
 **English** · [简体中文](README.zh-CN.md)
 
 [![CI](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml)
-[![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2Fmateria-viva-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/materia-viva)
+[![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2FMateriaViva-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/MateriaViva)
 
 > **Materials discovery should not begin with calling one database API after another and juggling
 > a separate account for each.** MateriaViva delivers a unified, deduplicated, licence-reviewed
@@ -56,7 +56,22 @@ The unified index currently contains:
 
 | Experimental structures | Computational candidates | Unified search records |
 |---:|---:|---:|
-| 99,162 | 8,125,976 | 8,225,138 |
+| 357,127 | 13,186,150 | 13,543,277 |
+
+On top of the structure pool sits a cross-database property layer: **121,620,776 property
+rows** covering **166 distinct properties** from **54 integrated source databases**, with
+every value keeping its source database, native record id and calculation / measurement
+method; 12,812,918 materials carry at least one cross-database property, and **1,190,447
+structures are contributed by two or more source databases** — that overlap is what
+deduplication buys you. Non-scalar data — **1,198,897 stored spectra** (band structures,
+phonon / electronic DOS, powder XRD, XAS, Raman, IR, thermal conductivity) plus on-demand
+simulated XRD for every structure — lives in a parallel curve store. Space groups cover
+99.996% of the pool. Non-conventional crystal classes (MOF, COF, zeolite, molecular
+crystal, 2D material, carbon allotrope, …) are labelled and filterable.
+See [`docs/property-integration.md`](docs/property-integration.md).
+
+These figures are a snapshot; `curl -s http://127.0.0.1:8000/api/stats` on a running
+instance is authoritative.
 
 ### Integrated databases
 
@@ -107,7 +122,7 @@ materials databases and new versions of existing sources, then publish a new uni
 after licence judgement, format mapping, structural deduplication and quality checks.
 
 > [!IMPORTANT]
-> Automatic discovery and integration are not implemented yet. All 101 current sources are still
+> Automatic discovery and integration are not implemented yet. All 102 current sources are still
 > found and reviewed manually, then ingested by resumable acquisition scripts. This README keeps
 > planned capabilities separate from what is implemented today.
 
@@ -136,18 +151,36 @@ redistribution limits; data whose authorization cannot be confirmed stays unpubl
 ## One download instead of scraping a hundred databases
 
 At the publication layer, MateriaViva removes the pattern where every user separately calls
-traditional bulk APIs or logs into source accounts. All data that clearly permits open
-redistribution and passes review is organised into a snapshot with versions, hashes, a source
-manifest and a licence manifest, published directly at:
+traditional bulk APIs or logs into source accounts. The index is published as a Hugging Face
+dataset with versions, hashes, a source manifest and a licence manifest:
 
-### [Hugging Face Dataset · AI4QC/materia-viva](https://huggingface.co/datasets/AI4QC/materia-viva)
+### [Hugging Face Dataset · AI4QC/MateriaViva](https://huggingface.co/datasets/AI4QC/MateriaViva) (private)
 
-The GitHub repository holds only code, data schemas, the source catalog, documentation, tests and
-demo assets. It contains no database files, unified index, render cache or partial downloads.
+**This repository is private, and it is not the open-redistribution snapshot.** It carries the
+complete working index, including sources whose terms restrict redistribution — ICSD (FIZ
+Karlsruhe, per-subscriber licence), and the CC BY-NC / academic-terms sources ELEMENTA, GNoME and
+AFLOW. Access is granted per person. A public snapshot would first have to drop those sources;
+every property row records its `source_id`, so that filter is one `WHERE` clause, but it has not
+been applied to what is published here.
+
+**Code lives on GitHub, data lives on Hugging Face.** The GitHub repository holds only code, data
+schemas, the source catalog, documentation, tests and demo assets — no database files, unified
+index, render cache or partial downloads. Two index variants are published:
+
+| Variant | Size | What it is for |
+|---|---:|---|
+| `index/` | ~47 GB | the full index, what the site serves |
+| `slice/` | ~tens of MB | developing the web UI without the full download |
+
+The slice is **not** a random sample. It is a greedy set cover chosen so that every source, every
+property name, every curve type and every material family appears at least once. A random
+thousand rows out of thirteen million would miss almost every rare property, which is exactly the
+set of UI panels most likely to be broken — see [`scripts/export_slice.py`](scripts/export_slice.py).
 
 ### Copyright and redistribution boundary
 
-MateriaViva is released under [CC BY-NC 4.0](LICENSE) and permits non-commercial use only.
+MateriaViva's own code is released under [CC BY-NC 4.0](LICENSE) and permits non-commercial use
+only. The integrated data carries the terms of its sources, which are stricter.
 
 - Data that clearly permits redistribution — CC0, CC BY, CC BY-SA, CC BY-NC — may enter the public
   snapshot while keeping its original authors, versions, licences and citation requirements.
@@ -163,10 +196,10 @@ MateriaViva is released under [CC BY-NC 4.0](LICENSE) and permits non-commercial
 
 ## Current coverage
 
-The machine-readable catalog currently registers 101 crystal structure or property sources.
+The machine-readable catalog currently registers 102 crystal structure or property sources.
 "Registered" is not the same as "publicly downloaded":
 
-- 58 are acquired or reuse data already present on this machine;
+- 59 are acquired or reuse data already present on this machine;
 - 18 are registered only, or still waiting for a suitable official bulk acquisition route;
 - 22 need an account, provider authorization or a paid licence, and keep catalog information only;
 - 3 trajectory sources are excluded by project scope;
@@ -184,8 +217,25 @@ relationships are in [`docs/legacy-ssd-data-inventory.md`](docs/legacy-ssd-data-
 ```bash
 git clone https://github.com/AI4QC/materia-viva.git
 cd materia-viva
+pip install -e backend  # or: pip install -r requirements.txt
 
-# after downloading the data from Hugging Face, link the local data root into the repository
+# a small slice — enough to develop the interface against
+python scripts/fetch_index.py slice
+python scripts/serve.py --runtime data/slice
+
+# or the full index (~47 GB; the download needs roughly double that free,
+# because the hub cache holds a second copy until the files are linked)
+python scripts/fetch_index.py full
+python scripts/serve.py --runtime data/index
+```
+
+Then open <http://127.0.0.1:8000>. `--runtime` takes any directory holding `materials.sqlite`,
+`structures.blob` and `curves.blob`, so switching between the slice and the full index is a
+command-line argument, not a rebuild.
+
+If the data already sits on another volume, link it in instead of downloading:
+
+```bash
 export MV_DATA_ROOT=/path/on/ssd/materia-viva-data
 ln -s "$MV_DATA_ROOT" data
 ```
@@ -196,12 +246,18 @@ layout is:
 
 ```text
 data/
-├── sources/
-│   ├── experimental/        99,162 experimental structures
-│   └── candidate/           8,125,976 candidate structures
-├── index/                   SQLite search database and compressed CIF blob
+├── sources/                 per-dataset structure exports
+├── index/                   full index: materials.sqlite + structures.blob + curves.blob
+├── slice/                   development slice, same three files
 ├── manifests/               Crystal Record v1 validation reports
 └── raw/                     source archives and provenance
+```
+
+Current counts are not written here, because every hardcoded figure in this project has gone
+stale at least once. Ask the running instance instead:
+
+```bash
+curl -s http://127.0.0.1:8000/api/stats
 ```
 
 Local SSD migration and legacy path compatibility are described in
@@ -250,7 +306,7 @@ export MATERIALS_OVITO_PYTHON=/path/to/ovito-enabled/python
 Without OVITO configured, interactive 3D still works in the browser, but server-side Tachyon image
 rendering is unavailable.
 
-Validate all 8,225,138 published records and build the index:
+Validate all 13,077,781 published records and build the index (rebuild the property layer afterwards with scripts/properties/run_all.py):
 
 ```bash
 make validate-data

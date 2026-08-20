@@ -74,6 +74,11 @@ function MaterialCard({ material, index, onSelect, locale }: MaterialCardProps) 
           <span className={`source-badge source-badge--${material.dataset}`}>
             <Database size={12} /> {material.is_experimental ? t('badge.experimental') : t('badge.candidate')}
           </span>
+          {material.material_family ? (
+            <span className="family-badge" data-family={material.material_family}>
+              {t(`family.${material.material_family}` as Parameters<typeof t>[0])}
+            </span>
+          ) : null}
           <span>{material.material_id}</span>
         </div>
         <button

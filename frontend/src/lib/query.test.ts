@@ -26,6 +26,14 @@ describe('query URL state', () => {
     )
   })
 
+  it('serializes and parses material families', () => {
+    const params = serializeQuery({ ...DEFAULT_QUERY, materialFamilies: ['mof', '2d-material'] })
+    expect(params.get('material_families')).toBe('2d-material,mof')
+
+    const parsed = parseQuery(new URLSearchParams('material_families=mof,bulk'))
+    expect(parsed.materialFamilies).toEqual(['mof', 'bulk'])
+  })
+
   it('omits defaults and round-trips supported filters', () => {
     expect(serializeQuery(DEFAULT_QUERY).toString()).toBe('')
 

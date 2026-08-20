@@ -112,13 +112,25 @@ def index_facts() -> dict:
             "SELECT DISTINCT license FROM source_defs WHERE license IS NOT NULL"
         )
     })
-    facts["source_table"] = db.execute(
-        "SELECT s.key, s.name, s.license,"
-        " (SELECT COUNT(*) FROM material_properties p WHERE p.source_id = s.id),"
-        " (SELECT COUNT(DISTINCT r.material_pk) FROM material_source_refs r"
-        "   WHERE r.source_id = s.id)"
-        " FROM source_defs s ORDER BY 4 DESC"
-    ).fetchall()
+    # One grouped scan each. A correlated subquery per source re-scans
+    # material_properties' 121M rows 54 times over -- roughly an hour, for a
+    # manifest -- and each source ends up read from a different snapshot.
+    rows_by_source = dict(db.execute(
+        "SELECT source_id, COUNT(*) FROM material_properties GROUP BY source_id"
+    ))
+    mats_by_source = dict(db.execute(
+        "SELECT source_id, COUNT(DISTINCT material_pk) FROM material_source_refs"
+        " GROUP BY source_id"
+    ))
+    facts["source_table"] = sorted(
+        (
+            (key, name, lic, rows_by_source.get(sid, 0), mats_by_source.get(sid, 0))
+            for sid, key, name, lic in db.execute(
+                "SELECT id, key, name, license FROM source_defs"
+            )
+        ),
+        key=lambda row: -row[3],
+    )
     db.close()
     return facts
 

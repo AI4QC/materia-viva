@@ -75,26 +75,144 @@ instance is authoritative.
 
 ### Integrated databases
 
-The unified structure pool is assembled from the databases below, all merged after structural
-fingerprint (BAWL / entalpic fingerprint) deduplication:
+The unified index is assembled from the databases below: those that ship structures are merged into
+the pool after structural fingerprint (BAWL / entalpic fingerprint) deduplication, while the
+properties-only sources — ICSD among them — annotate materials that are already in it and add no
+structures of their own. The pool starts from the deduplicated base merge —
+[LeMat-BulkUnique](https://huggingface.co/datasets/LeMaterial/LeMat-BulkUnique) and the ELEMENTA
+relaxed endpoints among them, every record keeping its own `immutable_id` and fingerprint — and
+each database below then attaches to it by authoritative record id or by fingerprint, with
+fingerprint misses admitted as new structures. **1,190,447 structures are contributed by two or
+more source databases** — each of them one row here carrying every contributor's numbers and
+provenance, instead of a handful of near-duplicate entries to reconcile by hand.
 
-| Database | Notes |
-|---|---|
-| [LeMat-BulkUnique](https://huggingface.co/datasets/LeMaterial/LeMat-BulkUnique) | 4,273,800 records, each keeping its `immutable_id` and fingerprint |
-| [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) | 2,005,836 records, taking only the final relaxed structure of each optimization trajectory |
-| [Materials Project](https://next-gen.materialsproject.org/) | PBE/PBEsol computed structures and properties |
-| [OQMD](https://oqmd.org/) | Open Quantum Materials Database |
-| [JARVIS-DFT](https://jarvis.nist.gov/) | NIST JARVIS computed structures and descriptors |
-| [AFLOW](https://aflow.org/) | High-throughput automatic framework structures |
-| [Alexandria](https://alexandria.icams.rub.de/) | PBE / PBEsol 3D, 2D and 1D structures |
-| [NOMAD](https://nomad-lab.eu/) | Computed structures from the federated archive |
-| [OMat24](https://huggingface.co/datasets/facebook/OMAT24) | Unique structure endpoints extracted from it; intermediate trajectory frames are not ingested |
-| Carolina Materials Database | 214,435 existing structures |
-| [COD](https://www.crystallography.net/cod/) | Crystallography Open Database, CC0 |
-| [ICSD](https://icsd.products.fiz-karlsruhe.de/) | Requires a FIZ Karlsruhe licence; restricted fields never enter the public snapshot |
+**54 source databases, 121,620,776 property rows:**
+
+| Group | Databases | Property rows | Largest members |
+|---|---:|---:|---|
+| Large general-purpose DFT databases | 12 | 108,966,009 | Alexandria, AFLOW, ELEMENTA, OQMD, GNoME, Materials Project |
+| Experimental structure catalogues | 2 | 611,908 | COD, ICSD |
+| Specialised property libraries | 28 | 1,823,909 | Materiae, CMR, SNUMAT, phonix, Materials Cloud Archive |
+| Porous and framework materials | 12 | 10,218,950 | Boyd–Woo carbon capture, Deem zeolites, hMOF, QMOF |
+
+> ⚠️ **Four sources restrict redistribution: AFLOW, ELEMENTA, GNoME and ICSD.** They are
+> searchable in an index you build locally, but they are filtered out before any public release —
+> AFLOW's academic terms and the CC BY-NC licences of ELEMENTA and GNoME would make a combined
+> snapshot non-commercial, and ICSD data may only be held by someone with their own FIZ Karlsruhe
+> licence.
+>
+> **ICSD contributes no structures at all.** Its adapter is properties-only: it annotates pool
+> materials with chemical and mineral names and calculated densities, and its 73,823 `origin`
+> refs are provenance pointers marking pool materials that correspond to an ICSD collection code
+> — not structures admitted from FIZ Karlsruhe. No FIZ structure is stored or published here.
+
+<details>
+<summary><b>All 54 databases in detail</b> — what each one contributes, its property rows and its licence</summary>
+
+<br>
+
+#### Large general-purpose DFT databases — 12 sources, 108,966,009 property rows
+
+| Database | Contributes | Property rows | Licence |
+|---|---|---:|---|
+| [Alexandria](https://alexandria.icams.rub.de/datasets.html) | PBE / PBEsol / SCAN 3D, 2D and 1D crystals: formation and hull energies, indirect and direct gaps, magnetization | 60,588,138 | Alexandria dataset terms |
+| [AFLOW](https://aflow.org/documentation/) ⚠️ | high-throughput formation enthalpies, gaps, total energies, prototype labels, density | 18,464,119 | AFLOW academic non-commercial terms |
+| [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) ⚠️ | per-endpoint total energies over the 2,005,836 relaxed endpoints it brought to the base merge; the spin runs add magnetization | 8,023,344 | CC BY-NC 4.0 |
+| [OQMD](https://oqmd.org/download/) | one converged calculation per entry: formation energy, hull distance, gap, magnetization | 6,086,500 | CC BY 4.0 |
+| [GNoME](https://github.com/google-deepmind/materials_discovery/blob/main/DATASET.md) ⚠️ | formation and decomposition energies, gaps, plus an r2SCAN re-computed subset | 4,897,901 | CC BY-NC 4.0 |
+| [Materials Project](https://docs.materialsproject.org/downloading-data/how-do-i-download-the-materials-project-database) | PBE(+U) gaps, energetics and stability, VRH moduli, dielectric / piezoelectric constants, electrode voltages and capacities, surface and grain-boundary energies, oxidation states | 4,291,860 | Materials Project terms |
+| [JARVIS-QETB](https://jarvis.nist.gov/) | tight-binding energies and gaps over a fitting set full of deliberately non-equilibrium geometries; every row keeps its "QETB (tight-binding)" method string | 2,524,250 | NIST/JARVIS dataset terms |
+| [Matbench Discovery / WBM](https://figshare.com/articles/dataset/Matbench_Discovery_v1_0_0/22715158) | MP2020-corrected formation and hull energies, PBE gaps; its MP-2023 snapshot also bridges legacy numeric `mp-` ids into the match map | 1,734,187 | CC BY 4.0 |
+| [JARVIS-DFT 3D](https://pages.nist.gov/jarvis/databases/) | OptB88vdW / TBmBJ / HSE06 gaps, VRH moduli, Seebeck and power factor, DFPT piezoelectrics, SLME, spillage, exfoliation energies | 1,569,924 | NIST/JARVIS dataset terms |
+| [Carolina Materials Database](https://www.carolinamatdb.org/) | ML-generated hypothetical crystals with formation energy and space group | 428,272 | CC BY 4.0 |
+| [ODBX](https://odbx.science/) | CAMD formation energies and hull distances | 287,006 | ODBX provider terms and source-dataset provenance |
+| [Materials Cloud MC3D](https://mc3d.materialscloud.org/) | PBEsol-relaxed 3D crystals linked to their experimental parents | 70,508 | Materials Cloud record licence |
+
+#### Experimental structure catalogues — 2 sources, 611,908 property rows
+
+| Database | Contributes | Property rows | Licence |
+|---|---|---:|---|
+| [COD](https://wiki.crystallography.net/howtoobtaincod) | as-published experimental CIFs with chemical and mineral names and the temperature and pressure of the measurement | 354,350 | CC0 |
+| [ICSD](https://icsd.products.fiz-karlsruhe.de/) ⚠️ | chemical and mineral names and calculated densities, annotated onto pool materials; properties only, no structures | 257,558 | FIZ Karlsruhe ICSD licence |
+
+#### Specialised property libraries — 28 sources, 1,823,909 property rows
+
+Electronic, optical and topological (5 sources, 1,221,398 rows):
+
+| Database | Contributes | Property rows | Licence |
+|---|---|---:|---|
+| [Materiae](https://cmpdc.iphy.ac.cn/materiae/) | SOC / NSOC topological classes, symmetry indicators, DOS gaps, band structures | 589,993 | Materiae site terms; cite Zhang et al., Nature 566, 475-479 (2019) |
+| [CMR static collections](https://cmr.fysik.dtu.dk/) | GLLB-SC gaps and derivative discontinuities, perovskite heats of formation, OQMD-linked energetics, low-dimensionality labels | 305,346 | CC BY-SA 4.0 |
+| [SNUMAT](https://figshare.com/articles/dataset/21713885) | GGA and HSE06 electronic and optical gaps, magnetic ordering | 170,893 | Figshare record licence |
+| [Materials Cloud Archive static datasets](https://archive.materialscloud.org/) | SHG coefficients, refractive index and birefringence, HSE / LDA gaps, TQC topology classes, electride ELF | 143,153 | record-specific open licences, predominantly CC BY 4.0 |
+| [OMDB-organic](https://omdb.mathub.io/dataset/) | organic molecular-crystal gaps | 12,013 | OMDB terms |
+
+Phonons, thermal transport and mechanics (3 sources, 242,300 rows):
+
+| Database | Contributes | Property rows | Licence |
+|---|---|---:|---|
+| [phonix](https://phonix-db.org/) | lattice thermal conductivity, phonon frequency range, imaginary-mode flags, spectral and cumulative κ curves | 155,192 | CC BY 4.0 |
+| [PhononDB (NIMS MDR)](https://mdr.nims.go.jp/collections/8g84ms862?locale=en) | PBEsol DFPT dielectric constants, Born effective charges, harmonic phonon DOS | 86,616 | CC BY 4.0 |
+| [HADB](https://hadb.funmat-ii.se/) | hard-coating alloys: elastic moduli from DFT and MLIP at temperature | 492 | HADB terms and source-publication provenance |
+
+Magnetism, superconductivity and ion transport (6 sources, 115,087 rows):
+
+| Database | Contributes | Property rows | Licence |
+|---|---|---:|---|
+| [NovoMag](https://www.novomag.physics.iastate.edu/structure-database) | magnetic polarization, moments, anisotropy, Curie temperatures | 38,884 | CC BY 4.0 |
+| [3DSC](https://github.com/aimat-lab/3DSC) | superconducting critical temperatures matched to crystal structures; properties only | 36,531 | 3DSC repository licence and upstream MP/ICSD terms |
+| [SPSE](https://figshare.com/articles/dataset/High-Throughput_Screening_Platform_for_Solid_Electrolytes_Combining_Hierarchical_Ion-Transport_Prediction_Algorithms_/12011412) | BVSE migration barriers and experimental ionic conductivities; properties only | 29,953 | CC BY 4.0 record; underlying ICSD-derived structures retain ICSD terms |
+| [SuperBand](https://github.com/ljcj007/SuperBand) | electronic bands, DOS and Fermi surfaces of superconductors | 8,985 | CC BY 4.0 data; MIT software |
+| [AMDB](https://altermagnets.anyterial.se/) | altermagnetism screen over MAGNDATA: spin-splitting metrics and screening gap; properties only | 622 | AMDB terms and source-publication provenance |
+| [OBELiX](https://github.com/NRC-Mila/OBELiX) | measured room-temperature ionic conductivities; properties only | 112 | CC BY 4.0 |
+
+Two-dimensional and layered materials (5 sources, 71,615 rows):
+
+| Database | Contributes | Property rows | Licence |
+|---|---|---:|---|
+| [2DMatPedia](https://www.2dmatpedia.org/download) | monolayers derived from bulk parents: gaps, exfoliation energies | 30,583 | 2DMatPedia terms |
+| [C2DB](https://2dhub.org/) | computational 2D materials: gaps, work functions, stability | 14,120 | CC BY-SA 4.0 |
+| [Materials Cloud MC2D](https://mc2d.materialscloud.org/) | exfoliable monolayers and their interlayer binding energies | 13,202 | Materials Cloud record licence |
+| [BiDB](https://www.2dhub.org/bidb/bidb.html) | van der Waals bilayers: stacking-resolved binding energies and gaps | 9,405 | 2DHub dataset terms |
+| [OpenMX 2D AB2](https://www.openmx-square.org/2d-ab2/) | AB2 monolayer prototypes and their electronic structure | 4,305 | OpenMX database and source-publication terms |
+
+Minerals, prototypes and other specialised sets (9 sources, 173,509 rows):
+
+| Database | Contributes | Property rows | Licence |
+|---|---|---:|---|
+| [CSLLM negatives](https://doi.org/10.6084/m9.figshare.29086931) | `predicted_synthesizable=false` labels from a PU screen; properties only, and a missing row is not a prediction of synthesizability | 98,303 | CC BY 4.0 |
+| [JARVIS specialized datasets](https://pages.nist.gov/jarvis/databases/) | NIST JARVIS specialized crystal endpoint and property sets | 26,154 | NIST/JARVIS dataset terms |
+| [AMCSD](https://www.rruff.net/about/download-data/) | experimental mineral structures with mineral names, measured densities and calculated diffraction patterns | 24,639 | AMCSD terms |
+| [SACADA](https://www.sacada.info/) | carbon allotropes: density, hardness, moduli, relative energies | 10,349 | SACADA site terms and source-publication provenance |
+| [AFLOW prototype encyclopedia](https://aflowlib.duke.edu/p/index.html) | prototype and Strukturbericht labels; properties only | 6,251 | Apache-2.0 |
+| [Webmineral](https://webmineral.com/) | species-level mineral compilations — density, Mohs hardness, refractive index; properties only, and the values describe the species rather than the matched specimen | 4,698 | Webmineral site and cited-source terms |
+| [HEX high-pressure elements](https://springernature.figshare.com/collections/HEX_a_complete_Database_of_High-Pressure_Elemental_Crystal_Structures/7119778/1) | elemental crystal structures from 0 to 300 GPa | 1,456 | CC0 |
+| [RRUFF](https://www.rruff.net/about/download-data/) | measured mineral chemistry with Raman, infrared and diffraction spectra | 1,302 | RRUFF terms and source-citation provenance |
+| [TCOD](https://www.crystallography.net/tcod/) | DFT gaps in theoretical CIFs | 357 | CC0 |
+
+#### Porous and framework materials — 12 sources, 10,218,950 property rows
+
+| Database | Contributes | Property rows | Licence |
+|---|---|---:|---|
+| [Boyd–Woo carbon-capture MOFs](https://archive.materialscloud.org/record/2018.0016/v3) | GCMC CO₂ capture in wet flue gas: uptakes, selectivities, working capacities, heats of adsorption | 5,454,666 | CC BY 4.0 |
+| [Deem SLC zeolites](https://mwdeem.org/PCOD/index.html) | hypothetical zeolites with the SLC forcefield run parsed out of the CIF trailers: moduli, directional Poisson ratios, sound velocities, framework density, plus simulated XRD patterns | 2,977,166 | CC BY 4.0 |
+| [hMOF](https://figshare.com/articles/dataset/15127758) | hypothetical MOFs: CO₂ uptake and zeo++ pore geometry | 892,486 | Figshare record licence |
+| [QMOF](https://github.com/Andrew-S-Rosen/QMOF) | DFT-relaxed MOFs: multi-functional gaps, total energy, magnetization, LCD / PLD | 339,443 | CC BY 4.0 |
+| [FAIR-MOFs](https://zenodo.org/records/13254307) | experimental CSD-derived MOFs: porosity, RCSR topology, bond-dissociation energies | 277,454 | CC BY 4.0 |
+| [CoRE MOF 2019](https://zenodo.org/records/3677685) | curated experimentally reported MOFs: Zeo++ porosity, surface area, void fraction, pore volume | 155,488 | CC BY 4.0 |
+| [MOFX-DB](https://mof.tech.northwestern.edu/databases) | CoRE MOF / IZA / ToBaCCo subsets: pore geometry and single-gas uptakes near 298 K, 1 bar | 87,845 | MOFX-DB dataset terms |
+| [PCOD](https://www.crystallography.net/pcod/) | GRINSP-predicted frameworks — silicates, phosphates, borates and more: prediction R factor and framework density | 24,416 | public domain |
+| [EC-MOF](https://ec-mof.njit.edu/) | electrically conductive 2D MOFs: gaps, formation and binding energies | 7,848 | EC-MOF site terms and source-publication provenance |
+| [Open-framework aluminophosphates](https://figshare.com/articles/dataset/Database_of_Open-Framework_Aluminophosphate_Structures/7822574) | AlPO frameworks with IZA codes and published refinement residuals | 925 | CC BY 4.0 |
+| [CURATED-COFs](https://github.com/lipelopesoliveira/curatedCOFs) | synthesized covalent organic frameworks with their framework names | 684 | repository licence |
+| [IZA-SC](https://www.iza-structure.org/databases/) | the approved zeolite framework types as DLS76-idealized pure-silica geometries, not experimental cells | 529 | IZA Structure Commission terms |
+
+</details>
 
 Deduplication and source-priority rules are in section 7 of
-[`docs/dataset-acquisition.md`](docs/dataset-acquisition.md). Licence-restricted sources such as
+[`docs/dataset-acquisition.md`](docs/dataset-acquisition.md); what each source contributes and how
+it matches onto the pool is in section 2 of
+[`docs/property-integration.md`](docs/property-integration.md). Licence-restricted sources such as
 ICSD follow the copyright and redistribution boundary below: usable locally for unified search,
 while protected original files and fields are not published with the snapshot.
 
@@ -122,7 +240,7 @@ materials databases and new versions of existing sources, then publish a new uni
 after licence judgement, format mapping, structural deduplication and quality checks.
 
 > [!IMPORTANT]
-> Automatic discovery and integration are not implemented yet. All 102 current sources are still
+> Automatic discovery and integration are not implemented yet. All 106 catalogued sources are still
 > found and reviewed manually, then ingested by resumable acquisition scripts. This README keeps
 > planned capabilities separate from what is implemented today.
 
@@ -196,14 +314,16 @@ only. The integrated data carries the terms of its sources, which are stricter.
 
 ## Current coverage
 
-The machine-readable catalog currently registers 102 crystal structure or property sources.
-"Registered" is not the same as "publicly downloaded":
+The machine-readable catalog registers **106** crystal structure or property sources, of which
+**54 are integrated** into the index and contribute the property rows counted above. "Registered"
+is not the same as "acquired", and "acquired" is not the same as "integrated": a source can be
+downloaded and still be waiting for an adapter, or be evaluated and deliberately rejected —
+Catalysis-Hub is in the catalog with a status recording that its crawl omitted the
+`reactionSystems` join key, leaving 91% of its reactions unattachable.
 
-- 59 are acquired or reuse data already present on this machine;
-- 18 are registered only, or still waiting for a suitable official bulk acquisition route;
-- 22 need an account, provider authorization or a paid licence, and keep catalog information only;
-- 3 trajectory sources are excluded by project scope;
-- there are no unfinished background downloads.
+Per-source status lives in [`scripts/datasets/sources.json`](scripts/datasets/sources.json) — each
+entry's `status` field says exactly where it stands, which is the only place that stays correct as
+sources move between those states.
 
 ELEMENTA is a trajectory dataset, but it is ingested under the "one endpoint per relaxation" rule,
 so intermediate frames never enter the structure pool.

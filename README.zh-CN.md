@@ -64,26 +64,142 @@ OVITO/Tachyon 检查结构。
 
 ### 已整合的数据库
 
-统一结构池目前由以下数据库汇聚而成，全部经过结构指纹（BAWL / entalpic fingerprint）去重后合并：
+统一索引由以下数据库汇聚而成：其中提供结构的来源，经结构指纹（BAWL / entalpic fingerprint）
+去重后并入结构池；仅提供性质的来源（ICSD 即在其中）只为池内已有材料补充数值，自身不贡献任何
+结构。池内结构来自去重后的基础合并——其中包括
+[LeMat-BulkUnique](https://huggingface.co/datasets/LeMaterial/LeMat-BulkUnique) 与 ELEMENTA 的
+弛豫终态端点，每条记录都保留自己的 `immutable_id` 与指纹——下列每个数据库再按权威记录 id 或
+指纹挂接上去，指纹未命中的部分作为新结构入池。**1,190,447 个结构由两个及以上来源库共同贡献**
+——它们在这里各自只占一行，同时带着每个来源的数值和 provenance，而不是留下一堆需要人工核对的
+近重复条目。
 
-| 数据库 | 说明 |
-|---|---|
-| [LeMat-BulkUnique](https://huggingface.co/datasets/LeMaterial/LeMat-BulkUnique) | 4,273,800 条，逐条保留 `immutable_id` 与指纹 |
-| [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) | 2,005,836 条，每条弛豫轨迹只取最终稳定结构 |
-| [Materials Project](https://next-gen.materialsproject.org/) | PBE/PBEsol 计算结构与性质 |
-| [OQMD](https://oqmd.org/) | 开放量子材料数据库 |
-| [JARVIS-DFT](https://jarvis.nist.gov/) | NIST JARVIS 计算结构与描述符 |
-| [AFLOW](https://aflow.org/) | 高通量自动流程结构库 |
-| [Alexandria](https://alexandria.icams.rub.de/) | PBE / PBEsol 三维、二维、一维结构 |
-| [NOMAD](https://nomad-lab.eu/) | 联邦归档中的计算结构 |
-| [OMat24](https://huggingface.co/datasets/facebook/OMAT24) | 由其中提取的独特结构端点，中间轨迹帧不入库 |
-| Carolina Materials Database | 214,435 条既有结构库 |
-| [COD](https://www.crystallography.net/cod/) | 开放晶体学数据库，CC0 |
-| [ICSD](https://icsd.products.fiz-karlsruhe.de/) | 需 FIZ Karlsruhe 授权；受限字段不进入公开快照 |
+**54 个来源库，121,620,776 条性质行：**
+
+| 类别 | 数据库数 | 性质行数 | 主要成员 |
+|---|---:|---:|---|
+| 大型综合 DFT 数据库 | 12 | 108,966,009 | Alexandria、AFLOW、ELEMENTA、OQMD、GNoME、Materials Project |
+| 实验结构总库 | 2 | 611,908 | COD、ICSD |
+| 专题性质库 | 28 | 1,823,909 | Materiae、CMR、SNUMAT、phonix、Materials Cloud 归档 |
+| 多孔 / 框架材料 | 12 | 10,218,950 | Boyd–Woo 碳捕集 MOF、Deem 沸石、hMOF、QMOF |
+
+> ⚠️ **四个来源受再分发限制：AFLOW、ELEMENTA、GNoME 和 ICSD。** 它们可以在本机自行构建的索引
+> 里检索，但在任何对外发布前都会被过滤掉——AFLOW 的学术条款以及 ELEMENTA、GNoME 的
+> CC BY-NC 许可会让合并后的快照变成非商业用途，而 ICSD 数据只能由自行持有 FIZ Karlsruhe
+> 授权的人使用。
+>
+> **ICSD 完全没有贡献结构。** 它的适配器是 properties-only：只为池内材料补充化学名、矿物名和
+> 计算密度；它的 73,823 条 `origin` 引用是 provenance 指针，标记那些对应某个 ICSD 收录号的池内
+> 材料，而不是从 FIZ Karlsruhe 收进来的结构。这里既不存放也不发布任何 FIZ 结构。
+
+<details>
+<summary><b>全部 54 个数据库明细</b>——各自贡献什么、性质行数与许可</summary>
+
+<br>
+
+#### 大型综合 DFT 数据库——12 个来源，108,966,009 条性质行
+
+| 数据库 | 贡献内容 | 性质行数 | 许可 |
+|---|---|---:|---|
+| [Alexandria](https://alexandria.icams.rub.de/datasets.html) | PBE / PBEsol / SCAN 的三维、二维、一维晶体：形成能与凸包能、间接与直接带隙、磁化强度 | 60,588,138 | Alexandria dataset terms |
+| [AFLOW](https://aflow.org/documentation/) ⚠️ | 高通量形成焓、带隙、总能、原型标签、密度 | 18,464,119 | AFLOW academic non-commercial terms |
+| [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) ⚠️ | 它带入基础合并的 2,005,836 个弛豫终态端点上的逐端点总能，自旋弛豫另附磁化强度 | 8,023,344 | CC BY-NC 4.0 |
+| [OQMD](https://oqmd.org/download/) | 每条目一个收敛终态计算：形成能、凸包距离、带隙、磁化 | 6,086,500 | CC BY 4.0 |
+| [GNoME](https://github.com/google-deepmind/materials_discovery/blob/main/DATASET.md) ⚠️ | 形成能与分解能、带隙，另含 r2SCAN 复算子集 | 4,897,901 | CC BY-NC 4.0 |
+| [Materials Project](https://docs.materialsproject.org/downloading-data/how-do-i-download-the-materials-project-database) | PBE(+U) 带隙、能量与稳定性、VRH 模量、介电 / 压电常数、嵌入式电极电压与容量、表面能与晶界能、氧化态 | 4,291,860 | Materials Project terms |
+| [JARVIS-QETB](https://jarvis.nist.gov/) | 紧束缚能量与带隙，数据来自充满刻意构造非平衡构型的拟合集；每一行都保留 "QETB (tight-binding)" 的 method 字符串 | 2,524,250 | NIST/JARVIS dataset terms |
+| [Matbench Discovery / WBM](https://figshare.com/articles/dataset/Matbench_Discovery_v1_0_0/22715158) | MP2020 修正形成能与凸包能、PBE 带隙；其 MP-2023 快照还把旧版数字 `mp-` id 桥接进匹配映射 | 1,734,187 | CC BY 4.0 |
+| [JARVIS-DFT 3D](https://pages.nist.gov/jarvis/databases/) | OptB88vdW / TBmBJ / HSE06 带隙、VRH 模量、Seebeck 与功率因子、DFPT 压电、SLME、spillage、剥离能 | 1,569,924 | NIST/JARVIS dataset terms |
+| [Carolina Materials Database](https://www.carolinamatdb.org/) | 机器学习生成的假设晶体：形成能、空间群 | 428,272 | CC BY 4.0 |
+| [ODBX](https://odbx.science/) | CAMD 形成能与凸包距离 | 287,006 | ODBX provider terms and source-dataset provenance |
+| [Materials Cloud MC3D](https://mc3d.materialscloud.org/) | PBEsol 弛豫的三维晶体及其实验母体关联 | 70,508 | Materials Cloud record licence |
+
+#### 实验结构总库——2 个来源，611,908 条性质行
+
+| 数据库 | 贡献内容 | 性质行数 | 许可 |
+|---|---|---:|---|
+| [COD](https://wiki.crystallography.net/howtoobtaincod) | 原样发表的实验 CIF，附化学名 / 矿物名以及测量时的温度与压力 | 354,350 | CC0 |
+| [ICSD](https://icsd.products.fiz-karlsruhe.de/) ⚠️ | 为池内材料补充化学名与矿物名、计算密度；仅性质，不提供结构 | 257,558 | FIZ Karlsruhe ICSD licence |
+
+#### 专题性质库——28 个来源，1,823,909 条性质行
+
+电子结构、光学与拓扑（5 个来源，1,221,398 行）：
+
+| 数据库 | 贡献内容 | 性质行数 | 许可 |
+|---|---|---:|---|
+| [Materiae](https://cmpdc.iphy.ac.cn/materiae/) | SOC / NSOC 拓扑分类、对称性指标、DOS 带隙、能带 | 589,993 | Materiae site terms; cite Zhang et al., Nature 566, 475-479 (2019) |
+| [CMR 静态合集](https://cmr.fysik.dtu.dk/) | GLLB-SC 带隙与导数不连续、钙钛矿形成热、OQMD 关联能量、低维标签 | 305,346 | CC BY-SA 4.0 |
+| [SNUMAT](https://figshare.com/articles/dataset/21713885) | GGA 与 HSE06 的电子和光学带隙、磁序 | 170,893 | Figshare record licence |
+| [Materials Cloud 归档静态数据集](https://archive.materialscloud.org/) | SHG 系数、折射率与双折射、HSE / LDA 带隙、TQC 拓扑类、电子化物 ELF | 143,153 | record-specific open licences, predominantly CC BY 4.0 |
+| [OMDB-organic](https://omdb.mathub.io/dataset/) | 有机分子晶体带隙 | 12,013 | OMDB terms |
+
+声子、热输运与力学（3 个来源，242,300 行）：
+
+| 数据库 | 贡献内容 | 性质行数 | 许可 |
+|---|---|---:|---|
+| [phonix](https://phonix-db.org/) | 晶格热导率、声子频率范围、虚频标记，以及谱分辨与累积 κ 曲线 | 155,192 | CC BY 4.0 |
+| [PhononDB（NIMS MDR）](https://mdr.nims.go.jp/collections/8g84ms862?locale=en) | PBEsol DFPT 介电常数、Born 有效电荷、谐振声子 DOS | 86,616 | CC BY 4.0 |
+| [HADB](https://hadb.funmat-ii.se/) | 硬质涂层合金：DFT 与 MLIP 的含温弹性模量 | 492 | HADB terms and source-publication provenance |
+
+磁性、超导与离子输运（6 个来源，115,087 行）：
+
+| 数据库 | 贡献内容 | 性质行数 | 许可 |
+|---|---|---:|---|
+| [NovoMag](https://www.novomag.physics.iastate.edu/structure-database) | 磁极化、磁矩、磁各向异性、居里温度 | 38,884 | CC BY 4.0 |
+| [3DSC](https://github.com/aimat-lab/3DSC) | 与晶体结构对应的超导临界温度；仅性质 | 36,531 | 3DSC repository licence and upstream MP/ICSD terms |
+| [SPSE](https://figshare.com/articles/dataset/High-Throughput_Screening_Platform_for_Solid_Electrolytes_Combining_Hierarchical_Ion-Transport_Prediction_Algorithms_/12011412) | BVSE 迁移势垒、实验离子电导率；仅性质 | 29,953 | CC BY 4.0 record; underlying ICSD-derived structures retain ICSD terms |
+| [SuperBand](https://github.com/ljcj007/SuperBand) | 超导体的能带、DOS 与费米面 | 8,985 | CC BY 4.0 data; MIT software |
+| [AMDB](https://altermagnets.anyterial.se/) | 对 MAGNDATA 做的交替磁性筛查：自旋劈裂指标与筛查带隙；仅性质 | 622 | AMDB terms and source-publication provenance |
+| [OBELiX](https://github.com/NRC-Mila/OBELiX) | 实测室温离子电导率；仅性质 | 112 | CC BY 4.0 |
+
+二维与层状材料（5 个来源，71,615 行）：
+
+| 数据库 | 贡献内容 | 性质行数 | 许可 |
+|---|---|---:|---|
+| [2DMatPedia](https://www.2dmatpedia.org/download) | 由体相母体剥离得到的单层：带隙、剥离能 | 30,583 | 2DMatPedia terms |
+| [C2DB](https://2dhub.org/) | 计算二维材料：带隙、功函数、稳定性 | 14,120 | CC BY-SA 4.0 |
+| [Materials Cloud MC2D](https://mc2d.materialscloud.org/) | 可剥离单层及其层间结合能 | 13,202 | Materials Cloud record licence |
+| [BiDB](https://www.2dhub.org/bidb/bidb.html) | 范德华双层：按堆垛方式区分的结合能与带隙 | 9,405 | 2DHub dataset terms |
+| [OpenMX 2D AB2](https://www.openmx-square.org/2d-ab2/) | AB2 单层原型及其电子结构 | 4,305 | OpenMX database and source-publication terms |
+
+矿物、原型与其他专题集（9 个来源，173,509 行）：
+
+| 数据库 | 贡献内容 | 性质行数 | 许可 |
+|---|---|---:|---|
+| [CSLLM negatives](https://doi.org/10.6084/m9.figshare.29086931) | PU 筛查给出的 `predicted_synthesizable=false` 标签；仅性质，且没有这一行并不等于预测其可合成 | 98,303 | CC BY 4.0 |
+| [JARVIS 专题数据集](https://pages.nist.gov/jarvis/databases/) | NIST JARVIS 的专题晶体端点与性质集 | 26,154 | NIST/JARVIS dataset terms |
+| [AMCSD](https://www.rruff.net/about/download-data/) | 实验矿物结构，附矿物名、实测密度与计算衍射谱 | 24,639 | AMCSD terms |
+| [SACADA](https://www.sacada.info/) | 碳同素异形体：密度、硬度、模量、相对能量 | 10,349 | SACADA site terms and source-publication provenance |
+| [AFLOW 原型百科](https://aflowlib.duke.edu/p/index.html) | 原型与 Strukturbericht 标签；仅性质 | 6,251 | Apache-2.0 |
+| [Webmineral](https://webmineral.com/) | 矿物种级汇编——密度、莫氏硬度、折射率；仅性质，且数值描述的是矿物种整体而非所匹配的那件标本 | 4,698 | Webmineral site and cited-source terms |
+| [HEX 高压单质](https://springernature.figshare.com/collections/HEX_a_complete_Database_of_High-Pressure_Elemental_Crystal_Structures/7119778/1) | 0–300 GPa 的单质晶体结构 | 1,456 | CC0 |
+| [RRUFF](https://www.rruff.net/about/download-data/) | 实测矿物化学组成，以及拉曼、红外与衍射谱 | 1,302 | RRUFF terms and source-citation provenance |
+| [TCOD](https://www.crystallography.net/tcod/) | 理论 CIF 中的 DFT 带隙 | 357 | CC0 |
+
+#### 多孔 / 框架材料——12 个来源，10,218,950 条性质行
+
+| 数据库 | 贡献内容 | 性质行数 | 许可 |
+|---|---|---:|---|
+| [Boyd–Woo 碳捕集 MOF](https://archive.materialscloud.org/record/2018.0016/v3) | 湿烟气 GCMC 碳捕集：吸附量、选择性、工作容量、吸附热 | 5,454,666 | CC BY 4.0 |
+| [Deem SLC 沸石](https://mwdeem.org/PCOD/index.html) | 假设沸石，性质取自 CIF 尾部的 SLC 力场计算：模量、方向性泊松比、声速、骨架密度，另附模拟 XRD 谱 | 2,977,166 | CC BY 4.0 |
+| [hMOF](https://figshare.com/articles/dataset/15127758) | 假设 MOF：CO₂ 吸附量与 zeo++ 孔隙几何 | 892,486 | Figshare record licence |
+| [QMOF](https://github.com/Andrew-S-Rosen/QMOF) | DFT 弛豫的 MOF：多泛函带隙、总能、磁化、LCD / PLD | 339,443 | CC BY 4.0 |
+| [FAIR-MOFs](https://zenodo.org/records/13254307) | 源自 CSD 的实验 MOF：孔隙学、RCSR 拓扑、键解离能 | 277,454 | CC BY 4.0 |
+| [CoRE MOF 2019](https://zenodo.org/records/3677685) | 经整理的实验报道 MOF：Zeo++ 孔隙学、比表面积、空隙率、孔体积 | 155,488 | CC BY 4.0 |
+| [MOFX-DB](https://mof.tech.northwestern.edu/databases) | CoRE MOF / IZA / ToBaCCo 子集：孔隙几何与 298 K、1 bar 附近的单气体吸附量 | 87,845 | MOFX-DB dataset terms |
+| [PCOD](https://www.crystallography.net/pcod/) | GRINSP 预测骨架——硅酸盐、磷酸盐、硼酸盐等：预测 R 因子与骨架密度 | 24,416 | public domain |
+| [EC-MOF](https://ec-mof.njit.edu/) | 导电二维 MOF：带隙、形成能与结合能 | 7,848 | EC-MOF site terms and source-publication provenance |
+| [开放骨架磷酸铝](https://figshare.com/articles/dataset/Database_of_Open-Framework_Aluminophosphate_Structures/7822574) | AlPO 骨架，附 IZA 代码与已发表的精修残差 | 925 | CC BY 4.0 |
+| [CURATED-COFs](https://github.com/lipelopesoliveira/curatedCOFs) | 已合成的共价有机骨架及其骨架名称 | 684 | repository licence |
+| [IZA-SC](https://www.iza-structure.org/databases/) | 官方认定的沸石骨架类型，为 DLS76 理想化纯硅几何，并非实验晶胞 | 529 | IZA Structure Commission terms |
+
+</details>
 
 去重与来源优先级规则见
-[`docs/dataset-acquisition.zh-CN.md`](docs/dataset-acquisition.zh-CN.md) 第 7 节。ICSD 等受许可限制的来源
-按“版权和再分发边界”处理：本机可用于统一检索，受保护的原始文件和字段不随公开快照发布。
+[`docs/dataset-acquisition.zh-CN.md`](docs/dataset-acquisition.zh-CN.md) 第 7 节；每个来源贡献
+什么、如何挂接到结构池见
+[`docs/property-integration.zh-CN.md`](docs/property-integration.zh-CN.md) 第 2 节。ICSD 等受
+许可限制的来源按“版权和再分发边界”处理：本机可用于统一检索，受保护的原始文件和字段不随公开
+快照发布。
 
 [![播放 MateriaViva 2K60 演示视频](demo/MateriaViva_demo_preview.gif)](demo/MateriaViva_demo_2K60.mp4)
 
@@ -105,7 +221,7 @@ MateriaViva 的长期目标不是维护一次性的静态合集，而是持续�
 完成许可判断、格式映射、结构去重和质量检查后，再发布新的统一快照。
 
 > [!IMPORTANT]
-> 自动发现和自动整合功能尚未实现。当前 102 个来源仍由人工发现和审核，再由可恢复的采集
+> 自动发现和自动整合功能尚未实现。当前 106 个目录来源仍由人工发现和审核，再由可恢复的采集
 > 脚本接入。README 将待开发能力与当前实现分开描述。
 
 计划中的闭环是：
@@ -169,13 +285,13 @@ MateriaViva 自身的代码按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商�
 
 ## 当前覆盖范围
 
-机器可读目录目前登记 102 个晶体结构或性质来源。“登记”不等于“公开下载完成”：
+机器可读目录登记 **106** 个晶体结构或性质来源，其中 **54 个已整合**进索引、贡献上文统计的
+性质行。“登记”不等于“已采集”，“已采集”也不等于“已整合”：一个来源可能已经下载但还在等适配器，
+也可能是评估后被主动排除——Catalysis-Hub 就留在目录里，其 `status` 字段记录了爬取时漏掉
+`reactionSystems` 连接键、导致 91% 的反应无法挂接。
 
-- 59 个已完成采集或复用本机已有数据；
-- 18 个仅登记，或仍在等待合适的官方批量采集方案；
-- 22 个需要账户、提供方授权或付费许可，只保留目录信息；
-- 3 个轨迹数据源按项目范围排除；
-- 当前没有未完成的后台下载。
+逐来源状态见 [`scripts/datasets/sources.json`](scripts/datasets/sources.json)，每条记录的
+`status` 字段写明它当前处在哪个阶段——来源会在这些阶段之间移动，只有那里的信息会一直正确。
 
 其中 ELEMENTA 是轨迹数据集，但按“每条弛豫只取终点”的规则接入，中间帧不计入结构库。
 

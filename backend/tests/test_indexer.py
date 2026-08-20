@@ -80,6 +80,11 @@ def test_build_index_streams_both_datasets_and_persists_random_access_cif(tmp_pa
                 "magnetism": 0,
                 "elasticity": 0,
             },
+            # A freshly built index has no cross-database property layer yet, so
+            # the cached counts are absent and must report as unknown rather
+            # than as zero -- zero would claim the layer exists and is empty.
+            "property_rows": None,
+            "curve_count": None,
         }
         result = repo.search(SearchQuery(include_elements=("Li",)))
         assert [item["material_id"] for item in result.items] == ["exp-train-17"]

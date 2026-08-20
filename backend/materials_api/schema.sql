@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS materials (
     bulk_modulus REAL,
     shear_modulus REAL,
     poisson_ratio REAL,
+    material_family TEXT,
     blob_offset INTEGER NOT NULL,
     blob_length INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -50,6 +51,66 @@ CREATE TABLE IF NOT EXISTS metadata (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 ) WITHOUT ROWID;
+
+-- v3: per-property provenance ------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS source_defs (
+    id INTEGER PRIMARY KEY,
+    key TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    license TEXT,
+    url TEXT
+);
+
+CREATE TABLE IF NOT EXISTS property_defs (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    unit TEXT,
+    kind TEXT NOT NULL DEFAULT 'num'
+);
+
+CREATE TABLE IF NOT EXISTS material_properties (
+    material_pk INTEGER NOT NULL REFERENCES materials(pk) ON DELETE CASCADE,
+    property_id INTEGER NOT NULL REFERENCES property_defs(id),
+    source_id INTEGER NOT NULL REFERENCES source_defs(id),
+    native_id TEXT,
+    value_num REAL,
+    value_text TEXT,
+    method TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_props_material ON material_properties(material_pk);
+CREATE INDEX IF NOT EXISTS idx_props_lookup
+    ON material_properties(property_id, source_id, material_pk);
+
+CREATE TABLE IF NOT EXISTS material_source_refs (
+    material_pk INTEGER NOT NULL REFERENCES materials(pk) ON DELETE CASCADE,
+    source_id INTEGER NOT NULL REFERENCES source_defs(id),
+    native_id TEXT NOT NULL,
+    match_via TEXT NOT NULL,
+    PRIMARY KEY (material_pk, source_id, native_id)
+) WITHOUT ROWID;
+
+CREATE INDEX IF NOT EXISTS idx_srcref_source
+    ON material_source_refs(source_id, native_id);
+
+-- v3: non-scalar properties (spectra / curves), payloads in curves.blob ------
+
+CREATE TABLE IF NOT EXISTS material_curves (
+    id INTEGER PRIMARY KEY,
+    material_pk INTEGER NOT NULL REFERENCES materials(pk) ON DELETE CASCADE,
+    curve_type TEXT NOT NULL,   -- xrd / band_structure / dos / phonon_dos / raman / ir
+                                -- / kappa_spectral / kappa_cumulative / xas / absorption
+    fmt TEXT NOT NULL,          -- xy / peaks / svg
+    source_id INTEGER NOT NULL REFERENCES source_defs(id),
+    native_id TEXT,
+    method TEXT,
+    label TEXT,
+    blob_offset INTEGER NOT NULL,
+    blob_length INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_curves_material ON material_curves(material_pk);
 
 CREATE INDEX IF NOT EXISTS idx_materials_dataset ON materials(dataset, pk);
 CREATE INDEX IF NOT EXISTS idx_materials_formula ON materials(formula COLLATE NOCASE, pk);
@@ -69,4 +130,6 @@ CREATE INDEX IF NOT EXISTS idx_materials_e_hull ON materials(energy_above_hull, 
     WHERE energy_above_hull IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_materials_stability ON materials(is_stable, pk) WHERE is_stable IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_materials_metallicity ON materials(is_metal, pk) WHERE is_metal IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_materials_family ON materials(material_family, pk)
+    WHERE material_family IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_elements_element_material ON material_elements(element, material_pk);

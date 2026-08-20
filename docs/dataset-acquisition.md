@@ -2,14 +2,14 @@
 
 **English** · [简体中文](dataset-acquisition.zh-CN.md)
 
-Updated: 2026-07-28
+Updated: 2026-07-31
 
 This file records MateriaViva's coverage of external crystal databases, actual download status,
 licence boundaries and required manual steps. The machine-readable catalog lives at
 [`scripts/datasets/sources.json`](../scripts/datasets/sources.json).
 
 "Coverage" here is not the same as "already downloaded". The catalog currently registers exactly
-**101 sources**: 61 source paths already exist on this machine, of which 55 sit under
+**102 sources**: 62 source paths already exist on this machine, of which 56 sit under
 `data/raw/acquired/`, 5 reuse existing data in `data/raw/external_structs/`, and the licensed ICSD
 sits in `data/raw/icsd_extracted/`. The remaining 40 have no local source path yet, for reasons
 including account or paid licences, no official bulk interface, provider prohibitions on bulk
@@ -17,10 +17,10 @@ download, and trajectories excluded by project scope. The true state of each ent
 catalog's `status` and `data_path` say; a source-discovery count must never be read as a
 download-completion count.
 
-Split by catalog status: 58 acquired or reusing existing data, 18 registered only or awaiting an
+Split by catalog status: 59 acquired or reusing existing data, 18 registered only or awaiting an
 official bulk route, 22 requiring a user account, provider authorization or a paid licence, and 3
 trajectory sources excluded by scope. There are no unfinished background downloads. The four groups
-total 101 sources.
+total 102 sources.
 
 ## 1. Storage and format conventions
 
@@ -143,7 +143,7 @@ find data/raw/acquired -type f -name '*.receipt.json' | sort
 
 ### 3.2 Second-round expansion sources
 
-The machine-readable catalog now contains 101 sources. The following were added in the second round
+The machine-readable catalog now contains 102 sources. The following were added in the second round
 as specialized structure/property libraries:
 
 | Source | Scale / contents | Automation status | Overlap handling |
@@ -479,6 +479,19 @@ export, offline storage and internal search; ingest only after explicit permissi
   38,184 materials, but its structures and classifications derive from ICSD and other licensed data,
   and no redistributable full-database download was found. With the corresponding ICSD rights it can
   be joined to the local ICSD by ID rather than scraped.
+- [Materiae](https://cmpdc.iphy.ac.cn/materiae/), the CMPDC/IOP catalogue of topological electronic
+  materials behind Zhang et al., Nature 566, 475-479 (2019), was mirrored in full on 2026-07-31 via
+  its public web API with `scripts/datasets/materiae.py`: the 28,605-row catalogue summary, one
+  gzipped detail record per material (primitive/conventional CIFs, space group, symmetry-based
+  indicators, NSOC/SOC topological classification, DOS curves and BZ data; 28,603 records carry a
+  primitive CIF), and all 49,342 available band-structure SVGs (26,117 SOC, 23,225 NSOC). The SOC
+  classes cover 1,839 TI, 1,238 TCI and about 5k high-symmetry-point/line semimetals. Files sit in
+  `raw/acquired/materiae/` with a summary receipt and `manifest.json`. The site officially documents
+  a token API (User -> Profile -> Generate; 7-day access token, 1-year refresh token, refresh via
+  `POST /materiae/api/user/api_token/refresh`); the fetcher reads `MATERIAE_API_ACCESS_TOKEN` /
+  `MATERIAE_API_REFRESH_TOKEN` from the local `.env`, auto-refreshes and persists the new access
+  token, and falls back to anonymous browser-profile headers when no token is configured. Use
+  requires citing the Nature paper and the SymTopo reference above.
 
 ## 6. Integrity checks
 
@@ -512,3 +525,11 @@ and rules:
 5. More strictly licensed data must never be redistributed "contagiously" through a more permissive
    dataset; the frontend exposes only the fields and download actions the current authorization
    permits.
+
+Cross-database property attachment — matching each acquired property database onto the pool by
+authoritative source ids and by the same primitive-reduced BAWL fingerprint, admitting fingerprint
+misses as new master records, and storing every value with its source database, native record id
+and method — is implemented by `scripts/properties/` and documented in
+[`docs/property-integration.md`](property-integration.md). Sources whose structures cannot be
+redistributed (SPSE, 3DSC-ICSD and similar ICSD-derived mirrors) run in properties-only mode and
+never contribute structures.

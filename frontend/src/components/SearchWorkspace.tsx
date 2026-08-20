@@ -14,10 +14,44 @@ interface SearchWorkspaceProps {
   onSelectMaterial: (materialId: string) => void
 }
 
+/** Big counts in prose, in each language's own idiom. */
+function approx(value: number | null | undefined, locale: string): string {
+  if (value === null || value === undefined) return '—'
+  if (locale.startsWith('zh')) {
+    // No Intl notation produces 亿/万, so the split is explicit.
+    if (value >= 1e8) return `${(value / 1e8).toFixed(2)} 亿`
+    if (value >= 1e4) return `${(value / 1e4).toFixed(1)} 万`
+    return value.toLocaleString(locale)
+  }
+  if (value >= 1e6) return `${(value / 1e6).toFixed(1)} million`
+  return value.toLocaleString(locale)
+}
+
+function exact(value: number | null | undefined, locale: string): string {
+  return value === null || value === undefined ? '—' : value.toLocaleString(locale)
+}
+
 export function SearchWorkspace({ query, onQueryChange, onSelectMaterial }: SearchWorkspaceProps) {
   const { t, locale } = useI18n()
   const { data, error, loading, refresh } = useMaterials(query)
   const stats = useAtlasStats()
+  // Every figure in the hero comes from /api/stats. They used to be literals in
+  // the copy and each one drifted as the pool grew -- at one point the page
+  // showed a hardcoded "99,162 experimental" beside a live 13,504,703 index.
+  const heroNumbers = {
+    total: approx(stats?.total, locale),
+    experimental: locale.startsWith('zh')
+      ? approx(stats?.datasets?.experimental, locale)
+      : exact(stats?.datasets?.experimental, locale),
+    candidate: locale.startsWith('zh')
+      ? approx(stats?.datasets?.candidate, locale)
+      : exact(stats?.datasets?.candidate, locale),
+    properties: approx(stats?.property_rows, locale),
+  }
+  const subtitleKey =
+    stats?.property_rows === null || stats?.property_rows === undefined
+      ? 'hero.subtitleNoProps'
+      : 'hero.subtitle'
   const selection: ElementSelection = Object.fromEntries([
     ...query.includedElements.map((symbol) => [symbol, 'include']),
     ...query.excludedElements.map((symbol) => [symbol, 'exclude']),
@@ -33,13 +67,13 @@ export function SearchWorkspace({ query, onQueryChange, onSelectMaterial }: Sear
       <section className="hero">
         <div className="hero__copy">
           <span className="eyebrow"><Activity size={13} /> {t('hero.eyebrow')}</span>
-          <h1>{t('hero.titleLead')}<br /><em>{t('hero.titleEm')}</em></h1>
-          <p>{t('hero.subtitle')}</p>
+          <h1>{t('hero.titleLead')}<br /><em>{t('hero.titleEm', heroNumbers)}</em></h1>
+          <p>{t(subtitleKey, heroNumbers)}</p>
         </div>
         <div className="hero__metrics" aria-label={t('hero.metricsLabel')}>
-          <Metric icon={<FlaskConical />} value="99,162" label={t('metric.experimental')} tone="mint" />
-          <Metric icon={<Layers3 />} value="8.13M" label={t('metric.candidate')} tone="orange" />
-          <Metric icon={<DatabaseZap />} value={stats ? stats.total.toLocaleString(locale) : '—'} label={t('metric.index')} tone="plain" />
+          <Metric icon={<FlaskConical />} value={exact(stats?.datasets?.experimental, locale)} label={t('metric.experimental')} tone="mint" />
+          <Metric icon={<Layers3 />} value={exact(stats?.datasets?.candidate, locale)} label={t('metric.candidate')} tone="orange" />
+          <Metric icon={<DatabaseZap />} value={exact(stats?.total, locale)} label={t('metric.index')} tone="plain" />
         </div>
       </section>
 

@@ -18,6 +18,11 @@ const PROPERTY_OPTIONS = [
   'magnetism', 'elasticity',
 ] as const
 
+const MATERIAL_FAMILIES = [
+  'bulk', 'mof', 'cof', 'hof', 'zeolite', 'zeotype', 'molecular-crystal',
+  '2d-material', '1d-material', 'carbon-allotrope',
+] as const
+
 export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersProps) {
   const { t } = useI18n()
   const update = (patch: Partial<MaterialQuery>) => onChange({ ...query, ...patch, page: 1 })
@@ -39,6 +44,12 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
       : [...query.hasProperties, property]
     update({ hasProperties })
   }
+  const toggleFamily = (family: string) => {
+    const materialFamilies = query.materialFamilies.includes(family)
+      ? query.materialFamilies.filter((value) => value !== family)
+      : [...query.materialFamilies, family]
+    update({ materialFamilies })
+  }
   const reset = () => onChange({
     ...query,
     datasets: [], formula: '', gapMin: undefined, gapMax: undefined,
@@ -47,7 +58,7 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
     volumeMin: undefined, volumeMax: undefined,
     formationEnergyMin: undefined, formationEnergyMax: undefined,
     energyAboveHullMin: undefined, energyAboveHullMax: undefined,
-    stability: '', metallicity: '', magneticOrderings: '',
+    stability: '', metallicity: '', magneticOrderings: '', materialFamilies: [],
     magnetizationMin: undefined, magnetizationMax: undefined,
     bulkModulusMin: undefined, bulkModulusMax: undefined,
     shearModulusMin: undefined, shearModulusMax: undefined,
@@ -138,6 +149,23 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
               type="button"
             >
               {t(`system.${value}` as TranslationKey)}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="field-group">
+        <legend>{t('filters.family')}</legend>
+        <div className="chip-grid">
+          {MATERIAL_FAMILIES.map((value) => (
+            <button
+              className="filter-chip"
+              data-active={query.materialFamilies.includes(value)}
+              key={value}
+              onClick={() => toggleFamily(value)}
+              type="button"
+            >
+              {t(`family.${value}` as TranslationKey)}
             </button>
           ))}
         </div>

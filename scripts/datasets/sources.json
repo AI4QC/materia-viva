@@ -9,7 +9,7 @@
       "official_url": "https://docs.materialsproject.org/downloading-data/how-do-i-download-the-materials-project-database",
       "license": "Materials Project terms",
       "data_path": "raw/acquired/materials-project",
-      "status": "downloaded-verified-154377-summary-documents-2026-07-26",
+      "status": "downloaded-verified-154377-summary-documents-2026-07-26-plus-8-property-endpoints-2026-08-19",
       "downloads": []
     },
     {
@@ -139,27 +139,37 @@
         {
           "url": "https://alexandria.icams.rub.de/data/pbe/2025.07.02/",
           "destination": "pbe-3d-2025.07.02",
-          "suffixes": [".json.bz2"]
+          "suffixes": [
+            ".json.bz2"
+          ]
         },
         {
           "url": "https://alexandria.icams.rub.de/data/pbe_2d/",
           "destination": "pbe-2d",
-          "suffixes": [".json.bz2"]
+          "suffixes": [
+            ".json.bz2"
+          ]
         },
         {
           "url": "https://alexandria.icams.rub.de/data/pbe_1d/",
           "destination": "pbe-1d",
-          "suffixes": [".json.bz2"]
+          "suffixes": [
+            ".json.bz2"
+          ]
         },
         {
           "url": "https://alexandria.icams.rub.de/data/pbesol/",
           "destination": "pbesol-3d",
-          "suffixes": [".json.bz2"]
+          "suffixes": [
+            ".json.bz2"
+          ]
         },
         {
           "url": "https://alexandria.icams.rub.de/data/scan/",
           "destination": "scan-3d",
-          "suffixes": [".json.bz2"]
+          "suffixes": [
+            ".json.bz2"
+          ]
         }
       ]
     },
@@ -263,13 +273,13 @@
       ]
     },
     {
-      "id": "omdb",
-      "name": "Organic Materials Database",
+      "id": "omdb-organic",
+      "name": "Organic Materials Database (OMDB, omdb.mathub.io)",
       "access": "free-registration",
       "official_url": "https://omdb.mathub.io/dataset/",
       "license": "OMDB terms",
       "data_path": "raw/acquired/omdb",
-      "status": "downloaded-verified-2026-07-26-via-jarvis-mirror-official-login-required",
+      "status": "downloaded-verified-2026-07-26-via-jarvis-mirror-official-login-required-renamed-2026-08-18-to-avoid-collision-with-the-optimade-omdb-prefix",
       "downloads": [
         {
           "filename": "omdbv1.json.zip",
@@ -306,13 +316,25 @@
     },
     {
       "id": "core-mof",
-      "name": "CoRE MOF",
+      "name": "CoRE MOF 2019",
       "access": "open",
-      "official_url": "https://zenodo.org/communities/coremof/",
-      "license": "release-specific open licence",
-      "data_path": "raw/external_structs/frameworks/core_mof",
-      "status": "already-present",
-      "downloads": []
+      "official_url": "https://zenodo.org/records/3677685",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/core-mof",
+      "status": "downloaded-verified-19081-zeo-porosity-rows-structure-archives-already-present-2026-08-19",
+      "notes": "Structures were already on disk before this catalog existed and stay at raw/external_structs/frameworks/core_mof; their md5s match 2019-11-01-ASR-public_12020.tar.gz and 2019-11-01-FSR-public_7061.tar.gz of record 3677685 (v1.1.3, DOI 10.5281/zenodo.3677685), so only the companion Zeo++ property tables are downloaded here. Their filename column joins the CIF basenames 12020/12020 and 7061/7061. The internal ASR/FSR spreadsheets are skipped: they describe structures the public archives do not contain.",
+      "downloads": [
+        {
+          "filename": "2019-11-01-ASR-public_12020.csv",
+          "url": "https://zenodo.org/api/records/3677685/files/2019-11-01-ASR-public_12020.csv/content",
+          "bytes": 1630916
+        },
+        {
+          "filename": "2019-11-01-FSR-public_7061.csv",
+          "url": "https://zenodo.org/api/records/3677685/files/2019-11-01-FSR-public_7061.csv/content",
+          "bytes": 956911
+        }
+      ]
     },
     {
       "id": "curated-cof",
@@ -724,6 +746,17 @@
           "bytes": 4020038106
         }
       ]
+    },
+    {
+      "id": "materiae",
+      "name": "Materiae - Material Sciences Database (catalogue of topological electronic materials)",
+      "access": "open",
+      "official_url": "https://cmpdc.iphy.ac.cn/materiae/",
+      "license": "Materiae site terms; cite Zhang et al., Nature 566, 475-479 (2019)",
+      "data_path": "raw/acquired/materiae",
+      "status": "downloaded-verified-28605-details-49342-bandplots-2026-07-31",
+      "downloads": [],
+      "notes": "Public web API mirrored in full: catalogue summary (28,605 rows), per-material details with prim/conv CIFs, symmetry indicators, topological classification and DOS curves, plus 49,342 band-structure SVGs (soc 26,117 / nsoc 23,225). Acquired by scripts/datasets/materiae.py; cite Zhang et al., Nature 566, 475-479 (2019). Official token API documented on the site (User -> Profile -> Generate, 7-day access / 1-year refresh token); the fetcher uses MATERIAE_API_ACCESS_TOKEN / MATERIAE_API_REFRESH_TOKEN from .env with auto-refresh, and falls back to anonymous browser-profile requests when no token is configured."
     },
     {
       "id": "pcod",
@@ -1345,33 +1378,141 @@
       "data_path": "raw/acquired/cmr-static",
       "status": "downloaded-verified-27-periodic-ase-databases-c1db-currently-404-nonperiodic-molecule-datasets-excluded-2026-07-26",
       "downloads": [
-        {"filename": "a2bcx4.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/a2bcx4.db", "bytes": 58380288},
-        {"filename": "abs3.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/abs3.db", "bytes": 303951872},
-        {"filename": "abse3.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/abse3.db", "bytes": 13000704},
-        {"filename": "absorption_perovskites.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/absorption_perovskites.db", "bytes": 4213760},
-        {"filename": "abx2.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/abx2.db", "bytes": 141578240},
-        {"filename": "ads1d.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/ads1d.db", "bytes": 294912},
-        {"filename": "adsorption.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/adsorption.db", "bytes": 3719168},
-        {"filename": "surfaces.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/surfaces.db", "bytes": 466944},
-        {"filename": "solids.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/solids.db", "bytes": 1561600},
-        {"filename": "c2dm.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/c2dm.db", "bytes": 16678912},
-        {"filename": "compression.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/compression.db", "bytes": 85362688},
-        {"filename": "cubic_perovskites.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/cubic_perovskites.db", "bytes": 47226880},
-        {"filename": "dcdft.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/dcdft.db", "bytes": 15879168},
-        {"filename": "dcdft_gpaw_pw_paw09.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/dcdft_gpaw_pw_paw09.db", "bytes": 835584},
-        {"filename": "fcc111.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/fcc111.db", "bytes": 5214208},
-        {"filename": "funct_perovskites.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/funct_perovskites.db", "bytes": 294912},
-        {"filename": "gbrv.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/gbrv.db", "bytes": 37895168},
-        {"filename": "htgw.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/htgw.db", "bytes": 23994368},
-        {"filename": "imp2d.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/imp2d.db", "bytes": 71819264},
-        {"filename": "low_symmetry_perovskites.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/low_symmetry_perovskites.db", "bytes": 4262912},
-        {"filename": "lowdim.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/lowdim.db", "bytes": 1072135168},
-        {"filename": "mp_gllbsc.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/mp_gllbsc.db", "bytes": 4542464},
-        {"filename": "oqmd12.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/oqmd12.db", "bytes": 12394496},
-        {"filename": "oqmd123.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/oqmd123.db", "bytes": 22130688},
-        {"filename": "organometal.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/organometal.db", "bytes": 618496},
-        {"filename": "pv_pec_oqmd.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/pv_pec_oqmd.db", "bytes": 9666560},
-        {"filename": "uafd.db", "url": "https://wiki.fysik.dtu.dk/cmr-files/uafd.db", "bytes": 466944}
+        {
+          "filename": "a2bcx4.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/a2bcx4.db",
+          "bytes": 58380288
+        },
+        {
+          "filename": "abs3.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/abs3.db",
+          "bytes": 303951872
+        },
+        {
+          "filename": "abse3.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/abse3.db",
+          "bytes": 13000704
+        },
+        {
+          "filename": "absorption_perovskites.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/absorption_perovskites.db",
+          "bytes": 4213760
+        },
+        {
+          "filename": "abx2.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/abx2.db",
+          "bytes": 141578240
+        },
+        {
+          "filename": "ads1d.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/ads1d.db",
+          "bytes": 294912
+        },
+        {
+          "filename": "adsorption.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/adsorption.db",
+          "bytes": 3719168
+        },
+        {
+          "filename": "surfaces.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/surfaces.db",
+          "bytes": 466944
+        },
+        {
+          "filename": "solids.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/solids.db",
+          "bytes": 1561600
+        },
+        {
+          "filename": "c2dm.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/c2dm.db",
+          "bytes": 16678912
+        },
+        {
+          "filename": "compression.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/compression.db",
+          "bytes": 85362688
+        },
+        {
+          "filename": "cubic_perovskites.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/cubic_perovskites.db",
+          "bytes": 47226880
+        },
+        {
+          "filename": "dcdft.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/dcdft.db",
+          "bytes": 15879168
+        },
+        {
+          "filename": "dcdft_gpaw_pw_paw09.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/dcdft_gpaw_pw_paw09.db",
+          "bytes": 835584
+        },
+        {
+          "filename": "fcc111.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/fcc111.db",
+          "bytes": 5214208
+        },
+        {
+          "filename": "funct_perovskites.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/funct_perovskites.db",
+          "bytes": 294912
+        },
+        {
+          "filename": "gbrv.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/gbrv.db",
+          "bytes": 37895168
+        },
+        {
+          "filename": "htgw.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/htgw.db",
+          "bytes": 23994368
+        },
+        {
+          "filename": "imp2d.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/imp2d.db",
+          "bytes": 71819264
+        },
+        {
+          "filename": "low_symmetry_perovskites.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/low_symmetry_perovskites.db",
+          "bytes": 4262912
+        },
+        {
+          "filename": "lowdim.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/lowdim.db",
+          "bytes": 1072135168
+        },
+        {
+          "filename": "mp_gllbsc.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/mp_gllbsc.db",
+          "bytes": 4542464
+        },
+        {
+          "filename": "oqmd12.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/oqmd12.db",
+          "bytes": 12394496
+        },
+        {
+          "filename": "oqmd123.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/oqmd123.db",
+          "bytes": 22130688
+        },
+        {
+          "filename": "organometal.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/organometal.db",
+          "bytes": 618496
+        },
+        {
+          "filename": "pv_pec_oqmd.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/pv_pec_oqmd.db",
+          "bytes": 9666560
+        },
+        {
+          "filename": "uafd.db",
+          "url": "https://wiki.fysik.dtu.dk/cmr-files/uafd.db",
+          "bytes": 466944
+        }
       ]
     },
     {
@@ -1384,12 +1525,30 @@
       "status": "downloaded-verified-95595-static-structures-mptrj-benchmark-and-aiida-provenance-archives-excluded-2026-07-26",
       "estimated_documents": 95595,
       "downloads": [
-        {"filename": "atomic_energies.csv", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/atomic_energies.csv?download=1"},
-        {"filename": "mad-subsets.chemiscope.json.gz", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-subsets.chemiscope.json.gz?download=1"},
-        {"filename": "mad-test.xyz", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-test.xyz?download=1"},
-        {"filename": "mad-train.xyz", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-train.xyz?download=1"},
-        {"filename": "mad-val.xyz", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-val.xyz?download=1"},
-        {"filename": "README.md", "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/README.md?download=1"}
+        {
+          "filename": "atomic_energies.csv",
+          "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/atomic_energies.csv?download=1"
+        },
+        {
+          "filename": "mad-subsets.chemiscope.json.gz",
+          "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-subsets.chemiscope.json.gz?download=1"
+        },
+        {
+          "filename": "mad-test.xyz",
+          "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-test.xyz?download=1"
+        },
+        {
+          "filename": "mad-train.xyz",
+          "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-train.xyz?download=1"
+        },
+        {
+          "filename": "mad-val.xyz",
+          "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/mad-val.xyz?download=1"
+        },
+        {
+          "filename": "README.md",
+          "url": "https://archive.materialscloud.org/records/c4ene-0mv14/files/README.md?download=1"
+        }
       ]
     },
     {
@@ -1401,12 +1560,36 @@
       "data_path": "raw/acquired/shiftml2-static",
       "status": "downloaded-verified-static-training-benchmark-and-polymorph-structures-relax-vs-md-trajectory-archive-excluded-2026-07-26",
       "downloads": [
-        {"filename": "files_description.md", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/files_description.md?download=1", "bytes": 1693},
-        {"filename": "Experimental_benchmark_nmr.zip", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/Experimental_benchmark_nmr.zip?download=1", "bytes": 472732},
-        {"filename": "final_training_test_sets.zip", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/final_training_test_sets.zip?download=1", "bytes": 120941801},
-        {"filename": "initial_training_test_sets.zip", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/initial_training_test_sets.zip?download=1", "bytes": 40844081},
-        {"filename": "README.txt", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/README.txt?download=1", "bytes": 1274},
-        {"filename": "ShiftML_poly.zip", "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/ShiftML_poly.zip?download=1", "bytes": 550092}
+        {
+          "filename": "files_description.md",
+          "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/files_description.md?download=1",
+          "bytes": 1693
+        },
+        {
+          "filename": "Experimental_benchmark_nmr.zip",
+          "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/Experimental_benchmark_nmr.zip?download=1",
+          "bytes": 472732
+        },
+        {
+          "filename": "final_training_test_sets.zip",
+          "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/final_training_test_sets.zip?download=1",
+          "bytes": 120941801
+        },
+        {
+          "filename": "initial_training_test_sets.zip",
+          "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/initial_training_test_sets.zip?download=1",
+          "bytes": 40844081
+        },
+        {
+          "filename": "README.txt",
+          "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/README.txt?download=1",
+          "bytes": 1274
+        },
+        {
+          "filename": "ShiftML_poly.zip",
+          "url": "https://archive.materialscloud.org/records/j2fka-sda13/files/ShiftML_poly.zip?download=1",
+          "bytes": 550092
+        }
       ]
     },
     {
@@ -1419,7 +1602,11 @@
       "status": "downloaded-verified-457-static-cifs-first-57-elements-at-0-100-200-300-gpa-2026-07-26",
       "estimated_documents": 457,
       "downloads": [
-        {"filename": "HEX.zip", "url": "https://ndownloader.figshare.com/files/45020533", "bytes": 624878}
+        {
+          "filename": "HEX.zip",
+          "url": "https://ndownloader.figshare.com/files/45020533",
+          "bytes": 624878
+        }
       ]
     },
     {
@@ -1444,9 +1631,21 @@
       "status": "downloaded-verified-631-raw-and-p1-static-hof-cifs-with-660-synthesis-records-2026-07-26",
       "notes": "The raw and P1-standardized archives each contain 631 actual CIF files; the synthesis/property table has 660 rows. The 2.35 GB literature-PDF archive and EndNote export are not crystal structure/property records and are intentionally excluded.",
       "downloads": [
-        {"filename": "HOF_database.csv", "url": "https://ndownloader.figshare.com/files/53956475", "bytes": 87364},
-        {"filename": "cifs.zip", "url": "https://ndownloader.figshare.com/files/54700850", "bytes": 129366739},
-        {"filename": "hof_database_cifs_raw.zip", "url": "https://ndownloader.figshare.com/files/54700847", "bytes": 2808683}
+        {
+          "filename": "HOF_database.csv",
+          "url": "https://ndownloader.figshare.com/files/53956475",
+          "bytes": 87364
+        },
+        {
+          "filename": "cifs.zip",
+          "url": "https://ndownloader.figshare.com/files/54700850",
+          "bytes": 129366739
+        },
+        {
+          "filename": "hof_database_cifs_raw.zip",
+          "url": "https://ndownloader.figshare.com/files/54700847",
+          "bytes": 2808683
+        }
       ]
     },
     {
@@ -1459,8 +1658,16 @@
       "status": "downloaded-verified-312-experimental-static-structures-with-topology-and-simulated-xrd-properties-2026-07-26",
       "estimated_documents": 312,
       "downloads": [
-        {"filename": "alpo-cif.zip", "url": "https://ndownloader.figshare.com/files/21758073", "bytes": 393515},
-        {"filename": "alpo-312-200219.xlsx", "url": "https://ndownloader.figshare.com/files/21758109", "bytes": 667962}
+        {
+          "filename": "alpo-cif.zip",
+          "url": "https://ndownloader.figshare.com/files/21758073",
+          "bytes": 393515
+        },
+        {
+          "filename": "alpo-312-200219.xlsx",
+          "url": "https://ndownloader.figshare.com/files/21758109",
+          "bytes": 667962
+        }
       ]
     },
     {
@@ -1474,7 +1681,11 @@
       "estimated_documents": 92552,
       "notes": "The verified archive contains exactly 92,552 JSON pattern records and no frame or trajectory files. A content scan found 912 labels with complete lattice plus atomic basis, 1,267 partial phase labels, and 90,373 unlabeled experimental patterns.",
       "downloads": [
-        {"filename": "opxrd.zip", "url": "https://zenodo.org/api/records/15298026/files/opxrd.zip/content", "bytes": 1400997733}
+        {
+          "filename": "opxrd.zip",
+          "url": "https://zenodo.org/api/records/15298026/files/opxrd.zip/content",
+          "bytes": 1400997733
+        }
       ]
     },
     {
@@ -1488,7 +1699,11 @@
       "estimated_documents": 467861,
       "notes": "Structures.zip contains the source structure and simulated one-dimensional diffraction record. Its 467,861 entries pass a full Python Zip64 decompression and CRC scan; legacy Info-ZIP 6.00 misreads this very large Zip64 central directory. The 29.4 GB radial-image rendering and two redundant 5.9/20.5 GB CSV exports are excluded to preserve SSD space without losing the structure/property records.",
       "downloads": [
-        {"filename": "Structures.zip", "url": "https://china.scidb.cn/download?fileId=d2b55f1d1fcdc0f49d83099e2e795fae", "bytes": 47781765915}
+        {
+          "filename": "Structures.zip",
+          "url": "https://china.scidb.cn/download?fileId=d2b55f1d1fcdc0f49d83099e2e795fae",
+          "bytes": 47781765915
+        }
       ]
     },
     {
@@ -1500,11 +1715,21 @@
       "data_path": "raw/acquired/spse",
       "status": "downloaded-verified-91763-static-structures-with-ion-transport-properties-migration-path-arrays-excluded-2026-07-26",
       "estimated_documents": 91763,
-      "excluded_structure_fields": ["hierarchical_calculation_data.json:paths"],
+      "excluded_structure_fields": [
+        "hierarchical_calculation_data.json:paths"
+      ],
       "notes": "The verified archive contains 91,763 newline-delimited static structure records plus BVSE, CAVD, conduction-descriptor, and literature-property tables. Its 49 hierarchical calculation records include migration-path coordinate arrays; those arrays are not structures and are explicitly excluded from MateriaViva ingestion. No images or frame files are present. The code archive is excluded, and ICSD-derived structures remain local-only under their source licence.",
       "downloads": [
-        {"filename": "SPSE_database_data.zip", "url": "https://ndownloader.figshare.com/files/22067844", "bytes": 50847996},
-        {"filename": "Readme.docx", "url": "https://ndownloader.figshare.com/files/22067850", "bytes": 16671}
+        {
+          "filename": "SPSE_database_data.zip",
+          "url": "https://ndownloader.figshare.com/files/22067844",
+          "bytes": 50847996
+        },
+        {
+          "filename": "Readme.docx",
+          "url": "https://ndownloader.figshare.com/files/22067850",
+          "bytes": 16671
+        }
       ]
     },
     {
@@ -1518,8 +1743,15 @@
       "estimated_documents": 2474,
       "notes": "The full Science Data Bank HDF5 and the accompanying GitHub snapshot are collected. Structures originate mainly from Materials Project and OQMD and will be matched later; SuperBand-specific band and Fermi-surface properties are retained.",
       "downloads": [
-        {"filename": "0724.hdf5", "url": "https://china.scidb.cn/download?fileId=c2487ff51a6230ba2ff55f0b5a8bfe8f", "bytes": 13292718528},
-        {"filename": "SuperBand-main.zip", "url": "https://github.com/ljcj007/SuperBand/archive/refs/heads/main.zip"}
+        {
+          "filename": "0724.hdf5",
+          "url": "https://china.scidb.cn/download?fileId=c2487ff51a6230ba2ff55f0b5a8bfe8f",
+          "bytes": 13292718528
+        },
+        {
+          "filename": "SuperBand-main.zip",
+          "url": "https://github.com/ljcj007/SuperBand/archive/refs/heads/main.zip"
+        }
       ]
     },
     {
@@ -1532,8 +1764,16 @@
       "status": "downloaded-verified-599-synthesized-electrolytes-321-with-full-cif-and-experimental-conductivity-2026-07-26",
       "estimated_documents": 599,
       "downloads": [
-        {"filename": "all.csv", "url": "https://raw.githubusercontent.com/NRC-Mila/OBELiX/main/data/downloads/all.csv", "bytes": 114856},
-        {"filename": "all_cifs.tar.gz", "url": "https://raw.githubusercontent.com/NRC-Mila/OBELiX/main/data/downloads/all_cifs.tar.gz", "bytes": 106813}
+        {
+          "filename": "all.csv",
+          "url": "https://raw.githubusercontent.com/NRC-Mila/OBELiX/main/data/downloads/all.csv",
+          "bytes": 114856
+        },
+        {
+          "filename": "all_cifs.tar.gz",
+          "url": "https://raw.githubusercontent.com/NRC-Mila/OBELiX/main/data/downloads/all_cifs.tar.gz",
+          "bytes": 106813
+        }
       ]
     },
     {
@@ -1582,10 +1822,26 @@
       "status": "downloaded-verified-324426-static-mof-structures-with-partial-charges-and-adsorption-properties-2026-07-26",
       "estimated_documents": 324426,
       "downloads": [
-        {"filename": "MOF_database.tar.gz", "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/MOF_database.tar.gz/content", "bytes": 1237868795},
-        {"filename": "screening_data.tar.gz", "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/screening_data.tar.gz/content", "bytes": 58177360},
-        {"filename": "experimental_structures.zip", "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/experimental_structures.zip/content", "bytes": 2382},
-        {"filename": "files_description.md", "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/files_description.md/content", "bytes": 415}
+        {
+          "filename": "MOF_database.tar.gz",
+          "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/MOF_database.tar.gz/content",
+          "bytes": 1237868795
+        },
+        {
+          "filename": "screening_data.tar.gz",
+          "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/screening_data.tar.gz/content",
+          "bytes": 58177360
+        },
+        {
+          "filename": "experimental_structures.zip",
+          "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/experimental_structures.zip/content",
+          "bytes": 2382
+        },
+        {
+          "filename": "files_description.md",
+          "url": "https://archive.materialscloud.org/api/records/nsp7v-2dk91/files/files_description.md/content",
+          "bytes": 415
+        }
       ]
     },
     {
@@ -1624,13 +1880,13 @@
     {
       "id": "atomly",
       "name": "Atomly materials science database",
-      "access": "free-registration",
-      "official_url": "https://atomly.net/",
+      "access": "open",
+      "official_url": "https://atomly.matchat.cn/explore-materials",
       "license": "Atomly service terms and source-dataset provenance",
       "data_path": "raw/acquired/atomly",
-      "status": "user-action-required-api-is-limited-to-internal-testing-and-collaborators-contact-atomly-at-iphy-ac-cn",
+      "status": "downloading-enum-wave-in-progress-2026-07-31",
       "estimated_documents": 349043,
-      "notes": "The official web client states that API access is currently limited to internal testing and collaborators. Contact atomly@iphy.ac.cn; the site certificate was expired when verified on 2026-07-26.",
+      "notes": "Bulk acquisition running via scripts/datasets/atomly.py with account session token (documented 120 req/min per-IP limit; API keys are scoped to 5 read-only endpoints at 10/min+200/day, OPTIMADE endpoint exists but is not deployed yet). Phases: chemical-system enumeration (search_by_elements, 100-row cap, recursive subdivision), detail harvest (get_struct_detail per struct id: lattice, energies, symmetry, prim/conv CIF, electronic diagram), blind sweep of the dense id block [1,150000] for capped-system overflow. Sparse id blocks near 1e9/3e9 are only reachable via enumeration.",
       "downloads": []
     },
     {
@@ -1736,7 +1992,7 @@
       "official_url": "https://www.catalysis-hub.org/",
       "license": "dataset-specific licences and Catalysis-Hub terms",
       "data_path": "raw/acquired/catalysis-hub",
-      "status": "graphql-api-export-planned-dataset-specific-provenance-required",
+      "status": "downloaded-158304-reactions-2026-08-18-excluded-from-ingestion-crawl-omitted-reactionSystems-join-key-so-91-percent-unattachable",
       "downloads": []
     },
     {
@@ -1803,6 +2059,63 @@
         }
       ],
       "notes": "Fetched with huggingface_hub at revision 9de9010715da4f563326f99bf3f7ee829cf4486a, which is the revision recorded in the local HF download cache; both archives match the remote x-linked-size exactly and both pass a full zstd stream check. The dataset card declares cc-by-nc-4.0 and the repository is public and ungated. This is trajectory data: 38,808,603 frames over 2,028,008 relaxations in the core archive and 4,713,110 frames over 207,185 relaxations in the spin archive. Under section 7 rule 3 only the endpoint of each relaxation enters the structure pool and every intermediate ionic step is discarded. Trajectory identity is the (material, structure, spin) triple rather than material alone: partway through the spin archive the material tag drops its spin suffix, so consecutive magnetic runs share one tag while restarting ionic_step at zero, and keying on material alone silently merges those runs and loses about 62 percent of that archive. CC BY-NC 4.0 restricts the whole published snapshot to non-commercial use."
+    },
+    {
+      "id": "carolina",
+      "name": "Carolina Materials Database",
+      "access": "open",
+      "official_url": "https://www.carolinamatdb.org/",
+      "license": "CC BY 4.0",
+      "data_path": "raw/acquired/carolina",
+      "status": "downloaded-verified-bulk-2026-08-18-zenodo-8381476-carolina-matdb-lmdb-214435-records-plus-colabfit-214267-plus-300-record-live-site-sample",
+      "downloads": [
+        {
+          "filename": "bulk/matsciml-zenodo-8381476/carolina_matdb.zip",
+          "url": "https://zenodo.org/api/records/8381476/files/carolina_matdb.zip/content",
+          "bytes": 63053941
+        },
+        {
+          "filename": "bulk/colabfit-hf/co/co_0.parquet",
+          "url": "https://huggingface.co/datasets/colabfit/Carolina_Materials/resolve/main/co/co_0.parquet",
+          "bytes": 114276714
+        },
+        {
+          "filename": "bulk/colabfit-hf/ds.parquet",
+          "url": "https://huggingface.co/datasets/colabfit/Carolina_Materials/resolve/main/ds.parquet",
+          "bytes": 17970
+        }
+      ],
+      "notes": "The provider site (http://www.carolinamatdb.org/, Jianjun Hu and Ming Hu groups, University of South Carolina) states 214,436 inorganic materials (16,302 ternary, 198,134 quaternary) and licenses the data CC BY 4.0, confirmed verbatim on both the landing page and /terms/. It serves plain HTTP only; the HTTPS listener returns a malformed TLS record, so official_url is not reachable over TLS. The site publishes no bulk archive, no REST API and no OPTIMADE endpoint, and is absent from the OPTIMADE provider registry; /download/ has never existed in the Wayback record. Its only machine-readable routes are one static VASP POSCAR per record at /static/export/vasp/{primitive_cell,conventional_cell}/<i> for i in 0..214435, and the HTML detail page /entry/<i+1>/ carrying formation energy per atom, cell volume and the space-group assignment. Search results paginate at 10 rows and require a session POST, so a full mirror would cost about 236,000 requests at roughly 1.3 s each. The acquired copy therefore comes from the two CC BY 4.0 bulk redistributions instead: the MatSciML benchmark deposit (Zenodo 10.5281/zenodo.8381476, v1.0.0, 2023-08-31) whose carolina_matdb.zip holds an LMDB of 214,435 records with cell parameters, atomic numbers, Cartesian coordinates, space group and a per-atom formation energy; and the ColabFit Exchange curation of that same deposit (DOI 10.60732/f2f98394, 214,267 configurations) which preserves the LMDB key in its names field. The legacy /home/zhilong/SSD/material_data/carolina_matdb_structs.lmdb is that same Zenodo release re-serialised as pymatgen Structure dicts: all 214,435 keys match and all 214,435 records agree on composition and lattice, but the legacy copy dropped the formation energy. Neither bulk snapshot carries the site's CMD-ID, so records cannot be linked back to /entry/ pages without re-deriving the mapping."
+    },
+    {
+      "id": "csllm-negatives",
+      "name": "CSLLM non-synthesizable screening set",
+      "access": "open",
+      "official_url": "https://doi.org/10.6084/m9.figshare.29086931",
+      "license": "CC BY 4.0",
+      "data_path": "raw/external_structs/csllm_negatives",
+      "status": "already-present-106470-pu-screened-non-synthesizable-structures-label-sidecar-2026-08-17",
+      "downloads": []
+    },
+    {
+      "id": "jarvis-qetb",
+      "name": "NIST JARVIS-QETB tight-binding dataset",
+      "access": "open",
+      "official_url": "https://jarvis.nist.gov/",
+      "license": "NIST/JARVIS dataset terms",
+      "data_path": "raw/legacy-material-data/jqe_tb_folder.json",
+      "status": "already-present-legacy-829576-qetb-records-2026-08-17",
+      "downloads": []
+    },
+    {
+      "id": "open-materials-db",
+      "name": "Open Materials Database (openmaterialsdb.se)",
+      "access": "open",
+      "official_url": "https://openmaterialsdb.se/",
+      "license": "not stated by the provider",
+      "status": "surveyed-2026-08-18-optimade-endpoint-live-68566-structures-zero-provider-properties-primary-source-is-cod-not-ingested",
+      "downloads": [],
+      "data_path": "raw/acquired/open-materials-db"
     }
   ]
 }

@@ -28,6 +28,7 @@ export interface MaterialQuery {
   stability: StabilityFilter
   metallicity: MetallicityFilter
   magneticOrderings: string
+  materialFamilies: string[]
   magnetizationMin?: number
   magnetizationMax?: number
   bulkModulusMin?: number
@@ -52,6 +53,7 @@ export const DEFAULT_QUERY: MaterialQuery = {
   stability: '',
   metallicity: '',
   magneticOrderings: '',
+  materialFamilies: [],
   hasProperties: [],
   page: 1,
   pageSize: 24,
@@ -85,6 +87,7 @@ export function serializeQuery(query: MaterialQuery): URLSearchParams {
   if (query.stability) params.set('stability', query.stability)
   if (query.metallicity) params.set('metallicity', query.metallicity)
   if (query.magneticOrderings.trim()) params.set('magnetic_orderings', query.magneticOrderings.trim())
+  if (query.materialFamilies.length) params.set('material_families', csv(query.materialFamilies))
   setNumber(params, 'magnetization_min', query.magnetizationMin)
   setNumber(params, 'magnetization_max', query.magnetizationMax)
   setNumber(params, 'bulk_modulus_min', query.bulkModulusMin)
@@ -133,6 +136,7 @@ export function parseQuery(params: URLSearchParams): MaterialQuery {
     stability: parseStability(params.get('stability')),
     metallicity: parseMetallicity(params.get('metallicity')),
     magneticOrderings: params.get('magnetic_orderings') ?? '',
+    materialFamilies: splitCsv(params.get('material_families')),
     magnetizationMin: parseNumber(params.get('magnetization_min')),
     magnetizationMax: parseNumber(params.get('magnetization_max')),
     bulkModulusMin: parseNumber(params.get('bulk_modulus_min')),

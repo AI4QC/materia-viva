@@ -10,6 +10,8 @@
   --mineral-deep: #1b8f70;
   --signal: #ff8b4d;
   --signal-deep: #a94520;
+  /* chart series 2 (measured spectra); validated for CVD separation vs --signal */
+  --chart-2: #3391d8;
   --line: rgba(213, 238, 226, 0.13);
   --line-strong: rgba(213, 238, 226, 0.25);
   --surface-panel: rgba(10, 23, 22, 0.92);
@@ -44,6 +46,7 @@
   --mineral: #168463;
   --mineral-deep: #0d6a50;
   --signal: #c76635;
+  --chart-2: #1e6fd9;
   --signal-deep: #8f4021;
   --line: rgba(24, 73, 59, .11);
   --line-strong: rgba(24, 73, 59, .23);

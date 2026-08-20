@@ -29,9 +29,11 @@ const en = {
 
   'hero.eyebrow': 'Unified crystal universe · 01',
   'hero.titleLead': 'Every crystal dataset in one place,',
-  'hero.titleEm': 'discover 8.22 million unique structures.',
+  'hero.titleEm': 'discover {total} unique structures.',
   'hero.subtitle':
-    'Unified and deduplicated across sources, bringing 99,162 experimentally synthesizable structures and 8,125,976 candidate structures into a single search space.',
+    'Unified and deduplicated across sources: {experimental} experimental and {candidate} candidate structures, {properties} cross-database property records with full provenance, in a single search space.',
+  'hero.subtitleNoProps':
+    'Unified and deduplicated across sources: {experimental} experimental and {candidate} candidate structures, with full provenance, in a single search space.',
   'hero.metricsLabel': 'Dataset scale',
   'metric.experimental': 'Experimental',
   'metric.candidate': 'Candidates',
@@ -115,6 +117,18 @@ const en = {
   'property.magnetism': 'Magnetism',
   'property.elasticity': 'Elasticity',
 
+  'filters.family': 'Material class',
+  'family.bulk': 'Bulk crystal',
+  'family.mof': 'MOF',
+  'family.cof': 'COF',
+  'family.hof': 'HOF',
+  'family.zeolite': 'Zeolite',
+  'family.zeotype': 'Zeotype',
+  'family.molecular-crystal': 'Molecular crystal',
+  'family.2d-material': '2D material',
+  'family.1d-material': '1D material',
+  'family.carbon-allotrope': 'Carbon allotrope',
+
   'results.errorTitle': 'Search connection interrupted',
   'results.retry': 'Try again',
   'results.emptyTitle': 'No structures matched',
@@ -150,6 +164,40 @@ const en = {
   'detail.provenance': 'Data provenance',
   'detail.provenanceNote':
     'The original CIF is stored compressed exactly as the source provided it; index fields can be rebuilt.',
+  'detail.representative': 'Representative properties',
+  'detail.formationEnergy': 'Formation energy',
+  'detail.hull': 'Energy above hull',
+  'detail.stability': 'Stability',
+  'detail.stable': 'Stable',
+  'detail.unstable': 'Metastable',
+  'detail.metallicity': 'Metallicity',
+  'detail.metal': 'Metal',
+  'detail.nonmetal': 'Non-metal',
+  'detail.magneticOrdering': 'Magnetic ordering',
+  'detail.magnetization': 'Total magnetization',
+  'detail.bulkModulus': 'Bulk modulus',
+  'detail.shearModulus': 'Shear modulus',
+  'detail.poisson': 'Poisson ratio',
+  'detail.crossdb': 'Cross-database properties',
+  'detail.crossdbNote':
+    'Every value keeps its source database, native record id and method.',
+  'detail.noProperties': 'No cross-database properties recorded yet.',
+  'detail.property': 'Property',
+  'detail.value': 'Value',
+  'detail.method': 'Method',
+  'detail.source': 'Source',
+  'spectra.label': 'Spectra & curves',
+  'spectra.xrd': 'Powder XRD',
+  'spectra.simulated': 'Simulated (CuKα)',
+  'spectra.measured': 'Measured',
+  'spectra.intensity': 'Intensity',
+  'spectra.loading': 'Computing pattern…',
+  'spectra.xrdFailed': 'XRD simulation unavailable for this structure.',
+  'spectra.curveFailed': 'Curve failed to load.',
+  'detail.sources': 'Source databases',
+  'detail.viaHash': 'fingerprint match',
+  'detail.viaId': 'ID match',
+  'detail.viaOrigin': 'contributed structure',
 
   'viewer.label': 'Crystal structure viewer',
   'viewer.engines': 'Rendering engine',
@@ -199,8 +247,12 @@ const zh: Record<TranslationKey, string> = {
 
   'hero.eyebrow': 'Unified crystal universe · 01',
   'hero.titleLead': '汇聚全部晶体数据集，',
-  'hero.titleEm': '发现 822 万种独特结构。',
-  'hero.subtitle': '跨数据源统一整合与去重，将 99,162 个实验可合成结构和 8,125,976 个候选结构汇入同一检索空间。',
+  // {total} / {experimental} / {candidate} / {properties} arrive already
+  // formatted in the 万/亿 idiom, so the templates carry no unit of their own —
+  // a stray 万 here would render as "1350.5 万 万".
+  'hero.titleEm': '发现 {total}种独特结构。',
+  'hero.subtitle': '跨数据源统一整合与去重：{experimental}个实验结构、{candidate}个候选结构与 {properties}条带溯源的跨库性质记录，汇入同一检索空间。',
+  'hero.subtitleNoProps': '跨数据源统一整合与去重：{experimental}个实验结构、{candidate}个候选结构，全部带溯源标注，汇入同一检索空间。',
   'hero.metricsLabel': '数据集规模',
   'metric.experimental': '实验收录',
   'metric.candidate': '候选收录',
@@ -283,6 +335,18 @@ const zh: Record<TranslationKey, string> = {
   'property.magnetism': '磁性',
   'property.elasticity': '弹性',
 
+  'filters.family': '材料类别',
+  'family.bulk': '常规晶体',
+  'family.mof': 'MOF',
+  'family.cof': 'COF',
+  'family.hof': 'HOF',
+  'family.zeolite': '沸石',
+  'family.zeotype': '类沸石',
+  'family.molecular-crystal': '分子晶体',
+  'family.2d-material': '二维材料',
+  'family.1d-material': '一维材料',
+  'family.carbon-allotrope': '碳同素异形体',
+
   'results.errorTitle': '检索链路中断',
   'results.retry': '重新尝试',
   'results.emptyTitle': '没有命中结构',
@@ -317,6 +381,39 @@ const zh: Record<TranslationKey, string> = {
   'detail.composition': '元素组成',
   'detail.provenance': '数据溯源',
   'detail.provenanceNote': '原始 CIF 按数据集来源原样压缩保存，索引字段可重新构建。',
+  'detail.representative': '代表性质',
+  'detail.formationEnergy': '形成能',
+  'detail.hull': '凸包能',
+  'detail.stability': '稳定性',
+  'detail.stable': '稳定',
+  'detail.unstable': '亚稳',
+  'detail.metallicity': '金属性',
+  'detail.metal': '金属',
+  'detail.nonmetal': '非金属',
+  'detail.magneticOrdering': '磁序',
+  'detail.magnetization': '总磁矩',
+  'detail.bulkModulus': '体积模量',
+  'detail.shearModulus': '剪切模量',
+  'detail.poisson': '泊松比',
+  'detail.crossdb': '跨库性质',
+  'detail.crossdbNote': '每个数值都保留来源数据库、原始记录号和计算 / 测量方法。',
+  'detail.noProperties': '暂未记录跨库性质。',
+  'detail.property': '性质',
+  'detail.value': '数值',
+  'detail.method': '方法',
+  'detail.source': '来源',
+  'spectra.label': '谱图与非标量性质',
+  'spectra.xrd': '粉末 XRD',
+  'spectra.simulated': '模拟（CuKα）',
+  'spectra.measured': '实测',
+  'spectra.intensity': '强度',
+  'spectra.loading': '正在计算衍射谱…',
+  'spectra.xrdFailed': '该结构暂无法模拟 XRD。',
+  'spectra.curveFailed': '谱线加载失败。',
+  'detail.sources': '来源数据库',
+  'detail.viaHash': '结构指纹匹配',
+  'detail.viaId': 'ID 匹配',
+  'detail.viaOrigin': '结构贡献来源',
 
   'viewer.label': '晶体结构查看器',
   'viewer.engines': '渲染引擎',
@@ -354,7 +451,7 @@ export const NUMBER_LOCALE: Record<Language, string> = { en: 'en-US', zh: 'zh-CN
 interface I18nValue {
   lang: Language
   setLang: (lang: Language) => void
-  t: (key: TranslationKey) => string
+  t: (key: TranslationKey, params?: Record<string, string>) => string
   locale: string
 }
 
@@ -371,7 +468,14 @@ export function I18nProvider({ children, initial }: { children: ReactNode; initi
   const value = useMemo<I18nValue>(() => ({
     lang,
     setLang,
-    t: (key) => TRANSLATIONS[lang][key] ?? TRANSLATIONS.en[key] ?? key,
+    // Named placeholders so copy quoting dataset sizes can be filled from the
+    // live /api/stats payload. Every figure on this page was once a literal in
+    // the copy, and each one silently went stale as the pool grew.
+    t: (key, params) => {
+      const text = TRANSLATIONS[lang][key] ?? TRANSLATIONS.en[key] ?? key
+      if (!params) return text
+      return text.replace(/\{(\w+)\}/g, (match, name) => params[name] ?? match)
+    },
     locale: NUMBER_LOCALE[lang],
   }), [lang])
 

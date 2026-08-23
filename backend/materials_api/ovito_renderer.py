@@ -21,6 +21,27 @@ from typing import Callable
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 RENDERER_VERSION = "2"
+PROBE_TIMEOUT_SECONDS = 15
+
+
+def _probe_ovito(worker_python: str) -> bool:
+    """Whether ``worker_python`` can actually import ovito.
+
+    The interpreter merely existing says nothing: the last fallback is the
+    interpreter running this process, which exists by definition. Only an
+    import settles it.
+    """
+
+    try:
+        result = subprocess.run(
+            [worker_python, "-c", "import ovito"],
+            capture_output=True,
+            text=True,
+            timeout=PROBE_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0
 
 
 class OvitoRenderError(RuntimeError):
@@ -54,6 +75,7 @@ class OvitoRenderService:
         worker_python: str | Path | None = None,
         timeout_seconds: int = 180,
         runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+        prober: Callable[[str], bool] = _probe_ovito,
     ) -> None:
         self.cache_dir = Path(cache_dir)
         self.worker_python = str(
@@ -63,11 +85,24 @@ class OvitoRenderService:
         )
         self.timeout_seconds = max(10, timeout_seconds)
         self.runner = runner
+        self.prober = prober
+        self._available: bool | None = None
         self._locks: dict[str, threading.Lock] = {}
         self._locks_guard = threading.Lock()
 
     def available(self) -> bool:
-        return Path(self.worker_python).is_file()
+        """True only when the worker interpreter can import ovito.
+
+        Cached: /api/health and /api/stats call this on every request and the
+        probe spawns a subprocess.
+        """
+
+        if self._available is None:
+            self._available = (
+                Path(self.worker_python).is_file()
+                and self.prober(self.worker_python)
+            )
+        return self._available
 
     def render(self, cif: str, material_id: str, options: RenderOptions) -> Path:
         self.cache_dir.mkdir(parents=True, exist_ok=True)

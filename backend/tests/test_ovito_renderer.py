@@ -1,9 +1,15 @@
 import subprocess
+import sys
 import asyncio
 
 import pytest
 
-from materials_api.ovito_renderer import OvitoRenderError, OvitoRenderService, RenderOptions
+from materials_api.ovito_renderer import (
+    OvitoRenderError,
+    OvitoRenderService,
+    RenderOptions,
+    _probe_ovito,
+)
 
 
 PNG = b"\x89PNG\r\n\x1a\nrendered"
@@ -84,3 +90,56 @@ def test_ovito_renderer_surfaces_bounded_worker_error(tmp_path):
         service.render("data_Bad\n", "bad", RenderOptions())
 
     assert len(str(error.value)) < 2400
+
+
+def test_available_is_false_when_the_worker_interpreter_cannot_import_ovito(tmp_path):
+    # The regression this guards: the fallback interpreter is the one running
+    # this process, so "the file exists" was always true and /api/health
+    # advertised server-side rendering on hosts with no OVITO at all.
+    service = OvitoRenderService(
+        tmp_path / "cache",
+        worker_python=sys.executable,
+        prober=lambda _: False,
+    )
+
+    assert service.available() is False
+
+
+def test_available_is_true_only_when_the_import_succeeds(tmp_path):
+    service = OvitoRenderService(
+        tmp_path / "cache",
+        worker_python=sys.executable,
+        prober=lambda _: True,
+    )
+
+    assert service.available() is True
+
+
+def test_available_skips_the_probe_when_the_interpreter_is_missing(tmp_path):
+    probed = []
+
+    service = OvitoRenderService(
+        tmp_path / "cache",
+        worker_python=tmp_path / "no-such-python",
+        prober=lambda path: probed.append(path) or True,
+    )
+
+    assert service.available() is False
+    assert probed == []
+
+
+def test_available_probes_once_and_caches(tmp_path):
+    calls = []
+
+    service = OvitoRenderService(
+        tmp_path / "cache",
+        worker_python=sys.executable,
+        prober=lambda path: (calls.append(path), True)[1],
+    )
+
+    assert [service.available() for _ in range(3)] == [True, True, True]
+    assert len(calls) == 1
+
+
+def test_probe_reports_unavailable_for_an_interpreter_that_cannot_be_executed():
+    assert _probe_ovito("/nonexistent/bin/python") is False

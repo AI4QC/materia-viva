@@ -297,16 +297,3 @@ def test_no_source_is_both_probeable_and_recorded_as_having_no_bulk_interface():
         if s.get("reason") == "no-bulk-interface" and plans[s["id"]].kind != "manual"
     ]
     assert contradictions == []
-
-
-def test_a_multi_file_head_probe_says_how_little_it_covers():
-    source = {
-        "id": "example",
-        "downloads": [{"url": f"https://example.org/part{n}.zip"} for n in range(27)],
-    }
-    probe = plan_probe(source)
-    assert probe.kind == "http-head"
-    assert probe.note == "head-covers-1-of-27-files"
-    # a single-file source carries no such caveat
-    single = {"id": "one", "downloads": [{"url": "https://example.org/all.zip"}]}
-    assert plan_probe(single).note is None

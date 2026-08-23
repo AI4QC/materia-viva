@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import time
 from dataclasses import dataclass
@@ -288,7 +287,6 @@ def merge_probes(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     parser.add_argument(
         "--out",
         type=Path,
@@ -303,7 +301,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    catalog = load_catalog(args.catalog)
+    catalog = load_catalog(DEFAULT_CATALOG)
     catalogued = plan_probes(catalog)
     probes = catalogued
     if args.only:
@@ -335,7 +333,6 @@ def main(argv: list[str] | None = None) -> int:
     verdict = diff_against(previous, results)
     payload = {
         "generated_at": date.today().isoformat(),
-        "catalog": os.path.relpath(args.catalog, REPOSITORY_ROOT),
         "probes": merge_probes(previous, results, set(catalogued)),
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)

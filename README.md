@@ -337,7 +337,7 @@ relationships are in [`docs/legacy-ssd-data-inventory.md`](docs/legacy-ssd-data-
 ```bash
 git clone https://github.com/AI4QC/materia-viva.git
 cd materia-viva
-pip install -e backend  # or: pip install -r requirements.txt
+pip install -r backend/requirements.txt
 
 # a small slice — enough to develop the interface against
 python scripts/fetch_index.py slice

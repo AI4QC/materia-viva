@@ -9,7 +9,6 @@ from scripts.datasets.aflow import export_all as export_all_aflow
 from scripts.datasets.aflow import parse_total as parse_aflow_total
 from scripts.datasets.acquire import (
     CapacityError,
-    REASON_CODES,
     SOURCE_STATES,
     build_curl_command,
     default_data_root,
@@ -397,17 +396,13 @@ def test_catalog_source_requires_only_the_six_identity_fields():
     validate_catalog({"schema_version": 1, "sources": [filled]})
 
 
-def test_every_catalogued_state_is_a_known_one_and_terminal_states_say_why():
+def test_every_catalogued_source_carries_a_state():
+    # the state/reason pairing itself is enforced by validate_catalog, which
+    # test_catalog_is_broad_valid_and_contains_no_credentials already runs over
+    # this file; what it cannot require is that the field is there at all
     catalog = load_catalog(REPO_ROOT / "scripts" / "datasets" / "sources.json")
-    for source in catalog["sources"]:
-        state = source.get("state")
-        # every catalogued source now carries one; absent would read as
-        # `registered`, which the validator allows but the catalog no longer uses
-        assert state in SOURCE_STATES, source["id"]
-        if state in {"rejected", "quarantined"}:
-            assert source.get("reason") in REASON_CODES, source["id"]
-        else:
-            assert "reason" not in source, source["id"]
+    stateless = [s["id"] for s in catalog["sources"] if s.get("state") not in SOURCE_STATES]
+    assert stateless == []
 
 
 def test_integrated_state_matches_the_sources_that_have_an_adapter():

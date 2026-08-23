@@ -91,7 +91,9 @@ ICSD 是"整合成功 + 不可发布"的标准形态：`state` 为 `integrated`�
 | `join-key-missing` | 抓取缺少关联键，数据无法挂接 | Catalysis-Hub |
 | `integrity-failed` | 校验和、计数或异常值检查未通过 | 见采集文档第 6 节 |
 
-新码只在真的出现新失败形态时增加，不预先铺开。
+新码只在真的出现新失败形态时增加，不预先铺开。回填之后 `licence-unclear` 和 `integrity-failed`
+仍是零实例，因为它们是**运行期结果而非目录类别**：前者是许可闸门的默认拒绝出口，后者由完整性检查
+在 `quarantined` 时写入。目录里出现零实例是正常的。
 
 `scope-unbounded` 就是回填时被数据逼出来的：`nomad` 的 status 是 `too-large-for-full-mirror`
 ——它有批量接口，是我们主动不做全量镜像，记成 `no-bulk-interface` 是不准确的。同一类还有

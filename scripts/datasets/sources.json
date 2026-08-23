@@ -55,6 +55,8 @@
       "license": "per-upload licence and NOMAD terms",
       "data_path": "raw/acquired/nomad",
       "status": "too-large-for-full-mirror",
+      "state": "rejected",
+      "reason": "scope-unbounded",
       "downloads": []
     },
     {
@@ -65,6 +67,7 @@
       "license": "provider-specific",
       "data_path": "raw/acquired/optimade",
       "status": "registry-downloaded-verified-2026-07-26-provider-data-is-federated",
+      "state": "acquired",
       "downloads": [
         {
           "filename": "providers-2026-07-26.json",
@@ -591,6 +594,8 @@
       "license": "derived from licensed ICSD data",
       "data_path": "raw/acquired/topological-materials",
       "status": "browser-access-no-redistributable-bulk-structures",
+      "state": "rejected",
+      "reason": "licence-restricted",
       "downloads": []
     },
     {
@@ -2138,6 +2143,8 @@
       "license": "NOMAD upload and Perovskite Database terms",
       "data_path": "raw/acquired/perovskite-database",
       "status": "nomad-query-access-cataloged",
+      "state": "rejected",
+      "reason": "scope-unbounded",
       "downloads": []
     },
     {
@@ -2247,6 +2254,8 @@
       "official_url": "https://openmaterialsdb.se/",
       "license": "not stated by the provider",
       "status": "surveyed-2026-08-18-optimade-endpoint-live-68566-structures-zero-provider-properties-primary-source-is-cod-not-ingested",
+      "state": "rejected",
+      "reason": "scope-unbounded",
       "downloads": [],
       "data_path": "raw/acquired/open-materials-db"
     }

@@ -401,10 +401,8 @@ def test_every_catalogued_state_is_a_known_one_and_terminal_states_say_why():
     catalog = load_catalog(REPO_ROOT / "scripts" / "datasets" / "sources.json")
     for source in catalog["sources"]:
         state = source.get("state")
-        if state is None:
-            # a handful still await a policy call; absent reads as `registered`
-            assert "reason" not in source, source["id"]
-            continue
+        # every catalogued source now carries one; absent would read as
+        # `registered`, which the validator allows but the catalog no longer uses
         assert state in SOURCE_STATES, source["id"]
         if state in {"rejected", "quarantined"}:
             assert source.get("reason") in REASON_CODES, source["id"]

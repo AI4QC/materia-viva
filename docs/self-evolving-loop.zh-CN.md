@@ -87,24 +87,21 @@ ICSD 是"整合成功 + 不可发布"的标准形态：`state` 为 `integrated`�
 | `account-required` | 需人工注册或登录，无法自动化 | MatCloud、MatCraft |
 | `no-bulk-interface` | 无官方批量接口且禁止爬取 | NOMAD、OPTIMADE 联邦 |
 | `scope-trajectory` | 轨迹 / 中间帧数据集，超出静态结构范围 | MPtrj、OMat24 |
+| `scope-unbounded` | 有批量接口，但主动不做无边界全量镜像 | NOMAD、Perovskite Database、Open Materials DB |
 | `join-key-missing` | 抓取缺少关联键，数据无法挂接 | Catalysis-Hub |
 | `integrity-failed` | 校验和、计数或异常值检查未通过 | 见采集文档第 6 节 |
 
 新码只在真的出现新失败形态时增加，不预先铺开。
 
-**5 条来源现有词表装不下，`state` 留空待决**（第 3 步回填时暴露的）：
+`scope-unbounded` 就是回填时被数据逼出来的：`nomad` 的 status 是 `too-large-for-full-mirror`
+——它有批量接口，是我们主动不做全量镜像，记成 `no-bulk-interface` 是不准确的。同一类还有
+`perovskite-database`（经 NOMAD 查询访问，只登记）和 `open-materials-db`（主来源 COD 已整合，本身
+冗余），正对应 [`docs/dataset-acquisition.zh-CN.md`](dataset-acquisition.zh-CN.md) 第 4 节
+「已探测但不做无边界全量镜像」那一类。
 
-| 来源 | status | 缺的是什么 |
-|---|---|---|
-| `nomad` | `too-large-for-full-mirror` | 有批量接口，是我们主动不做全量镜像——不是 `no-bulk-interface` |
-| `optimade` | `registry-downloaded-verified-...-provider-data-is-federated` | registry 已采到并校验，只有联邦的 provider 数据不镜像，一半成功一半不做 |
-| `perovskite-database` | `nomad-query-access-cataloged` | 经 NOMAD 查询访问，只登记 |
-| `open-materials-db` | `...zero-provider-properties-primary-source-is-cod-not-ingested` | 主来源 COD 已整合，本身冗余 |
-| `topological-materials` | `browser-access-no-redistributable-bulk-structures` | 同时是"只有浏览接口"和"不可再分发"，哪个是约束条件 |
-
-前四条大致指向同一个缺口：**"探测过、但主动不做无边界镜像"**（正是
-[`docs/dataset-acquisition.zh-CN.md`](dataset-acquisition.zh-CN.md) 第 4 节那一类）。加不加一个
-`scope-unbounded` 码，是需要拍的决定，不是能推出来的规则。
+另两条同批定下：`optimade` 记为 `acquired`（registry 已采到并校验，只有联邦的 provider 数据不
+镜像），`topological-materials` 记为 `rejected(licence-restricted)`——它同时是"只有浏览接口"和
+"不可再分发"，后者是更硬的约束。
 
 ### 2.3 与 `status` 文本的关系
 
@@ -355,15 +352,14 @@ site 上限、以及**复合键例外清单**。枚举库（Deem 假想沸石、
 → 验证：`pytest backend/tests` 全绿。
 
 **第 3 步（已完成）：`state` / `reason` 回填。**
-101 条已填，5 条留空等政策判断。分布：`integrated` 54（= `adapters/` 里有模块的那 54 个，与 README
-的数字一致）、`rejected(account-required)` 21、`acquired` 14、`rejected(no-bulk-interface)` 7、
-`rejected(scope-trajectory)` 3、`rejected(join-key-missing)` 1（Catalysis-Hub）、`registered` 1
-（Atomly，采集在途）。`schema_version` 升到 2，`validate_catalog` 校验状态与原因码的配对：终态必须
+106 条全部填完。分布：`integrated` 54（= `adapters/` 里有模块的那 54 个，与 README 的数字一致）、
+`rejected(account-required)` 21、`acquired` 15、`rejected(no-bulk-interface)` 7、
+`rejected(scope-unbounded)` 3、`rejected(scope-trajectory)` 3、`rejected(licence-restricted)` 1、
+`rejected(join-key-missing)` 1（Catalysis-Hub）、`registered` 1（Atomly，采集在途）。`schema_version` 升到 2，`validate_catalog` 校验状态与原因码的配对：终态必须
 带已知原因码，非终态不得带原因码，有 `reason` 无 `state` 直接报错。
 → 验证：`pytest backend/tests`（140 passed）；`status` 文本零改动。
 
-留空的 5 条需要的不是规则而是决定，见第 2.2 节末：`nomad`、`optimade`、`perovskite-database`、
-`open-materials-db`、`topological-materials`。
+其中 5 条需要的是决定而不是规则，为它们新增了一个原因码 `scope-unbounded`，见第 2.2 节。
 
 **第 4 步（可与第 3 步并行）：补 figshare article id。**
 14 个来源，人工一次性工作，补完这 14 条才进入探测覆盖。

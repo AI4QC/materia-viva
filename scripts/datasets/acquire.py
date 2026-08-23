@@ -40,6 +40,7 @@ REASON_CODES = {
     "account-required",
     "no-bulk-interface",
     "scope-trajectory",
+    "scope-unbounded",
     "join-key-missing",
     "integrity-failed",
 }

@@ -212,6 +212,10 @@ Hugging Face 提交 SHA `9de9010715da4f563326f99bf3f7ee829cf4486a`。
 | github（raw / media / codeload / archive） | 5 | ✅ `<org>/<repo>/<branch>/...` |
 | 其余单点 host | 10 | 逐个看，多数只能 `http-head` |
 
+`http-head` 一次只探第一个下载 URL（礼貌规则：一次探测一个请求）。`cmr-static` 有 27 个下载
+URL、`rruff` 16 个、`mofx-db` 6 个，对它们而言这是**局部覆盖**——探测结果会在 note 里写
+`head-covers-1-of-N-files`，不让局部覆盖读成全覆盖。
+
 两条直接结论：
 
 - **40 个来源可探测**（invenio-latest 13、http-head 11、figshare-article 9、git-commit 5、

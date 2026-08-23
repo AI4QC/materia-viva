@@ -71,7 +71,7 @@ def test_probeable_share_of_the_catalog_is_reported_honestly():
     probeable = [p for p in plans.values() if p.kind != "manual"]
     # automated detection covers a minority of the catalog by design; this guards
     # against a regex regression silently shrinking the covered set
-    assert len(probeable) >= 30
+    assert len(probeable) >= 40
     assert len(probeable) < len(plans) / 2
 
 
@@ -253,6 +253,16 @@ def test_a_recorded_article_id_beats_the_official_url():
     assert probe.kind == "figshare-article"
     assert probe.endpoint.endswith("/25403968")
 
+    # the two recorded ids were each proved by checking that the article lists
+    # the file id the catalog already held; a typo here would silently monitor
+    # someone else's dataset, so the proved values are pinned
+    catalogued = {
+        s["id"]: s["figshare_article"]
+        for s in load_catalog(CATALOG)["sources"]
+        if "figshare_article" in s
+    }
+    assert catalogued == {"jarvis-dft": 6815699, "hex-high-pressure": 25403968}
+
     # and without the recorded id, a collection URL is not mistaken for an article
     del source["figshare_article"]
     assert plan_probe(source).kind == "manual"
@@ -261,3 +271,42 @@ def test_a_recorded_article_id_beats_the_official_url():
 def test_a_figshare_article_reports_its_version_as_the_token():
     probe = Probe("hmof", "figshare-article", endpoint="https://api.figshare.com/v2/articles/1")
     assert run_probe(probe, _StubPoller({"version": 2}))["seen"] == "2"
+
+
+def test_an_empty_upstream_payload_is_not_read_as_unchanged():
+    # a missing version field must not become the token "None" or "", either of
+    # which would compare equal next run and report unchanged forever
+    for kind, payload in [
+        ("figshare-article", {}),
+        ("invenio-latest", {}),
+        ("hf-revision", {}),
+    ]:
+        result = run_probe(Probe("x", kind, endpoint="https://x"), _StubPoller(payload))
+        assert result["seen"] is None, kind
+        assert result["note"] == "upstream-payload-carries-no-version", kind
+
+
+def test_no_source_is_both_probeable_and_recorded_as_having_no_bulk_interface():
+    # the catalog's `reason` and the probe's plan are two vocabularies over the
+    # same fact; this pins them together so they cannot drift apart unnoticed
+    catalog = load_catalog(CATALOG)
+    plans = plan_probes(catalog)
+    contradictions = [
+        s["id"]
+        for s in catalog["sources"]
+        if s.get("reason") == "no-bulk-interface" and plans[s["id"]].kind != "manual"
+    ]
+    assert contradictions == []
+
+
+def test_a_multi_file_head_probe_says_how_little_it_covers():
+    source = {
+        "id": "example",
+        "downloads": [{"url": f"https://example.org/part{n}.zip"} for n in range(27)],
+    }
+    probe = plan_probe(source)
+    assert probe.kind == "http-head"
+    assert probe.note == "head-covers-1-of-27-files"
+    # a single-file source carries no such caveat
+    single = {"id": "one", "downloads": [{"url": "https://example.org/all.zip"}]}
+    assert plan_probe(single).note is None

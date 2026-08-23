@@ -15,7 +15,9 @@ Two things here are not derivable from the code and were learned the hard way:
   when the article gains a version, and the article id is nowhere in the
   catalog, so those sources stay unprobeable until someone records it by hand.
 
-A `HEAD` fallback catches a file replaced in place but not a new release.
+A `HEAD` fallback catches a file replaced in place but not a new release, and it
+watches only the first of a source's download URLs — `cmr-static` has 27 — which
+each such probe reports in its note.
 """
 
 from __future__ import annotations
@@ -146,7 +148,10 @@ def plan_probe(source: dict[str, Any]) -> Probe:
                 endpoint=f"https://api.figshare.com/v2/articles/{article}",
             )
         return Probe(source_id, "manual", note="figshare-article-id-unknown")
-    return Probe(source_id, "http-head", endpoint=urls[0])
+    # one request per probe, so a multi-file source is watched through its first
+    # file only; say so rather than let partial cover read as full cover
+    note = f"head-covers-1-of-{len(urls)}-files" if len(urls) > 1 else None
+    return Probe(source_id, "http-head", endpoint=urls[0], note=note)
 
 
 def plan_probes(catalog: dict[str, Any]) -> dict[str, Probe]:
@@ -181,9 +186,10 @@ class _PolitePoller:
 
 
 def _seen_invenio(probe: Probe, payload: Any) -> tuple[str, dict[str, Any]]:
-    record_id = str(payload.get("id", ""))
+    record_id = payload.get("id")
+    record_id = "" if record_id is None else str(record_id)
     version = payload.get("metadata", {}).get("version")
-    seen = f"{record_id}:{version}" if version else record_id
+    seen = f"{record_id}:{version}" if record_id and version else record_id
     extra: dict[str, Any] = {"latest_version": version}
     if probe.known and record_id and record_id != probe.known:
         extra["catalog_points_at_older_record"] = probe.known
@@ -206,7 +212,8 @@ def run_probe(probe: Probe, poller: _PolitePoller) -> dict[str, Any]:
             result["seen"] = seen
             result.update(extra)
         elif probe.kind == "figshare-article":
-            result["seen"] = str(poller.json(probe.endpoint).get("version"))
+            version = poller.json(probe.endpoint).get("version")
+            result["seen"] = None if version is None else str(version)
         elif probe.kind == "hf-revision":
             result["seen"] = poller.json(probe.endpoint).get("sha")
         elif probe.kind == "git-commit":
@@ -225,6 +232,11 @@ def run_probe(probe: Probe, poller: _PolitePoller) -> dict[str, Any]:
     except Exception as error:  # one host's failure must not lose the other probes
         result["seen"] = None
         result["error"] = f"{type(error).__name__}: {error}"
+    if not result.get("seen"):
+        # an empty token would read as "unchanged" forever, which is worse than
+        # reporting that this probe learned nothing
+        result["seen"] = None
+        result.setdefault("note", "upstream-payload-carries-no-version")
     return result
 
 

@@ -12,9 +12,9 @@
 # fingerprint is trustworthy here and the normal match stage applies.
 set -u
 cd "$(dirname "$0")/../.."
-P=/home/zhilong/anaconda3/envs/matgenbench-py310/bin/python
+P="${MV_PYTHON:-$(command -v python3)}"
 LOGS=data/props_work/_logs
-OUT=/tmp/claude-1000/-home-zhilong-workspace-matdata
+OUT="${MV_OUT:-data/props_work/_out}"
 mkdir -p "$LOGS" "$OUT"
 rm -f "$LOGS/coremof-complete.marker"
 echo "core-mof chain started $(date)" >> "$LOGS/chain.log"

@@ -351,7 +351,7 @@ def main() -> int:
     parser.add_argument(
         "--cache",
         type=Path,
-        default=Path("/tmp/claude-1000/cod_trim_sample.jsonl.gz"),
+        default=PROJECT_ROOT / "data" / "props_work" / "cod_trim_sample.jsonl.gz",
     )
     parser.add_argument("--rebuild-sample", action="store_true")
     parser.add_argument("--selftest-only", action="store_true")

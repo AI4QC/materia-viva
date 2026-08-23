@@ -14,12 +14,12 @@
 # <folder>/.cache/huggingface/upload/ and resumes rather than re-sending.
 set -u
 cd "$(dirname "$0")/.."
-OUT=/tmp/claude-1000/-home-zhilong-workspace-matdata
+OUT="${MV_OUT:-data/props_work/_out}"
 LOG="$OUT/hf-upload.log"
 STATE="$OUT/hf-supervisor.log"
 FOLDER=data/hf-upload
 REPO=AI4QC/MateriaViva
-PY=/home/zhilong/anaconda3/envs/matgenbench-py310/bin/python
+PY="${MV_PYTHON:-$(command -v python3)}"
 
 #: no progress for this long -> assume the tunnel died and restart
 STALL_SECONDS=600

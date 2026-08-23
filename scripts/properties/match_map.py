@@ -22,6 +22,7 @@ both rows are kept and matching attaches properties to every one.
 from __future__ import annotations
 
 import argparse
+import os
 import sqlite3
 import sys
 import time
@@ -31,8 +32,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA = PROJECT_ROOT / "data"
 DEFAULT_OUT = DATA / "props_work" / "match_map.sqlite"
 
+# Where the base merge left its local-candidate hash TSVs. Not produced by
+# this repository, so it is configurable rather than assumed.
 LOCAL_HASH_LEGACY = Path(
-    "/home/zhilong/SSD/workspace_data/matgenbench/data/lemat_merge_work"
+    os.environ.get("MV_LEMAT_MERGE_WORK") or DATA / "raw" / "lemat_merge_work"
 )
 
 
@@ -45,7 +48,11 @@ def _ensure_local_meta() -> list[tuple[Path, str]]:
         if not dest.exists():
             source = LOCAL_HASH_LEGACY / f"local_hashes_{split}.tsv"
             if not source.exists():
-                raise SystemExit(f"missing local hash file: {source}")
+                raise SystemExit(
+                    f"missing local hash file: {source}\n"
+                    "Set MV_LEMAT_MERGE_WORK to the base merge's "
+                    "lemat_merge_work directory."
+                )
             dest.write_bytes(source.read_bytes())
         out.append((dest, split))
     return out

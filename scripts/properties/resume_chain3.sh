@@ -4,9 +4,10 @@
 # Run detached:  setsid nohup bash scripts/properties/resume_chain3.sh &
 set -u
 cd "$(dirname "$0")/../.."
-P=/home/zhilong/anaconda3/envs/matgenbench-py310/bin/python
+P="${MV_PYTHON:-$(command -v python3)}"
 LOGS=data/props_work/_logs
-mkdir -p "$LOGS"
+OUT="${MV_OUT:-data/props_work/_out}"
+mkdir -p "$LOGS" "$OUT"
 rm -f "$LOGS/chain3-complete.marker"
 echo "chain3 started $(date)" >> "$LOGS/chain.log"
 
@@ -44,7 +45,7 @@ for s in phonondb; do
 done
 
 $P scripts/properties/summarize.py \
-  > /tmp/claude-1000/-home-zhilong-workspace-matdata/summary-batch3.md 2>/dev/null
+  > "$OUT/summary-batch3.md" 2>/dev/null
 
 echo "chain3 finished $(date) exit=$STATUS" >> "$LOGS/chain.log"
 echo "$STATUS" > "$LOGS/chain3-complete.marker"

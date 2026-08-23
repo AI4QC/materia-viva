@@ -6,9 +6,10 @@
 #   setsid nohup bash scripts/properties/finalize_all.sh &
 set -u
 cd "$(dirname "$0")/../.."
-P=/home/zhilong/anaconda3/envs/matgenbench-py310/bin/python
+P="${MV_PYTHON:-$(command -v python3)}"
 LOGS=data/props_work/_logs
-mkdir -p "$LOGS"
+OUT="${MV_OUT:-data/props_work/_out}"
+mkdir -p "$LOGS" "$OUT"
 rm -f "$LOGS/finalize-complete.marker"
 echo "finalize started $(date)" >> "$LOGS/chain.log"
 
@@ -80,7 +81,7 @@ fi
 
 # 3. whole-pool backfill + fresh summary
 $P scripts/properties/run_all.py --phase backfill >> "$LOGS/finalize-backfill.log" 2>&1
-$P scripts/properties/summarize.py > /tmp/claude-1000/-home-zhilong-workspace-matdata/summary-complete.md 2>/dev/null
+$P scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
 
 echo "finalize finished $(date)" >> "$LOGS/chain.log"
 echo "0" > "$LOGS/finalize-complete.marker"

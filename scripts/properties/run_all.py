@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -28,7 +29,9 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 WORK = PROJECT_ROOT / "data" / "props_work"
 LOGS = WORK / "_logs"
-PYTHON = "/home/zhilong/anaconda3/envs/matgenbench-py310/bin/python"
+# The interpreter the pipeline stages run under. Defaults to the one running
+# this driver; override when the stages need a different environment.
+PYTHON = os.environ.get("MV_PYTHON") or sys.executable
 
 BRIDGE_FIRST = ["matbench-discovery"]
 

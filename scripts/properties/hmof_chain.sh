@@ -16,9 +16,9 @@
 # (see load.FINGERPRINT_UNRELIABLE).
 set -u
 cd "$(dirname "$0")/../.."
-P=/home/zhilong/anaconda3/envs/matgenbench-py310/bin/python
+P="${MV_PYTHON:-$(command -v python3)}"
 LOGS=data/props_work/_logs
-OUT=/tmp/claude-1000/-home-zhilong-workspace-matdata
+OUT="${MV_OUT:-data/props_work/_out}"
 mkdir -p "$LOGS" "$OUT"
 rm -f "$LOGS/hmof-complete.marker"
 echo "hmof chain started $(date)" >> "$LOGS/chain.log"

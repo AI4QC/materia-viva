@@ -10,7 +10,7 @@
 #   setsid nohup bash scripts/properties/recover_duplicates_chain.sh &
 set -u
 cd "$(dirname "$0")/../.."
-P=/home/zhilong/anaconda3/envs/matgenbench-py310/bin/python
+P="${MV_PYTHON:-$(command -v python3)}"
 LOGS=data/props_work/_logs
 mkdir -p "$LOGS"
 rm -f "$LOGS/recover-complete.marker"

@@ -56,11 +56,10 @@ class OvitoRenderService:
         runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     ) -> None:
         self.cache_dir = Path(cache_dir)
-        default_worker = Path("/home/zhilong/anaconda3/envs/catdt/bin/python")
         self.worker_python = str(
             worker_python
             or os.environ.get("MATERIALS_OVITO_PYTHON")
-            or (default_worker if default_worker.exists() else sys.executable)
+            or sys.executable
         )
         self.timeout_seconds = max(10, timeout_seconds)
         self.runner = runner

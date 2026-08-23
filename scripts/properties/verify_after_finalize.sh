@@ -4,9 +4,9 @@
 #   setsid nohup bash scripts/properties/verify_after_finalize.sh &
 set -u
 cd "$(dirname "$0")/../.."
-P=/home/zhilong/anaconda3/envs/matgenbench-py310/bin/python
+P="${MV_PYTHON:-$(command -v python3)}"
 LOGS=data/props_work/_logs
-OUT=/tmp/claude-1000/-home-zhilong-workspace-matdata
+OUT="${MV_OUT:-data/props_work/_out}"
 mkdir -p "$LOGS" "$OUT"
 rm -f "$LOGS/verify-complete.marker"
 echo "verify supervisor started $(date)" >> "$LOGS/chain.log"

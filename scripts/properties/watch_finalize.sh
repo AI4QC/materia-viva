@@ -5,6 +5,8 @@
 set -u
 cd "$(dirname "$0")/../.."
 LOGS=data/props_work/_logs
+OUT="${MV_OUT:-data/props_work/_out}"
+mkdir -p "$OUT"
 STATE=$(mktemp)
 CHAINLINES=$(wc -l < "$LOGS/chain.log" 2>/dev/null || echo 0)
 
@@ -32,7 +34,7 @@ while true; do
   fi
 
   if [ -f "$LOGS/verify-complete.marker" ]; then
-    echo "VERIFY DONE (exit $(cat "$LOGS/verify-complete.marker")) — audit at /tmp/claude-1000/-home-zhilong-workspace-matdata/verify-complete.txt"
+    echo "VERIFY DONE (exit $(cat "$LOGS/verify-complete.marker")) — audit at $OUT/verify-complete.txt"
     rm -f "$STATE"
     exit 0
   fi

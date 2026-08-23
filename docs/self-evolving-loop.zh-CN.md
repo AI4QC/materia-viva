@@ -34,7 +34,7 @@ README 的线性七步改成带失败出口的形态。`✋` 标记人工闸门�
         │ 授权不明 → rejected(licence-unclear)（默认不发布，见第 6.4 节）
         ↓
 [3] 生成或推荐采集与字段映射适配器（草稿）
-        │ 门槛未过 → adapter-pending，草稿不进 adapters/
+        │ 门槛未过 → 留在 acquired，草稿不进 adapters/
         ↓
 [4] ✋ 适配器评审并注册
         ↓
@@ -54,7 +54,7 @@ README 的线性七步改成带失败出口的形态。`✋` 标记人工闸门�
 ### 2.1 状态
 
 ```
-registered → acquired → adapter-pending → integrated
+registered → acquired → integrated
 ```
 
 任意一步可跳出到两个带原因码的态：
@@ -64,6 +64,11 @@ registered → acquired → adapter-pending → integrated
 
 不设 `acquiring`（采集脚本本身可恢复，不需要持久化在途状态）、不设 `licence-cleared`（许可判定的
 结果是许可字段上的一个布尔，不是来源状态）、不设 `superseded`（上游是否落后，比对 `seen` 即得）。
+
+也**不设 `adapter-pending`**：回填 106 条时发现没有一条能落进 `acquired` 而不同时落进
+`adapter-pending`——文件到手而尚无适配器，就是 `acquired` 的全部含义。缺不缺适配器由
+`scripts/properties/adapters/` 里有没有对应模块回答，不需要第二个状态。同理，`integrated` 不是一句
+自称：它的定义就是"存在适配器模块"，并由测试钉住（`test_integrated_state_matches_the_sources_that_have_an_adapter`）。
 
 **发布可见性不入目录。** 它由许可判定推导：受限来源的 `source_id` 进一条发布拒绝名单，公开快照按
 `source_id` 过滤。存一个 `visibility` 字段等于给许可造第二个真相源，两者迟早漂移。
@@ -87,6 +92,20 @@ ICSD 是"整合成功 + 不可发布"的标准形态：`state` 为 `integrated`�
 
 新码只在真的出现新失败形态时增加，不预先铺开。
 
+**5 条来源现有词表装不下，`state` 留空待决**（第 3 步回填时暴露的）：
+
+| 来源 | status | 缺的是什么 |
+|---|---|---|
+| `nomad` | `too-large-for-full-mirror` | 有批量接口，是我们主动不做全量镜像——不是 `no-bulk-interface` |
+| `optimade` | `registry-downloaded-verified-...-provider-data-is-federated` | registry 已采到并校验，只有联邦的 provider 数据不镜像，一半成功一半不做 |
+| `perovskite-database` | `nomad-query-access-cataloged` | 经 NOMAD 查询访问，只登记 |
+| `open-materials-db` | `...zero-provider-properties-primary-source-is-cod-not-ingested` | 主来源 COD 已整合，本身冗余 |
+| `topological-materials` | `browser-access-no-redistributable-bulk-structures` | 同时是"只有浏览接口"和"不可再分发"，哪个是约束条件 |
+
+前四条大致指向同一个缺口：**"探测过、但主动不做无边界镜像"**（正是
+[`docs/dataset-acquisition.zh-CN.md`](dataset-acquisition.zh-CN.md) 第 4 节那一类）。加不加一个
+`scope-unbounded` 码，是需要拍的决定，不是能推出来的规则。
+
 ### 2.3 与 `status` 文本的关系
 
 状态目前事实上写在 `sources.json` 的 `status` 自由文本里，例如：
@@ -101,8 +120,7 @@ downloaded-158304-reactions-2026-08-18-excluded-from-ingestion-crawl-omitted-rea
 ### 2.4 Catalysis-Hub 走一遍
 
 ```
-registered → acquired(158304 reactions, 2026-08-18) → adapter-pending
-          → rejected(join-key-missing)
+registered → acquired(158304 reactions, 2026-08-18) → rejected(join-key-missing)
 ```
 
 抓取遗漏了 `reactionSystems` 关联键，91% 的反应挂不到结构上。失败发生在 [4] 之前，索引没有被
@@ -160,10 +178,9 @@ Hugging Face 提交 SHA `9de9010715da4f563326f99bf3f7ee829cf4486a`。
 - `state` / `reason`（第 2.1、2.2 节）——第 3 步，其中 21 条需要人工判断；
 - figshare article id（第 3.3 节）——第 4 步，14 条人工补录。
 
-`schema_version` 也因此**留在 1**：结论 (b) 下没有形态变化，版本号跳升应该跟着第 3 步真正加字段
-的那个提交走，而不是提前为一个还没发生的改动声明契约。已经落地的只有一条回归测试：只带六个必填
-字段的来源必须能通过校验（`backend/tests/test_dataset_acquisition.py`），这是第 3、4 步能分批填、
-不做整体迁移的前提。
+`schema_version` 的跳升因此不属于第 2 步，而是跟着第 3 步真正加字段的那个提交走：现在是 **2**，
+新增的是可选的 `state` / `reason` 对，version 1 的旧文件照样加载（每条没有 `state` 的记录读作
+`registered`）。
 
 不加的字段及理由（原样保留，均已被数据印证）：
 
@@ -337,12 +354,16 @@ site 上限、以及**复合键例外清单**。枚举库（Deem 假想沸石、
 留在 1，只落地一条回归测试：只带六个必填字段的来源必须能通过校验，这是第 3、4 步分批填字段的前提。
 → 验证：`pytest backend/tests` 全绿。
 
-**第 3 步：`state` / `reason` 分批回填，不做一次性迁移。**
-62 条 `downloaded` / `already-present` 开头的可脚本推断；20 条 `user-action-required` 可推断为
-`rejected(account-required)`；**剩下 21 条是散文式 status，必须人工判断**（`magndata`
-`per-entry-mcif-download-no-documented-bulk-endpoint`、`qpod` `browse-api-available-...` 一类）。
-按批提交，缺字段按 `registered` 处理。
-→ 验证：每批提交后，`state` 已填条目数单调增，且无一条 `status` 文本被改动。
+**第 3 步（已完成）：`state` / `reason` 回填。**
+101 条已填，5 条留空等政策判断。分布：`integrated` 54（= `adapters/` 里有模块的那 54 个，与 README
+的数字一致）、`rejected(account-required)` 21、`acquired` 14、`rejected(no-bulk-interface)` 7、
+`rejected(scope-trajectory)` 3、`rejected(join-key-missing)` 1（Catalysis-Hub）、`registered` 1
+（Atomly，采集在途）。`schema_version` 升到 2，`validate_catalog` 校验状态与原因码的配对：终态必须
+带已知原因码，非终态不得带原因码，有 `reason` 无 `state` 直接报错。
+→ 验证：`pytest backend/tests`（140 passed）；`status` 文本零改动。
+
+留空的 5 条需要的不是规则而是决定，见第 2.2 节末：`nomad`、`optimade`、`perovskite-database`、
+`open-materials-db`、`topological-materials`。
 
 **第 4 步（可与第 3 步并行）：补 figshare article id。**
 14 个来源，人工一次性工作，补完这 14 条才进入探测覆盖。

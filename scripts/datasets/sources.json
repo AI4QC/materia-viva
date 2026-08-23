@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "updated": "2026-07-28",
   "sources": [
     {
@@ -10,6 +10,7 @@
       "license": "Materials Project terms",
       "data_path": "raw/acquired/materials-project",
       "status": "downloaded-verified-154377-summary-documents-2026-07-26-plus-8-property-endpoints-2026-08-19",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -20,6 +21,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/oqmd",
       "status": "downloaded-verified-21034479961-byte-v1-8-sql-gzip-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "qmdb__v1_8__022026.sql.gz",
@@ -36,6 +38,7 @@
       "license": "AFLOW academic non-commercial terms",
       "data_path": "raw/acquired/aflow",
       "status": "downloaded-verified-2981853-aflux-structures-plus-property-snapshot-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "CFID_AFLOW2.json.zip",
@@ -77,6 +80,7 @@
       "license": "CC0",
       "data_path": "raw/external_structs/cod",
       "status": "already-present",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -87,6 +91,7 @@
       "license": "FIZ Karlsruhe ICSD licence",
       "data_path": "raw/icsd_extracted",
       "status": "already-present-user-licensed",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -97,6 +102,8 @@
       "license": "CCDC licence",
       "data_path": "raw/acquired/csd",
       "status": "user-action-required",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -107,6 +114,8 @@
       "license": "MPDS subscription terms",
       "data_path": "raw/acquired/mpds",
       "status": "user-action-required",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -117,6 +126,7 @@
       "license": "NIST/JARVIS dataset terms",
       "data_path": "raw/acquired/jarvis-dft",
       "status": "downloaded-verified-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "jdft_3d-9-24-2025.json.zip",
@@ -133,6 +143,7 @@
       "license": "Alexandria dataset terms",
       "data_path": "raw/acquired/alexandria",
       "status": "downloaded-verified-all-official-pbe-3d-pbe-2d-pbe-1d-pbesol-and-scan-files-2026-07-26",
+      "state": "integrated",
       "estimated_bytes": 4300000000,
       "downloads": [],
       "indexes": [
@@ -181,6 +192,7 @@
       "license": "CC BY-NC 4.0",
       "data_path": "raw/acquired/gnome",
       "status": "downloaded-verified-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "stable_materials_summary.csv",
@@ -207,6 +219,7 @@
       "license": "Alexandria and NIST JARVIS dataset terms",
       "data_path": "raw/acquired/alexandria-jarvis-snapshot",
       "status": "downloaded-verified-2026-07-26",
+      "state": "acquired",
       "downloads": [
         {
           "filename": "alexandria_pbe_3d_2024.10.1_jarvis_tools.json.zip",
@@ -248,6 +261,7 @@
       "license": "CC BY-SA 4.0",
       "data_path": "raw/acquired/c2db",
       "status": "downloaded-verified-2026-07-26-via-jarvis-mirror",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "c2db_atoms.json.zip",
@@ -264,6 +278,7 @@
       "license": "2DMatPedia terms",
       "data_path": "raw/acquired/2dmatpedia",
       "status": "downloaded-verified-2026-07-26-via-jarvis-mirror",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "twodmatpd.json.zip",
@@ -280,6 +295,7 @@
       "license": "OMDB terms",
       "data_path": "raw/acquired/omdb",
       "status": "downloaded-verified-2026-07-26-via-jarvis-mirror-official-login-required-renamed-2026-08-18-to-avoid-collision-with-the-optimade-omdb-prefix",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "omdbv1.json.zip",
@@ -296,6 +312,7 @@
       "license": "Figshare record licence",
       "data_path": "raw/acquired/hmof",
       "status": "downloaded-verified-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "hmof_db_9_18_2021.json.zip",
@@ -312,6 +329,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/external_structs/frameworks/qmof",
       "status": "already-present",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -322,6 +340,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/core-mof",
       "status": "downloaded-verified-19081-zeo-porosity-rows-structure-archives-already-present-2026-08-19",
+      "state": "integrated",
       "notes": "Structures were already on disk before this catalog existed and stay at raw/external_structs/frameworks/core_mof; their md5s match 2019-11-01-ASR-public_12020.tar.gz and 2019-11-01-FSR-public_7061.tar.gz of record 3677685 (v1.1.3, DOI 10.5281/zenodo.3677685), so only the companion Zeo++ property tables are downloaded here. Their filename column joins the CIF basenames 12020/12020 and 7061/7061. The internal ASR/FSR spreadsheets are skipped: they describe structures the public archives do not contain.",
       "downloads": [
         {
@@ -344,6 +363,7 @@
       "license": "repository licence",
       "data_path": "raw/external_structs/frameworks/curated_cofs",
       "status": "already-present",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -354,6 +374,7 @@
       "license": "Materials Cloud record licence",
       "data_path": "raw/external_structs/mc3d",
       "status": "already-present",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -364,6 +385,7 @@
       "license": "Materials Cloud record licence",
       "data_path": "raw/acquired/mc2d",
       "status": "downloaded-verified-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "as_extracted_2d_structures.zip",
@@ -390,6 +412,8 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/omat24",
       "status": "excluded-by-scope-existing-legacy-trajectory-data-not-ingested",
+      "state": "rejected",
+      "reason": "scope-trajectory",
       "downloads": []
     },
     {
@@ -400,6 +424,7 @@
       "license": "MIT and dataset-specific licences",
       "data_path": "raw/acquired/mattergen",
       "status": "downloaded-verified-2026-07-26",
+      "state": "acquired",
       "downloads": [
         {
           "filename": "mp_20.zip",
@@ -421,6 +446,8 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/mptrj",
       "status": "excluded-by-scope-trajectory-dataset",
+      "state": "rejected",
+      "reason": "scope-trajectory",
       "downloads": []
     },
     {
@@ -431,6 +458,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/matbench-discovery",
       "status": "downloaded-verified-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "2023-02-07-mp-computed-structure-entries.json.gz",
@@ -467,6 +495,8 @@
       "license": "paid NIMS licence; annual download cap",
       "data_path": "raw/acquired/atomwork-adv",
       "status": "user-action-required",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -477,6 +507,8 @@
       "license": "SpringerMaterials institutional licence",
       "data_path": "raw/acquired/springer-materials",
       "status": "user-action-required",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -487,6 +519,8 @@
       "license": "Crystal Impact licence",
       "data_path": "raw/acquired/pearsons-crystal-data",
       "status": "user-action-required",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -497,6 +531,7 @@
       "license": "Figshare record licence",
       "data_path": "raw/acquired/snumat",
       "status": "downloaded-verified-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "snumat.json.zip",
@@ -513,6 +548,7 @@
       "license": "3DSC repository licence and upstream MP/ICSD terms",
       "data_path": "raw/acquired/3dsc",
       "status": "downloaded-verified-2026-07-26-mp-structures-icsd-ids-only",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "3DSC-main.zip",
@@ -528,6 +564,7 @@
       "license": "AMCSD terms",
       "data_path": "raw/acquired/amcsd",
       "status": "download-ready-official-bulk-cif-amc-and-diffraction-records",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "amc.zip",
@@ -564,6 +601,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/fair-mofs",
       "status": "downloaded-verified-structure-and-property-release-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "FAIR-MOFs_exp.zip",
@@ -625,6 +663,7 @@
       "license": "MOFX-DB dataset terms",
       "data_path": "raw/acquired/mofx-db",
       "status": "downloaded-verified-property-overlays-structures-overlap-existing-mof-sources-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "CoREMOF-2014-dc8a0295db.zip",
@@ -666,6 +705,7 @@
       "license": "CC BY-NC-SA 4.0 for record files; CIF structures require a CSD licence",
       "data_path": "raw/acquired/mosaec-db",
       "status": "downloaded-verified-open-descriptors-structure-cifs-require-csd-licence-2026-07-26",
+      "state": "acquired",
       "downloads": [
         {
           "filename": "mosaec-db.csv",
@@ -702,6 +742,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/phonix",
       "status": "downloaded-verified-summary-full-force-constant-archive-too-large-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "phonix-summary-2026.03.28.parquet",
@@ -718,6 +759,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/novomag",
       "status": "downloaded-verified-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "magdb-v1.json",
@@ -739,6 +781,7 @@
       "license": "CC BY-NC 4.0",
       "data_path": "raw/acquired/topomat",
       "status": "downloaded-verified-derived-from-icsd-and-cod-2026-07-26",
+      "state": "acquired",
       "downloads": [
         {
           "filename": "topomat-v1-media.tar.gz",
@@ -755,6 +798,7 @@
       "license": "Materiae site terms; cite Zhang et al., Nature 566, 475-479 (2019)",
       "data_path": "raw/acquired/materiae",
       "status": "downloaded-verified-28605-details-49342-bandplots-2026-07-31",
+      "state": "integrated",
       "downloads": [],
       "notes": "Public web API mirrored in full: catalogue summary (28,605 rows), per-material details with prim/conv CIFs, symmetry indicators, topological classification and DOS curves, plus 49,342 band-structure SVGs (soc 26,117 / nsoc 23,225). Acquired by scripts/datasets/materiae.py; cite Zhang et al., Nature 566, 475-479 (2019). Official token API documented on the site (User -> Profile -> Generate, 7-day access / 1-year refresh token); the fetcher uses MATERIAE_API_ACCESS_TOKEN / MATERIAE_API_REFRESH_TOKEN from .env with auto-refresh, and falls back to anonymous browser-profile requests when no token is configured."
     },
@@ -766,6 +810,7 @@
       "license": "public domain",
       "data_path": "raw/acquired/pcod",
       "status": "rsync-endpoint-verified-compact-ingestion-required-for-one-million-small-cifs",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -776,6 +821,8 @@
       "license": "Bilbao Crystallographic Server terms and source publications",
       "data_path": "raw/acquired/magndata",
       "status": "per-entry-mcif-download-no-documented-bulk-endpoint",
+      "state": "rejected",
+      "reason": "no-bulk-interface",
       "downloads": []
     },
     {
@@ -786,6 +833,7 @@
       "license": "IZA Structure Commission terms",
       "data_path": "raw/acquired/iza-zeolite",
       "status": "per-framework-download-mofx-iza-snapshot-queued",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -796,6 +844,8 @@
       "license": "2DHub and QPOD terms",
       "data_path": "raw/acquired/qpod",
       "status": "browse-api-available-no-current-documented-bulk-file",
+      "state": "rejected",
+      "reason": "no-bulk-interface",
       "downloads": []
     },
     {
@@ -806,6 +856,7 @@
       "license": "2DHub dataset terms",
       "data_path": "raw/acquired/bidb",
       "status": "downloaded-verified-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "bidb-2026-06-25.db",
@@ -822,6 +873,8 @@
       "license": "2DHub dataset terms",
       "data_path": "raw/acquired/hetdb",
       "status": "browse-database-no-current-documented-bulk-file",
+      "state": "rejected",
+      "reason": "no-bulk-interface",
       "downloads": []
     },
     {
@@ -832,6 +885,7 @@
       "license": "2DHub dataset terms",
       "data_path": "raw/acquired/2dalloys",
       "status": "downloaded-verified-2026-07-26",
+      "state": "acquired",
       "downloads": [
         {
           "filename": "2dalloys-2026-06-25.db",
@@ -848,6 +902,8 @@
       "license": "2DHub dataset terms",
       "data_path": "raw/acquired/x2db",
       "status": "browse-metadata-database-no-current-documented-bulk-file",
+      "state": "rejected",
+      "reason": "no-bulk-interface",
       "downloads": []
     },
     {
@@ -858,6 +914,7 @@
       "license": "SACADA site terms and source-publication provenance",
       "data_path": "raw/acquired/sacada",
       "status": "downloaded-1644-static-structure-archives-17-official-entries-have-no-archive-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "sacada-metadata.json",
@@ -873,6 +930,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/deem-zeolites",
       "status": "downloaded-verified-331k-unique-zeolite-like-structures-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "database_2.1_slc_good_1_of_3.tgz",
@@ -899,6 +957,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/arc-mof",
       "status": "downloaded-verified-24-structure-charge-descriptor-and-adsorption-files-2026-07-26",
+      "state": "acquired",
       "downloads": [
         {
           "filename": "all_structures_1.tar.gz",
@@ -1030,6 +1089,7 @@
       "license": "NIST/JARVIS dataset terms",
       "data_path": "raw/acquired/jarvis-specialized-structures",
       "status": "downloaded-verified-endpoint-structures-no-force-field-or-ocp-trajectories-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "dft_2d-2022.json.zip",
@@ -1121,6 +1181,7 @@
       "license": "RRUFF terms and source-citation provenance",
       "data_path": "raw/acquired/rruff",
       "status": "downloaded-verified-official-bulk-structure-and-property-archives-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "chemistry/Microprobe_Data.zip",
@@ -1212,6 +1273,8 @@
       "license": "MPOD terms and source-publication provenance",
       "data_path": "raw/acquired/mpod",
       "status": "per-record-mpod-files-no-stable-bulk-endpoint-found",
+      "state": "rejected",
+      "reason": "no-bulk-interface",
       "downloads": []
     },
     {
@@ -1222,6 +1285,7 @@
       "license": "EC-MOF site terms and source-publication provenance",
       "data_path": "raw/acquired/ec-mof",
       "status": "downloaded-verified-1071-static-structure-property-pairs-one-official-candidate-404-2026-07-26",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -1232,6 +1296,7 @@
       "license": "Apache-2.0",
       "data_path": "raw/acquired/aflow-prototypes",
       "status": "downloaded-verified-2050-canonical-prototype-definitions-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "aflow_prototype_encyclopedia-main.tar.gz",
@@ -1247,6 +1312,8 @@
       "license": "Matterverse terms and source-model provenance",
       "data_path": "raw/acquired/matterverse",
       "status": "cataloged-31791192-optimade-structures-page-limit-500-no-official-bulk-file-found",
+      "state": "rejected",
+      "reason": "no-bulk-interface",
       "estimated_documents": 31791192,
       "downloads": []
     },
@@ -1258,6 +1325,7 @@
       "license": "ODBX provider terms and source-dataset provenance",
       "data_path": "raw/acquired/odbx",
       "status": "downloaded-verified-137909-optimade-structures-with-formation-energy-and-hull-distance-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 137909,
       "downloads": []
     },
@@ -1269,6 +1337,7 @@
       "license": "CC0",
       "data_path": "raw/acquired/tcod",
       "status": "downloaded-verified-7499-final-structure-cifs-via-official-directory-tree-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 7499,
       "downloads": []
     },
@@ -1280,6 +1349,8 @@
       "license": "MPDD terms and source-publication provenance",
       "data_path": "raw/acquired/mpdd",
       "status": "user-action-required-legacy-optimade-endpoint-is-http-only-and-currently-unavailable",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -1290,6 +1361,7 @@
       "license": "provider-dataset-specific open licences",
       "data_path": "raw/acquired/materials-cloud-specialized",
       "status": "downloaded-verified-3079-static-2d-topological-mof-interface-wannier-and-chalcohalide-structures-2026-07-26",
+      "state": "acquired",
       "estimated_documents": 3079,
       "downloads": []
     },
@@ -1301,6 +1373,7 @@
       "license": "record-specific open licences, predominantly CC BY 4.0",
       "data_path": "raw/acquired/materials-cloud-archive-static",
       "status": "downloaded-verified-40399-static-structures-with-provider-properties-via-optimade-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 40399,
       "downloads": []
     },
@@ -1312,6 +1385,8 @@
       "license": "record-specific open licence",
       "data_path": "raw/acquired/materials-cloud-li-ion-trajectories",
       "status": "excluded-by-scope-4396695-optimade-entries-are-mostly-molecular-dynamics-frames",
+      "state": "rejected",
+      "reason": "scope-trajectory",
       "downloads": []
     },
     {
@@ -1322,6 +1397,8 @@
       "license": "dataset-card-specific terms and source provenance",
       "data_path": "raw/acquired/mofdb-ml",
       "status": "user-action-required-hugging-face-repositories-return-401-h2mof-has-4034-structures-hmof-has-137953",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 141987,
       "downloads": []
     },
@@ -1333,6 +1410,8 @@
       "license": "CC BY-SA 4.0 for non-substantial extracts; provider permission required for substantial replication",
       "data_path": "raw/acquired/adaq",
       "status": "user-action-required-contact-provider-before-bulk-collection-of-47403-defects",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 47403,
       "downloads": []
     },
@@ -1344,6 +1423,7 @@
       "license": "AMDB terms and source-publication provenance",
       "data_path": "raw/acquired/amdb",
       "status": "cataloged-180-property-records-linked-to-magndata-structures-no-bulk-endpoint-found",
+      "state": "integrated",
       "estimated_documents": 180,
       "downloads": []
     },
@@ -1355,6 +1435,7 @@
       "license": "HADB terms and source-publication provenance",
       "data_path": "raw/acquired/hadb",
       "status": "downloaded-verified-165-static-dft-and-mlip-endpoints-79-aimd-entries-excluded-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 165,
       "downloads": []
     },
@@ -1366,6 +1447,7 @@
       "license": "per-record PDDL 1.0, ODC-By 1.0, or CC BY 4.0",
       "data_path": "raw/acquired/ccpnc-magres",
       "status": "downloaded-verified-5804-latest-static-structures-with-nmr-tensors-2026-07-26",
+      "state": "acquired",
       "estimated_documents": 5804,
       "downloads": []
     },
@@ -1377,6 +1459,7 @@
       "license": "CC BY-SA 4.0",
       "data_path": "raw/acquired/cmr-static",
       "status": "downloaded-verified-27-periodic-ase-databases-c1db-currently-404-nonperiodic-molecule-datasets-excluded-2026-07-26",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "a2bcx4.db",
@@ -1523,6 +1606,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/mad-static",
       "status": "downloaded-verified-95595-static-structures-mptrj-benchmark-and-aiida-provenance-archives-excluded-2026-07-26",
+      "state": "acquired",
       "estimated_documents": 95595,
       "downloads": [
         {
@@ -1559,6 +1643,7 @@
       "license": "Materials Cloud record terms and source-dataset provenance",
       "data_path": "raw/acquired/shiftml2-static",
       "status": "downloaded-verified-static-training-benchmark-and-polymorph-structures-relax-vs-md-trajectory-archive-excluded-2026-07-26",
+      "state": "acquired",
       "downloads": [
         {
           "filename": "files_description.md",
@@ -1600,6 +1685,7 @@
       "license": "CC0",
       "data_path": "raw/acquired/hex-high-pressure",
       "status": "downloaded-verified-457-static-cifs-first-57-elements-at-0-100-200-300-gpa-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 457,
       "downloads": [
         {
@@ -1617,6 +1703,8 @@
       "license": "HPCSD/CALYPSO terms and source-publication provenance",
       "data_path": "raw/acquired/hpcsd",
       "status": "user-action-required-register-or-request-bulk-77346-static-structures",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 77346,
       "notes": "The initial HPCSD release reports 77,346 static high-pressure structures spanning 89 elements. The public portal redirects to sign-in and the paper states that additional data are available on request; do not scrape authenticated pages.",
       "downloads": []
@@ -1629,6 +1717,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/hofsyn",
       "status": "downloaded-verified-631-raw-and-p1-static-hof-cifs-with-660-synthesis-records-2026-07-26",
+      "state": "acquired",
       "notes": "The raw and P1-standardized archives each contain 631 actual CIF files; the synthesis/property table has 660 rows. The 2.35 GB literature-PDF archive and EndNote export are not crystal structure/property records and are intentionally excluded.",
       "downloads": [
         {
@@ -1656,6 +1745,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/open-framework-aluminophosphate",
       "status": "downloaded-verified-312-experimental-static-structures-with-topology-and-simulated-xrd-properties-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 312,
       "downloads": [
         {
@@ -1678,6 +1768,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/opxrd",
       "status": "downloaded-verified-92552-experimental-patterns-2179-structure-labeled-total-912-full-and-1267-partial-2026-07-26",
+      "state": "acquired",
       "estimated_documents": 92552,
       "notes": "The verified archive contains exactly 92,552 JSON pattern records and no frame or trajectory files. A content scan found 912 labels with complete lattice plus atomic basis, 1,267 partial phase labels, and 90,373 unlabeled experimental patterns.",
       "downloads": [
@@ -1696,6 +1787,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/simpod",
       "status": "downloaded-verified-467861-static-cod-structures-with-simulated-powder-xrd-json-images-and-redundant-csv-exports-excluded-2026-07-26",
+      "state": "acquired",
       "estimated_documents": 467861,
       "notes": "Structures.zip contains the source structure and simulated one-dimensional diffraction record. Its 467,861 entries pass a full Python Zip64 decompression and CRC scan; legacy Info-ZIP 6.00 misreads this very large Zip64 central directory. The 29.4 GB radial-image rendering and two redundant 5.9/20.5 GB CSV exports are excluded to preserve SSD space without losing the structure/property records.",
       "downloads": [
@@ -1714,6 +1806,7 @@
       "license": "CC BY 4.0 record; underlying ICSD-derived structures retain ICSD terms",
       "data_path": "raw/acquired/spse",
       "status": "downloaded-verified-91763-static-structures-with-ion-transport-properties-migration-path-arrays-excluded-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 91763,
       "excluded_structure_fields": [
         "hierarchical_calculation_data.json:paths"
@@ -1740,6 +1833,7 @@
       "license": "CC BY 4.0 data; MIT software",
       "data_path": "raw/acquired/superband",
       "status": "downloaded-verified-2474-static-superconductor-structures-and-electronic-band-data-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 2474,
       "notes": "The full Science Data Bank HDF5 and the accompanying GitHub snapshot are collected. Structures originate mainly from Materials Project and OQMD and will be matched later; SuperBand-specific band and Fermi-surface properties are retained.",
       "downloads": [
@@ -1762,6 +1856,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/obelix",
       "status": "downloaded-verified-599-synthesized-electrolytes-321-with-full-cif-and-experimental-conductivity-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 599,
       "downloads": [
         {
@@ -1784,6 +1879,8 @@
       "license": "NIMS MatNavi terms; web scraping prohibited",
       "data_path": "raw/acquired/atomwork-open",
       "status": "user-action-required-dice-registration-and-matnavi-application-for-82000-open-structures",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 82000,
       "notes": "The public catalog reports 82,000 crystal structures, 55,000 property records, and 15,000 phase diagrams. Register a DICE account and submit the MatNavi usage application; do not scrape the site.",
       "downloads": []
@@ -1796,6 +1893,8 @@
       "license": "database and underlying crystallographic-source terms",
       "data_path": "raw/acquired/hybrid-perovskite-2d",
       "status": "user-action-required-515-entry-site-is-http-only-and-no-redistributable-bulk-archive-found",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 515,
       "notes": "The paper points to pdb.nmse-lab.ru and reports CIFs, band gaps, structural descriptors, and predicted partial charges. The live database is HTTP-only and no documented bulk archive or redistribution licence was found.",
       "downloads": []
@@ -1808,6 +1907,7 @@
       "license": "OpenMX database and source-publication terms",
       "data_path": "raw/acquired/openmx-2d-ab2",
       "status": "cataloged-3844-static-ab2-candidates-interactive-per-entry-access-no-bulk-file-found",
+      "state": "integrated",
       "estimated_documents": 3844,
       "notes": "The interactive structure and spin map provides relaxed structures and calculated properties by composition. No stable documented bulk archive was found.",
       "downloads": []
@@ -1820,6 +1920,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/mof-carbon-capture",
       "status": "downloaded-verified-324426-static-mof-structures-with-partial-charges-and-adsorption-properties-2026-07-26",
+      "state": "integrated",
       "estimated_documents": 324426,
       "downloads": [
         {
@@ -1852,6 +1953,8 @@
       "license": "US Department of Energy laboratory terms and cited source provenance",
       "data_path": "raw/acquired/nlr-matdb",
       "status": "cataloged-interactive-query-and-csv-export-no-documented-bulk-structure-endpoint-found",
+      "state": "rejected",
+      "reason": "no-bulk-interface",
       "notes": "The database exposes relaxed structures and thermochemical, stability, GW, dielectric, and effective-mass properties. Its public form supports CSV output, but no complete bulk structure export is documented.",
       "downloads": []
     },
@@ -1863,6 +1966,8 @@
       "license": "MatGen service and per-application terms",
       "data_path": "raw/acquired/matgen",
       "status": "user-action-required-register-or-contact-matgen-at-nscc-gz-cn-for-bulk-api",
+      "state": "rejected",
+      "reason": "account-required",
       "notes": "The portal contains inorganic, hypothetical, 2D, superconductor, solid-electrolyte, porous-material, and ABACUS structure/property databases. The advertised API documentation returned 404 and no public bulk endpoint was found.",
       "downloads": []
     },
@@ -1874,6 +1979,8 @@
       "license": "MatCloud+ service and per-dataset terms",
       "data_path": "raw/acquired/matcloud",
       "status": "user-action-required-registration-and-provider-approved-bulk-export-no-public-bulk-api-found",
+      "state": "rejected",
+      "reason": "account-required",
       "notes": "The public site exposes a JavaScript search application, but no documented redistributable bulk structure endpoint was found. Request an account-level export or provider-approved API before collection.",
       "downloads": []
     },
@@ -1885,6 +1992,7 @@
       "license": "Atomly service terms and source-dataset provenance",
       "data_path": "raw/acquired/atomly",
       "status": "downloading-enum-wave-in-progress-2026-07-31",
+      "state": "registered",
       "estimated_documents": 349043,
       "notes": "Bulk acquisition running via scripts/datasets/atomly.py with account session token (documented 120 req/min per-IP limit; API keys are scoped to 5 read-only endpoints at 10/min+200/day, OPTIMADE endpoint exists but is not deployed yet). Phases: chemical-system enumeration (search_by_elements, 100-row cap, recursive subdivision), detail harvest (get_struct_detail per struct id: lattice, energies, symmetry, prim/conv CIF, electronic diagram), blind sweep of the dense id block [1,150000] for capped-system overflow. Sparse id blocks near 1e9/3e9 are only reachable via enumeration.",
       "downloads": []
@@ -1897,6 +2005,8 @@
       "license": "MatCraft terms of service and upstream MP, AFLOW, and JARVIS provenance",
       "data_path": "raw/acquired/matcraft",
       "status": "user-action-required-request-provider-bulk-export-api-is-rate-limited-and-current-endpoint-tls-failed",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 205000,
       "notes": "Documented records aggregate MP, AFLOW, and JARVIS structures already collected here. The list endpoint returns no atomic positions, detail retrieval would require one request per material, guest access is limited to 100 requests/hour, and bulk downloading beyond API limits is prohibited. Request a licensed bulk export before mirroring.",
       "downloads": []
@@ -1909,6 +2019,7 @@
       "license": "Bilbao Crystallographic Server terms and source-publication provenance",
       "data_path": "raw/acquired/b-incstrdb",
       "status": "downloaded-verified-282-published-static-modulated-and-composite-mscif-structures-2026-07-26",
+      "state": "acquired",
       "estimated_documents": 282,
       "notes": "The dedicated collector saves exactly one published msCIF per entry from the official download view. It does not collect JSmol images, animations, or structure trajectories.",
       "downloads": []
@@ -1921,6 +2032,8 @@
       "license": "MinCryst and underlying publication terms",
       "data_path": "raw/acquired/mincryst",
       "status": "user-action-required-official-host-unreachable-no-current-bulk-export-found",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 5000,
       "notes": "The IUCr catalog describes more than 5,000 mineral phase records representing about 2,500 mineral names. The official host did not complete a TLS connection during the 2026-07-26 audit; no mirror is substituted without provider permission.",
       "downloads": []
@@ -1933,6 +2046,7 @@
       "license": "Webmineral site and cited-source terms",
       "data_path": "raw/acquired/webmineral",
       "status": "cataloged-4714-interactive-mineral-descriptions-no-documented-bulk-atomic-structure-export",
+      "state": "integrated",
       "estimated_documents": 4714,
       "notes": "The site provides searchable mineral descriptions and crystallographic properties but no documented redistributable bulk atomic-coordinate archive. It is cataloged for later provider-approved export rather than scraped.",
       "downloads": []
@@ -1945,6 +2059,8 @@
       "license": "PowBase site and contributed-record terms",
       "data_path": "raw/acquired/powbase",
       "status": "user-action-required-contact-owner-before-mirroring-169-static-powder-pattern-archives",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 169,
       "notes": "The official index exposes 169 per-record ZIP archives containing CIF or powder-pattern data and asks prospective mirrors to contact the owner. MateriaViva will request permission instead of bulk-scraping the archive sequence.",
       "downloads": []
@@ -1957,6 +2073,8 @@
       "license": "NIST SRD commercial licence",
       "data_path": "raw/acquired/nist-crystal-data",
       "status": "user-action-required-purchase-or-institutional-license-for-237671-record-legacy-database",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 237671,
       "notes": "The published NIST-3 release contains 237,671 crystallographic records. No open bulk redistribution path was found; obtain the licensed database from NIST or through an institutional subscription.",
       "downloads": []
@@ -1969,6 +2087,8 @@
       "license": "NIST SRD licence",
       "data_path": "raw/acquired/nist-surface-structure",
       "status": "user-action-required-contact-nist-for-current-licensed-release-nearly-1400-static-surface-structures",
+      "state": "rejected",
+      "reason": "account-required",
       "estimated_documents": 1400,
       "notes": "The current NIST release reports nearly 1,400 experimentally determined surface structures. It is legacy licensed software/data rather than an open bulk download; contact NIST for access before ingestion.",
       "downloads": []
@@ -1981,6 +2101,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/phonondb",
       "status": "user-action-required-request-collection-level-bulk-snapshot-for-10034-static-mp-structures-and-phonon-properties",
+      "state": "integrated",
       "estimated_documents": 10034,
       "notes": "The NIMS collection exposes 10,034 per-material datasets but no collection-level bulk archive. Each phonopy_params.yaml.xz contains the initial static unit cell plus harmonic phonon displacement/force data. MateriaViva will create only one static structure record per MP material ID; displacement supercells are property inputs, not structures or trajectories. Request a bulk snapshot instead of issuing roughly 10,000 record-page and file requests.",
       "downloads": []
@@ -1993,6 +2114,8 @@
       "license": "dataset-specific licences and Catalysis-Hub terms",
       "data_path": "raw/acquired/catalysis-hub",
       "status": "downloaded-158304-reactions-2026-08-18-excluded-from-ingestion-crawl-omitted-reactionSystems-join-key-so-91-percent-unattachable",
+      "state": "rejected",
+      "reason": "join-key-missing",
       "downloads": []
     },
     {
@@ -2003,6 +2126,8 @@
       "license": "NIMS MatNavi service terms",
       "data_path": "raw/acquired/matnavi",
       "status": "user-registration-required-mass-downloading-explicitly-prohibited",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -2023,6 +2148,8 @@
       "license": "NIMS Starrydata terms and source-publication provenance",
       "data_path": "raw/acquired/starrydata",
       "status": "interactive-filtered-download-user-registration-may-be-required",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -2033,6 +2160,8 @@
       "license": "ICDD commercial licence",
       "data_path": "raw/acquired/icdd-pdf",
       "status": "user-action-required",
+      "state": "rejected",
+      "reason": "account-required",
       "downloads": []
     },
     {
@@ -2043,6 +2172,7 @@
       "license": "CC BY-NC 4.0",
       "data_path": "raw/acquired/elementa",
       "status": "downloaded-verified-2235193-relaxation-endpoints-from-43521713-frames-2026-07-28",
+      "state": "integrated",
       "estimated_documents": 2235193,
       "paper_url": "https://www.kairosmaterials.com/papers/ELEMENTA.pdf",
       "revision": "9de9010715da4f563326f99bf3f7ee829cf4486a",
@@ -2068,6 +2198,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/acquired/carolina",
       "status": "downloaded-verified-bulk-2026-08-18-zenodo-8381476-carolina-matdb-lmdb-214435-records-plus-colabfit-214267-plus-300-record-live-site-sample",
+      "state": "integrated",
       "downloads": [
         {
           "filename": "bulk/matsciml-zenodo-8381476/carolina_matdb.zip",
@@ -2095,6 +2226,7 @@
       "license": "CC BY 4.0",
       "data_path": "raw/external_structs/csllm_negatives",
       "status": "already-present-106470-pu-screened-non-synthesizable-structures-label-sidecar-2026-08-17",
+      "state": "integrated",
       "downloads": []
     },
     {
@@ -2105,6 +2237,7 @@
       "license": "NIST/JARVIS dataset terms",
       "data_path": "raw/legacy-material-data/jqe_tb_folder.json",
       "status": "already-present-legacy-829576-qetb-records-2026-08-17",
+      "state": "integrated",
       "downloads": []
     },
     {

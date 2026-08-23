@@ -9,6 +9,8 @@ from scripts.datasets.aflow import export_all as export_all_aflow
 from scripts.datasets.aflow import parse_total as parse_aflow_total
 from scripts.datasets.acquire import (
     CapacityError,
+    REASON_CODES,
+    SOURCE_STATES,
     build_curl_command,
     default_data_root,
     ensure_capacity,
@@ -393,6 +395,81 @@ def test_catalog_source_requires_only_the_six_identity_fields():
     # without teaching the validator about it first
     filled = {**minimal, "state": "integrated", "reason": None, "article_id": 25453265}
     validate_catalog({"schema_version": 1, "sources": [filled]})
+
+
+def test_every_catalogued_state_is_a_known_one_and_terminal_states_say_why():
+    catalog = load_catalog(REPO_ROOT / "scripts" / "datasets" / "sources.json")
+    for source in catalog["sources"]:
+        state = source.get("state")
+        if state is None:
+            # a handful still await a policy call; absent reads as `registered`
+            assert "reason" not in source, source["id"]
+            continue
+        assert state in SOURCE_STATES, source["id"]
+        if state in {"rejected", "quarantined"}:
+            assert source.get("reason") in REASON_CODES, source["id"]
+        else:
+            assert "reason" not in source, source["id"]
+
+
+def test_integrated_state_matches_the_sources_that_have_an_adapter():
+    # `integrated` is not a free-text claim: it means an adapter module exists
+    catalog = load_catalog(REPO_ROOT / "scripts" / "datasets" / "sources.json")
+    adapters = {
+        path.stem.replace("_", "-")
+        for path in (REPO_ROOT / "scripts" / "properties" / "adapters").glob("*.py")
+    }
+    integrated = {s["id"] for s in catalog["sources"] if s.get("state") == "integrated"}
+    assert integrated == adapters & {s["id"] for s in catalog["sources"]}
+
+
+def test_state_and_reason_are_validated_together():
+    minimal = {
+        "id": "minimal",
+        "name": "minimal",
+        "access": "open",
+        "official_url": "https://example.org",
+        "license": "unknown",
+        "data_path": "minimal",
+    }
+
+    validate_catalog({"schema_version": 2, "sources": [{**minimal, "state": "acquired"}]})
+    validate_catalog(
+        {
+            "schema_version": 2,
+            "sources": [{**minimal, "state": "rejected", "reason": "no-bulk-interface"}],
+        }
+    )
+
+    with pytest.raises(ValueError, match="unsupported state"):
+        validate_catalog({"schema_version": 2, "sources": [{**minimal, "state": "acquiring"}]})
+    with pytest.raises(ValueError, match="needs a known reason code"):
+        validate_catalog({"schema_version": 2, "sources": [{**minimal, "state": "rejected"}]})
+    with pytest.raises(ValueError, match="needs a known reason code"):
+        validate_catalog(
+            {
+                "schema_version": 2,
+                "sources": [{**minimal, "state": "rejected", "reason": "made-up"}],
+            }
+        )
+    with pytest.raises(ValueError, match="must not carry a reason"):
+        validate_catalog(
+            {
+                "schema_version": 2,
+                "sources": [{**minimal, "state": "integrated", "reason": "licence-unclear"}],
+            }
+        )
+    with pytest.raises(ValueError, match="reason without state"):
+        validate_catalog(
+            {"schema_version": 2, "sources": [{**minimal, "reason": "licence-unclear"}]}
+        )
+
+
+def test_schema_version_one_still_loads():
+    # an older checkout has no state anywhere; it must keep validating
+    validate_catalog({"schema_version": 1, "sources": []})
+    with pytest.raises(ValueError, match="must be 1 or 2"):
+        validate_catalog({"schema_version": 3, "sources": []})
 
 
 def test_capacity_guard_keeps_fifty_gibibytes_free():

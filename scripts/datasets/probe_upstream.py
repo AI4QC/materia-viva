@@ -1,40 +1,35 @@
 #!/usr/bin/env python3
 """Probe upstream sources for new versions without downloading any data.
 
-The probe reads the upstream identity out of the download URLs already recorded
-in `scripts/datasets/sources.json`, asks each host one metadata question, and
-writes an opaque `seen` token per source to a side file. It never touches the
-catalog, the index or the archives, so a bad run is undone by deleting the
-output.
+Reads the upstream identity out of the download URLs already in
+`scripts/datasets/sources.json`, asks each host one metadata question, and
+writes an opaque `seen` token per source to a side file. Nothing in the catalog
+or the index is touched, so a bad run is undone by deleting the output.
 
-Four hosting families carry a version-addressable identity in the stored URL:
+Two things here are not derivable from the code and were learned the hard way:
 
-* `zenodo.org` / `archive.materialscloud.org` — `api/records/<id>/versions/latest`
-  answers with the newest sibling record, so an `id` different from the one we
-  ingested is exactly the "new version published" signal.
-* `huggingface.co` datasets — the repository head `sha`.
-* `raw`/`media.githubusercontent.com` and `codeload.github.com` — the last commit
-  that touched the stored path, or the branch tip when the URL addresses an
-  archive of the whole ref.
-* everything else with a download URL — a `HEAD` for `ETag` / `Last-Modified`,
-  which catches a file replaced in place but not a new release.
+* `api/records/<id>/versions/latest` answers with the newest sibling record on
+  both Zenodo and Materials Cloud, so one request settles whether the record we
+  ingested has been superseded — no concept id to resolve, nothing to cache.
+* `ndownloader.figshare.com` URLs carry an immutable *file* id that does not move
+  when the article gains a version, and the article id is nowhere in the
+  catalog, so those sources stay unprobeable until someone records it by hand.
 
-`ndownloader.figshare.com` URLs carry an immutable *file* id that does not move
-when the article gains a version, and the article id appears nowhere in the
-catalog, so those sources stay unprobeable until someone records it by hand.
+A `HEAD` fallback catches a file replaced in place but not a new release.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -55,6 +50,10 @@ _GH_MEDIA = re.compile(
     r"^https?://media\.githubusercontent\.com/media/([^/]+)/([^/]+)/([^/]+)/(.+)$"
 )
 _GH_CODELOAD = re.compile(r"^https?://codeload\.github\.com/([^/]+)/([^/]+)/[^/]+/(.+)$")
+# github.com/<owner>/<repo>/archive/refs/heads/<branch>.zip
+_GH_ARCHIVE = re.compile(
+    r"^https?://github\.com/([^/]+)/([^/]+)/archive/refs/heads/(.+?)\.(?:zip|tar\.gz)$"
+)
 _FIGSHARE = re.compile(r"^https?://ndownloader\.figshare\.com/files/\d+")
 
 
@@ -67,7 +66,6 @@ class Probe:
     endpoint: str | None = None
     note: str | None = None
     known: str | None = None  # the upstream id recorded in the catalog, when any
-    extra: dict[str, Any] = field(default_factory=dict)
 
 
 def _source_urls(source: dict[str, Any]) -> list[str]:
@@ -98,7 +96,6 @@ def plan_probe(source: dict[str, Any]) -> Probe:
                 source_id,
                 "hf-revision",
                 endpoint=f"https://huggingface.co/api/datasets/{repo}",
-                known=repo,
             )
         for pattern in (_GH_RAW, _GH_MEDIA):
             match = pattern.match(url)
@@ -111,16 +108,14 @@ def plan_probe(source: dict[str, Any]) -> Probe:
                         f"https://api.github.com/repos/{owner}/{repo}/commits"
                         f"?sha={ref}&path={path}&per_page=1"
                     ),
-                    known=f"{owner}/{repo}@{ref}",
                 )
-        match = _GH_CODELOAD.match(url)
+        match = _GH_CODELOAD.match(url) or _GH_ARCHIVE.match(url)
         if match:
             owner, repo, ref = match.groups()
             return Probe(
                 source_id,
                 "git-commit",
                 endpoint=f"https://api.github.com/repos/{owner}/{repo}/commits?sha={ref}&per_page=1",
-                known=f"{owner}/{repo}@{ref}",
             )
 
     if any(_FIGSHARE.match(url) for url in urls):
@@ -162,11 +157,8 @@ class _PolitePoller:
 def _seen_invenio(probe: Probe, payload: Any) -> tuple[str, dict[str, Any]]:
     record_id = str(payload.get("id", ""))
     version = payload.get("metadata", {}).get("version")
-    versions = payload.get("versions") or {}
     seen = f"{record_id}:{version}" if version else record_id
-    extra: dict[str, Any] = {"latest_record": record_id, "latest_version": version}
-    if versions.get("index") is not None:
-        extra["version_index"] = versions["index"]
+    extra: dict[str, Any] = {"latest_version": version}
     if probe.known and record_id and record_id != probe.known:
         extra["catalog_points_at_older_record"] = probe.known
     return seen, extra
@@ -202,7 +194,7 @@ def run_probe(probe: Probe, poller: _PolitePoller) -> dict[str, Any]:
     except HTTPError as error:
         result["seen"] = None
         result["error"] = f"http-{error.code}"
-    except (URLError, TimeoutError, OSError, ValueError, KeyError, IndexError) as error:
+    except Exception as error:  # one host's failure must not lose the other probes
         result["seen"] = None
         result["error"] = f"{type(error).__name__}: {error}"
     return result
@@ -239,13 +231,18 @@ def merge_probes(
 
     A `--only` run probes a handful of sources; it must not drop the entries it
     did not visit. Sources that have left the catalog are dropped.
+
+    A failed probe learns nothing, so it must not overwrite a token we already
+    hold: otherwise one transient network error erases the baseline and the next
+    genuine upstream change is reported as `first-seen` instead of `changed`.
     """
-    merged = {
-        source_id: entry
-        for source_id, entry in previous.get("probes", {}).items()
-        if source_id in catalogued and source_id not in results
-    }
-    merged.update(results)
+    old = previous.get("probes", {})
+    merged = {k: v for k, v in old.items() if k in catalogued}
+    for source_id, entry in results.items():
+        carried = old.get(source_id, {})
+        if entry.get("error") and carried.get("seen") is not None:
+            entry = {**entry, "seen": carried["seen"], "seen_carried_over": True}
+        merged[source_id] = entry
     return merged
 
 
@@ -298,7 +295,7 @@ def main(argv: list[str] | None = None) -> int:
     verdict = diff_against(previous, results)
     payload = {
         "generated_at": date.today().isoformat(),
-        "catalog": str(args.catalog.relative_to(REPOSITORY_ROOT)),
+        "catalog": os.path.relpath(args.catalog, REPOSITORY_ROOT),
         "probes": merge_probes(previous, results, set(catalogued)),
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,12 +1,13 @@
-import json
 from pathlib import Path
 
 from scripts.datasets.acquire import load_catalog
 from scripts.datasets.probe_upstream import (
+    Probe,
     diff_against,
     merge_probes,
     plan_probe,
     plan_probes,
+    run_probe,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -116,9 +117,107 @@ def test_a_partial_run_keeps_the_sources_it_did_not_probe():
     assert merged == {"kept": {"seen": "old"}, "reprobed": {"seen": "new"}}
 
 
-def test_written_probe_file_is_json_with_one_entry_per_source():
-    out = REPO_ROOT / "data" / "probe" / "seen.json"
-    if not out.exists():
-        return  # the probe has not been run on this machine
-    payload = json.loads(out.read_text(encoding="utf-8"))
-    assert set(payload["probes"]) == set(_plans())
+class _StubPoller:
+    """Stands in for the network: canned payloads, or an exception to raise."""
+
+    def __init__(self, payload=None, headers=None, raises=None):
+        self._payload = payload
+        self._headers = headers or {}
+        self._raises = raises
+
+    def json(self, url):
+        if self._raises:
+            raise self._raises
+        return self._payload
+
+    def head(self, url):
+        if self._raises:
+            raise self._raises
+        return self._headers
+
+
+def test_github_release_archive_urls_probe_a_commit():
+    # github.com/<owner>/<repo>/archive/refs/heads/<branch>.zip is a fourth github
+    # form; before it was recognised, superband fell back to a HEAD on a mirror
+    source = {
+        "id": "example",
+        "downloads": [
+            {"url": "https://github.com/ljcj007/SuperBand/archive/refs/heads/main.zip"}
+        ],
+    }
+    probe = plan_probe(source)
+    assert probe.kind == "git-commit"
+    assert "ljcj007/SuperBand/commits?sha=main" in probe.endpoint
+
+
+def test_invenio_payload_reports_the_superseding_record():
+    probe = Probe("core-mof", "invenio-latest", endpoint="https://zenodo.org/x", known="3677685")
+    payload = {"id": 14184621, "metadata": {"version": "2.0.1"}}
+    result = run_probe(probe, _StubPoller(payload))
+    assert result["seen"] == "14184621:2.0.1"
+    assert result["latest_version"] == "2.0.1"
+    # the headline output: the catalog still points at the record we ingested
+    assert result["catalog_points_at_older_record"] == "3677685"
+
+
+def test_invenio_payload_at_the_latest_record_reports_no_lag():
+    probe = Probe("deem", "invenio-latest", endpoint="https://zenodo.org/x", known="8035241")
+    result = run_probe(probe, _StubPoller({"id": 8035241, "metadata": {"version": "2.1"}}))
+    assert result["seen"] == "8035241:2.1"
+    assert "catalog_points_at_older_record" not in result
+
+
+def test_each_probe_kind_extracts_its_own_token():
+    hf = run_probe(
+        Probe("elementa", "hf-revision", endpoint="https://hf/x"), _StubPoller({"sha": "abc123"})
+    )
+    assert hf["seen"] == "abc123"
+
+    git = run_probe(
+        Probe("obelix", "git-commit", endpoint="https://api.github.com/x"),
+        _StubPoller([{"sha": "def456"}]),
+    )
+    assert git["seen"] == "def456"
+
+    head = run_probe(
+        Probe("oqmd", "http-head", endpoint="https://static/x"),
+        _StubPoller(headers={"etag": '"a90506cf"'}),
+    )
+    assert head["seen"] == '"a90506cf"'
+
+    manual = run_probe(Probe("icsd", "manual", note="no-download-endpoint"), _StubPoller())
+    assert manual["seen"] is None
+    assert manual["note"] == "no-download-endpoint"
+
+
+def test_a_host_that_sends_no_validator_is_named_as_such():
+    result = run_probe(Probe("sacada", "http-head", endpoint="https://x"), _StubPoller(headers={}))
+    assert result["seen"] is None
+    assert result["note"] == "host-sends-no-etag-or-last-modified"
+
+
+def test_an_empty_commit_list_is_not_mistaken_for_a_token():
+    result = run_probe(Probe("x", "git-commit", endpoint="https://x"), _StubPoller([]))
+    assert result["seen"] is None
+    assert result["note"] == "no-commit-touches-the-stored-path"
+
+
+def test_one_failing_host_is_recorded_and_does_not_raise():
+    result = run_probe(
+        Probe("x", "hf-revision", endpoint="https://x"), _StubPoller(raises=TimeoutError("slow"))
+    )
+    assert result["seen"] is None
+    assert result["error"].startswith("TimeoutError")
+
+
+def test_a_failed_probe_does_not_erase_the_token_it_already_had():
+    # one transient failure must not demote the next genuine change to first-seen
+    previous = {"probes": {"core-mof": {"seen": "14184621:2.0.1", "kind": "invenio-latest"}}}
+    failed = {"core-mof": {"kind": "invenio-latest", "seen": None, "error": "http-503"}}
+    merged = merge_probes(previous, failed, {"core-mof"})
+    assert merged["core-mof"]["seen"] == "14184621:2.0.1"
+    assert merged["core-mof"]["seen_carried_over"] is True
+    assert merged["core-mof"]["error"] == "http-503"
+    # and the carried token still classifies a later real change as changed
+    verdict = diff_against({"probes": merged}, {"core-mof": {"kind": "invenio-latest", "seen": "9:3.0"}})
+    assert verdict["changed"] == ["core-mof"]

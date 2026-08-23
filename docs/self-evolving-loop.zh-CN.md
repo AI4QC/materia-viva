@@ -195,8 +195,10 @@ ELEMENTA 现有的顶层 `revision` 迁到 `upstream.seen` + `probe_kind: "hf-re
 
 两条直接结论：
 
-- **约 18 个来源（zenodo + materialscloud + hf + github）的上游标识已在现有 URL 里**，正则可提取，
-  探测脚本不需要任何 schema 改动就能跑起来；
+- **31 个来源的上游标识已在现有 URL 里**（invenio-latest 13、http-head 14、git-commit 4、
+  hf-revision 2），正则可提取，探测脚本不需要任何 schema 改动就能跑起来。这一步**已实现**：
+  [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py)，结果写
+  `<data root>/probe/seen.json`；
 - **figshare 那 14 个来源目前探测不了**，需要人工补一次 figshare article id（`official_url` 指向
   的是项目主页，不含 figshare 标识）。这是一项独立的、可量化的人工工作，不要和 schema 改动混在
   一起做。
@@ -316,11 +318,16 @@ site 上限、以及**复合键例外清单**。枚举库（Deem 假想沸石、
 
 原则：**先用只读探测产出真实数据，再让数据决定字段长什么样。** 反过来做就是先建抽象再看需求。
 
-**第 1 步：只读探测器，零 schema 改动。**
-从现有 `downloads[].url` 正则提取上游标识，覆盖 zenodo(8) + materialscloud(5) + hf(3) +
-github(5) 约 18 个来源，探测结果写到旁路文件（如 `data/probe/seen.json`），**不碰
-`sources.json`、不下载任何数据**。
-→ 验证：连跑两次，第二次应全部判定"未变更"；人工挑 2-3 个已知发过新版本的来源，应判定"变更"。
+**第 1 步（已实现）：只读探测器，零 schema 改动。**
+[`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py) 从现有
+`downloads[].url` 提取上游标识，覆盖 31 个来源，结果写 `<data root>/probe/seen.json`，**不碰
+`sources.json`、不下载任何数据**。Zenodo 与 Materials Cloud 用
+`api/records/<id>/versions/latest` 一次请求即可知道所记录的 record 是否已被新版本取代。
+
+首轮全量运行发现 4 个来源的上游已经领先于目录里记录的 record：`arc-mof`、`carolina`、
+`core-mof`（v1.1.3 → v2.0.1）、`topomat`。
+
+→ 验证：`pytest backend/tests/test_upstream_probe.py`；连跑两次，第二次应全部判定"未变更"。
 
 **第 2 步：让第 1 步的输出决定字段形态。**
 跑过一轮之后才知道 `seen` 实际长什么样、`probe_kind` 够不够用、有没有漏掉的分类。此时再改

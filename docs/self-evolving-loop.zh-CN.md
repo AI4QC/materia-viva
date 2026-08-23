@@ -122,53 +122,47 @@ Hugging Face 提交 SHA `9de9010715da4f563326f99bf3f7ee829cf4486a`。
 已经承诺"保留 `source`、`source_version`、`source_id`、`license`、`retrieved_at`"——意图早就写下
 了，只是目录 schema 里没有落地。
 
-### 3.2 拟新增字段
+### 3.2 目录不存上游状态（第 1 步跑完后的结论）
 
-变更检测只需要回答一个问题：**和上次看到的一样吗。** 所以不存 `etag` / `last_modified` /
-`content_hash` / `upstream_version` 四个并列字段——它们是同一语义的四种编码。存一个不透明 token：
+这一节原本设计了一个 `upstream` 块（`probe` / `probe_kind` / `seen` / `checked_at`）写进
+`sources.json`。第 1 步的探测器跑过全量之后，这个设计被自己的输出否掉了。判据是：**这个值是人工
+知识，还是每次运行都能重算的结果？**
 
-```jsonc
-{
-  "id": "materials-project",
-  "status": "downloaded-verified-154377-summary-documents-2026-07-26-plus-8-property-endpoints-2026-08-19",
+- `seen` 全部派生。`data/probe/seen.json` 里 29 个非空 token 全是机器读出来的校验值：HTTP ETag、
+  `Last-Modified`、git SHA、HF repo sha、Invenio record id。没有一个需要人。
+- `probe` 和 `probe_kind` 也是派生的。`plan_probe()` 是 `downloads[].url` 的纯函数，对全部 106 条
+  给出 kind 和端点，零人工输入。原先写"`probe_kind` 决定怎么探测，无法推导"——这句是错的。
+- `checked_at` 是运行时间戳，定义上就不是目录内容。
+- **目录里已经存了版本指针**：它就在下载 URL 里。`arc-mof` / `carolina` / `core-mof` / `topomat`
+  这四个"上游已领先"的判定，正是把 URL 里的 record id 与上游最新版比出来的。再存一个
+  `upstream.seen` 就是同一个指针存两份——和 §2.1 拒绝 `visibility` 的理由完全相同，而且这四条 URL
+  已经在漂移了。
+- 变更检测不需要目录字段。`diff_against()` 拿上一轮的旁路文件比即可，第 1 步的验收标准本来就是
+  "连跑两次，第二次报未变更"。若把状态写进目录，只读探测器就得变成每轮对版本库里 106 条记录写
+  diff 的目录改写器。
+- ELEMENTA 顶层的 `revision` 印证的是冗余而非先例：探测器独立推导出了逐字符相同的 sha。它也没有
+  任何读者（`scripts/` 与 `backend/` 里 grep 不到），保持原样不动。
 
-  "state": "integrated",           // 第 2.1 节
-  "reason": null,                  // rejected / quarantined 时填第 2.2 节原因码
+**所以：探测状态永久留在旁路文件 `<data root>/probe/seen.json`，不进版本库，目录不加
+`upstream` 块，探测器也不提供把结果写回目录的 `--sync`——那只是同一个设计换个名字。**
 
-  "upstream": {
-    "probe": "https://api.materialsproject.org/materials/summary/?_limit=1",
-    "probe_kind": "api-metadata",  // http-head | api-metadata | hf-revision | git-commit | manual
-    "seen": "2026-07-26",          // 不透明 token：etag / Last-Modified / commit SHA / 载荷 sha256
-    "checked_at": "2026-08-19"
-  }
-}
-```
+目录只该存**无法从 URL 推导的人工知识**，目前只有两项，都还没到：
 
-`probe_kind` 保留，因为它决定**怎么探测**，无法推导；`seen` 的内容由 `probe_kind` 决定，比较时
-只做字符串相等判断，不解析。
+- `state` / `reason`（第 2.1、2.2 节）——第 3 步，其中 21 条需要人工判断；
+- figshare article id（第 3.3 节）——第 4 步，14 条人工补录。
 
-失败态的形态（Catalysis-Hub）：
+`schema_version` 也因此**留在 1**：结论 (b) 下没有形态变化，版本号跳升应该跟着第 3 步真正加字段
+的那个提交走，而不是提前为一个还没发生的改动声明契约。已经落地的只有一条回归测试：只带六个必填
+字段的来源必须能通过校验（`backend/tests/test_dataset_acquisition.py`），这是第 3、4 步能分批填、
+不做整体迁移的前提。
 
-```jsonc
-{
-  "id": "catalysis-hub",
-  "status": "downloaded-158304-reactions-2026-08-18-excluded-from-ingestion-crawl-omitted-reactionSystems-join-key-so-91-percent-unattachable",
-  "state": "rejected",
-  "reason": "join-key-missing",
-  "upstream": { "probe_kind": "manual", "checked_at": "2026-08-18" }
-}
-```
+不加的字段及理由（原样保留，均已被数据印证）：
 
-ELEMENTA 现有的顶层 `revision` 迁到 `upstream.seen` + `probe_kind: "hf-revision"`，顶层保留作
-别名。
-
-不加的字段及理由：
-
-- `check_interval_days`——先用一个全局默认间隔（**待定**），`probe_kind: "manual"` 即不探测。
-  逐来源周期等到真的观察到"某来源必须按不同频率看"再加。
-- `probe_failures` / 退避计数——探测失败的正确处理是"这次什么也没学到"：`checked_at` 不更新，
-  下轮自然重试。不需要状态，也不需要计数器。
-- `visibility`——推导得出，见第 2.1 节。
+- `check_interval_days`——先用一个全局默认间隔（**待定**），`manual` 即不探测；
+- `probe_failures` / 退避计数——探测失败的正确处理是"这次什么也没学到"，下轮自然重试；
+- `visibility`——推导得出，见第 2.1 节；
+- `etag` / `last_modified` / `content_hash` / `upstream_version` 四个并列字段——同一语义的四种
+  编码，只用一个不透明 token。
 
 ### 3.3 自动探测的覆盖上限
 
@@ -190,12 +184,12 @@ ELEMENTA 现有的顶层 `revision` 迁到 `upstream.seen` + `probe_kind: "hf-re
 | `zenodo.org` | 8 | ✅ `api/records/<record_id>/...` |
 | `archive.materialscloud.org` | 5 | ✅ `api/records/<record_id>/...` |
 | `huggingface.co` | 3 | ✅ `datasets/<repo>/resolve/main/...` |
-| github（raw / media / codeload） | 5 | ✅ `<org>/<repo>/<branch>/...` |
+| github（raw / media / codeload / archive） | 5 | ✅ `<org>/<repo>/<branch>/...` |
 | 其余单点 host | 10 | 逐个看，多数只能 `http-head` |
 
 两条直接结论：
 
-- **31 个来源的上游标识已在现有 URL 里**（invenio-latest 13、http-head 14、git-commit 4、
+- **31 个来源的上游标识已在现有 URL 里**（invenio-latest 13、http-head 11、git-commit 5、
   hf-revision 2），正则可提取，探测脚本不需要任何 schema 改动就能跑起来。这一步**已实现**：
   [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py)，结果写
   `<data root>/probe/seen.json`；
@@ -329,10 +323,10 @@ site 上限、以及**复合键例外清单**。枚举库（Deem 假想沸石、
 
 → 验证：`pytest backend/tests/test_upstream_probe.py`；连跑两次，第二次应全部判定"未变更"。
 
-**第 2 步：让第 1 步的输出决定字段形态。**
-跑过一轮之后才知道 `seen` 实际长什么样、`probe_kind` 够不够用、有没有漏掉的分类。此时再改
-`sources.json`（第 3.2 节），`schema_version` 升到 2。
-→ 验证：现有 119 个测试全绿；新增一条 schema 校验测试。
+**第 2 步（已完成）：让第 1 步的输出决定字段形态。**
+结论是**目录一个字段都不加**——探测状态全部派生，旁路文件才是它的家（第 3.2 节）。`schema_version`
+留在 1，只落地一条回归测试：只带六个必填字段的来源必须能通过校验，这是第 3、4 步分批填字段的前提。
+→ 验证：`pytest backend/tests` 全绿。
 
 **第 3 步：`state` / `reason` 分批回填，不做一次性迁移。**
 62 条 `downloaded` / `already-present` 开头的可脚本推断；20 条 `user-action-required` 可推断为

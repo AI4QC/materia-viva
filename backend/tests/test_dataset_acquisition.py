@@ -368,6 +368,27 @@ def test_catalog_rejects_parent_traversal_destination():
         validate_catalog(catalog)
 
 
+def test_catalog_source_requires_only_the_six_identity_fields():
+    # everything else is optional and absent by default, which is what lets the
+    # self-evolving loop add per-source fields to a subset of the 106 entries
+    # without a migration; `status`, `downloads` and `revision` are all optional
+    # (the probe keeps its own state in a side file, so no catalog field is
+    # needed for change detection — see docs/self-evolving-loop.zh-CN.md 3.2)
+    minimal = {
+        "id": "minimal",
+        "name": "minimal",
+        "access": "open",
+        "official_url": "https://example.org",
+        "license": "unknown",
+        "data_path": "minimal",
+    }
+
+    validate_catalog({"schema_version": 1, "sources": [minimal]})
+
+    with pytest.raises(ValueError, match="missing fields"):
+        validate_catalog({"schema_version": 1, "sources": [{"id": "minimal"}]})
+
+
 def test_capacity_guard_keeps_fifty_gibibytes_free():
     gib = 1024**3
     ensure_capacity(available_bytes=80 * gib, expected_bytes=20 * gib)

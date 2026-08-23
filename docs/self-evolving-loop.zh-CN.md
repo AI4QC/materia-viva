@@ -205,7 +205,7 @@ Hugging Face 提交 SHA `9de9010715da4f563326f99bf3f7ee829cf4486a`。
 
 | host | 来源数 | 现有 URL 里的上游标识 |
 |---|---:|---|
-| `ndownloader.figshare.com` | 14 | ❌ 只有文件 id（`files/25453265`），发新版本时不变 |
+| `ndownloader.figshare.com` | 14 | ⚠️ 文件 id 不随版本移动；9 个已解出 article id，5 个未解 |
 | `zenodo.org` | 8 | ✅ `api/records/<record_id>/...` |
 | `archive.materialscloud.org` | 5 | ✅ `api/records/<record_id>/...` |
 | `huggingface.co` | 3 | ✅ `datasets/<repo>/resolve/main/...` |
@@ -214,13 +214,13 @@ Hugging Face 提交 SHA `9de9010715da4f563326f99bf3f7ee829cf4486a`。
 
 两条直接结论：
 
-- **31 个来源的上游标识已在现有 URL 里**（invenio-latest 13、http-head 11、git-commit 5、
-  hf-revision 2），正则可提取，探测脚本不需要任何 schema 改动就能跑起来。这一步**已实现**：
+- **40 个来源可探测**（invenio-latest 13、http-head 11、figshare-article 9、git-commit 5、
+  hf-revision 2）。其中 38 个的上游标识可从现有 URL 提取，2 个是查出来记进目录的。这一步**已实现**：
   [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py)，结果写
   `<data root>/probe/seen.json`；
-- **figshare 那 14 个来源目前探测不了**，需要人工补一次 figshare article id（`official_url` 指向
-  的是项目主页，不含 figshare 标识）。这是一项独立的、可量化的人工工作，不要和 schema 改动混在
-  一起做。
+- **figshare 那 14 个来源里 9 个已解决**（第 4 步）：7 个的 article id 本来就在 `official_url` 里，
+  按第 3.2 节的规则不入目录、由 `plan_probe` 提取；另 2 个（`jarvis-dft`、`hex-high-pressure`）查出
+  来才知道，属于人工知识，记为目录字段 `figshare_article`。剩 5 个仍未解，见第 7 节第 4 步。
 
 ### 3.4 硬约束：必须是纯增量改动
 
@@ -363,9 +363,27 @@ site 上限、以及**复合键例外清单**。枚举库（Deem 假想沸石、
 
 其中 5 条需要的是决定而不是规则，为它们新增了一个原因码 `scope-unbounded`，见第 2.2 节。
 
-**第 4 步（可与第 3 步并行）：补 figshare article id。**
-14 个来源，人工一次性工作，补完这 14 条才进入探测覆盖。
-→ 验证：14 个来源的探测结果从"无法探测"变为有 `seen` 值。
+**第 4 步（已完成）：figshare article id。**
+14 个 figshare 来源里 9 个可探测了，覆盖从 31 升到 40/106。
+
+关键点是 article 的元数据会列出它的 files，所以**每个映射都能用我们记录的 file id 反证，而不是靠
+标题猜**——这是 article id 敢入库的前提。三条来路：
+
+| 来路 | 数量 | 存在哪 |
+|---|---:|---|
+| article id 已在 `official_url` 里 | 7 | 不入库，`plan_probe` 提取（同第 3.2 节规则） |
+| figshare 搜索反查 + file id 验证 | 1 | `jarvis-dft` → `figshare_article: 6815699` |
+| collection 里唯一那篇 article | 1 | `hex-high-pressure` → `figshare_article: 25403968` |
+
+`hex-high-pressure` 的 `official_url` 是 collection（`7119778`），**不是** article（`25403968`）
+——所以 `plan_probe` 只匹配 `/articles/` 路径，绝不匹配 collection，并且记录值优先于 URL 推导。
+
+**未解的 5 个**：`aflow`、`c2db`、`2dmatpedia`、`omdb-organic`（项目主页与 figshare 搜索都没给出
+能被 file id 验证的 article）、`jarvis-specialized-structures`（16 个 file id 分散在多篇 article，
+一条目录记录对多篇文章，单个 `figshare_article` 字段表达不了）。它们保持
+`manual / figshare-article-id-unknown`，等谁手上有确切链接再补一条即可。
+
+→ 验证：`pytest backend/tests`（143 passed）；9 个来源实跑均取到 article version 作为 `seen`。
 
 **第 5 步：golden sample 框架与第 5 节门槛检查。**
 → 验证：拿一个现有适配器反向跑通，故意改坏一个字段应当报错。

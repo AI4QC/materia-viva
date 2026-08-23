@@ -55,6 +55,9 @@ _GH_ARCHIVE = re.compile(
     r"^https?://github\.com/([^/]+)/([^/]+)/archive/refs/heads/(.+?)\.(?:zip|tar\.gz)$"
 )
 _FIGSHARE = re.compile(r"^https?://ndownloader\.figshare\.com/files/\d+")
+# the article id is what moves when a figshare dataset gains a version; it sits
+# in official_url for some sources and is recorded by hand for the rest
+_FIGSHARE_ARTICLE_URL = re.compile(r"^https?://(?:[\w.-]+\.)?figshare\.com/articles/([^?#]+)")
 
 
 @dataclass
@@ -70,6 +73,22 @@ class Probe:
 
 def _source_urls(source: dict[str, Any]) -> list[str]:
     return [d["url"] for d in source.get("downloads", []) if d.get("url")]
+
+
+def _figshare_article(source: dict[str, Any]) -> str | None:
+    """The recorded article id, else the one in official_url.
+
+    A collection URL is not an article URL, so it is deliberately not matched;
+    those sources carry the article id explicitly.
+    """
+    recorded = source.get("figshare_article")
+    if recorded:
+        return str(recorded)
+    match = _FIGSHARE_ARTICLE_URL.match(source.get("official_url", ""))
+    if not match:
+        return None
+    digits = re.findall(r"\d{6,}", match.group(1))
+    return digits[-1] if digits else None
 
 
 def plan_probe(source: dict[str, Any]) -> Probe:
@@ -119,7 +138,14 @@ def plan_probe(source: dict[str, Any]) -> Probe:
             )
 
     if any(_FIGSHARE.match(url) for url in urls):
-        return Probe(source_id, "manual", note="figshare-file-id-is-not-version-addressable")
+        article = _figshare_article(source)
+        if article:
+            return Probe(
+                source_id,
+                "figshare-article",
+                endpoint=f"https://api.figshare.com/v2/articles/{article}",
+            )
+        return Probe(source_id, "manual", note="figshare-article-id-unknown")
     return Probe(source_id, "http-head", endpoint=urls[0])
 
 
@@ -179,6 +205,8 @@ def run_probe(probe: Probe, poller: _PolitePoller) -> dict[str, Any]:
             seen, extra = _seen_invenio(probe, poller.json(probe.endpoint))
             result["seen"] = seen
             result.update(extra)
+        elif probe.kind == "figshare-article":
+            result["seen"] = str(poller.json(probe.endpoint).get("version"))
         elif probe.kind == "hf-revision":
             result["seen"] = poller.json(probe.endpoint).get("sha")
         elif probe.kind == "git-commit":

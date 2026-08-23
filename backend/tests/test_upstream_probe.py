@@ -55,11 +55,12 @@ def test_hf_and_github_sources_probe_a_revision():
 
 def test_figshare_and_endpointless_sources_are_reported_as_unprobeable():
     plans = _plans()
-    # figshare stores an immutable file id, so a new article version is invisible
+    # figshare stores an immutable file id, so without the article id a new
+    # version of the dataset is invisible
     for source_id in ("aflow", "c2db", "2dmatpedia"):
         probe = plans[source_id]
         assert probe.kind == "manual"
-        assert probe.note == "figshare-file-id-is-not-version-addressable"
+        assert probe.note == "figshare-article-id-unknown"
     # licensed and browse-only sources have no download endpoint at all
     assert plans["icsd"].note == "no-download-endpoint"
     assert plans["magndata"].note == "no-download-endpoint"
@@ -221,3 +222,42 @@ def test_a_failed_probe_does_not_erase_the_token_it_already_had():
     # and the carried token still classifies a later real change as changed
     verdict = diff_against({"probes": merged}, {"core-mof": {"kind": "invenio-latest", "seen": "9:3.0"}})
     assert verdict["changed"] == ["core-mof"]
+
+
+def test_figshare_article_id_comes_from_official_url_when_it_is_there():
+    plans = _plans()
+    for source_id in ("hmof", "matbench-discovery", "hofsyn"):
+        probe = plans[source_id]
+        assert probe.kind == "figshare-article", source_id
+        assert probe.endpoint.startswith("https://api.figshare.com/v2/articles/")
+    # the id is the last number in the path, not the first, so a title carrying
+    # digits does not shadow it
+    source = {
+        "id": "example",
+        "official_url": "https://figshare.com/articles/dataset/Matbench_Discovery_v1_0_0/22715158",
+        "downloads": [{"url": "https://ndownloader.figshare.com/files/40344436"}],
+    }
+    assert plan_probe(source).endpoint.endswith("/22715158")
+
+
+def test_a_recorded_article_id_beats_the_official_url():
+    # hex-high-pressure's official_url is a *collection*, whose id is not the
+    # article id, so the looked-up value has to win
+    source = {
+        "id": "hex",
+        "official_url": "https://springernature.figshare.com/collections/HEX/7119778",
+        "figshare_article": 25403968,
+        "downloads": [{"url": "https://ndownloader.figshare.com/files/45020533"}],
+    }
+    probe = plan_probe(source)
+    assert probe.kind == "figshare-article"
+    assert probe.endpoint.endswith("/25403968")
+
+    # and without the recorded id, a collection URL is not mistaken for an article
+    del source["figshare_article"]
+    assert plan_probe(source).kind == "manual"
+
+
+def test_a_figshare_article_reports_its_version_as_the_token():
+    probe = Probe("hmof", "figshare-article", endpoint="https://api.figshare.com/v2/articles/1")
+    assert run_probe(probe, _StubPoller({"version": 2}))["seen"] == "2"

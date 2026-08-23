@@ -132,7 +132,6 @@ Hugging Face 提交 SHA `9de9010715da4f563326f99bf3f7ee829cf4486a`。
   `Last-Modified`、git SHA、HF repo sha、Invenio record id。没有一个需要人。
 - `probe` 和 `probe_kind` 也是派生的。`plan_probe()` 是 `downloads[].url` 的纯函数，对全部 106 条
   给出 kind 和端点，零人工输入。原先写"`probe_kind` 决定怎么探测，无法推导"——这句是错的。
-- `checked_at` 是运行时间戳，定义上就不是目录内容。
 - **目录里已经存了版本指针**：它就在下载 URL 里。`arc-mof` / `carolina` / `core-mof` / `topomat`
   这四个"上游已领先"的判定，正是把 URL 里的 record id 与上游最新版比出来的。再存一个
   `upstream.seen` 就是同一个指针存两份——和 §2.1 拒绝 `visibility` 的理由完全相同，而且这四条 URL
@@ -145,6 +144,16 @@ Hugging Face 提交 SHA `9de9010715da4f563326f99bf3f7ee829cf4486a`。
 
 **所以：探测状态永久留在旁路文件 `<data root>/probe/seen.json`，不进版本库，目录不加
 `upstream` 块，探测器也不提供把结果写回目录的 `--sync`——那只是同一个设计换个名字。**
+
+这个选择的代价必须说清：旁路文件在 `data/` 下，而 `data/` 不进版本库，所以**基线是机器本地的**。
+新克隆的仓库、CI、换一台机器都没有基线，所有来源首轮都报 `first-seen`，必须在本机跑过两次才能
+回答"变了没变"；SSD 丢了基线跟着丢；两个人也无法共享探测结果。
+
+缓和的一面：**最有价值的那个信号不依赖基线。** `catalog_points_at_older_record` 比的是下载 URL
+里的 record id 与上游最新版，所以首轮全是 `first-seen` 时，`arc-mof` / `carolina` / `core-mof` /
+`topomat` 这四个发现照样被报了出来。基线丢失只削弱 `http-head` / `hf-revision` / `git-commit`
+三类的 `changed` 判定，不会让探测器变哑。真到了需要跨机器共享基线的那天，再讨论把 `seen.json`
+纳入版本库——那是一个独立决定，不是现在这个。
 
 目录只该存**无法从 URL 推导的人工知识**，目前只有两项，都还没到：
 

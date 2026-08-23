@@ -388,6 +388,12 @@ def test_catalog_source_requires_only_the_six_identity_fields():
     with pytest.raises(ValueError, match="missing fields"):
         validate_catalog({"schema_version": 1, "sources": [{"id": "minimal"}]})
 
+    # the direction steps 3 and 4 actually depend on: a field the validator has
+    # never heard of passes, so `state` can be filled in for a subset of entries
+    # without teaching the validator about it first
+    filled = {**minimal, "state": "integrated", "reason": None, "article_id": 25453265}
+    validate_catalog({"schema_version": 1, "sources": [filled]})
+
 
 def test_capacity_guard_keeps_fifty_gibibytes_free():
     gib = 1024**3

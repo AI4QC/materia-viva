@@ -304,7 +304,7 @@ MateriaViva 自身的代码按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商�
 ```bash
 git clone https://github.com/AI4QC/materia-viva.git
 cd materia-viva
-pip install -e backend  # 或：pip install -r requirements.txt
+pip install -r backend/requirements.txt
 
 # 小切片——开发前端够用
 python scripts/fetch_index.py slice

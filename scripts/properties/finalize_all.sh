@@ -7,6 +7,8 @@
 set -u
 cd "$(dirname "$0")/../.."
 P="${MV_PYTHON:-$(command -v python3)}"
+#: unset -> each script picks a worker count from this machine's cores
+NPROC="${MV_NPROC:+--nproc $MV_NPROC}"
 LOGS=data/props_work/_logs
 OUT="${MV_OUT:-data/props_work/_out}"
 mkdir -p "$LOGS" "$OUT"
@@ -31,7 +33,7 @@ reload_source () {
   local s="$1"
   [ -d "data/props_work/$s" ] || return 0
   echo "=== $s $(date) ===" >> "$LOGS/finalize-$s.log"
-  $P scripts/properties/pipeline.py "$s" --stage adapt --nproc 20 \
+  $P scripts/properties/pipeline.py "$s" --stage adapt $NPROC \
       >> "$LOGS/finalize-$s.log" 2>&1 || return 0
   # allow the re-load: clear the marker so load.py replaces this source's rows
   $P - "$s" <<'PYEOF' >> "$LOGS/finalize-$s.log" 2>&1
@@ -58,8 +60,8 @@ for s in $REMAP; do reload_source "$s"; done
 #    means nothing is ever admitted), register the id->material pairs, then re-run
 #    the sources that key on ICSD ids so they pick up the new links.
 if [ -f scripts/properties/icsd_bridge.py ]; then
-  $P scripts/properties/pipeline.py icsd --stage adapt --nproc 20 >> "$LOGS/finalize-icsd.log" 2>&1
-  $P scripts/properties/pipeline.py icsd --stage hash --nproc 20 >> "$LOGS/finalize-icsd.log" 2>&1
+  $P scripts/properties/pipeline.py icsd --stage adapt $NPROC >> "$LOGS/finalize-icsd.log" 2>&1
+  $P scripts/properties/pipeline.py icsd --stage hash $NPROC >> "$LOGS/finalize-icsd.log" 2>&1
   $P scripts/properties/pipeline.py icsd --stage match >> "$LOGS/finalize-icsd.log" 2>&1
   $P scripts/properties/icsd_bridge.py >> "$LOGS/finalize-icsd.log" 2>&1
   for s in icsd 3dsc spse webmineral amdb obelix; do reload_source "$s"; done

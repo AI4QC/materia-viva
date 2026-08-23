@@ -13,6 +13,8 @@
 set -u
 cd "$(dirname "$0")/../.."
 P="${MV_PYTHON:-$(command -v python3)}"
+#: unset -> each script picks a worker count from this machine's cores
+NPROC="${MV_NPROC:+--nproc $MV_NPROC}"
 LOGS=data/props_work/_logs
 OUT="${MV_OUT:-data/props_work/_out}"
 mkdir -p "$LOGS" "$OUT"
@@ -24,7 +26,7 @@ while pgrep -f "hmof_chain.sh|fix_framework_hash_refs.sh|load_new_extractors.sh|
   sleep 60
 done
 
-$P scripts/properties/pipeline.py core-mof --stage hash --nproc 20 \
+$P scripts/properties/pipeline.py core-mof --stage hash $NPROC \
     >> "$LOGS/coremof-chain.log" 2>&1 || {
   echo "core-mof: hash failed" >> "$LOGS/chain.log"; exit 1; }
 

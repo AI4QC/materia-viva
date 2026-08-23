@@ -31,7 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.properties.base import WORK_ROOT, SourceAdapter  # noqa: E402
+from scripts.properties.base import WORK_ROOT, SourceAdapter, default_nproc  # noqa: E402
 from scripts.properties.cif_trim import trim_cif  # noqa: E402
 from scripts.properties.match_map import DEFAULT_OUT as MATCH_MAP  # noqa: E402
 
@@ -278,7 +278,7 @@ def main() -> int:
         "--stage", choices=("adapt", "hash", "match", "all"), default="all"
     )
     parser.add_argument("--limit", type=int, default=None)
-    parser.add_argument("--nproc", type=int, default=28)
+    parser.add_argument("--nproc", type=int, default=default_nproc())
     args = parser.parse_args()
 
     work = WORK_ROOT / args.source

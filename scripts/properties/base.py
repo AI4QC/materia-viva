@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -11,6 +12,21 @@ from typing import Any, Iterator
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ACQUIRED_ROOT = PROJECT_ROOT / "data" / "raw" / "acquired"
 WORK_ROOT = PROJECT_ROOT / "data" / "props_work"
+
+
+def default_nproc() -> int:
+    """Workers for a CPU-bound stage on whatever machine this is.
+
+    Honours CPU affinity where the platform exposes it, so a cgroup- or
+    taskset-limited run does not oversubscribe the cores it was actually
+    given. The pipeline stages were originally pinned to 28, the core count
+    of the machine they were built on.
+    """
+
+    if hasattr(os, "sched_getaffinity"):
+        return max(1, len(os.sched_getaffinity(0)))
+    return max(1, os.cpu_count() or 1)
+
 
 _ID_PATTERNS = {
     "materials-project": re.compile(r"^mp-\d+$"),

@@ -5,6 +5,8 @@
 set -u
 cd "$(dirname "$0")/../.."
 P="${MV_PYTHON:-$(command -v python3)}"
+#: unset -> each script picks a worker count from this machine's cores
+NPROC="${MV_NPROC:+--nproc $MV_NPROC}"
 LOGS=data/props_work/_logs
 OUT="${MV_OUT:-data/props_work/_out}"
 mkdir -p "$LOGS" "$OUT"
@@ -26,8 +28,8 @@ for s in $SMALL $BIG; do
         "data/props_work/$s/report.json"
 done
 
-$P scripts/properties/run_all.py --sources $SMALL --nproc 24 >> "$LOGS/driver-batch3.log" 2>&1 \
-  && $P scripts/properties/run_all.py --sources $BIG --nproc 24 >> "$LOGS/driver-batch3.log" 2>&1
+$P scripts/properties/run_all.py --sources $SMALL $NPROC >> "$LOGS/driver-batch3.log" 2>&1 \
+  && $P scripts/properties/run_all.py --sources $BIG $NPROC >> "$LOGS/driver-batch3.log" 2>&1
 STATUS=$?
 
 # phonon scalars recomputed with phonopy (needs phonondb loaded first)

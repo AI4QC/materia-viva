@@ -23,6 +23,10 @@ import time
 import warnings
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.properties.base import default_nproc  # noqa: E402
+
 warnings.filterwarnings("ignore")
 
 MAX_SITES = 500
@@ -103,7 +107,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("structs", type=Path)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--nproc", type=int, default=28)
+    parser.add_argument("--nproc", type=int, default=default_nproc())
     parser.add_argument("--chunk", type=int, default=32)
     args = parser.parse_args()
     run(args.structs, args.out, args.nproc, args.chunk)

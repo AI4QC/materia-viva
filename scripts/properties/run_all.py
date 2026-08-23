@@ -27,6 +27,10 @@ import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.properties.base import default_nproc  # noqa: E402
+
 WORK = PROJECT_ROOT / "data" / "props_work"
 LOGS = WORK / "_logs"
 # The interpreter the pipeline stages run under. Defaults to the one running
@@ -147,7 +151,7 @@ def process_source(source: str, nproc: int, status: dict) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--nproc", type=int, default=26)
+    parser.add_argument("--nproc", type=int, default=default_nproc())
     parser.add_argument(
         "--phase", choices=("bridge", "main", "huge", "backfill", "all"),
         default="all",

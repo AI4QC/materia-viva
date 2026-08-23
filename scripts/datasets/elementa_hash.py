@@ -23,6 +23,10 @@ import warnings
 from pathlib import Path
 from typing import Iterator
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.properties.base import default_nproc  # noqa: E402
+
 warnings.filterwarnings("ignore")
 
 _hasher = None
@@ -112,7 +116,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("endpoints", type=Path, help="endpoints_<tag>.extxyz")
     parser.add_argument("--out", type=Path, required=True, help="destination TSV")
-    parser.add_argument("--nproc", type=int, default=28)
+    parser.add_argument("--nproc", type=int, default=default_nproc())
     parser.add_argument("--chunk", type=int, default=64)
     args = parser.parse_args()
 

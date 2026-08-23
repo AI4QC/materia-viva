@@ -32,6 +32,10 @@ import time
 import warnings
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.properties.base import default_nproc  # noqa: E402
+
 warnings.filterwarnings("ignore")
 csv.field_size_limit(10 ** 8)
 
@@ -196,7 +200,7 @@ def main() -> int:
         help="directory holding local_hashes_{train,val}.tsv",
     )
     parser.add_argument("--tags", nargs="+", default=["open", "spin"])
-    parser.add_argument("--nproc", type=int, default=28)
+    parser.add_argument("--nproc", type=int, default=default_nproc())
     parser.add_argument(
         "--dry-run",
         action="store_true",

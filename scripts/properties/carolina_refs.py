@@ -10,6 +10,7 @@ structures and no properties are added — provenance only.
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import pickle
@@ -26,6 +27,8 @@ warnings.filterwarnings("ignore")
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "backend"))
+
+from scripts.properties.base import default_nproc  # noqa: E402
 
 # Defaults to the legacy-data symlink documented in docs/storage-layout.md.
 LMDB_PATH = os.environ.get("MV_CAROLINA_LMDB") or str(
@@ -76,6 +79,9 @@ def _iter_lmdb():
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--nproc", type=int, default=default_nproc())
+    args = parser.parse_args()
     started = time.time()
     from scripts.properties.load import connect, migrate, _source_def
 
@@ -97,7 +103,7 @@ def main() -> int:
         db.commit()
         ref_batch.clear()
 
-    with Pool(26, initializer=_init) as pool:
+    with Pool(args.nproc, initializer=_init) as pool:
         for key, hashed in pool.imap_unordered(_work, _iter_lmdb(), chunksize=64):
             counters["done"] += 1
             if hashed.startswith("FAIL:"):

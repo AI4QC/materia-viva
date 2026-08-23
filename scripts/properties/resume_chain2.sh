@@ -4,6 +4,8 @@
 set -u
 cd "$(dirname "$0")/../.."
 P="${MV_PYTHON:-$(command -v python3)}"
+#: unset -> each script picks a worker count from this machine's cores
+NPROC="${MV_NPROC:+--nproc $MV_NPROC}"
 LOGS=data/props_work/_logs
 OUT="${MV_OUT:-data/props_work/_out}"
 mkdir -p "$LOGS" "$OUT"
@@ -51,7 +53,7 @@ print('re-run markers cleared')
 PYEOF
 
 run_sources () {
-  $P scripts/properties/run_all.py --sources $1 --nproc 26 >> "$LOGS/driver-batch2.log" 2>&1
+  $P scripts/properties/run_all.py --sources $1 $NPROC >> "$LOGS/driver-batch2.log" 2>&1
 }
 
 run_sources "$RERUN" \

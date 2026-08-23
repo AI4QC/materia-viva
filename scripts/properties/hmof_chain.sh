@@ -17,6 +17,8 @@
 set -u
 cd "$(dirname "$0")/../.."
 P="${MV_PYTHON:-$(command -v python3)}"
+#: unset -> each script picks a worker count from this machine's cores
+NPROC="${MV_NPROC:+--nproc $MV_NPROC}"
 LOGS=data/props_work/_logs
 OUT="${MV_OUT:-data/props_work/_out}"
 mkdir -p "$LOGS" "$OUT"
@@ -27,11 +29,11 @@ while pgrep -f "fix_framework_hash_refs.sh|load_new_extractors.sh|repair_and_ver
   sleep 30
 done
 
-$P scripts/properties/pipeline.py hmof --stage adapt --nproc 20 \
+$P scripts/properties/pipeline.py hmof --stage adapt $NPROC \
     >> "$LOGS/hmof-chain.log" 2>&1 || {
   echo "hmof: adapt failed" >> "$LOGS/chain.log"; exit 1; }
 
-$P scripts/properties/pipeline.py hmof --stage hash --nproc 20 \
+$P scripts/properties/pipeline.py hmof --stage hash $NPROC \
     >> "$LOGS/hmof-chain.log" 2>&1 || {
   echo "hmof: hash failed" >> "$LOGS/chain.log"; exit 1; }
 

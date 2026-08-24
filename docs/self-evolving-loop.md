@@ -187,7 +187,7 @@ unchecked, several agents only produce more confident wrong answers faster.
 #### How it runs
 
 - **The harness is Claude Code subagents**, not a framework of our own. The three roles are defined
-  in [`.claude/agents/`](../.claude/agents/), in that harness's own format. The repository already
+  in [`docs/agents/`](agents/), in that harness's own format. The repository already
   carries `.claude/CLAUDE.md` and `.mcp.json`, so an agent inherits this project's conventions for
   free, and the web search discovery needs comes with the harness. Building an API loop instead
   means rebuilding tool use, retries and sandboxing for a research dataset maintained by two people.
@@ -304,7 +304,7 @@ and `state` answers that:
 
 ### 1.6 What the expert is handed
 
-The packet is assembled by [`gate-audit`](../.claude/agents/gate-audit.md), the one role whose
+The packet is assembled by [`reviewer`](agents/reviewer.md), the one role whose
 output is a judgement for a person to read rather than a catalog diff, so it does not pass through
 the gate. Its anchor is that every precedent it cites must resolve to a real catalog entry, which it
 checks itself; fact and judgement are listed separately; and **a recommendation must carry what
@@ -368,7 +368,7 @@ fields, the self-check command, and the report sections that actually produced v
 existed only in one conversation's history, so **nobody could reproduce a run** — a larger loss than
 guessing wrong would have been.
 
-So the three exercised roles are now defined in [`.claude/agents/`](../.claude/agents/), in the
+So the three exercised roles are now defined in [`docs/agents/`](agents/), in the
 harness's own format, which makes them executable, diffable and reproducible. What is still not
 done:
 

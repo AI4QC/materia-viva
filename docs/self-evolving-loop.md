@@ -98,6 +98,7 @@ Three kinds of actor, and confusing them is the easiest mistake this design invi
 | [4] adapter review and registration | **human** | looks only at the three things no automatic check can settle, section 5 |
 | [5] [6] unify, deduplicate, verify | script | a deterministic pipeline |
 | [7] publication approval | **human** | a promise made to the outside |
+| preparing for any of the four gates | **agent** | assembles the machine results, the section 1.6 checklist and the catalog's precedents for the same question, and recommends — **it does not decide**, see below |
 
 ### 1.2 The containment rule: an agent may propose anything, and nothing enters on its word
 
@@ -303,7 +304,19 @@ and `state` answers that:
 
 ### 1.6 What the expert is handed
 
-Not a transcript. **A diff and a fixed checklist.** The checklist was not invented; every line of it
+The packet is assembled by [`gate-audit`](../.claude/agents/gate-audit.md), the one role whose
+output is a judgement for a person to read rather than a catalog diff, so it does not pass through
+the gate. Its anchor is that every precedent it cites must resolve to a real catalog entry, which it
+checks itself; fact and judgement are listed separately; and **a recommendation must carry what
+would change it** — advice without that is a decision taken on someone else's behalf.
+
+**This role is not split into a pair.** Section 1.3 splits only where objectives conflict, and an
+assembler has no opposing objective; the adversarial step already happened upstream, between
+discovery and refutation. It also **has no web tools**: attacking a candidate's claims is the
+refuter's job, and repeating it here would double the requests made of other people's servers for
+one answer.
+
+What the expert gets is not a transcript. **A diff and a fixed checklist.** The checklist was not invented; every line of it
 corresponds to a real entry in the catalog, and all five are things an expert catches and an agent
 does not:
 

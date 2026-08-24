@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import time
@@ -56,6 +57,18 @@ def default_data_root(repo_root: Path | None = None) -> Path:
     repository = Path(repo_root).resolve() if repo_root is not None else REPOSITORY_ROOT
     root = Path(override).expanduser() if override else repository / "data"
     return root.resolve()
+
+
+def normalise_licence(value: Any) -> str:
+    """Compare licences by content, not punctuation.
+
+    Upstream says `cc-by-4.0` where the catalog says `CC BY 4.0`. Two tools ask
+    whether a licence changed — the upgrade planner and the snapshot report — and
+    they have to agree, so the comparison lives with the catalog they both read.
+    """
+    if isinstance(value, dict):
+        value = value.get("id") or value.get("name") or ""
+    return re.sub(r"[^a-z0-9]", "", str(value or "").lower())
 
 
 def load_catalog(path: Path) -> dict[str, Any]:

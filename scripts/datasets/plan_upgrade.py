@@ -21,19 +21,20 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
 from typing import Any
-from urllib.error import HTTPError
 from urllib.parse import urlparse
 
-from scripts.datasets.acquire import default_data_root, load_catalog
+from scripts.datasets.acquire import default_data_root, load_catalog, normalise_licence
 from scripts.datasets.probe_upstream import (
     DEFAULT_CATALOG,
     Probe,
-    _PolitePoller,
+    PolitePoller,
     plan_probes,
 )
+# the gate owns "does this proposed download resolve, and is it the size claimed";
+# deriving a plan and vetting one must not grow two answers to that
+from scripts.datasets.verify_plan import check_urls
 
 DERIVABLE_KINDS = {"invenio-latest", "figshare-article"}
 
@@ -41,17 +42,6 @@ DERIVABLE_KINDS = {"invenio-latest", "figshare-article"}
 def _basename(path: str) -> str:
     """A recorded filename may be a local path; upstream knows only the name."""
     return path.rsplit("/", 1)[-1]
-
-
-def _normalise_licence(value: Any) -> str:
-    """Compare licences by content, not by punctuation.
-
-    Upstream says `cc-by-4.0` where the catalog says `CC BY 4.0`; a plain string
-    comparison would report every source as changed.
-    """
-    if isinstance(value, dict):
-        value = value.get("id") or value.get("name") or value.get("value") or ""
-    return re.sub(r"[^a-z0-9]", "", str(value).lower())
 
 
 def upstream_licence(payload: dict[str, Any]) -> Any:
@@ -72,7 +62,7 @@ def upstream_files(probe: Probe, payload: dict[str, Any]) -> list[dict[str, Any]
     # invenio: zenodo answers with a list, InvenioRDM with a keyed dict, and the
     # record id in the reply is the new one we must build URLs against
     record_id = payload.get("id")
-    host = urlparse(probe.endpoint or "").netloc
+    host = urlparse(probe.endpoint).netloc
     raw = payload.get("files") or []
     if isinstance(raw, dict):  # InvenioRDM keys its files by name
         entries = list((raw.get("entries") or {}).values())
@@ -121,7 +111,7 @@ def route_for(kept: list[str], recorded: list[str]) -> str:
     return "restructured"
 
 
-def derive(source: dict[str, Any], probe: Probe, poller: _PolitePoller) -> dict[str, Any]:
+def derive(source: dict[str, Any], probe: Probe, poller: PolitePoller) -> dict[str, Any]:
     result: dict[str, Any] = {"kind": probe.kind}
     if probe.kind not in DERIVABLE_KINDS:
         # hf, git and plain HEAD sources keep their URLs; a new version arrives
@@ -159,7 +149,7 @@ def derive(source: dict[str, Any], probe: Probe, poller: _PolitePoller) -> dict[
             upstream.get("id") or upstream.get("name")
         ),
         "verdict": "same"
-        if _normalise_licence(catalogued) == _normalise_licence(upstream)
+        if normalise_licence(catalogued) == normalise_licence(upstream)
         else "differs-return-to-the-licence-gate",
     }
 
@@ -171,27 +161,6 @@ def derive(source: dict[str, Any], probe: Probe, poller: _PolitePoller) -> dict[
     if stale_paths:
         result["local_paths_name_the_old_record"] = stale_paths
     return result
-
-
-def verify(proposed: list[dict[str, Any]], poller: _PolitePoller) -> list[dict[str, Any]]:
-    """HEAD each URL we constructed: does it resolve, and is it the size claimed."""
-    checks = []
-    for item in proposed:
-        entry: dict[str, Any] = {"filename": item["filename"]}
-        try:
-            headers = poller.head(item["url"])
-            length = headers.get("content-length")
-            entry["status"] = "ok"
-            entry["content_length"] = int(length) if length else None
-            if entry["content_length"] and item["bytes"]:
-                entry["matches_upstream_size"] = entry["content_length"] == item["bytes"]
-        except HTTPError as error:
-            # figshare's ndownloader refuses HEAD; the article API is the authority
-            entry["status"] = f"http-{error.code}"
-        except Exception as error:
-            entry["status"] = f"{type(error).__name__}: {error}"
-        checks.append(entry)
-    return checks
 
 
 def lagging_sources(probe_file: Path) -> list[str]:
@@ -218,12 +187,12 @@ def main(argv: list[str] | None = None) -> int:
     if unknown:
         parser.error(f"unknown source id(s): {', '.join(unknown)}")
 
-    poller = _PolitePoller()
+    poller = PolitePoller()
     report: dict[str, Any] = {}
     for source_id in wanted:
         plan = derive(sources[source_id], probes[source_id], poller)
         if plan.get("proposed_downloads"):
-            plan["head_checks"] = verify(plan["proposed_downloads"], poller)
+            plan["head_checks"] = check_urls(plan["proposed_downloads"], poller)
         report[source_id] = plan
 
         print(f"\n{source_id}  [{plan['kind']}]  route = {plan['route']}")
@@ -247,8 +216,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  ⚠️  本地路径里写着旧 record id，需人工决定是否改: "
                   f"{plan['local_paths_name_the_old_record']}")
         for check in plan.get("head_checks", []):
-            if check["status"] != "ok" or check.get("matches_upstream_size") is False:
-                print(f"  ⚠️  {check['filename']}: {check}")
+            if check["verdict"] != "ok":
+                print(f"  ⚠️  {check['filename']}: {check['verdict']}")
 
     out = data_root / "probe" / "upgrades.json"
     out.parent.mkdir(parents=True, exist_ok=True)

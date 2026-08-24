@@ -1,5 +1,5 @@
+from scripts.datasets.acquire import normalise_licence
 from scripts.datasets.plan_upgrade import (
-    _normalise_licence,
     derive,
     recorded_for,
     route_for,
@@ -30,10 +30,10 @@ def test_route_follows_how_much_of_the_recorded_list_survives():
 
 def test_licences_compare_by_content_not_punctuation():
     # upstream says cc-by-4.0 where the catalog says CC BY 4.0
-    assert _normalise_licence("CC BY 4.0") == _normalise_licence("cc-by-4.0")
-    assert _normalise_licence("CC BY-NC 4.0") == _normalise_licence({"id": "cc-by-nc-4.0"})
+    assert normalise_licence("CC BY 4.0") == normalise_licence("cc-by-4.0")
+    assert normalise_licence("CC BY-NC 4.0") == normalise_licence({"id": "cc-by-nc-4.0"})
     # but a genuinely different licence must still differ
-    assert _normalise_licence("CC BY 4.0") != _normalise_licence("cc-by-nc-4.0")
+    assert normalise_licence("CC BY 4.0") != normalise_licence("cc-by-nc-4.0")
 
 
 def test_only_the_probed_hosts_files_are_compared():

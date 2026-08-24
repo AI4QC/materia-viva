@@ -157,7 +157,7 @@ def plan_probes(catalog: dict[str, Any]) -> dict[str, Probe]:
     return {source["id"]: plan_probe(source) for source in catalog["sources"]}
 
 
-class _PolitePoller:
+class PolitePoller:
     """One request at a time, at most one per host per HOST_DELAY_SECONDS."""
 
     def __init__(self, delay: float = HOST_DELAY_SECONDS) -> None:
@@ -195,7 +195,7 @@ def _seen_invenio(probe: Probe, payload: Any) -> tuple[str, dict[str, Any]]:
     return seen, extra
 
 
-def run_probe(probe: Probe, poller: _PolitePoller) -> dict[str, Any]:
+def run_probe(probe: Probe, poller: PolitePoller) -> dict[str, Any]:
     """Resolve one probe. Failures are recorded, never retried, never raised."""
     result: dict[str, Any] = {"kind": probe.kind, "checked_at": date.today().isoformat()}
     if probe.note:
@@ -325,7 +325,7 @@ def main(argv: list[str] | None = None) -> int:
     if out_path.exists():
         previous = json.loads(out_path.read_text(encoding="utf-8"))
 
-    poller = _PolitePoller()
+    poller = PolitePoller()
     results: dict[str, Any] = {}
     for source_id, probe in sorted(probes.items()):
         results[source_id] = run_probe(probe, poller)

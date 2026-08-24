@@ -19,22 +19,18 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sqlite3
 from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any
 
+from scripts.datasets.acquire import normalise_licence
 from scripts.properties.hashing import MAX_PRIMITIVE_SITES, MAX_SITES
 from scripts.properties.load import FINGERPRINT_UNRELIABLE
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INDEX = PROJECT_ROOT / "data" / "index" / "materials.sqlite"
 DEFAULT_CATALOG = PROJECT_ROOT / "scripts" / "datasets" / "sources.json"
-
-
-def _normalise_licence(value: Any) -> str:
-    return re.sub(r"[^a-z0-9]", "", str(value or "").lower())
 
 
 def fingerprint_identity() -> dict[str, Any]:
@@ -157,7 +153,7 @@ def diff_snapshots(before: dict[str, Any], after: dict[str, Any]) -> dict[str, A
                     "property_rows": now["property_rows"] - was["property_rows"],
                 }
             )
-        if _normalise_licence(was["licence_in_index"]) != _normalise_licence(
+        if normalise_licence(was["licence_in_index"]) != normalise_licence(
             now["licence_in_index"]
         ):
             report["licence_changes"].append(

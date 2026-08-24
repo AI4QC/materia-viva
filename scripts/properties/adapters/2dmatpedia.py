@@ -53,8 +53,7 @@ class TwoDMatPediaAdapter(SourceAdapter):
             if magnetization is not None:
                 properties.append(
                     PropertyValue(
-                        "total_magnetization", magnetization, "μB",
-                        f"{METHOD} per cell",
+                        "total_magnetization", magnetization, "μB/cell", METHOD
                     )
                 )
             energy = safe_float(row.get("energy_per_atom"))

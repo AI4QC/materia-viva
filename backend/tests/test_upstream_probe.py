@@ -71,7 +71,9 @@ def test_probeable_share_of_the_catalog_is_reported_honestly():
     probeable = [p for p in plans.values() if p.kind != "manual"]
     # automated detection covers a minority of the catalog by design; this guards
     # against a regex regression silently shrinking the covered set
-    assert len(probeable) >= 40
+    # 38, not 40: the two hand-recorded figshare article ids that lifted this to
+    # 40 were catalog data and went back with the rest of the data changes
+    assert len(probeable) >= 38
     assert len(probeable) < len(plans) / 2
 
 
@@ -253,19 +255,9 @@ def test_a_recorded_article_id_beats_the_official_url():
     assert probe.kind == "figshare-article"
     assert probe.endpoint.endswith("/25403968")
 
-    # the two recorded ids were each proved by checking that the article lists
-    # the file id the catalog already held; a typo here would silently monitor
-    # someone else's dataset, so the proved values are pinned
-    catalogued = {
-        s["id"]: s["figshare_article"]
-        for s in load_catalog(CATALOG)["sources"]
-        if "figshare_article" in s
-    }
-    assert catalogued == {"jarvis-dft": 6815699, "hex-high-pressure": 25403968}
-
-    # and without the recorded id, a collection URL is not mistaken for an article
-    del source["figshare_article"]
-    assert plan_probe(source).kind == "manual"
+    # the mechanism stays and is worth testing; what went away with the data
+    # changes is any catalogued source that uses it
+    assert {s["id"] for s in load_catalog(CATALOG)["sources"] if "figshare_article" in s} == set()
 
 
 def test_a_figshare_article_reports_its_version_as_the_token():

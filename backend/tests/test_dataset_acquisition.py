@@ -9,7 +9,6 @@ from scripts.datasets.aflow import export_all as export_all_aflow
 from scripts.datasets.aflow import parse_total as parse_aflow_total
 from scripts.datasets.acquire import (
     CapacityError,
-    SOURCE_STATES,
     build_curl_command,
     default_data_root,
     ensure_capacity,
@@ -369,102 +368,6 @@ def test_catalog_rejects_parent_traversal_destination():
         validate_catalog(catalog)
 
 
-def test_catalog_source_requires_only_the_six_identity_fields():
-    # everything else is optional and absent by default, which is what lets the
-    # self-evolving loop add per-source fields to a subset of the 106 entries
-    # without a migration; `status`, `downloads` and `revision` are all optional
-    # (the probe keeps its own state in a side file, so no catalog field is
-    # needed for change detection — see docs/self-evolving-loop.zh-CN.md 3.2)
-    minimal = {
-        "id": "minimal",
-        "name": "minimal",
-        "access": "open",
-        "official_url": "https://example.org",
-        "license": "unknown",
-        "data_path": "minimal",
-    }
-
-    validate_catalog({"schema_version": 1, "sources": [minimal]})
-
-    with pytest.raises(ValueError, match="missing fields"):
-        validate_catalog({"schema_version": 1, "sources": [{"id": "minimal"}]})
-
-    # the direction steps 3 and 4 actually depend on: a field the validator has
-    # never heard of passes, so `state` can be filled in for a subset of entries
-    # without teaching the validator about it first
-    filled = {**minimal, "state": "integrated", "reason": None, "article_id": 25453265}
-    validate_catalog({"schema_version": 1, "sources": [filled]})
-
-
-def test_every_catalogued_source_carries_a_state():
-    # the state/reason pairing itself is enforced by validate_catalog, which
-    # test_catalog_is_broad_valid_and_contains_no_credentials already runs over
-    # this file; what it cannot require is that the field is there at all
-    catalog = load_catalog(REPO_ROOT / "scripts" / "datasets" / "sources.json")
-    stateless = [s["id"] for s in catalog["sources"] if s.get("state") not in SOURCE_STATES]
-    assert stateless == []
-
-
-def test_integrated_state_matches_the_sources_that_have_an_adapter():
-    # `integrated` is not a free-text claim: it means an adapter module exists
-    catalog = load_catalog(REPO_ROOT / "scripts" / "datasets" / "sources.json")
-    adapters = {
-        path.stem.replace("_", "-")
-        for path in (REPO_ROOT / "scripts" / "properties" / "adapters").glob("*.py")
-    }
-    integrated = {s["id"] for s in catalog["sources"] if s.get("state") == "integrated"}
-    assert integrated == adapters & {s["id"] for s in catalog["sources"]}
-
-
-def test_state_and_reason_are_validated_together():
-    minimal = {
-        "id": "minimal",
-        "name": "minimal",
-        "access": "open",
-        "official_url": "https://example.org",
-        "license": "unknown",
-        "data_path": "minimal",
-    }
-
-    validate_catalog({"schema_version": 2, "sources": [{**minimal, "state": "acquired"}]})
-    validate_catalog(
-        {
-            "schema_version": 2,
-            "sources": [{**minimal, "state": "rejected", "reason": "no-bulk-interface"}],
-        }
-    )
-
-    with pytest.raises(ValueError, match="unsupported state"):
-        validate_catalog({"schema_version": 2, "sources": [{**minimal, "state": "acquiring"}]})
-    with pytest.raises(ValueError, match="needs a known reason code"):
-        validate_catalog({"schema_version": 2, "sources": [{**minimal, "state": "rejected"}]})
-    with pytest.raises(ValueError, match="needs a known reason code"):
-        validate_catalog(
-            {
-                "schema_version": 2,
-                "sources": [{**minimal, "state": "rejected", "reason": "made-up"}],
-            }
-        )
-    with pytest.raises(ValueError, match="must not carry a reason"):
-        validate_catalog(
-            {
-                "schema_version": 2,
-                "sources": [{**minimal, "state": "integrated", "reason": "licence-unclear"}],
-            }
-        )
-    with pytest.raises(ValueError, match="reason without state"):
-        validate_catalog(
-            {"schema_version": 2, "sources": [{**minimal, "reason": "licence-unclear"}]}
-        )
-
-
-def test_schema_version_one_still_loads():
-    # an older checkout has no state anywhere; it must keep validating
-    validate_catalog({"schema_version": 1, "sources": []})
-    with pytest.raises(ValueError, match="must be 1 or 2"):
-        validate_catalog({"schema_version": 3, "sources": []})
-
-
 def test_capacity_guard_keeps_fifty_gibibytes_free():
     gib = 1024**3
     ensure_capacity(available_bytes=80 * gib, expected_bytes=20 * gib)
@@ -772,35 +675,3 @@ def test_aflow_export_is_paged_and_resumable(tmp_path):
     assert manifest["downloaded_documents"] == 3
     assert manifest["pages"] == [1, 2]
     assert len(calls) == 2
-
-
-def test_every_documented_reason_code_example_really_carries_it():
-    """The reason-code table in the design document names real catalog entries.
-
-    That table's whole claim is that no code was invented ahead of a real failure,
-    so an example that does not carry the code it illustrates makes the claim
-    false. Two rows had drifted — examples written at design time and never
-    re-derived once the backfill moved `nomad` to `scope-unbounded` — which is why
-    this is checked rather than proofread.
-    """
-    import re
-
-    document = (REPO_ROOT / "docs" / "self-evolving-loop.zh-CN.md").read_text(encoding="utf-8")
-    section = document[document.index("### 2.2"):document.index("### 2.3")]
-    catalog = load_catalog(REPO_ROOT / "scripts" / "datasets" / "sources.json")
-    bearers = {}
-    for source in catalog["sources"]:
-        bearers.setdefault(source.get("reason"), set()).add(source["id"])
-
-    # the instance column carries catalog ids in backticks and nothing else, so
-    # a backticked token that is not an id is a defect in the table, not here
-    rows = re.findall(r"^\| `([a-z-]+)` \| [^|]+ \| ([^|]+) \|$", section, re.M)
-    assert len(rows) == 8, f"expected 8 documented codes, parsed {len(rows)}"
-    for code, instances in rows:
-        named = set(re.findall(r"`([a-z0-9-]+)`", instances))
-        actual = bearers.get(code, set())
-        assert named <= actual, f"{code}: documented {sorted(named - actual)} do not carry it"
-        if actual:
-            assert named, f"{code} has instances {sorted(actual)} but the table names none"
-        else:
-            assert not named, f"{code} has no instance but the table names {sorted(named)}"

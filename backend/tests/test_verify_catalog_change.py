@@ -30,7 +30,7 @@ class _StubPoller:
 
 
 def _catalog(*sources):
-    return {"schema_version": 2, "sources": list(sources)}
+    return {"schema_version": 1, "sources": list(sources)}
 
 
 def _source(sid="cod", downloads=(), **extra):

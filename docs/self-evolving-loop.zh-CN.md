@@ -8,9 +8,19 @@
 目标设计。它是设计文档，不是现状描述。
 
 > [!IMPORTANT]
-> 自动发现和自动整合**尚未实现**。当前 106 个来源全部由人工发现和审核，再由
-> [`scripts/datasets/acquire.py`](../scripts/datasets/acquire.py) 等可恢复采集脚本接入，其中 54
-> 个已整合进索引。下文全部按「计划」阅读，标注「已实现」的除外。
+> **本文件是设计，不是现状。** 仓库里实际存在的只有两件东西：
+>
+> | 已落地 | 是什么 |
+> |---|---|
+> | [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py) | 只读上游变更探测，覆盖 106 个来源中的 38 个 |
+> | [`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py) | agent 产出（候选 / 拉取计划）的闸门 |
+>
+> 其余全部是计划，包括拉取计划推导、golden sample 框架、准入重叠测量、快照与变更报告，以及
+> 目录里的 `state` / `reason` 字段。**自动发现和自动整合尚未实现**，106 个来源全部由人工发现审核。
+>
+> 文中提到的一些数字与结论来自曾经跑过的实验（探测全量、目录回填、单位审计、两次 agent 真实运行），
+> 那些**发现**是真的并保留在此，但**它们的实现已被撤回**——本文件不为一个不存在的东西声称已实现。
+> 见文末「已验证但未落地的发现」。
 >
 > 标注 **（待定）** 的是本文件提出的建议值，不是已经拍下的决定。
 
@@ -71,7 +81,7 @@ README 的线性七步改成带失败出口的形态。`✋` 标记人工闸门�
 | 步骤 | 执行者 | 为什么是它 |
 |---|---|---|
 | [0] 发现候选新来源 | **agent** | 需要读文献、读网页、判断"这是不是一个晶体结构数据库"；脚本无法发现目录外的东西 |
-| [1] 探测上游版本 | 脚本 | 纯确定性比较，已实现（`probe_upstream.py`） |
+| [1] 探测上游版本 | 脚本 | 纯确定性比较，**已落地**（`probe_upstream.py`，38/106） |
 | [2] 许可判定 | **人** | 法律判断，且错了不可逆（数据一旦发布收不回） |
 | [2.5] 产出拉取计划 | **agent** | 读上游文档判断"下载哪些文件、放哪里"；这是历史上最大的人工瓶颈，24 个采集脚本里约 22 个是为单个来源手写的 |
 | [3] 起草采集与字段映射适配器 | **agent** | 读上游文档与样本、写映射代码，正是它擅长的 |
@@ -251,8 +261,8 @@ agent 不自己拉数据，它产出计划，由 `acquire.py` 执行。
 
 | 数据契约 | 它的验证器 | 今天对人有用吗 |
 |---|---|---|
-| `downloads[]` + `data_path` | `validate_catalog` + 逐 URL HEAD + `ensure_capacity` | 有：人手写的拉取计划走同一道检查（已实现） |
-| 候选来源条目 | `official_url` 解析 + 撞名/撞主机去重 + `validate_catalog` + 可探测性 | 有：人添一个新来源时同样该过（已实现） |
+| `downloads[]` + `data_path` | `validate_catalog` + 逐 URL HEAD + `ensure_capacity` | 有：人手写的拉取计划走同一道检查（**已落地**） |
+| 候选来源条目 | `official_url` 解析 + 撞名/撞主机去重 + `validate_catalog` + 可探测性 | 有：人添一个新来源时同样该过（**已落地**） |
 | 适配器 + golden sample | 零 diff 回归 | **有，而且最急**：55 个适配器目前零测试覆盖 |
 
 验证器一旦存在，agent 接进来就只是"换一个生产者"，契约与闸门一行都不用改。这才是"空间"的实体。
@@ -275,9 +285,8 @@ agent 不自己拉数据，它产出计划，由 `acquire.py` 执行。
 | `arc-mof` | 23/24 在，`ARCMOF_20220610.tar.gz` 消失，新版本共 25 个文件 | **机械推导 + 标出 delta**：专家只回答"消失的那个和新增的那些怎么办"。零 agent |
 | `core-mof` | **0/2**，v1.1.3 的两个 csv 在 v2.0.1 里一个都不在，新版本是 9 个完全不同的文件 | **上游重构**：必须有人判断 9 个新文件里哪些对应我们原来取的东西。这才是 MAS 或专家该上的地方 |
 
-这套分流已实现：[`scripts/datasets/plan_upgrade.py`](../scripts/datasets/plan_upgrade.py)。它按 kind 取
-上游最新版本的文件清单、算重叠度、产出可直接粘进 `downloads[]` 的计划，并逐 URL HEAD 核对存在性与
-content-length。**它不写目录**——产出是一份待审的提案。
+这套分流**尚未实现**。它需要的东西是确定的:按 kind 取上游最新版本的文件清单、算重叠度、产出可直接
+粘进 `downloads[]` 的计划、逐 URL HEAD 核对。它必须不写目录——产出是一份待审的提案。
 
 由此得到三条路由，按重叠度自动分流：
 
@@ -309,7 +318,7 @@ figshare 的 API 都返回许可字段，所以这一项可以机器比对——
 
 | 活动 | 周期 | 执行者 | 覆盖 |
 |---|---|---|---|
-| 探测已有来源有没有新版本 | 每来源，周到月量级 | 脚本，确定性 | 40 个（已实现） |
+| 探测已有来源有没有新版本 | 每来源，周到月量级 | 脚本，确定性 | 38 个（已落地） |
 | 搜索目录里没有的新数据集 | 每周或每月一次全局扫 | **agent** | 整个互联网 |
 | 判定 66 个探测不到的来源变没变 | 随上一条同批 | **agent** | 66 个（第 1.7 节） |
 
@@ -323,10 +332,9 @@ N / 候选总数 M」**。
 
 这正是第 1.2 节要的那种检查——**一个 agent 编不出来的数**。所以准入批准的依据是测量，不是叙述。
 
-已实现：[`scripts/properties/measure_overlap.py`](../scripts/properties/measure_overlap.py)。它读
-`scripts/properties/hashing.py` 已有的指纹输出（`native_id / n_sites / formula / bawl_hash`，失败记为
-`FAIL:<reason>`），因此**不重实现指纹协议**；池子一侧以只读方式打开
-`data/props_work/match_map.sqlite` 的 `hash_map`。产出正是下面那四行测量，例如：
+**尚未实现。** 它该长什么样是确定的:读 `scripts/properties/hashing.py` 已有的指纹输出
+（`native_id / n_sites / formula / bawl_hash`，失败记为 `FAIL:<reason>`），因此**不重实现指纹协议**；
+池子一侧以只读方式打开 `data/props_work/match_map.sqlite` 的 `hash_map`。产出是下面那四行测量，例如：
 
 ```text
 读入 340 行，解析失败 15 (0.0441)
@@ -506,9 +514,9 @@ Hugging Face 提交 SHA `9de9010715da4f563326f99bf3f7ee829cf4486a`。
 - `state` / `reason`（第 2.1、2.2 节）——第 3 步，其中 21 条需要人工判断；
 - figshare article id（第 3.3 节）——第 4 步，14 条人工补录。
 
-`schema_version` 的跳升因此不属于第 2 步，而是跟着第 3 步真正加字段的那个提交走：现在是 **2**，
-新增的是可选的 `state` / `reason` 对，version 1 的旧文件照样加载（每条没有 `state` 的记录读作
-`registered`）。
+`schema_version` 的跳升不属于第 2 步，而该跟着真正加字段的那个提交走。目录目前仍是 **1**，`state` /
+`reason` 尚未落地；真加的时候，新字段必须可选，version 1 的旧文件照样加载（每条没有 `state` 的记录
+读作 `registered`）。
 
 不加的字段及理由（原样保留，均已被数据印证）：
 
@@ -547,13 +555,13 @@ URL、`rruff` 16 个、`mofx-db` 6 个，对它们而言这是**局部覆盖**�
 
 两条直接结论：
 
-- **40 个来源可探测**（invenio-latest 13、http-head 11、figshare-article 9、git-commit 5、
-  hf-revision 2）。其中 38 个的上游标识可从现有 URL 提取，2 个是查出来记进目录的。这一步**已实现**：
+- **38 个来源可探测**（invenio-latest 13、http-head 12、figshare-article 7、git-commit 4、
+  hf-revision 2），上游标识全部可从现有 URL 提取。这一步**已落地**：
   [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py)，结果写
   `<data root>/probe/seen.json`；
-- **figshare 那 14 个来源里 9 个已解决**（第 4 步）：7 个的 article id 本来就在 `official_url` 里，
-  按第 3.2 节的规则不入目录、由 `plan_probe` 提取；另 2 个（`jarvis-dft`、`hex-high-pressure`）查出
-  来才知道，属于人工知识，记为目录字段 `figshare_article`。剩 5 个仍未解，见第 7 节第 4 步。
+- **figshare 那 14 个来源里 7 个的 article id 本来就在 `official_url` 里**，按第 3.2 节的规则不入目录、
+  由 `plan_probe` 提取。另有 2 个（`jarvis-dft`、`hex-high-pressure`）经查证可解出，但那是目录数据，
+  随其余数据改动一并撤回，所以现在仍算未解——机制在代码里，`figshare_article` 字段目前无人使用。
 
 ### 3.4 硬约束：必须是纯增量改动
 
@@ -608,7 +616,7 @@ EOCD 拿到中央目录的偏移与大小（10.27 MB，占归档 **0.73%**），
    的样子，那时零 diff 只证明它自我一致。所以起草与期望输出由两个 agent 分别读同一份上游文档产出，
    后者看不到前者的代码（第 1.3 节）。
 
-   已实现：[`scripts/properties/golden.py`](../scripts/properties/golden.py)。样本放在
+   **尚未实现。** 设计是:样本放在
    `backend/tests/golden/<source_key>/`，`raw/` 是微型原始输入、`expected.json` 是期望记录，
    `pytest` 对目录下每一份样本逐字段比对。每份样本必须声明 `authored_by`：
 
@@ -695,8 +703,7 @@ site 上限，以及**两份互不相同的例外清单**——它们都属于�
 
 ### 6.5 快照元数据与变更报告
 
-已实现：[`scripts/snapshot_meta.py`](../scripts/snapshot_meta.py)。`describe` 从索引产出快照元数据，
-`--diff` 拿两份元数据产出变更报告。
+**尚未实现。** 设计是:一个 `describe` 从索引产出快照元数据，一个 `--diff` 拿两份元数据产出变更报告。
 
 每个快照携带：索引 schema 版本、第 6.3 节的指纹算法（版本 + 两个 site 上限 + 两份例外清单）、逐来源的
 许可，以及逐来源的 `(source_id, seen, checked_at)`。有了最后一项，任一快照才能回溯到确切的上游版本
@@ -711,101 +718,67 @@ site 上限，以及**两份互不相同的例外清单**——它们都属于�
 
 ## 7. 实现顺序
 
-原则：**先用只读探测产出真实数据，再让数据决定字段长什么样。** 反过来做就是先建抽象再看需求。
+原则：**先用只读探测产出真实数据，再让数据决定字段长什么样；先有验证机制，再有产出它的 agent。**
+反过来做就是先建抽象再看需求，或把 agent 的错误当成数据。
 
-**第 1 步（已实现）：只读探测器，零 schema 改动。**
-[`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py) 从现有
-`downloads[].url` 提取上游标识，覆盖 31 个来源，结果写 `<data root>/probe/seen.json`，**不碰
-`sources.json`、不下载任何数据**。Zenodo 与 Materials Cloud 用
-`api/records/<id>/versions/latest` 一次请求即可知道所记录的 record 是否已被新版本取代。
+### 已落地
 
-首轮全量运行发现 4 个来源的上游已经领先于目录里记录的 record：`arc-mof`、`carolina`、
-`core-mof`（v1.1.3 → v2.0.1）、`topomat`。
-
+**只读探测器**（[`probe_upstream.py`](../scripts/datasets/probe_upstream.py)）。从现有
+`downloads[].url` 提取上游标识，覆盖 38/106，结果写 `<data root>/probe/seen.json`，**不碰
+`sources.json`、不下载任何数据**。Zenodo 与 Materials Cloud 用 `api/records/<id>/versions/latest`
+一次请求即可知道所记录的 record 是否已被新版本取代。
 → 验证：`pytest backend/tests/test_upstream_probe.py`；连跑两次，第二次应全部判定"未变更"。
 
-**第 2 步（已完成）：让第 1 步的输出决定字段形态。**
-结论是**目录一个字段都不加**——探测状态全部派生，旁路文件才是它的家（第 3.2 节）。`schema_version`
-留在 1，只落地一条回归测试：只带六个必填字段的来源必须能通过校验，这是第 3、4 步分批填字段的前提。
-→ 验证：`pytest backend/tests` 全绿。
+**agent 产出的闸门**（[`verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py)）。
+两个碰目录的 agent 角色产出同一种东西——一个分支，其 diff 要么新增来源（候选），要么改动
+`downloads[]`（拉取计划）——所以闸门是同一个，读的是同一份 diff。
+→ 验证：`pytest backend/tests/test_verify_catalog_change.py`。
 
-**第 3 步（已完成）：`state` / `reason` 回填。**
-106 条全部填完。分布：`integrated` 54（= `adapters/` 里有模块的那 54 个，与 README 的数字一致）、
-`rejected(account-required)` 21、`acquired` 15、`rejected(no-bulk-interface)` 7、
-`rejected(scope-unbounded)` 3、`rejected(scope-trajectory)` 3、`rejected(licence-restricted)` 1、
-`rejected(join-key-missing)` 1（Catalysis-Hub）、`registered` 1（Atomly，采集在途）。`schema_version` 升到 2，`validate_catalog` 校验状态与原因码的配对：终态必须
-带已知原因码，非终态不得带原因码，有 `reason` 无 `state` 直接报错。
-→ 验证：`pytest backend/tests`（140 passed）；`status` 文本零改动。
+### 未落地，按"验证机制在不在"排序
 
-其中 5 条需要的是决定而不是规则，为它们新增了一个原因码 `scope-unbounded`，见第 2.2 节。
-
-**第 4 步（已完成）：figshare article id。**
-14 个 figshare 来源里 9 个可探测了，覆盖从 31 升到 40/106。
-
-关键点是 article 的元数据会列出它的 files，所以**每个映射都能用我们记录的 file id 反证，而不是靠
-标题猜**——这是 article id 敢入库的前提。三条来路：
-
-| 来路 | 数量 | 存在哪 |
-|---|---:|---|
-| article id 已在 `official_url` 里 | 7 | 不入库，`plan_probe` 提取（同第 3.2 节规则） |
-| figshare 搜索反查 + file id 验证 | 1 | `jarvis-dft` → `figshare_article: 6815699` |
-| collection 里唯一那篇 article | 1 | `hex-high-pressure` → `figshare_article: 25403968` |
-
-`hex-high-pressure` 的 `official_url` 是 collection（`7119778`），**不是** article（`25403968`）
-——所以 `plan_probe` 只匹配 `/articles/` 路径，绝不匹配 collection，并且记录值优先于 URL 推导。
-
-**未解的 5 个**：`aflow`、`c2db`、`2dmatpedia`、`omdb-organic`（项目主页与 figshare 搜索都没给出
-能被 file id 验证的 article）、`jarvis-specialized-structures`（16 个 file id 分散在多篇 article，
-一条目录记录对多篇文章，单个 `figshare_article` 字段表达不了）。它们保持
-`manual / figshare-article-id-unknown`，等谁手上有确切链接再补一条即可。
-
-→ 验证：`pytest backend/tests`（143 passed）；9 个来源实跑均取到 article version 作为 `seen`。
-
-**第 5 步（部分完成）：golden sample 框架与第 5 节门槛检查。**
-框架、`authored_by` 区分、单位与注册路径检查、首份 `obelix` 样本都已落地
-（[`scripts/properties/golden.py`](../scripts/properties/golden.py)）。**门槛 2（字段覆盖率）仍缺**，
-见第 5 节末。另外 55 个适配器里目前 10 个有基线（`obelix` `amcsd` `omdb-organic` `snumat` `mc2d` `2dmatpedia`
-`c2db` `hex-high-pressure` `novomag` `elementa`），其余 45 个各需一份手写 fixture——这是可以逐个
-推进的存量工作，不阻塞别的步骤。优先做过的那几个是单位修复动过 method 串的三个，因为静态审计只读
-单位、抓不到 method 退化。
-→ 已验证：三种故意破坏（改单位 / 改 `> 0` 守卫 / 改坏正则）全部被报出；恢复后干净。
-
-**第 5.5 步（已完成）：准入的重叠测量。**
-[`scripts/properties/measure_overlap.py`](../scripts/properties/measure_overlap.py)，第 1.10 节。
-纯脚本、零 agent，复用既有指纹协议与 match map。
-→ 验证：9 个测试（含"整个候选池子都已有"这种 `open-materials-db` 形态、以及只读打开 match map 的
-断言）；本机没有真实索引，端到端只在合成 fixture 上跑过，**真实验证要在存数据那台机器上执行**：
-`python scripts/properties/measure_overlap.py --hashes <候选的 hashes.tsv.gz> --source <id>`。
-
-**第 6 步（已完成）：快照元数据与变更报告。**
-[`scripts/snapshot_meta.py`](../scripts/snapshot_meta.py)，第 6.5 节。只读索引，不写任何东西。
-→ 已验证：对本机 slice 索引连出两次，差异为空（它列出 54 个来源，正与第 3 步回填的 `integrated`
-数目吻合）；对人为改动过的快照，报出新增/下线来源、状态与许可变化、逐来源计数差、以及指纹算法变化
-被标为重编号事件。8 个测试用合成索引覆盖，不依赖本机是否有真实数据。
-
-**agent 角色的落地顺序，由"验证机制在不在"决定，不由步骤编号决定。**
-
-规则是同一条：**先有验证机制，再有产出它的 agent**，顺序颠倒等于把 agent 的错误当成数据。按这条
-规则排下来，三个角色分在两侧：
-
-| agent 角色 | 它的验证机制 | 现在能不能做 |
+| 要做的 | 它的验证机制 | 前置 |
 |---|---|---|
-| 拉取计划（[2.5]，产出二） | `validate_catalog` + 逐个 HEAD + `ensure_capacity` + 陈旧散文检查 | **已跑过一次真实案子** |
-| 发现候选来源（[0]） | 第 1.2 节那些检查 + 人工许可闸门，均已存在 | 能 |
-| 起草适配器 / 拉取脚本（[3]、产出三） | golden sample 框架 —— **不存在** | 必须等第 5 步 |
+| 拉取计划推导（第 1.9 节） | 闸门已在 | 无，可直接做 |
+| 目录的 `state` / `reason`（第 2.1、2.2 节） | `validate_catalog` 扩一条配对校验 | 无；其中约 21 条需要人工判断 |
+| 准入的重叠测量（第 1.10 节） | 复用既有指纹协议与 match map | 需要存数据那台机器 |
+| golden sample 框架（第 5 节） | 零 diff 回归 | 无，且 55 个适配器目前零测试覆盖，这一项对人最急 |
+| 快照元数据与变更报告（第 6.5 节） | 同一份索引连出两次应差异为空 | 需要真实索引 |
+| 起草适配器 / 拉取脚本 | golden sample 框架 —— **不存在** | 必须等上面那一项 |
 
-所以先做的是**拉取计划 agent**：它是唯一一个验证机制已经齐备的角色，而且对着历史上最大的人工瓶颈
-（24 个采集脚本里约 22 个为单个来源手写）。发现 agent 可紧随其后，它的损害上限只是"专家白看一条
-候选"。起草类 agent 放最后。
+### agent 角色
 
-**拉取计划 agent 的第一次真实运行（`core-mof` 的 v2.0.1 重构）验证了这套设计的三处：**
+同一条规则：**先有验证机制，再有产出它的 agent。**
 
-- 它产出的是提案而非改动:目录未被触碰，提案写在仓库外，`verify_catalog_change.py` 通过四项机器检查；
-- **它修正了任务前提**:两个 `full_unmodified.csv` 在 v1.1.3 里就有且 size 与 md5 逐字节相同，所以
-  9 个文件里真正新增的只有 7 个。这一条我用 API 独立核实过——正是 §1.2"没有东西凭 agent 的话入库"
-  该起作用的地方，而它这次起作用的方式是**证实**而不是否证；
-- 它自己指出了一个机器检查抓不到的东西（计划被接受后 `status` / `notes` 里的旧 record id 会成为
-  谎言），那件事是可机器检查的，因此现在归机器管（第 1.4 节最后一条检查），并在它自己的计划上触发。
+| agent 角色 | 它的验证机制 | 能不能做 |
+|---|---|---|
+| 拉取计划（[2.5]，产出二） | 闸门已在 | 能 |
+| 发现候选来源（[0]） | 闸门已在（`official_url` 解析、撞名/撞主机去重、`validate_catalog`、可探测性） | 能 |
+| 起草适配器 / 拉取脚本（[3]、产出三） | golden sample 框架 —— 不存在 | 不能 |
 
-它同时列出 7 条"我判断不了"，其中它唯一主动推荐的是:盘上的结构来自 v1.1.3 而新属性表来自 v2.0.1，
-结构与属性是否同源需要专家判断。这类条目按设计只能进闸门排队，不能自动通过。
+## 附录：已验证但未落地的发现
+
+以下都是跑实验时核实过的事实。它们的实现改动已被撤回（属于数据侧，不属于智能体系统），但**问题依然
+存在**，记在这里以免知识随代码一起丢掉。
+
+**`mc2d` 的层间结合能有 1000 倍量级错误。** `scripts/properties/adapters/mc2d.py` 把上游的
+`binding_energy_per_substructure_per_unit_area_*` 原样传出并标 `eV/Å²`，而
+`registry.CANONICAL_PROPERTIES` 声明 `interlayer_binding_energy` 的规范单位是 `meV/Å²`，中间没有 ×1000
+转换。方向由上游数据定：`structure_2d.json` 里 2,865 个值的 median 是 0.0251，按 eV/Å² 读即 25 meV/Å²，
+正是层间结合能该有的量级；按 meV/Å² 读则比范德华力还弱两个数量级。**而且这个错被静默隐藏**：
+`property_defs` 由注册表预先播种、`material_properties` 没有 unit 列，所以适配器给的单位被丢弃，发布
+出去的行标着 `meV/Å²`、装的是 eV/Å² 的数。修法与 `2dmatpedia` 处理 exfoliation 同型（`* 1000.0`）。
+
+**6 处磁化归一化写在了单位里而非 method 串里。** 注册表刻意把 `total_magnetization` 的单位保持中性
+（`μB`），并在注释里说 per cell / per f.u. 应记在 method 串。`alexandria` 与 `materials_project` 已
+合规；`2dmatpedia`、`novomag`、`elementa` 只写在单位里，而单位会被丢弃——于是 per-cell 值与 per-f.u.
+值在同一属性下不可区分。静态审计方式：抽出全部 `PropertyValue` 字面量单位与注册表比对，实测 207 个
+规范属性调用中 7 处不一致。
+
+**第 2.2 节原因码表的实例列曾经漂过两行。** 它曾把 ICSD / CSD / MPDS 列为 `licence-restricted` 的实例
+（实际 CSD、MPDS 带 `account-required`，而 ICSD 根本不是拒收态，它是第 2.1 节那个"整合成功 + 不可发布"
+的形态），并把 NOMAD / OPTIMADE 列为 `no-bulk-interface`（NOMAD 属于 `scope-unbounded`）。表里现在的
+实例来自那次已撤回的回填，**因此目前无从校验**——真做 `state` / `reason` 时，应同时加一条从
+`sources.json` 反导这张表的测试。
+
+**opxrd 的贡献者是 7 家，NREL / HTEM 不在其中。** LBNL 70,017、INT 19,797、CNRS 1,053、EMPA 771、
+HKUST 523、USC 339、IKFT 65（共 92,565 个 zip 条目）。取证方式见第 4 节末那条 zip 中央目录技术。

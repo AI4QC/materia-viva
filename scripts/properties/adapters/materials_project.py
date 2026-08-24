@@ -763,7 +763,7 @@ class MaterialsProjectAdapter(SourceAdapter):
                 )
                 if mag_fu is not None:
                     properties.append(
-                        PropertyValue("total_magnetization", mag_fu, "μB", METHOD)
+                        PropertyValue("total_magnetization", mag_fu, "μB/f.u.", METHOD)
                     )
                 else:
                     mag_cell = safe_float(doc.get("total_magnetization"))
@@ -772,7 +772,7 @@ class MaterialsProjectAdapter(SourceAdapter):
                             PropertyValue(
                                 "total_magnetization",
                                 mag_cell,
-                                "μB",
+                                "μB/cell",
                                 f"{METHOD} μB/cell",
                             )
                         )

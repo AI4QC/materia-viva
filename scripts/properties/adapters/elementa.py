@@ -120,8 +120,8 @@ class ElementaAdapter(SourceAdapter):
                                     PropertyValue(
                                         "total_magnetization",
                                         magmom,
-                                        "μB",
-                                        f"{METHOD} per cell",
+                                        "μB/cell",
+                                        METHOD,
                                     )
                                 )
                             else:

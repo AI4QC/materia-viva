@@ -9,10 +9,23 @@ ingested by resumable acquisition scripts" to an auditable self-evolving loop. I
 document, not a description of the present.
 
 > [!IMPORTANT]
-> Automatic discovery and automatic integration are **not implemented**. All 106 catalogued sources
-> were found and reviewed by a person and ingested through resumable scripts such as
-> [`scripts/datasets/acquire.py`](../scripts/datasets/acquire.py); 54 of them are integrated into
-> the index. Read everything below as planned unless it is marked implemented.
+> **This is a design, not a description of the present.** Two things actually exist in the
+> repository:
+>
+> | Landed | What it is |
+> |---|---|
+> | [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py) | read-only upstream change detection, covering 38 of the 106 sources |
+> | [`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py) | the gate an agent's output passes through (candidate or pull plan) |
+>
+> Everything else is planned, including upgrade-plan derivation, the golden sample framework, the
+> admission overlap measurement, snapshot metadata and the change report, and the catalog's `state` /
+> `reason` fields. **Automatic discovery and automatic integration are not implemented**, and all 106
+> sources were found and reviewed by a person.
+>
+> Some numbers and conclusions below come from experiments that were run — a full probe sweep, a
+> catalog backfill, a unit audit, two real agent runs. Those **findings** are real and are kept here,
+> but **their implementations were reverted**; this document does not claim something is implemented
+> when it is not. See "Findings verified but not landed" at the end.
 >
 > Values marked **(undecided)** are proposals made by this document, not settled decisions.
 
@@ -77,7 +90,7 @@ Three kinds of actor, and confusing them is the easiest mistake this design invi
 | Step | Actor | Why |
 |---|---|---|
 | [0] discover a candidate | **agent** | needs to read papers and pages and judge "is this a crystal structure database"; a script cannot see outside the catalog |
-| [1] probe upstream versions | script | a deterministic comparison, implemented (`probe_upstream.py`) |
+| [1] probe upstream versions | script | a deterministic comparison, **landed** (`probe_upstream.py`, 38/106) |
 | [2] licence decision | **human** | a legal judgement, and irreversible when wrong (published data cannot be recalled) |
 | [2.5] produce a pull plan | **agent** | reads upstream docs to decide which files to pull and where they land; this is the largest historical bottleneck — about 22 of the 24 acquisition scripts were written for one source each |
 | [3] draft an acquisition and mapping adapter | **agent** | read upstream docs and samples, write mapping code; squarely what it is good at |
@@ -296,8 +309,8 @@ rounds), while a verifier's shape follows from what must be true, and that is al
 
 | Data contract | Its verifier | Useful to a person today |
 |---|---|---|
-| `downloads[]` plus `data_path` | `validate_catalog` + a HEAD per URL + `ensure_capacity` | yes: a hand-written pull plan goes through the same gate (implemented) |
-| a candidate source entry | `official_url` resolves + host and name deduplication + `validate_catalog` + probeability | yes: adding a source by hand should pass the same ones (implemented) |
+| `downloads[]` plus `data_path` | `validate_catalog` + a HEAD per URL + `ensure_capacity` | yes: a hand-written pull plan goes through the same gate (**landed**) |
+| a candidate source entry | `official_url` resolves + host and name deduplication + `validate_catalog` + probeability | yes: adding a source by hand should pass the same ones (**landed**) |
 | an adapter plus its golden sample | a zero-diff regression | **yes, and overdue**: the adapters had no test coverage at all |
 
 Once the verifier exists, plugging an agent in is only swapping the producer; the contract and the
@@ -323,10 +336,10 @@ The three lagging zenodo sources land on the three possible answers:
 | `arc-mof` | 23 of 24; `ARCMOF_20220610.tar.gz` gone, 25 files upstream | **mechanical plus a delta**: the expert answers only "what about the one that vanished and the ones that arrived". No agent |
 | `core-mof` | **0 of 2** — neither v1.1.3 csv exists in v2.0.1, which ships 9 different files | **upstream restructured**: someone has to decide which of the nine correspond to what we ingested. This is where a MAS or an expert is worth spending |
 
-Implemented: [`scripts/datasets/plan_upgrade.py`](../scripts/datasets/plan_upgrade.py). It fetches
-the latest version's file list per probe kind, computes the overlap, produces a plan that can be
-pasted straight into `downloads[]`, and HEADs each URL for existence and content-length. **It does
-not write the catalog** — the output is a proposal awaiting review.
+**Not implemented.** What it needs is settled: fetch the latest version's file list per probe kind,
+compute the overlap, produce a plan that can be pasted straight into `downloads[]`, and HEAD each URL
+for existence and content-length. It must not write the catalog — the output is a proposal awaiting
+review.
 
 So upgrades route on overlap:
 
@@ -364,7 +377,7 @@ approve. Three decisions about that lane.
 
 | Activity | Period | Actor | Coverage |
 |---|---|---|---|
-| whether a catalogued source has a new version | per source, weeks to a month | script, deterministic | 40 (implemented) |
+| whether a catalogued source has a new version | per source, weeks to a month | script, deterministic | 38 (landed) |
 | searching for datasets not in the catalog | one sweep weekly or monthly | **agent** | the whole internet |
 | deciding whether the 66 unprobeable sources moved | with the sweep above | **agent** | 66 (section 1.7) |
 
@@ -381,12 +394,11 @@ unique structures of M candidates"**.
 That is precisely the kind of check section 1.2 asks for — **a number an agent cannot invent**. So
 admission rests on the measurement, not on the narrative.
 
-Implemented: [`scripts/properties/measure_overlap.py`](../scripts/properties/measure_overlap.py). It
-reads the fingerprint output `scripts/properties/hashing.py` already produces (`native_id /
-n_sites / formula / bawl_hash`, failures written as `FAIL:<reason>`), so **it does not
-re-implement the fingerprint protocol**; the pool side is `hash_map` in
-`data/props_work/match_map.sqlite`, opened read-only. Its output is exactly the four measurements
-below, for example:
+**Not implemented.** Its shape is settled: read the fingerprint output
+`scripts/properties/hashing.py` already produces (`native_id / n_sites / formula / bawl_hash`,
+failures written as `FAIL:<reason>`), so it **does not re-implement the fingerprint protocol**; the
+pool side is `hash_map` in `data/props_work/match_map.sqlite`, opened read-only. Its output is the
+four measurements below, for example:
 
 ```text
 340 rows read, 15 parse failures (0.0441)
@@ -601,9 +613,10 @@ two such items:
 - `state` / `reason` (sections 2.1 and 2.2) — step 3, where 21 entries needed human judgement;
 - figshare article ids (section 3.3) — step 4, recorded by hand.
 
-The `schema_version` bump therefore does not belong to step 2 but travels with the commit in step 3
-that actually adds a field: it is **2** now, the addition being the optional `state` / `reason` pair,
-and version 1 files keep loading (an entry without `state` reads as `registered`).
+The `schema_version` bump does not belong to step 2 but travels with whichever commit actually adds
+a field. The catalog is still at **1** and `state` / `reason` have not landed; when they do, the new
+fields must be optional so version 1 files keep loading (an entry without `state` reads as
+`registered`).
 
 Fields not added, with the reasons, all since borne out by the data:
 
@@ -649,16 +662,15 @@ read as full cover.
 
 Two direct conclusions:
 
-- **40 sources are probeable** (invenio-latest 13, http-head 11, figshare-article 9, git-commit 5,
-  hf-revision 2). For 38 of them the upstream identity comes out of the existing URL; 2 were looked
-  up and recorded. Implemented:
+- **38 sources are probeable** (invenio-latest 13, http-head 12, figshare-article 7, git-commit 4,
+  hf-revision 2), every upstream identity coming out of the existing URL. Landed:
   [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py), writing
   `<data root>/probe/seen.json`;
-- **9 of the 14 figshare sources are resolved** (step 4): 7 already carry the article id in
-  `official_url` and by the rule of section 3.2 stay out of the catalog, extracted by `plan_probe`;
-  2 more (`jarvis-dft`, `hex-high-pressure`) were only knowable by looking them up, which makes them
-  human knowledge, recorded as the catalog field `figshare_article`. The remaining 5 are unresolved,
-  see step 4 in section 7.
+- **7 of the 14 figshare sources already carry the article id in `official_url`** and by the rule of
+  section 3.2 stay out of the catalog, extracted by `plan_probe`. Two more (`jarvis-dft`,
+  `hex-high-pressure`) were shown to be resolvable, but that was catalog data and went back with the
+  rest of the data changes, so they count as unresolved again — the mechanism is in the code and the
+  `figshare_article` field currently has no user.
 
 ### 3.4 The hard constraint: the change has to be purely additive
 
@@ -726,7 +738,7 @@ passing the gates and a human review.
    So the draft and the expectation come from two agents reading the same upstream documentation, the
    second without seeing the first's code (section 1.3).
 
-   Implemented: [`scripts/properties/golden.py`](../scripts/properties/golden.py). Samples live in
+   **Not implemented.** The design is: samples live in
    `backend/tests/golden/<source_key>/`, where `raw/` is the miniature raw input and `expected.json`
    the expected records, and `pytest` compares every sample in that directory field by field. Each
    sample must declare `authored_by`:
@@ -836,8 +848,8 @@ Per-source licence decisions and the manual steps they require are in
 
 ### 6.5 Snapshot metadata and the change report
 
-Implemented: [`scripts/snapshot_meta.py`](../scripts/snapshot_meta.py). `describe` produces snapshot
-metadata from an index; `--diff` turns two of those into the change report.
+**Not implemented.** The design is a `describe` producing snapshot metadata from an index, and a
+`--diff` turning two of those into the change report.
 
 Every snapshot carries: the index schema version, the fingerprint algorithm of section 6.3 (version,
 both site caps, both exception lists), each source's licence, and each source's
@@ -857,128 +869,81 @@ deliberate boundary, not an omission.
 
 ## 7. Implementation order
 
-The principle: **let a read-only probe produce real data first, and let the data decide what the
-fields look like.** The other way round is building the abstraction before looking at the need.
+The principle: **let a read-only probe produce real data first and let the data decide what the
+fields look like; build the verification before the thing that produces work for it.** Reversed, it
+is either building the abstraction before looking at the need, or treating an agent's mistakes as
+data.
 
-**Step 1 (implemented): a read-only probe, no schema change.**
-[`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py) extracts the upstream
-identity from the existing `downloads[].url`, covering 31 sources at the time, and writes
+### Landed
+
+**The read-only probe** ([`probe_upstream.py`](../scripts/datasets/probe_upstream.py)). It extracts
+the upstream identity from the existing `downloads[].url`, covers 38 of 106, and writes
 `<data root>/probe/seen.json`. It **does not touch `sources.json` and downloads nothing**. For Zenodo
 and Materials Cloud, `api/records/<id>/versions/latest` settles in one request whether the record we
 recorded has been superseded.
-
-The first full run found four sources whose upstream is ahead of the record the catalog names:
-`arc-mof`, `carolina`, `core-mof` (v1.1.3 → v2.0.1) and `topomat`.
-
 → Verified: `pytest backend/tests/test_upstream_probe.py`; run twice, the second run reports
 everything unchanged.
 
-**Step 2 (done): let step 1's output decide the field shape.**
-The conclusion was **no catalog field at all** — probe state is entirely derived and the side file is
-its home (section 3.2). `schema_version` stayed at 1, and the only thing that landed was one
-regression test: a source carrying just the six required fields must validate, which is what lets
-steps 3 and 4 fill fields in batches.
-→ Verified: `pytest backend/tests` green.
+**The gate an agent's output passes through**
+([`verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py)). Both agent roles that
+touch the catalog produce the same artifact — a branch whose diff either adds a source (a candidate)
+or changes `downloads[]` (a pull plan) — so it is one gate reading one diff.
+→ Verified: `pytest backend/tests/test_verify_catalog_change.py`.
 
-**Step 3 (done): backfill `state` / `reason`.**
-All 106 filled. The split: `integrated` 54 (the same 54 that have a module under `adapters/`,
-matching the README), `rejected(account-required)` 21, `acquired` 15,
-`rejected(no-bulk-interface)` 7, `rejected(scope-unbounded)` 3, `rejected(scope-trajectory)` 3,
-`rejected(licence-restricted)` 1, `rejected(join-key-missing)` 1 for Catalysis-Hub, and `registered`
-1 for Atomly, whose acquisition is in flight. `schema_version` went to 2, and `validate_catalog`
-checks the pairing: a terminal state needs a known reason code, a non-terminal state must not carry
-one, and a `reason` with no `state` is an error.
-→ Verified: `pytest backend/tests`; not one `status` string changed.
+### Not landed, ordered by whether the verification exists
 
-Five of those needed a decision rather than a rule, and a new reason code `scope-unbounded` was added
-for them, section 2.2.
-
-**Step 4 (done): figshare article ids.**
-9 of the 14 figshare sources became probeable, taking coverage from 31 to 40 of 106.
-
-The key point is that an article's metadata lists its files, so **every mapping could be proved
-against the file id the catalog already held rather than guessed from a title** — which is what made
-an article id safe to record. Three routes:
-
-| Route | Count | Where it lives |
-|---|---:|---|
-| the article id is already in `official_url` | 7 | not stored; `plan_probe` extracts it (the rule of section 3.2) |
-| figshare search, confirmed by file id | 1 | `jarvis-dft` → `figshare_article: 6815699` |
-| the single article inside a collection | 1 | `hex-high-pressure` → `figshare_article: 25403968` |
-
-`hex-high-pressure`'s `official_url` is a collection (`7119778`), **not** its article (`25403968`) —
-so the extractor matches only `/articles/` paths, never a collection, and a recorded id always beats
-the URL.
-
-**The 5 unresolved**: `aflow`, `c2db`, `2dmatpedia`, `omdb-organic` (neither the project pages nor a
-figshare search produced an article the file id confirms) and `jarvis-specialized-structures` (its 16
-file ids are spread over several articles — one catalog entry to many articles, which a single
-`figshare_article` field cannot express). They stay `manual / figshare-article-id-unknown`, and one
-line each is all it takes once someone has the exact link.
-
-→ Verified: `pytest backend/tests`; all 9 sources returned an article version as their `seen` in a
-real run.
-
-**Step 5 (partly done): the golden sample framework and the gates of section 5.**
-The framework, the `authored_by` distinction, the unit and registration checks, and fixtures for 10
-of the 55 adapters have landed
-([`scripts/properties/golden.py`](../scripts/properties/golden.py)). **Gate 2, field coverage, is
-still missing**, see the end of section 5. The other 45 adapters each need a hand-written fixture —
-incremental work that blocks nothing else. The ones done first were the three whose method strings
-the unit fix had touched, because the static unit audit reads only units and cannot see a method
-string regressing.
-→ Verified: three deliberate breakages (unit, `> 0` guard, regex) were all reported, and the tree was
-clean afterwards.
-
-**Step 5.5 (done): the admission overlap measurement.**
-[`scripts/properties/measure_overlap.py`](../scripts/properties/measure_overlap.py), section 1.10.
-Pure script, no agent, reusing the existing fingerprint protocol and match map.
-→ Verified: nine tests, including the `open-materials-db` shape where the pool already holds the
-entire candidate, and an assertion that the match map is attached read-only. This machine has no real
-index, so the end-to-end run was against a synthetic fixture; **verifying it for real has to happen
-on the machine holding the data**:
-`python scripts/properties/measure_overlap.py --hashes <candidate hashes.tsv.gz> --source <id>`.
-
-**Step 6 (done): snapshot metadata and the change report.**
-[`scripts/snapshot_meta.py`](../scripts/snapshot_meta.py), section 6.5. Reads the index and writes
-nothing to it.
-→ Verified: two runs over this machine's slice index diff to nothing, and it lists 54 sources,
-matching the `integrated` count step 3's backfill produced; against a deliberately altered snapshot
-it reports added and dropped sources, state and licence changes, per-source count deltas, and a
-fingerprint change flagged as a renumbering event. Eight tests build their own index, so they do not
-depend on this machine holding data.
-
-**The order in which the agent roles land is decided by whether their verification exists, not by
-step number.**
-
-Same rule throughout: **verification first, then the agent that produces work for it.** Reversed, it
-amounts to treating an agent's mistakes as data. By that rule the three roles fall on two sides:
-
-| Agent role | Its verification | Can it be built now |
+| To build | Its verification | Prerequisite |
 |---|---|---|
-| pull plan ([2.5], output two) | `validate_catalog` + a HEAD per URL + `ensure_capacity` + the stale-prose check | **has run once on a real case** |
-| discover candidates ([0]) | the checks of section 1.2 plus the human licence gate, all present | yes |
-| draft adapters or acquisition scripts ([3], output three) | the golden sample framework — **absent** | must wait for step 5 |
+| upgrade-plan derivation (section 1.9) | the gate is already there | none; can be done now |
+| the catalog's `state` / `reason` (sections 2.1, 2.2) | one pairing check added to `validate_catalog` | none; about 21 entries need human judgement |
+| the admission overlap measurement (section 1.10) | reuses the existing fingerprint protocol and match map | needs the machine holding the data |
+| the golden sample framework (section 5) | a zero-diff regression | none, and the 55 adapters have no test coverage, which makes this the most overdue for a person |
+| snapshot metadata and the change report (section 6.5) | two runs over one index must diff to nothing | needs a real index |
+| drafting adapters or acquisition scripts | the golden sample framework — **absent** | must wait for the row above |
 
-So the pull-plan agent comes first: the one role whose verification was already complete, and the one
-pointed at the largest historical bottleneck (about 22 of the 24 acquisition scripts written for one
-source each). The discovery agent can follow, its damage ceiling being an expert reading one
-candidate for nothing. The drafting agents come last.
+### The agent roles
 
-**The pull-plan agent's first real run — core-mof's v2.0.1 restructure — confirmed three things
-about this design:**
+Same rule: **verification first, then the agent that produces work for it.**
 
-- what it produced was a proposal, not a change: the catalog was untouched, the proposal was written
-  outside the repository, and `verify_catalog_change.py` passed it on all four machine checks;
-- **it corrected the premise it was given**: both `full_unmodified.csv` files were already present in
-  v1.1.3 with byte-identical size and md5, so only 7 of the 9 files are genuinely new. That claim was
-  verified independently against the API — which is section 1.2's "nothing enters on the agent's
-  word" doing its job, and this time the job was **confirming** rather than refuting;
-- it identified something no machine check would catch — that once the plan is accepted, the old
-  record id in `status` and `notes` becomes a lie — and because that is machine-checkable it is now
-  checked by machine (the last row of section 1.4's table), and it fires on the agent's own plan.
+| Agent role | Its verification | Can it be built |
+|---|---|---|
+| pull plan ([2.5], output two) | the gate is there | yes |
+| discover candidates ([0]) | the gate is there (`official_url` resolves, host and name deduplication, `validate_catalog`, probeability) | yes |
+| draft adapters or acquisition scripts ([3], output three) | the golden sample framework — absent | no |
 
-It also listed seven items it declined to decide, the one it actively recommended being that the
-structures on disk come from v1.1.3 while the new property tables come from v2.0.1, so whether
-structures and properties are from the same provenance needs an expert. By design such items can only
-queue for a gate; they cannot pass automatically.
+## Appendix: findings verified but not landed
+
+Each of these was verified while running experiments. The changes that acted on them were reverted
+as data-side work rather than agent system, but **the problems are still there**; they are recorded
+so the knowledge does not go with the code.
+
+**`mc2d`'s interlayer binding energies are wrong by a factor of 1000.**
+`scripts/properties/adapters/mc2d.py` passes the upstream
+`binding_energy_per_substructure_per_unit_area_*` through labelled `eV/Å²`, while
+`registry.CANONICAL_PROPERTIES` declares `interlayer_binding_energy` as `meV/Å²`, with no ×1000
+conversion between them. The upstream data settles which way it goes: across the 2,865 values in
+`structure_2d.json` the median is 0.0251, so 25 meV/Å², the expected magnitude for interlayer
+binding; read as meV/Å² they would sit a hundredfold below van der Waals. **And the error is hidden
+by the very mechanism that should surface it**: `property_defs` is seeded from the registry and
+`material_properties` has no unit column, so the unit an adapter passes is discarded and the rows are
+published as `meV/Å²` carrying eV/Å² numbers. The fix mirrors what `2dmatpedia` already does for
+exfoliation energy (`* 1000.0`).
+
+**Six magnetisation normalisations live in the unit instead of the method string.** The registry
+deliberately keeps `total_magnetization`'s unit neutral (`μB`) and says in its own comment that
+per-cell versus per-formula-unit belongs in the method string. `alexandria` and `materials_project`
+comply; `2dmatpedia`, `novomag` and `elementa` put it only in the unit, which is discarded — leaving
+per-cell values indistinguishable from per-f.u. ones under one property. The audit is static: extract
+every literal unit from `PropertyValue` calls and compare against the registry; 7 of 207 canonical
+calls disagreed.
+
+**The instance column of the reason-code table in section 2.2 had drifted twice.** It cited ICSD, CSD
+and MPDS as instances of `licence-restricted` (CSD and MPDS carry `account-required`, and ICSD is not
+a rejection at all — it is the "integrated and unpublishable" shape of section 2.1), and NOMAD and
+OPTIMADE for `no-bulk-interface` (NOMAD belongs to `scope-unbounded`). The instances in the table now
+come from that reverted backfill, so **they currently cannot be checked** — whoever builds `state` /
+`reason` should add a test that re-derives that table from `sources.json`.
+
+**opxrd has seven contributors, and NREL / HTEM is not among them.** LBNL 70,017, INT 19,797, CNRS
+1,053, EMPA 771, HKUST 523, USC 339, IKFT 65, across 92,565 zip entries. Obtained by the central
+directory technique at the end of section 4.

@@ -164,7 +164,7 @@ class AlexandriaAdapter(SourceAdapter):
         if total_mag is not None:
             properties.append(
                 PropertyValue(
-                    "total_magnetization", total_mag, "μB",
+                    "total_magnetization", total_mag, "μB/cell",
                     f"{method} per cell",
                 )
             )

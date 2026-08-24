@@ -112,8 +112,7 @@ class NovomagAdapter(SourceAdapter):
                     ):
                         properties.append(
                             PropertyValue(
-                                "total_magnetization", value, "μB",
-                                f"{METHOD} per cell",
+                                "total_magnetization", value, "μB/cell", METHOD
                             )
                         )
 

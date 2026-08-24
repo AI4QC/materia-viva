@@ -7,7 +7,6 @@ import argparse
 import hashlib
 import json
 import os
-import re
 import shutil
 import subprocess
 import time
@@ -29,22 +28,6 @@ ACCESS_MODES = {
     "paid",
     "federated",
 }
-# Source lifecycle, see docs/self-evolving-loop.zh-CN.md section 2.1. `acquired`
-# means the files are here; whether an adapter exists yet is answered by
-# scripts/properties/adapters/, not by a second state.
-SOURCE_STATES = {"registered", "acquired", "integrated", "rejected", "quarantined"}
-TERMINAL_STATES = {"rejected", "quarantined"}
-# section 2.2 — a terminal state must say why, in a code a script can group on
-REASON_CODES = {
-    "licence-unclear",
-    "licence-restricted",
-    "account-required",
-    "no-bulk-interface",
-    "scope-trajectory",
-    "scope-unbounded",
-    "join-key-missing",
-    "integrity-failed",
-}
 
 
 class CapacityError(RuntimeError):
@@ -59,18 +42,6 @@ def default_data_root(repo_root: Path | None = None) -> Path:
     return root.resolve()
 
 
-def normalise_licence(value: Any) -> str:
-    """Compare licences by content, not punctuation.
-
-    Upstream says `cc-by-4.0` where the catalog says `CC BY 4.0`. Two tools ask
-    whether a licence changed — the upgrade planner and the snapshot report — and
-    they have to agree, so the comparison lives with the catalog they both read.
-    """
-    if isinstance(value, dict):
-        value = value.get("id") or value.get("name") or ""
-    return re.sub(r"[^a-z0-9]", "", str(value or "").lower())
-
-
 def load_catalog(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -80,28 +51,9 @@ def _is_safe_relative_path(value: str) -> bool:
     return bool(value) and not path.is_absolute() and ".." not in path.parts
 
 
-def _validate_state(source_id: str, source: dict[str, Any]) -> None:
-    """Check the optional lifecycle pair. Absent `state` reads as `registered`."""
-    state = source.get("state")
-    if state is None:
-        if "reason" in source:
-            raise ValueError(f"reason without state for {source_id}")
-        return
-    if state not in SOURCE_STATES:
-        raise ValueError(f"unsupported state for {source_id}: {state}")
-    reason = source.get("reason")
-    if state in TERMINAL_STATES:
-        if reason not in REASON_CODES:
-            raise ValueError(f"{state} needs a known reason code for {source_id}: {reason}")
-    elif reason is not None:
-        raise ValueError(f"{state} must not carry a reason for {source_id}")
-
-
 def validate_catalog(catalog: dict[str, Any]) -> None:
-    # version 2 adds the optional `state` / `reason` pair; version 1 files load
-    # unchanged because every entry without them reads as `registered`
-    if catalog.get("schema_version") not in (1, 2):
-        raise ValueError("catalog schema_version must be 1 or 2")
+    if catalog.get("schema_version") != 1:
+        raise ValueError("catalog schema_version must be 1")
     sources = catalog.get("sources")
     if not isinstance(sources, list):
         raise ValueError("catalog sources must be a list")
@@ -121,7 +73,6 @@ def validate_catalog(catalog: dict[str, Any]) -> None:
             raise ValueError(f"official_url must use HTTPS for {source_id}")
         if not _is_safe_relative_path(source["data_path"]):
             raise ValueError(f"data_path must be a safe relative path for {source_id}")
-        _validate_state(source_id, source)
         for item in source.get("downloads", []):
             if not str(item.get("url", "")).startswith("https://"):
                 raise ValueError(f"download URL must use HTTPS for {source_id}")

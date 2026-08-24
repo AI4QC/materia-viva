@@ -699,6 +699,14 @@ This is the only part of the loop with an outward side effect, so the rules are 
 Frequency: one global interval to begin with (**undecided**, on the order of weeks to a month),
 probing when due. Sources with `probe_kind: "manual"` are not probed; when they come due, a person
 is reminded to review them.
+**One technique that moves a great deal of knowledge to before the pull: a zip's central directory
+can be fetched on its own.** A zip keeps every path name in a central directory at the end of the
+file, and a Range request can take just that. Measured on `opxrd`'s 1.4 GB archive: read the last
+64 KB for the EOCD to get the central directory's offset and size (10.27 MB, **0.73%** of the
+archive), then read those 10 MB to get all 92,565 entry names and the 7 contributor directories.
+**That is not "download and look" — it is an input to the admission decision.** It answers what an
+archive holds, how it is organised, and which existing source it shares provenance with; questions
+that otherwise wait for the pull or rest on believing the documentation.
 
 ## 5. The gates an adapter has to pass
 

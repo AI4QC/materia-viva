@@ -185,7 +185,8 @@ unchecked, several agents only produce more confident wrong answers faster.
 
 #### How it runs
 
-- **The harness is Claude Code subagents**, not a framework of our own. The repository already
+- **The harness is Claude Code subagents**, not a framework of our own. The three roles are defined
+  in [`.claude/agents/`](../.claude/agents/), in that harness's own format. The repository already
   carries `.claude/CLAUDE.md` and `.mcp.json`, so an agent inherits this project's conventions for
   free, and the web search discovery needs comes with the harness. Building an API loop instead
   means rebuilding tool use, retries and sandboxing for a research dataset maintained by two people.
@@ -343,10 +344,26 @@ rounds), while a verifier's shape follows from what must be true, and that is al
 Once the verifier exists, plugging an agent in is only swapping the producer; the contract and the
 gate do not change by a line. That is what the room actually consists of.
 
-**The trap: do not build an `agents/` directory, prompt templates, model configuration or an
-orchestration framework.** Those are all guesses about the producer, and the producer is the one
-part with no evidence behind it. Guesses written down become constraints in a later reader's mind.
-An empty directory and a stub are not room; they are a decision made early and wrong.
+**The trap: do not write down guesses about a producer that does not exist yet.** An empty directory
+and a stub are not room; they are a decision made early and wrong.
+
+**Half of this rule has since expired, and that is recorded here rather than quietly amended.** It
+was first written as "do not build an `agents/` directory, prompt templates, model configuration or
+an orchestration framework", which was right while no producer had ever run. After three real runs
+the prompts are no longer guesses but **evidence**: they encode the candidate cap, the required
+fields, the self-check command, and the report sections that actually produced value. And they
+existed only in one conversation's history, so **nobody could reproduce a run** — a larger loss than
+guessing wrong would have been.
+
+So the three exercised roles are now defined in [`.claude/agents/`](../.claude/agents/), in the
+harness's own format, which makes them executable, diffable and reproducible. What is still not
+done:
+
+- **No role is defined without a verifier.** Drafting an adapter and independently authoring its
+  golden sample are absent, because the golden sample framework does not exist — defining them would
+  be defining producers whose output nothing can check.
+- **No orchestration framework and no model configuration.** The fan-out shape still belongs in a
+  script, and that script does not exist yet.
 
 ### 1.9 Upgrades: let file-name overlap decide whether judgement is needed
 

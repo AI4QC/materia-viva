@@ -27,6 +27,14 @@ observe the boundaries below before submitting.
 - Do not delete a suspected duplicate source before the unified structural fingerprint comparison is
   complete; deduplication must preserve all properties and provenance.
 
+## Documentation
+
+- A quantity gets one value in one place. Counts belong to the thing that measures them — the
+  catalog, a manifest, `GET /api/stats` — not to prose that has to be kept in step by hand.
+- Every document under `docs/` has an English original and a `.zh-CN.md` translation; change both.
+- Where a document still disagrees with another document or with the code, it is listed in
+  [`docs/doc-conflicts.md`](docs/doc-conflicts.md) rather than left to be rediscovered.
+
 ## Verification
 
 ```bash
@@ -41,3 +49,7 @@ Changes to the data schema or the indexer also require `make validate-data`, or 
 fixture covering the change when the full dataset is unavailable. The complete data is published to
 the [Hugging Face Dataset](https://huggingface.co/datasets/AI4QC/materia-viva) rather than
 transferred through Git PRs.
+
+`make validate-data` currently enforces row counts from an earlier era and will fail against a
+present-day pool; see [`docs/doc-conflicts.md`](docs/doc-conflicts.md) before treating that as a
+regression.

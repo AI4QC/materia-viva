@@ -705,8 +705,9 @@ def test_no_document_reports_a_pool_size_that_belongs_to_an_earlier_era():
     `13,077,781` agreed with nothing. `8,125,976` / `8,225,138` describe the 8.2M
     era and still live in `scripts/validate_data.py`, which is a separate
     argument. Prose is not where a count belongs, so prose is where they are
-    barred. `docs/migration-report.*` is exempt: it is a dated record of a
-    migration, and its title says which date.
+    barred. Two exemptions: `docs/migration-report.*` is a dated record of a
+    migration whose title says which date, and `docs/doc-conflicts.*` is the
+    review list for these very values and has to be able to name them.
     """
     import subprocess
     from pathlib import Path
@@ -717,7 +718,8 @@ def test_no_document_reports_a_pool_size_that_belongs_to_an_earlier_era():
     retired = ("13,077,781", "8,225,138", "8,125,976")
     offenders = [
         (name, value)
-        for name in tracked if "migration-report" not in name
+        for name in tracked
+        if not any(exempt in name for exempt in ("migration-report", "doc-conflicts"))
         for value in retired
         if value in (root / name).read_text(encoding="utf-8")
     ]

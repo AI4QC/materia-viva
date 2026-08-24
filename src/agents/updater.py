@@ -50,8 +50,8 @@ the expert instead. If you cannot tell what a file is, say so; do not guess.
 ## Hard constraints
 
 {no_edits}
-- **Change nothing but that source's `downloads`.** Not `status`, not `notes`, not `state`, not
-  `data_path`, not another source. The gate refuses all of those, and `data_path` in particular is a
+- **Change nothing but that source's `downloads`.** Not `status`, not `notes`, not `data_path`,
+  not another source. The gate refuses all of those, and `data_path` in particular is a
   human's edit because moving an acquired source's directory orphans what is on disk.
 {politeness}
 - You do not pull. `acquire.py` does, after the licence and admission gates.

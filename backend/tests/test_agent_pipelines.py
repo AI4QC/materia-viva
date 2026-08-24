@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.agents.harness import PROPOSAL_NAME, Outcome
+from src.agents.harness import GATE_REFUSED, PROPOSAL_NAME, Outcome
 from src.agents.tokens import Budget, Usage
 from src.agents.pipelines import DISCOVERY_SWEEP, PIPELINES, plan, run_pipeline
 
@@ -23,6 +23,9 @@ class _FakeExecutor:
         self.calls.append((role.name, prompt))
         if role.name in self.fail_for:
             return Outcome(ok=False, text="", error="exit 1")
+        if role.proposes_catalog_change:  # as a real role would, for the gate to read
+            workspace.mkdir(parents=True, exist_ok=True)
+            (workspace / PROPOSAL_NAME).write_text("{}", encoding="utf-8")
         return Outcome(ok=True, text="done", turns=2,
                        usage=Usage(input=self.tokens, output=0, cost_usd=self.cost))
 
@@ -76,9 +79,26 @@ def test_a_refused_gate_stops_the_pipeline(tmp_path):
     (tmp_path / RUN_ID / "explorer").mkdir(parents=True)
     (tmp_path / RUN_ID / "explorer" / PROPOSAL_NAME).write_text("{}", encoding="utf-8")
     record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID,
-                          executor=_FakeExecutor(), gate_runner=_gate(1), now=WHEN)
+                          executor=_FakeExecutor(), gate_runner=_gate(GATE_REFUSED), now=WHEN)
     assert [r.role for r in record.results] == ["explorer"]
     assert record.stopped_after == "explorer" and "gate refused" in record.stopped_because
+
+
+class _SilentExecutor(_FakeExecutor):
+    """Succeeds, and leaves no proposal — the shape a role failing quietly takes."""
+
+    def __call__(self, role, prompt, workspace, *, model=None, timeout=None):
+        self.calls.append((role.name, prompt))
+        return Outcome(ok=True, text="done", usage=Usage(input=10, output=0))
+
+
+def test_a_proposing_role_that_leaves_nothing_stops_the_pipeline(tmp_path):
+    # otherwise the next step is handed a path to a file that was never written
+    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID,
+                          executor=_SilentExecutor(), gate_runner=_gate(), now=WHEN)
+    assert record.stopped_after == "explorer"
+    assert "no proposal" in record.stopped_because
+    assert [r.role for r in record.results] == ["explorer"]
 
 
 def test_a_role_that_does_not_succeed_stops_the_pipeline(tmp_path):

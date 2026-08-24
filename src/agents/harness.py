@@ -21,6 +21,7 @@ Around either, the harness adds what makes a run safe to repeat:
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import time
 from dataclasses import dataclass, field
@@ -36,6 +37,9 @@ GATE = PROJECT_ROOT / "scripts" / "datasets" / "verify_catalog_change.py"
 CATALOG = PROJECT_ROOT / "scripts" / "datasets" / "sources.json"
 
 PROPOSAL_NAME = "proposal.json"
+#: The gate's exit code for a refusal. Any other non-zero code means the gate
+#: itself failed to run, which is a different thing and must not read as "no".
+GATE_REFUSED = 3
 DEFAULT_TIMEOUT = 1800.0
 DEFAULT_ATTEMPTS = 2
 #: Retrying a role that ran and concluded just spends tokens on the same answer.
@@ -175,6 +179,8 @@ class Result:
     outcome: Outcome
     attempts: int
     started_at: str
+    #: not-applicable | passed | refused | no-proposal | did-not-run
+    gate_status: str = "not-applicable"
     gate_returncode: int | None = None
     gate_output: str = ""
 
@@ -184,7 +190,14 @@ class Result:
 
     @property
     def gate_passed(self) -> bool | None:
-        return None if self.gate_returncode is None else self.gate_returncode == 0
+        """True only if the gate ran and passed; None when no gate applies.
+
+        A gate that could not run is False, not None: the role proposed a catalog
+        change and nothing checked it.
+        """
+        if self.gate_status == "not-applicable":
+            return None
+        return self.gate_status == "passed"
 
     def as_record(self) -> dict[str, Any]:
         return {
@@ -199,6 +212,7 @@ class Result:
             "cost_usd": self.outcome.usage.cost_usd,
             "turns": self.outcome.turns,
             "duration_ms": self.outcome.duration_ms,
+            "gate_status": self.gate_status,
             "gate_returncode": self.gate_returncode,
             "gate_passed": self.gate_passed,
             "workspace": str(self.workspace),
@@ -236,19 +250,36 @@ def brief(task: str, workspace: Path) -> str:
     )
 
 
-def _gate(workspace: Path, runner: Callable[..., Any]) -> tuple[int | None, str]:
+def _gate(workspace: Path, runner: Callable[..., Any]) -> tuple[str, int | None, str]:
+    """Run the gate over what the role proposed, and say which of four things happened.
+
+    Collapsing these into a boolean is what hid a broken gate: every proposal came
+    back refused, and the refusal was a traceback nobody read.
+    """
     proposal = workspace / PROPOSAL_NAME
     if not proposal.exists():
-        return None, f"no {PROPOSAL_NAME} in {workspace}"
+        return "no-proposal", None, f"no {PROPOSAL_NAME} in {workspace}"
     done = runner(
         ["python", str(GATE), "--catalog", str(proposal), "--before", str(CATALOG)],
         PROJECT_ROOT,
     )
-    return done.returncode, (done.stdout or "") + (done.stderr or "")
+    output = (done.stdout or "") + (done.stderr or "")
+    if done.returncode == 0:
+        status = "passed"
+    elif done.returncode == GATE_REFUSED:
+        status = "refused"
+    else:
+        status = "did-not-run"
+    return status, done.returncode, output
 
 
 def _subprocess(argv: Sequence[str], cwd: Path) -> subprocess.CompletedProcess:
-    return subprocess.run(list(argv), cwd=cwd, capture_output=True, text=True)
+    # The gate imports `scripts.datasets.*`, which only resolves with the repo on
+    # the path. Inheriting the caller's environment is not enough: nothing puts it
+    # there, and without it the gate exits on ImportError before checking anything.
+    env = {**os.environ,
+           "PYTHONPATH": os.pathsep.join([str(PROJECT_ROOT / "backend"), str(PROJECT_ROOT)])}
+    return subprocess.run(list(argv), cwd=cwd, capture_output=True, text=True, env=env)
 
 
 def run(
@@ -281,15 +312,15 @@ def run(
 
     (workspace / "report.txt").write_text(outcome.text, encoding="utf-8")
 
-    gate_code, gate_output = (None, "")
+    gate_status, gate_code, gate_output = ("not-applicable", None, "")
     if role.proposes_catalog_change:
-        gate_code, gate_output = _gate(workspace, gate_runner)
+        gate_status, gate_code, gate_output = _gate(workspace, gate_runner)
         (workspace / "gate.txt").write_text(gate_output, encoding="utf-8")
 
     result = Result(
         role=role.name, task=task, workspace=workspace, backend=executor.name,
         outcome=outcome, attempts=used, started_at=started,
-        gate_returncode=gate_code, gate_output=gate_output,
+        gate_status=gate_status, gate_returncode=gate_code, gate_output=gate_output,
     )
     (workspace / "run.json").write_text(
         json.dumps(result.as_record(), indent=2, sort_keys=True) + "\n", encoding="utf-8"

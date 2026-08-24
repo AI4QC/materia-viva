@@ -77,3 +77,25 @@ def test_a_role_renders_to_frontmatter_the_harness_can_read(name):
     assert front["tools"] == ", ".join(role.tools)
     # the file is an artifact, and says so, so nobody edits it and loses the edit
     assert "Generated from src/agents/" in rendered
+
+
+def test_no_role_instructs_on_a_lifecycle_field_the_catalog_does_not_have():
+    """A prompt naming a field that does not exist is an instruction nothing can obey.
+
+    `state` and `reason` are designed in section 2 of the loop document and not
+    landed. Three roles were telling agents to write or avoid them anyway. When
+    the fields do land this test stops policing them on its own.
+    """
+    import json
+
+    from src.agents.harness import CATALOG
+
+    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+    present = {key for source in catalog["sources"] for key in source}
+
+    for field in ("state", "reason"):
+        if field in present:
+            continue
+        for name, role in ROLES.items():
+            for form in (f"`{field}`", f'"{field}"'):
+                assert form not in role.prompt, f"{name} names {field}, which no source has"

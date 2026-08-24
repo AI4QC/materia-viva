@@ -95,6 +95,11 @@ AMENDABLE = {"downloads"}
 #: proposal amends none.
 STALE_BASELINE_THRESHOLD = 3
 
+#: Exit code for "the diff may not proceed". Deliberately not 1: a caller has to
+#: be able to tell a refusal from this script failing to run at all, and 1 is
+#: what an uncaught exception exits with.
+REFUSED = 3
+
 
 def out_of_scope_edits(before: dict[str, Any], after: dict[str, Any]) -> list[str]:
     """Anything the diff touches that no agent role is allowed to touch.
@@ -350,7 +355,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\n{len(report['problems'])} problem(s):")
         for problem in report["problems"]:
             print(f"  {problem}")
-        return 1
+        return REFUSED
     print("\npasses the machine checks — the licence and admission gates are next")
     return 0
 

@@ -93,8 +93,7 @@ def main(argv: list[str] | None = None) -> int:
     for name in record.resumed:
         print(f"  {name:11s} reused from an earlier attempt")
     for result in record.results:
-        gate = "" if result.gate_passed is None else (
-            "  gate=ok" if result.gate_passed else "  gate=refused")
+        gate = "" if result.gate_passed is None else f"  gate={result.gate_status}"
         cost = "" if result.outcome.cost_usd is None else f"  ${result.outcome.cost_usd:.2f}"
         print(f"  {result.role:11s} {'ok' if result.ok else 'failed'}{gate}{cost}  "
               f"{result.workspace}")

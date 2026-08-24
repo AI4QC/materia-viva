@@ -34,7 +34,7 @@ carries this content under another provider — the case a host-and-name compari
 One candidate catalog file, written outside the repository (a scratch path the caller gives you).
 Copy `scripts/datasets/sources.json` whole and **append** new entries; change nothing that is
 already there, not one field. Each entry needs the six fields `validate_catalog` requires, plus
-`state: registered`, and `notes` carrying your evidence:
+`notes` carrying your evidence:
 
 ```jsonc
 {{
@@ -44,7 +44,6 @@ already there, not one field. Each entry needs the six fields `validate_catalog`
   "official_url": "https://…",
   "license": "free text, e.g. CC BY 4.0 or the site's terms",
   "data_path": "raw/acquired/<id>",
-  "state": "registered",
   "notes": "evidence and claims"
 }}
 ```
@@ -63,7 +62,8 @@ crystal structures, whether the licence permits redistribution — is a claim, a
 
 {no_edits}
 {politeness}
-- Never make a licence decision, never write `reason`, never advance any state.
+- Never make a licence decision, and never record one. You propose a candidate; the licence
+  gate is a person, and what you found about the licence is a claim in `notes`.
 
 {gate}
 

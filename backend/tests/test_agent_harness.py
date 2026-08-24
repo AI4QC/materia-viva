@@ -5,7 +5,10 @@ import pytest
 
 from src.agents import ROLES
 from src.agents.tokens import Usage
+from scripts.datasets import verify_catalog_change
 from src.agents.harness import (
+    CATALOG,
+    GATE_REFUSED,
     PROPOSAL_NAME,
     CliExecutor,
     Outcome,
@@ -88,10 +91,55 @@ def test_a_role_that_proposes_nothing_is_not_gated(tmp_path):
     assert not (tmp_path / "gate.txt").exists()
 
 
-def test_a_proposing_role_that_left_nothing_behind_is_reported_as_such(tmp_path):
+def test_a_proposing_role_that_left_nothing_behind_does_not_pass_the_gate(tmp_path):
+    # it proposed a catalog change and nothing checked it, which is not "no gate applies"
     result = run(ROLES["updater"], "upgrade", workspace=tmp_path, executor=_FakeExecutor(),
                  now=WHEN)
-    assert result.gate_passed is None and PROPOSAL_NAME in result.gate_output
+    assert result.gate_status == "no-proposal"
+    assert result.gate_passed is False and PROPOSAL_NAME in result.gate_output
+
+
+def test_a_gate_that_could_not_run_is_not_read_as_a_refusal(tmp_path):
+    (tmp_path / PROPOSAL_NAME).write_text("{}", encoding="utf-8")
+    result = run(ROLES["explorer"], "find", workspace=tmp_path, executor=_FakeExecutor(),
+                 gate_runner=_gate_runner(1), now=WHEN)
+    assert result.gate_status == "did-not-run"
+    assert result.gate_passed is False
+
+
+def test_the_refusal_code_is_the_one_the_gate_actually_exits_with():
+    # two files, one number: if the gate renumbers, the harness stops understanding it
+    assert GATE_REFUSED == verify_catalog_change.REFUSED
+
+
+@pytest.mark.parametrize("proposal,expected", [
+    ("unchanged", "passed"),
+    ("bad", "refused"),
+])
+def test_the_real_gate_runs_from_the_harness(tmp_path, monkeypatch, proposal, expected):
+    """No fake runner. A gate that cannot even import is the bug this pins.
+
+    The harness invokes the gate as a subprocess, and the gate imports
+    `scripts.datasets.*`. Every test above supplies a fake runner, so nothing
+    exercised the one call that has to work.
+    """
+    # the caller is not obliged to have set this; the harness is
+    monkeypatch.delenv("PYTHONPATH", raising=False)
+
+    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+    if proposal == "bad":
+        catalog["sources"].append(
+            {"id": "zzz-not-a-source", "name": "T", "access": "open",
+             "official_url": "https://example.org", "license": "CC-BY-4.0",
+             "data_path": "/absolute/and/therefore/unsafe", "status": "candidate",
+             "downloads": []}
+        )
+    (tmp_path / PROPOSAL_NAME).write_text(json.dumps(catalog), encoding="utf-8")
+
+    result = run(ROLES["explorer"], "find", workspace=tmp_path, executor=_FakeExecutor(),
+                 now=WHEN)
+    assert result.gate_status == expected, result.gate_output
+    assert "ModuleNotFoundError" not in result.gate_output
 
 
 def test_a_retryable_failure_is_retried_and_a_conclusive_one_is_not(tmp_path):

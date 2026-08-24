@@ -28,6 +28,14 @@ from src.agents.tokens import Budget, Usage
 #: role name -> the proposal that role produced. Deliberately not its report.
 Artifacts = Mapping[str, Path]
 
+#: Why the run stopped, per gate verdict. "Refused" and "the gate never ran" are
+#: both reasons to stop and different things to go and fix.
+GATE_STOP = {
+    "refused": "the gate refused what it produced",
+    "no-proposal": "the role left no proposal for the gate to read",
+    "did-not-run": "the gate itself failed to run",
+}
+
 
 @dataclass(frozen=True)
 class Step:
@@ -223,13 +231,16 @@ def run_pipeline(
         if budget is not None:
             budget.record(result.outcome.usage)
 
-        if result.gate_passed is False:
-            record.stopped_after = step.role.name
-            record.stopped_because = "the gate refused what it produced"
-            break
+        # Why the role failed says more than what the gate made of the nothing it
+        # left behind, so it is checked first.
         if not result.ok:
             record.stopped_after = step.role.name
             record.stopped_because = result.outcome.error or "the role did not succeed"
+            break
+        if result.gate_passed is False:
+            record.stopped_after = step.role.name
+            record.stopped_because = GATE_STOP.get(
+                result.gate_status, f"the gate answered {result.gate_status}")
             break
 
     record.resumed = tuple(resumed)

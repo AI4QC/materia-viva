@@ -109,6 +109,19 @@ README 的线性七步改成带失败出口的形态。`✋` 标记人工闸门�
 - agent 的每一个论断都必须落成一个**不依赖 agent 的检查**：文件存在、id 对上、diff 为零。做不到
   这一点的论断，只能进人工闸门排队，不能自动通过。
 
+**这些禁令中可机器化的部分现在由闸门执行，不再只写在这里。**
+[`verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py) 会拒绝任何触碰"新增之外"的
+diff：改动既有来源除 `downloads` 以外的任何字段（尤其是推进 `state` 或改写 `status`）、删除来源、候选
+以非 `registered` 到达、改动目录自身的 `schema_version` / `updated`。在这条检查存在之前，一个把
+`catalysis-hub` 从 `rejected` 推成 `integrated` 并改写其 `status` 的 diff 能**零问题通过**——因为其余
+每条检查只看 diff *新增*了什么。
+
+`data_path` 不在可改之列:移动一个已采集来源的目录会让盘上已有的文件变成孤儿，所以即便第 1.4 节允许
+agent 在文字里论证要改，动手仍是人的事。
+
+**仍然没有机制约束的两件**（见文末缺陷记录）:agent 自己发 HTTP 请求时的礼貌规则（第 4 节的 1 秒/host
+与 robots.txt 实现在探测器的 poller 里，而 agent 用自己的方式抓取），以及 `authored_by` 那个自述式声明。
+
 本文件第 1-4 步就是按这个模式做的（agent 起草 + 人工闸门 + 机器可验证的事实），包括这一节。
 
 **本节不设计 agent 本身**——模型选择、提示词、自治程度、调度方式都还没有依据可谈，写下来只会是猜测。

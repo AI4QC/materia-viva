@@ -125,6 +125,22 @@ built**:
   exists, an id matches, a diff is empty. A claim that cannot be reduced that way queues for a
   human gate; it does not pass automatically.
 
+**The machine-checkable part of those prohibitions is now enforced by the gate rather than only
+stated here.** [`verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py) refuses any
+diff that touches anything beyond what it adds: changing any field but `downloads` on an existing
+source — advancing `state` or rewriting `status` above all — deleting a source, a candidate arriving
+as anything but `registered`, or altering the catalog's own `schema_version` / `updated`. Before that
+check existed, a diff moving `catalysis-hub` from `rejected` to `integrated` and rewriting its
+`status` passed with **zero problems reported**, because every other check only inspects what a diff
+*adds*.
+
+`data_path` is not amendable: moving an acquired source's directory orphans what is already on disk,
+so it stays a human's edit even though section 1.4 lets an agent argue for one in prose.
+
+**Two prohibitions still have no mechanism** (see the defect note at the end): the politeness rules
+when an agent makes its own HTTP requests — section 4's one-per-second and robots.txt live in the
+probe's poller, while agents fetch their own way — and the self-declared `authored_by` claim.
+
 Steps 1 to 4 of this document were done in exactly that pattern — agent drafting, human gates,
 machine-verifiable facts — including this section.
 

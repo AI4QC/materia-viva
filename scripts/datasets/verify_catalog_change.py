@@ -23,6 +23,11 @@ For a download entry the diff adds or alters:
 * does a new source claim a `data_path` some other source already owns;
 * does any free-text field still name an upstream id the plan just replaced.
 
+And across the whole diff: does it touch anything no agent role is allowed to
+touch — another source's state or status, a deletion, a candidate arriving as
+anything but `registered`, the catalog's own header. Section 1.2 forbids those;
+until this gate looked, nothing enforced the prohibition.
+
 Nothing here judges whether a candidate is worth having: the record count it
 claims and whether it really is a crystal structure database are claims, and they
 queue for the human gates.
@@ -77,6 +82,73 @@ def proposed_downloads(before: dict[str, Any], after: dict[str, Any]) -> list[di
             if entry not in was:
                 proposed.append({"source_id": source_id, **entry})
     return proposed
+
+
+#: The only field a proposal may change on a source the catalog already holds.
+#: `data_path` is deliberately not here: moving an acquired source's directory
+#: orphans what is already on disk, so it is a human's edit even though section
+#: 1.4 permits an agent to suggest one in prose.
+AMENDABLE = {"downloads"}
+
+#: Above this many existing sources showing forbidden edits, the diff is read as
+#: stale rather than as misbehaviour. A pull plan amends one source; a discovery
+#: proposal amends none.
+STALE_BASELINE_THRESHOLD = 3
+
+
+def out_of_scope_edits(before: dict[str, Any], after: dict[str, Any]) -> list[str]:
+    """Anything the diff touches that no agent role is allowed to touch.
+
+    Section 1.2 forbids an agent from advancing a source's state, and until this
+    existed nothing enforced it — a diff that moved catalysis-hub from rejected to
+    integrated and rewrote its status passed every other check without a word,
+    because those checks only look at what the diff *adds*.
+    """
+    old = {s["id"]: s for s in before["sources"]}
+    new = {s["id"]: s for s in after["sources"]}
+    problems = []
+
+    for source_id in sorted(set(old) - set(new)):
+        problems.append(f"{source_id}: removed — a proposal may add or amend, never delete")
+
+    edited = []
+    for source_id in sorted(set(old) & set(new)):
+        was, now = old[source_id], new[source_id]
+        touched = sorted(k for k in set(was) | set(now) if was.get(k) != now.get(k))
+        forbidden = [k for k in touched if k not in AMENDABLE]
+        if forbidden:
+            edited.append((source_id, forbidden))
+    # A legitimate proposal touches one source, or adds several and amends none.
+    # Many sources differing in the same forbidden fields is not an agent
+    # misbehaving — it is a proposal built against a catalog that has since moved,
+    # and saying so once beats a hundred per-source lines that all mean it.
+    if len(edited) > STALE_BASELINE_THRESHOLD:
+        fields = sorted({field for _sid, fields in edited for field in fields})
+        problems.append(
+            f"{len(edited)} existing sources differ in {fields}, which no proposal may change — "
+            "this was almost certainly built against a different baseline, so rebase it and "
+            "re-run rather than reading the differences as edits"
+        )
+    else:
+        problems.extend(
+            f"{source_id}: a proposal may only change {sorted(AMENDABLE)} on an existing "
+            f"source, not {forbidden}"
+            for source_id, forbidden in edited
+        )
+
+    for source in after["sources"]:
+        state = source.get("state")
+        if source["id"] not in old and state not in (None, "registered"):
+            problems.append(
+                f"{source['id']}: a candidate must arrive as registered, not {state!r}"
+            )
+
+    for key in ("schema_version", "updated"):
+        if before.get(key) != after.get(key):
+            problems.append(
+                f"catalog {key}: {before.get(key)!r} -> {after.get(key)!r} is not a proposal's to make"
+            )
+    return problems
 
 
 def proposed_sources(before: dict[str, Any], after: dict[str, Any]) -> list[dict[str, Any]]:
@@ -222,6 +294,7 @@ def verify(before: dict[str, Any], after: dict[str, Any], poller: PolitePoller,
         report["problems"].append(f"catalog does not validate: {error}")
         return report
 
+    report["problems"].extend(out_of_scope_edits(before, after))
     report["problems"].extend(data_path_collisions(after))
     report["problems"].extend(stale_prose(before, after))
 

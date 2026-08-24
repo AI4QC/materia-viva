@@ -2,6 +2,7 @@ import pytest
 
 from scripts.datasets.verify_catalog_change import (
     check_candidate_urls,
+    out_of_scope_edits,
     check_urls,
     duplicate_candidates,
     proposed_sources,
@@ -187,3 +188,67 @@ def test_a_candidate_whose_official_url_does_not_resolve_is_a_problem():
     ok = verify(before, after, _StubPoller(status=200), free_bytes=10**12)
     assert ok["problems"] == []
     assert ok["candidates"][0]["source_id"] == "newdb"
+
+
+def test_a_proposal_may_not_advance_another_sources_state():
+    # section 1.2 forbids this and, until the gate looked, nothing enforced it:
+    # every other check only inspects what a diff adds
+    before = _catalog({**_source("catalysis-hub"), "state": "rejected", "status": "join key missing"})
+    after = _catalog({**_source("catalysis-hub"), "state": "integrated", "status": "fine now"})
+    problems = out_of_scope_edits(before, after)
+    assert len(problems) == 1
+    assert "'state'" in problems[0] and "'status'" in problems[0]
+
+
+def test_amending_the_downloads_of_one_source_is_what_a_plan_is_for():
+    before = _catalog(_source("cod", downloads=[_dl("a.csv", "https://h/a.csv")]))
+    after = _catalog(_source("cod", downloads=[_dl("b.csv", "https://h/b.csv")]))
+    assert out_of_scope_edits(before, after) == []
+
+
+def test_moving_an_acquired_sources_directory_is_a_humans_edit():
+    # it orphans what is already on disk, so it is not a proposal's to make even
+    # though section 1.4 lets an agent argue for one in prose
+    before = _catalog(_source("cod"))
+    after = _catalog({**_source("cod"), "data_path": "raw/acquired/cod-moved"})
+    assert "'data_path'" in out_of_scope_edits(before, after)[0]
+
+
+def test_a_proposal_may_not_delete_a_source():
+    before = _catalog(_source("cod"), _source("icsd"))
+    after = _catalog(_source("cod"))
+    assert out_of_scope_edits(before, after) == ["icsd: removed — a proposal may add or amend, never delete"]
+
+
+def test_a_candidate_must_arrive_as_registered():
+    before = _catalog(_source("cod"))
+    ok = _catalog(_source("cod"), {**_source("newdb"), "state": "registered"})
+    assert out_of_scope_edits(before, ok) == []
+    # an agent claiming a candidate is already integrated is the state advance
+    # of the previous test wearing a new entry
+    bad = _catalog(_source("cod"), {**_source("newdb"), "state": "integrated"})
+    assert "must arrive as registered" in out_of_scope_edits(before, bad)[0]
+
+
+def test_the_catalogs_own_header_is_not_a_proposals_to_change():
+    before = _catalog(_source("cod"))
+    after = dict(_catalog(_source("cod")), schema_version=2, updated="2026-01-01")
+    problems = out_of_scope_edits(before, after)
+    assert any("schema_version" in p for p in problems)
+    assert any("updated" in p for p in problems)
+
+
+def test_many_sources_differing_reads_as_a_stale_baseline_not_as_edits():
+    # a pull plan amends one source and a discovery proposal amends none, so a
+    # hundred sources differing in the same field means the proposal was built
+    # against a catalog that has since moved — one line beats a hundred
+    ids = [f"src{n}" for n in range(10)]
+    before = _catalog(*({**_source(i), "state": "acquired"} for i in ids))
+    after = _catalog(*({**_source(i), "state": "integrated"} for i in ids))
+    problems = out_of_scope_edits(before, after)
+    assert len(problems) == 1
+    assert "10 existing sources differ" in problems[0] and "rebase" in problems[0]
+    # but a handful is still named individually, since that may be real misbehaviour
+    few_before = _catalog(*({**_source(i), "state": "acquired"} for i in ids[:2]))
+    few_after = _catalog(*({**_source(i), "state": "integrated"} for i in ids[:2]))
+    assert len(out_of_scope_edits(few_before, few_after)) == 2

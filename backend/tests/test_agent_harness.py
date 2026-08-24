@@ -15,7 +15,6 @@ from src.agents.harness import (
     command,
     default_executor,
     run,
-    run_many,
 )
 
 WHEN = datetime(2026, 8, 24, 9, 0, tzinfo=timezone.utc)
@@ -123,11 +122,3 @@ def test_the_record_carries_what_the_run_cost(tmp_path):
     assert record["usage"]["total"] == 11800 and record["usage"]["billable"] == 2800
     assert record["backend"] == "fake" and record["attempts"] == 1
     assert record["started_at"].startswith("2026-08-24")
-
-
-def test_one_role_over_several_inputs_runs_a_few_at_a_time(tmp_path):
-    fake = _FakeExecutor()
-    tasks = [(f"upgrade {name}", tmp_path / name) for name in ("a", "b", "c", "d")]
-    results = run_many(ROLES["cleaner"], tasks, workers=2, executor=fake, now=WHEN)
-    assert len(results) == 4
-    assert {r.workspace.name for r in results} == {"a", "b", "c", "d"}

@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterator
 
 
 @dataclass(frozen=True)
@@ -108,10 +108,14 @@ class Budget:
     enforced a limit. This is the limit. It is checked before a step rather than
     after, because a budget you discover you have exceeded is a report, not a
     budget.
+
+    Counted in tokens and not in money, for the same reason `Usage` is: a ceiling
+    in a provider's currency stops meaning the same thing when the provider or
+    its prices change. Cost is still recorded and reported; it is just not what
+    the limit is drawn in.
     """
 
     tokens: int | None = None
-    usd: float | None = None
     spent: Usage = field(default_factory=Usage)
 
     def record(self, usage: Usage) -> None:
@@ -119,23 +123,15 @@ class Budget:
 
     @property
     def exhausted(self) -> bool:
-        return self.remaining_tokens == 0 or self.remaining_usd == 0
+        return self.remaining_tokens == 0
 
     @property
     def remaining_tokens(self) -> int | None:
         return None if self.tokens is None else max(0, self.tokens - self.spent.total)
 
-    @property
-    def remaining_usd(self) -> float | None:
-        if self.usd is None:
-            return None
-        return max(0.0, round(self.usd - (self.spent.cost_usd or 0.0), 6))
-
     def why(self) -> str:
         if self.remaining_tokens == 0:
             return f"token budget of {self.tokens:,} is spent ({self.spent.total:,} used)"
-        if self.remaining_usd == 0:
-            return f"budget of ${self.usd:.2f} is spent (${self.spent.cost_usd or 0:.2f} used)"
         return ""
 
 

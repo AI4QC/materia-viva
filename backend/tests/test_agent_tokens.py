@@ -51,14 +51,6 @@ def test_a_budget_is_exhausted_before_it_is_exceeded():
     assert "token budget of 1,000 is spent" in budget.why()
 
 
-def test_a_money_budget_works_the_same_way():
-    budget = Budget(usd=1.0)
-    budget.record(Usage(cost_usd=0.4))
-    assert budget.remaining_usd == pytest.approx(0.6)
-    budget.record(Usage(cost_usd=0.7))
-    assert budget.exhausted and "$1.00 is spent" in budget.why()
-
-
 def test_no_budget_never_stops_anything():
     budget = Budget()
     budget.record(Usage(input=10**9, cost_usd=10**6))

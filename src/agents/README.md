@@ -80,7 +80,9 @@ python -m src.agents run discovery-sweep --max-tokens 400000
 ```
 
 A `Budget` is checked **before** a step, not after — a ceiling you discover you have crossed is a
-report, not a ceiling — and the step that would have broken it is named as where the run stopped.
+report, not a ceiling — and the step that would have broken it is named as where the run stopped. It
+is drawn in tokens rather than money for the same reason `Usage` is: a ceiling in a provider's
+currency stops meaning the same thing when the provider does. Cost is still recorded and reported.
 
 ## The pipelines
 

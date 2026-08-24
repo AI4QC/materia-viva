@@ -43,7 +43,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("list")
     spent = sub.add_parser("tokens")
     spent.add_argument("--root", type=Path, default=DEFAULT_RUNS)
-    spent.add_argument("--by", choices=["role", "backend", "day", "pipeline"], default="role")
+    spent.add_argument("--by", choices=["role", "backend", "day"], default="role")
     for name in ("plan", "run"):
         node = sub.add_parser(name)
         node.add_argument("pipeline", choices=sorted(PIPELINES))
@@ -57,7 +57,6 @@ def main(argv: list[str] | None = None) -> int:
             node.add_argument("--backend", choices=["sdk", "cli"], default=None)
             node.add_argument("--max-tokens", type=int, default=None,
                               help="stop before the step that would exceed this")
-            node.add_argument("--max-usd", type=float, default=None)
     args = parser.parse_args(argv)
 
     if args.command == "render":
@@ -88,10 +87,7 @@ def main(argv: list[str] | None = None) -> int:
 
         executor = SdkExecutor() if args.backend == "sdk" else CliExecutor()
 
-    budget = (
-        Budget(tokens=args.max_tokens, usd=args.max_usd)
-        if (args.max_tokens or args.max_usd) else None
-    )
+    budget = Budget(tokens=args.max_tokens) if args.max_tokens else None
     record = run_pipeline(pipeline, root=args.root, run_id=args.run_id, prefix=args.about,
                           resume=args.resume, executor=executor, budget=budget)
     for name in record.resumed:

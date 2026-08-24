@@ -23,11 +23,10 @@ from __future__ import annotations
 import json
 import subprocess
 import time
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Iterable, Protocol, Sequence
+from typing import Any, Callable, Protocol, Sequence
 
 from src.agents.base import Role
 from src.agents.tokens import Usage, from_anthropic_model_usage
@@ -41,7 +40,7 @@ DEFAULT_TIMEOUT = 1800.0
 DEFAULT_ATTEMPTS = 2
 #: Retrying a role that ran and concluded just spends tokens on the same answer.
 #: These are the failures where the role never got to run.
-RETRYABLE = ("timed out", "connection", "CLINotFound", "ProcessError", "transport")
+RETRYABLE = ("timed out", "connection", "CLINotFound", "ProcessError")
 
 
 @dataclass(frozen=True)
@@ -296,21 +295,3 @@ def run(
         json.dumps(result.as_record(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return result
-
-
-def run_many(
-    role: Role,
-    tasks: Iterable[tuple[str, Path]],
-    *,
-    workers: int = 3,
-    **kwargs: Any,
-) -> list[Result]:
-    """One role over several inputs, a few at a time.
-
-    The cap is not about our machine; it is about how many conversations we are
-    willing to have with other people's servers at once through agents whose
-    request volume we do not control.
-    """
-    items = list(tasks)
-    with ThreadPoolExecutor(max_workers=max(1, min(workers, len(items) or 1))) as pool:
-        return list(pool.map(lambda item: run(role, item[0], workspace=item[1], **kwargs), items))

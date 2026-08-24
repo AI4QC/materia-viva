@@ -306,6 +306,23 @@ N / 候选总数 M」**。
 
 这正是第 1.2 节要的那种检查——**一个 agent 编不出来的数**。所以准入批准的依据是测量，不是叙述。
 
+已实现：[`scripts/properties/measure_overlap.py`](../scripts/properties/measure_overlap.py)。它读
+`scripts/properties/hashing.py` 已有的指纹输出（`native_id / n_sites / formula / bawl_hash`，失败记为
+`FAIL:<reason>`），因此**不重实现指纹协议**；池子一侧以只读方式打开
+`data/props_work/match_map.sqlite` 的 `hash_map`。产出正是下面那四行测量，例如：
+
+```text
+读入 340 行，解析失败 15 (0.0441)
+  FAIL:TOO_LARGE × 12
+  FAIL:DISORDERED × 3
+唯一指纹 320，池中已有 300，新增 20 (0.0625)
+  与 cod 重叠 300 个材料
+  与 icsd 重叠 100 个材料
+```
+
+`id_map` 只建了 `(source, native_id)` 索引，没有 `material_id` 索引，所以按来源拆分要扫它一遍——
+这是拿到"与哪些现有来源各重叠多少"的代价，一次全表扫。
+
 #### 关键结论：准入只需要结构，不需要性质
 
 要算重叠就得把结构从拉下来的数据里解析出来——但**只要结构**。第 5 节那套带 golden sample 的性质
@@ -686,6 +703,13 @@ site 上限、以及**复合键例外清单**。枚举库（Deem 假想沸石、
 **第 5 步：golden sample 框架与第 5 节门槛检查。**
 包含第 1.3 节那个拆分：起草与期望输出由两个互不可见的 agent 产出，否则零 diff 只证明自我一致。
 → 验证：拿一个现有适配器反向跑通，故意改坏一个字段应当报错。
+
+**第 5.5 步（已完成）：准入的重叠测量。**
+[`scripts/properties/measure_overlap.py`](../scripts/properties/measure_overlap.py)，第 1.10 节。
+纯脚本、零 agent，复用既有指纹协议与 match map。
+→ 验证：9 个测试（含"整个候选池子都已有"这种 `open-materials-db` 形态、以及只读打开 match map 的
+断言）；本机没有真实索引，端到端只在合成 fixture 上跑过，**真实验证要在存数据那台机器上执行**：
+`python scripts/properties/measure_overlap.py --hashes <候选的 hashes.tsv.gz> --source <id>`。
 
 **第 6 步：快照元数据与变更报告（第 6.5 节）。**
 → 验证：对同一份索引连出两次报告，差异应为空。

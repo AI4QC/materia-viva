@@ -1,0 +1,70 @@
+{
+  "authored_by": "recorded-from-adapter",
+  "records": [
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "cod",
+          "cod-1234567"
+        ]
+      ],
+      "native_id": "omdb-cod-1234567",
+      "properties": [
+        {
+          "method": "PBE (OMDB-GAP1)",
+          "name": "band_gap",
+          "unit": "eV",
+          "value": 2.5
+        }
+      ],
+      "structure": "sha256:5e80c6c530b1fa0ada9951749ec3e3bbf11f899ee68becf32784ec2c2b5d8f99"
+    },
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "cod",
+          "cod-7654321"
+        ]
+      ],
+      "native_id": "omdb-cod-7654321",
+      "properties": [],
+      "structure": "sha256:5e80c6c530b1fa0ada9951749ec3e3bbf11f899ee68becf32784ec2c2b5d8f99"
+    },
+    {
+      "experimental": false,
+      "match_ids": [],
+      "native_id": "omdb-cod-2",
+      "properties": [
+        {
+          "method": "PBE (OMDB-GAP1)",
+          "name": "band_gap",
+          "unit": "eV",
+          "value": 1.25
+        }
+      ],
+      "structure": "sha256:5e80c6c530b1fa0ada9951749ec3e3bbf11f899ee68becf32784ec2c2b5d8f99"
+    },
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "cod",
+          "cod-2222222"
+        ]
+      ],
+      "native_id": "omdb-cod-2222222",
+      "properties": [
+        {
+          "method": "PBE (OMDB-GAP1)",
+          "name": "band_gap",
+          "unit": "eV",
+          "value": 0.75
+        }
+      ],
+      "structure": null
+    }
+  ],
+  "source_key": "omdb-organic"
+}

@@ -1,0 +1,53 @@
+{
+  "authored_by": "recorded-from-adapter",
+  "records": [
+    {
+      "experimental": true,
+      "match_ids": [],
+      "native_id": "0000001",
+      "properties": [
+        {
+          "method": "experiment diffraction",
+          "name": "density",
+          "unit": "g/cm³",
+          "value": 2.65
+        },
+        {
+          "method": "experiment",
+          "name": "mineral_name",
+          "unit": null,
+          "value": "Quartz"
+        }
+      ],
+      "structure": "sha256:783b1471968ee6d794d23e3d087b5535c06652c74e86645d7abfcf8caf4a9176"
+    },
+    {
+      "experimental": true,
+      "match_ids": [],
+      "native_id": "0000002",
+      "properties": [],
+      "structure": "sha256:f63ce542525f68aff130245c1c1471cea5f6cf4785913c02030bb864a98e331e"
+    },
+    {
+      "experimental": true,
+      "match_ids": [],
+      "native_id": "0000005",
+      "properties": [
+        {
+          "method": "experiment diffraction",
+          "name": "density",
+          "unit": "g/cm³",
+          "value": 4.39
+        },
+        {
+          "method": "experiment",
+          "name": "mineral_name",
+          "unit": null,
+          "value": "Fayalite"
+        }
+      ],
+      "structure": "sha256:d605a3e5b3c8568dd73f2c8f79e1efb5f333bc809dafae2f18f5e6a4dd762f73"
+    }
+  ],
+  "source_key": "amcsd"
+}

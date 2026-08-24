@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from src.agents.harness import PROPOSAL_NAME, Outcome
+from src.agents.tokens import Budget, Usage
 from src.agents.pipelines import DISCOVERY_SWEEP, PIPELINES, plan, run_pipeline
 
 WHEN = datetime(2026, 8, 24, 9, 0, tzinfo=timezone.utc)
@@ -12,16 +13,18 @@ RUN_ID = "20260824T090000Z"
 class _FakeExecutor:
     name = "fake"
 
-    def __init__(self, fail_for=(), cost=0.5):
+    def __init__(self, fail_for=(), cost=0.5, tokens=1000):
         self.fail_for = set(fail_for)
         self.cost = cost
+        self.tokens = tokens
         self.calls = []
 
     def __call__(self, role, prompt, workspace, *, model=None, timeout=None):
         self.calls.append((role.name, prompt))
         if role.name in self.fail_for:
             return Outcome(ok=False, text="", error="exit 1")
-        return Outcome(ok=True, text="done", cost_usd=self.cost, turns=2)
+        return Outcome(ok=True, text="done", turns=2,
+                       usage=Usage(input=self.tokens, output=0, cost_usd=self.cost))
 
 
 def _gate(returncode=0):
@@ -108,7 +111,7 @@ def test_a_step_that_failed_before_is_redone_not_resumed(tmp_path):
 def test_the_run_records_what_the_whole_pipeline_cost(tmp_path):
     record = run_pipeline(PIPELINES["audit"], root=tmp_path, run_id=RUN_ID,
                           executor=_FakeExecutor(cost=0.25), now=WHEN)
-    assert record.cost_usd == 0.25
+    assert record.cost_usd == 0.25 and record.usage.total == 1000
     written = json.loads((tmp_path / RUN_ID / "pipeline.json").read_text(encoding="utf-8"))
     assert written["pipeline"] == "audit" and written["cost_usd"] == 0.25
     assert written["run_id"] == RUN_ID
@@ -119,3 +122,24 @@ def test_what_a_run_is_about_reaches_every_step(tmp_path):
     run_pipeline(PIPELINES["upgrade"], root=tmp_path, run_id=RUN_ID, prefix="source: core-mof",
                  executor=fake, gate_runner=_gate(), now=WHEN)
     assert all("source: core-mof" in prompt for _name, prompt in fake.calls)
+
+
+def test_a_budget_stops_the_run_before_the_step_that_would_break_it(tmp_path):
+    # a ceiling you discover you have crossed is a report, not a ceiling
+    budget = Budget(tokens=1500)
+    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID,
+                          executor=_FakeExecutor(tokens=1000), gate_runner=_gate(),
+                          budget=budget, now=WHEN)
+    # explorer spends 1000, challenger 1000 and takes it past 1500, reviewer never starts
+    assert [r.role for r in record.results] == ["explorer", "challenger"]
+    assert record.stopped_after == "reviewer"
+    assert "token budget of 1,500 is spent" in record.stopped_because
+
+
+def test_a_budget_with_room_does_not_interfere(tmp_path):
+    budget = Budget(tokens=1_000_000)
+    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID,
+                          executor=_FakeExecutor(tokens=1000), gate_runner=_gate(),
+                          budget=budget, now=WHEN)
+    assert record.stopped_after is None
+    assert budget.spent.total == 3000 and budget.remaining_tokens == 997_000

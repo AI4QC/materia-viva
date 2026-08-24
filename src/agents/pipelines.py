@@ -23,6 +23,7 @@ from typing import Callable, Mapping, Sequence
 from src.agents import ROLES
 from src.agents.base import Role
 from src.agents.harness import PROPOSAL_NAME, Executor, Result, run
+from src.agents.tokens import Budget, Usage
 
 #: role name -> the proposal that role produced. Deliberately not its report.
 Artifacts = Mapping[str, Path]
@@ -56,15 +57,22 @@ class PipelineRun:
     stopped_because: str = ""
 
     @property
+    def usage(self) -> Usage:
+        spent = Usage()
+        for result in self.results:
+            spent = spent + result.outcome.usage
+        return spent
+
+    @property
     def cost_usd(self) -> float | None:
-        costs = [r.outcome.cost_usd for r in self.results if r.outcome.cost_usd is not None]
-        return round(sum(costs), 4) if costs else None
+        return self.usage.cost_usd
 
     def as_record(self) -> dict:
         return {
             "pipeline": self.pipeline,
             "run_id": self.run_id,
             "started_at": self.started_at,
+            "usage": self.usage.as_record(),
             "cost_usd": self.cost_usd,
             "resumed": list(self.resumed),
             "steps": [r.as_record() for r in self.results],
@@ -167,6 +175,7 @@ def run_pipeline(
     run_id: str | None = None,
     prefix: str = "",
     resume: bool = False,
+    budget: Budget | None = None,
     executor: Executor | None = None,
     now: datetime | None = None,
     **run_kwargs,
@@ -180,6 +189,10 @@ def run_pipeline(
     `resume` reuses a step that finished in a previous attempt at the same
     `run_id` rather than paying for it again. A step is only skipped if its own
     record says it succeeded — a half-written workspace is redone.
+
+    `budget` is checked **before** a step, not after: a ceiling you discover you
+    have crossed is a report, not a ceiling. The step that would have broken it
+    is named as where the run stopped.
     """
     when = now or datetime.now(timezone.utc)
     run_id = run_id or when.strftime("%Y%m%dT%H%M%SZ")
@@ -195,6 +208,11 @@ def run_pipeline(
             artifacts[step.role.name] = workspace / PROPOSAL_NAME
             continue
 
+        if budget is not None and budget.exhausted:
+            record.stopped_after = step.role.name
+            record.stopped_because = budget.why()
+            break
+
         task = step.task(artifacts)
         if prefix:
             task = f"{prefix}\n\n{task}"
@@ -202,6 +220,8 @@ def run_pipeline(
                      now=when, **run_kwargs)
         record.results.append(result)
         artifacts[step.role.name] = workspace / PROPOSAL_NAME
+        if budget is not None:
+            budget.record(result.outcome.usage)
 
         if result.gate_passed is False:
             record.stopped_after = step.role.name

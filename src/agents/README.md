@@ -63,6 +63,25 @@ Around either backend it adds what `claude -p` does not:
   the order of 300k tokens, so redoing a step that succeeded because a later one broke is the
   expensive way to fail.
 
+## Tokens and the provider
+
+`Executor` is the provider seam. Everything above it — roles, gates, records, budgets — is ours;
+everything below belongs to whoever runs the model. A second vendor is a third executor class and a
+change nowhere else, provided it answers with an `Outcome` and maps what it reports into `Usage`.
+
+`tokens.py` is why that works. `Usage` counts input, output and the two cache classes, because
+dollars are a provider's opinion and tokens are what still compares after a model or a vendor
+changes. Cache reads are in the total and out of `billable`: they are cheap, not free, and leaving
+them out of the total is how a loop that looks affordable per turn stops being affordable per sweep.
+
+```bash
+python -m src.agents tokens --by role          # or --by day, --by backend
+python -m src.agents run discovery-sweep --max-tokens 400000
+```
+
+A `Budget` is checked **before** a step, not after — a ceiling you discover you have crossed is a
+report, not a ceiling — and the step that would have broken it is named as where the run stopped.
+
 ## The pipelines
 
 `pipelines.py` is the fan-out shape, in code rather than decided per run — the same every time and

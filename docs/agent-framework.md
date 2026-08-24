@@ -26,7 +26,7 @@ src/agents/
   __main__.py    render | list | plan | run
 ```
 
-## The five decisions, and what each costs
+## The six decisions, and what each costs
 
 **1. A role is code, not a document.** `base.Role` refuses at construction to build a role holding a
 tool that can edit a file, able to fetch without being told to use the shared client, or proposing a
@@ -70,6 +70,13 @@ shape, and a step sees only the artifact the previous role left, never its repor
 whoever launched it remembering to withhold the report. *Cost*: a fixed shape cannot adapt to a run
 that needs a different one.
 
+**6. The provider is a seam, not an assumption.** `Executor` is the only place that knows who runs
+the model. Roles, gates, records and budgets are counted in tokens, which still compare after a
+vendor changes; a provider's dollars and its per-model report are mapped at the seam into `Usage`.
+
+*Cost*: the neutral shape loses whatever a provider reports that does not fit it. *What would
+overturn it*: if a second provider is never added, the indirection bought nothing.
+
 ## What has actually run
 
 | Run | Cost | What it produced |
@@ -98,8 +105,10 @@ unattended once and been read.
 ## What running it for real would need
 
 - **A home for reports.** The harness records each run in its workspace; nothing collects them.
-- **A cost ceiling.** 300k tokens a sweep is affordable monthly and not weekly. The harness now
-  records what each run cost — the SDK backend reports it directly — but nothing enforces a limit.
+- **Someone to read the traces.** `python -m src.agents tokens` groups what has been spent by role,
+  by backend or by day, and `--max-tokens` stops a run before the step that would exceed it. What is
+  missing is a decision about what the ceiling should be: 334k tokens for a sweep plus an upgrade is
+  affordable monthly and not weekly, and nobody has said which.
 
 ## What would falsify this framework
 

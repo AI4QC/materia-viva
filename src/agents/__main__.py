@@ -4,6 +4,7 @@
     list                   the pipelines and the roles each runs
     plan <pipeline>        what would run, and what each step would be told
     run <pipeline>         run it, gating and recording each step
+    tokens                 what has been spent, grouped by role, backend or day
 
 The markdown is generated rather than maintained, so there is one definition and
 it is the Python: edit a role, re-render, and what the harness runs cannot drift
@@ -17,6 +18,7 @@ from pathlib import Path
 
 from src.agents import ROLES
 from src.agents.pipelines import PIPELINES, plan, run_pipeline
+from src.agents.tokens import Budget, report
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RENDER = PROJECT_ROOT / ".claude" / "agents"
@@ -39,6 +41,9 @@ def main(argv: list[str] | None = None) -> int:
     rendered = sub.add_parser("render")
     rendered.add_argument("--out", type=Path, default=DEFAULT_RENDER)
     sub.add_parser("list")
+    spent = sub.add_parser("tokens")
+    spent.add_argument("--root", type=Path, default=DEFAULT_RUNS)
+    spent.add_argument("--by", choices=["role", "backend", "day", "pipeline"], default="role")
     for name in ("plan", "run"):
         node = sub.add_parser(name)
         node.add_argument("pipeline", choices=sorted(PIPELINES))
@@ -50,11 +55,19 @@ def main(argv: list[str] | None = None) -> int:
             node.add_argument("--resume", action="store_true",
                               help="skip steps that already finished under this run id")
             node.add_argument("--backend", choices=["sdk", "cli"], default=None)
+            node.add_argument("--max-tokens", type=int, default=None,
+                              help="stop before the step that would exceed this")
+            node.add_argument("--max-usd", type=float, default=None)
     args = parser.parse_args(argv)
 
     if args.command == "render":
         for path in render(args.out):
             print(f"wrote {path}")
+        return 0
+
+    if args.command == "tokens":
+        for line in report(args.root, by=args.by):
+            print(line)
         return 0
 
     if args.command == "list":
@@ -75,8 +88,12 @@ def main(argv: list[str] | None = None) -> int:
 
         executor = SdkExecutor() if args.backend == "sdk" else CliExecutor()
 
+    budget = (
+        Budget(tokens=args.max_tokens, usd=args.max_usd)
+        if (args.max_tokens or args.max_usd) else None
+    )
     record = run_pipeline(pipeline, root=args.root, run_id=args.run_id, prefix=args.about,
-                          resume=args.resume, executor=executor)
+                          resume=args.resume, executor=executor, budget=budget)
     for name in record.resumed:
         print(f"  {name:11s} reused from an earlier attempt")
     for result in record.results:
@@ -85,8 +102,10 @@ def main(argv: list[str] | None = None) -> int:
         cost = "" if result.outcome.cost_usd is None else f"  ${result.outcome.cost_usd:.2f}"
         print(f"  {result.role:11s} {'ok' if result.ok else 'failed'}{gate}{cost}  "
               f"{result.workspace}")
-    if record.cost_usd is not None:
-        print(f"\nrun {record.run_id} cost ${record.cost_usd:.2f}")
+    spent = record.usage
+    money = "" if spent.cost_usd is None else f", ${spent.cost_usd:.2f}"
+    print(f"\nrun {record.run_id}: {spent.total:,} tokens "
+          f"({spent.billable:,} billable, {spent.cache_read:,} cached){money}")
     if record.stopped_after:
         print(f"stopped after {record.stopped_after}: {record.stopped_because}")
         print(f"resume with: python -m src.agents run {pipeline.name} "

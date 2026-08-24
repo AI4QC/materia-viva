@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Protocol, Sequence
 
 from src.agents.base import Role
+from src.agents.tokens import Usage, from_anthropic_model_usage
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 GATE = PROJECT_ROOT / "scripts" / "datasets" / "verify_catalog_change.py"
@@ -45,14 +46,23 @@ RETRYABLE = ("timed out", "connection", "CLINotFound", "ProcessError", "transpor
 
 @dataclass(frozen=True)
 class Outcome:
-    """What an executor got back, independent of which backend produced it."""
+    """What an executor got back, independent of which backend produced it.
+
+    `usage` is provider-neutral on purpose: an executor maps whatever its vendor
+    reports into `Usage`, so the budget, the trace and the records never learn
+    who ran the work.
+    """
 
     ok: bool
     text: str
-    cost_usd: float | None = None
+    usage: Usage = field(default_factory=Usage)
     turns: int | None = None
     duration_ms: int | None = None
     error: str = ""
+
+    @property
+    def cost_usd(self) -> float | None:
+        return self.usage.cost_usd
 
     @property
     def retryable(self) -> bool:
@@ -61,6 +71,14 @@ class Outcome:
 
 
 class Executor(Protocol):
+    """The provider seam.
+
+    Everything above this line is ours — roles, gates, records, budgets — and
+    everything below it belongs to whoever runs the model. A second vendor is a
+    third class here, not a change anywhere else, provided it maps what it
+    reports into `Usage` and answers with an `Outcome`.
+    """
+
     name: str
 
     def __call__(self, role: Role, prompt: str, workspace: Path, *,
@@ -83,13 +101,15 @@ class CliExecutor:
         except FileNotFoundError as error:
             return Outcome(ok=False, text="", error=f"CLINotFound: {error}")
         text = (done.stdout or "") + (done.stderr or "")
-        cost = turns = None
+        usage, turns = Usage(), None
         try:  # --output-format json, when the run got far enough to emit it
             payload = json.loads(done.stdout)
-            cost, turns = payload.get("total_cost_usd"), payload.get("num_turns")
+            usage = from_anthropic_model_usage(payload.get("modelUsage"),
+                                               payload.get("total_cost_usd"))
+            turns = payload.get("num_turns")
         except (ValueError, TypeError):
             pass
-        return Outcome(ok=done.returncode == 0, text=text, cost_usd=cost, turns=turns,
+        return Outcome(ok=done.returncode == 0, text=text, usage=usage, turns=turns,
                        error="" if done.returncode == 0 else f"exit {done.returncode}")
 
 
@@ -121,7 +141,8 @@ class SdkExecutor:
                     return Outcome(
                         ok=not message.is_error,
                         text=message.result or "\n".join(said),
-                        cost_usd=message.total_cost_usd,
+                        usage=from_anthropic_model_usage(message.model_usage,
+                                                         message.total_cost_usd),
                         turns=message.num_turns,
                         duration_ms=message.duration_ms,
                         error="" if not message.is_error else str(message.errors or "error"),
@@ -175,7 +196,8 @@ class Result:
             "ok": self.ok,
             "attempts": self.attempts,
             "error": self.outcome.error,
-            "cost_usd": self.outcome.cost_usd,
+            "usage": self.outcome.usage.as_record(),
+            "cost_usd": self.outcome.usage.cost_usd,
             "turns": self.outcome.turns,
             "duration_ms": self.outcome.duration_ms,
             "gate_returncode": self.gate_returncode,

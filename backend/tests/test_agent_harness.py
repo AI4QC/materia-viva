@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import pytest
 
 from src.agents import ROLES
+from src.agents.tokens import Usage
 from src.agents.harness import (
     PROPOSAL_NAME,
     CliExecutor,
@@ -26,7 +27,7 @@ class _FakeExecutor:
     name = "fake"
 
     def __init__(self, *outcomes):
-        self.outcomes = list(outcomes) or [Outcome(ok=True, text="done", cost_usd=0.5, turns=3)]
+        self.outcomes = list(outcomes) or [Outcome(ok=True, text="done", usage=Usage(input=100, output=50, cost_usd=0.5), turns=3)]
         self.calls = []
 
     def __call__(self, role, prompt, workspace, *, model=None, timeout=None):
@@ -97,7 +98,7 @@ def test_a_proposing_role_that_left_nothing_behind_is_reported_as_such(tmp_path)
 def test_a_retryable_failure_is_retried_and_a_conclusive_one_is_not(tmp_path):
     slept = []
     flaky = _FakeExecutor(Outcome(ok=False, text="", error="connection reset"),
-                          Outcome(ok=True, text="second time", cost_usd=0.2))
+                          Outcome(ok=True, text="second time", usage=Usage(cost_usd=0.2)))
     result = run(ROLES["cleaner"], "audit", workspace=tmp_path, executor=flaky,
                  attempts=3, sleep=slept.append, now=WHEN)
     assert result.ok and result.attempts == 2 and slept
@@ -111,11 +112,15 @@ def test_a_retryable_failure_is_retried_and_a_conclusive_one_is_not(tmp_path):
 def test_the_record_carries_what_the_run_cost(tmp_path):
     # without it there is no way to know whether a monthly sweep is affordable
     run(ROLES["cleaner"], "audit", workspace=tmp_path,
-        executor=_FakeExecutor(Outcome(ok=True, text="x", cost_usd=1.25, turns=7,
-                                       duration_ms=9000)),
+        executor=_FakeExecutor(Outcome(ok=True, text="x", turns=7, duration_ms=9000,
+                                       usage=Usage(input=2000, output=800, cache_read=9000,
+                                                   cost_usd=1.25))),
         now=WHEN)
     record = json.loads((tmp_path / "run.json").read_text(encoding="utf-8"))
     assert record["cost_usd"] == 1.25 and record["turns"] == 7
+    # tokens, not just dollars: they are what still compares after a provider change
+    assert record["usage"]["input"] == 2000 and record["usage"]["cache_read"] == 9000
+    assert record["usage"]["total"] == 11800 and record["usage"]["billable"] == 2800
     assert record["backend"] == "fake" and record["attempts"] == 1
     assert record["started_at"].startswith("2026-08-24")
 

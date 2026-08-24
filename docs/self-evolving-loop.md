@@ -99,6 +99,7 @@ Three kinds of actor, and confusing them is the easiest mistake this design invi
 | [5] [6] unify, deduplicate, verify | script | a deterministic pipeline |
 | [7] publication approval | **human** | a promise made to the outside |
 | preparing for any of the four gates | **agent** | assembles the machine results, the section 1.6 checklist and the catalog's precedents for the same question, and recommends — **it does not decide**, see below |
+| looking back over what we already hold | **agent** | finds redundancy and error in it. Its deterministic half is code (`src/agents/detectors.py`); the judgement is the part that is its own |
 
 ### 1.2 The containment rule: an agent may propose anything, and nothing enters on its word
 
@@ -992,6 +993,12 @@ Same rule: **verification first, then the agent that produces work for it.**
 Each of these was verified while running experiments. The changes that acted on them were reverted
 as data-side work rather than agent system, but **the problems are still there**; they are recorded
 so the knowledge does not go with the code.
+
+The first two now have both a detector and an owner: `unit_disagreements()` in
+`src/agents/detectors.py` recomputes them on demand, and the `cleaner` role judges and reports them.
+It may **not** edit the adapters — the only thing that can check a change to one is a zero-diff
+golden sample, and that framework does not exist (section 5), so proposing code nothing can check is
+exactly what section 1.8 forbids.
 
 **`mc2d`'s interlayer binding energies are wrong by a factor of 1000.**
 `scripts/properties/adapters/mc2d.py` passes the upstream

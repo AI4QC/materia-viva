@@ -14,7 +14,14 @@ ln -s ../scripts/agents .claude/agents
 
 One file, one source of truth: the link is local and ignored, the definitions are versioned.
 
-`__init__.py` is not ceremony. It loads and parses the definitions so their containment properties
+`detectors.py` is the cleaner's deterministic half. Judging whether two sources overlap is not
+something a script can do; producing the candidates to judge is, and each detector answers a failure
+this repository has actually had — a candidate whose content an integrated source already holds, an
+adapter emitting a canonical property under a unit the registry does not declare, prose naming an
+upstream record the URLs have left. Keeping that in code rather than in the prompt is the same rule
+the loop applies everywhere: judgement to the agent, everything checkable to code.
+
+`roles.py` is not ceremony. It loads and parses the definitions so their containment properties
 can be tested rather than asserted in prose — that no role holds a tool that edits a file, that the
 reviewer cannot reach the network, that a role which fetches is told to use the shared polite client,
 and that a role proposing a catalog change ends by running the gate on itself. Those properties are
@@ -26,6 +33,7 @@ why the roles are safe to run, and a property stated only in a README is one nob
 | `challenger.md` | try to reject what discovery proposed | 1.3 |
 | `updater.md` | work out what to pull when an upstream moved | 1.4, output two |
 | `reviewer.md` | assemble and advise at a human gate | 1.6 |
+| `cleaner.md` | find redundancy and error in what we already hold | 1.6, 6.3 |
 
 `reviewer` is the one that has not run yet. It is defined anyway because its output is advice
 rather than a catalog change, so the rule it has to satisfy is different: not "a gate can refuse it"

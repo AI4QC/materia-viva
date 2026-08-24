@@ -1,10 +1,11 @@
-"""The self-evolving loop's agent roles, as definitions the harness can run.
+"""The agent roles, as definitions the harness can run and code can check.
 
 Each role is one markdown file with YAML-ish frontmatter (`name`, `description`,
 `tools`) followed by the system prompt. That is the harness's own format, so a
 definition here is executable rather than a description of one.
 
-This module exists so the definitions can be checked. Their containment
+This module exists so the definitions can be checked, and so the deterministic
+half of a role's work — see `detectors` — lives in code rather than in a prompt. Their containment
 properties — that none of them can edit a file, that the ones producing a
 proposal end by running it through the gate, that the reviewer cannot reach the
 network — are the reason the roles are safe to run, and a property stated only in

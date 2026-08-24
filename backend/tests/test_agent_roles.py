@@ -1,6 +1,6 @@
 import pytest
 
-from scripts.agents import FORBIDDEN_TOOLS, ROLE_ROOT, load_roles
+from src.agents import FORBIDDEN_TOOLS, ROLE_ROOT, load_roles
 
 ROLES = load_roles()
 NETWORK_TOOLS = {"WebFetch", "WebSearch"}
@@ -9,7 +9,7 @@ PROPOSING = {"explorer", "updater"}
 
 
 def test_every_definition_parses_and_is_named_after_its_file():
-    assert set(ROLES) == {"explorer", "challenger", "updater", "reviewer"}
+    assert set(ROLES) == {"explorer", "challenger", "updater", "reviewer", "cleaner"}
     for name, role in ROLES.items():
         assert role.path.stem == name
         assert role.description.strip()
@@ -31,7 +31,8 @@ def test_no_role_can_edit_a_file(name):
 def test_the_reviewer_cannot_reach_the_network():
     # deliberate: attacking a candidate's claims is the challenger's job, and
     # repeating it here would double the requests made of other people's servers
-    assert not (set(ROLES["reviewer"].tools) & NETWORK_TOOLS)
+    for name in ("reviewer", "cleaner"):
+        assert not (set(ROLES[name].tools) & NETWORK_TOOLS), name
     # while the three that do research upstream keep it
     for name in ("explorer", "challenger", "updater"):
         assert set(ROLES[name].tools) & NETWORK_TOOLS, name

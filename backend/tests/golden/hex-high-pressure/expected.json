@@ -1,0 +1,54 @@
+{
+  "authored_by": "recorded-from-adapter",
+  "records": [
+    {
+      "experimental": false,
+      "match_ids": [],
+      "native_id": "Li_100_EA",
+      "properties": [
+        {
+          "method": "DFT USPEX best-hexagonal",
+          "name": "measurement_pressure",
+          "unit": "GPa",
+          "value": 100.0
+        }
+      ],
+      "structure": "sha256:2b199303f9bb4bf7e8ae0b4ab9f8f89a35032929ae7dcb555dbe03b695f8f68c"
+    },
+    {
+      "experimental": false,
+      "match_ids": [],
+      "native_id": "Fe_0_GS",
+      "properties": [
+        {
+          "method": "DFT USPEX ground-state search",
+          "name": "measurement_pressure",
+          "unit": "GPa",
+          "value": 0.0
+        },
+        {
+          "method": "FINDSYM (DFT USPEX ground-state search, 0 GPa)",
+          "name": "spacegroup_number",
+          "unit": null,
+          "value": 194
+        }
+      ],
+      "structure": "sha256:76bed79103d76dd120442a94ea56d46d7c72272204a58e7395a0454d144233e5"
+    },
+    {
+      "experimental": false,
+      "match_ids": [],
+      "native_id": "Na_300_MISS",
+      "properties": [
+        {
+          "method": "DFT USPEX best-hexagonal",
+          "name": "measurement_pressure",
+          "unit": "GPa",
+          "value": 300.0
+        }
+      ],
+      "structure": "sha256:c30c6a761e034c04175493dfa81cb59fd6aafc1524b3d59b5e394217391523c7"
+    }
+  ],
+  "source_key": "hex-high-pressure"
+}

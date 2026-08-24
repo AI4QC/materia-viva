@@ -1,62 +1,79 @@
+import re
+
 import pytest
 
-from src.agents import FORBIDDEN_TOOLS, ROLE_ROOT, load_roles
-
-ROLES = load_roles()
-NETWORK_TOOLS = {"WebFetch", "WebSearch"}
-#: roles whose output is a change to the catalog, and so must pass the gate
-PROPOSING = {"explorer", "updater"}
+from src.agents import FORBIDDEN_TOOLS, NETWORK_TOOLS, ROLES
+from src.agents.base import Role
 
 
-def test_every_definition_parses_and_is_named_after_its_file():
+def test_every_role_is_registered_under_its_own_name():
     assert set(ROLES) == {"explorer", "challenger", "updater", "reviewer", "cleaner"}
     for name, role in ROLES.items():
-        assert role.path.stem == name
-        assert role.description.strip()
-        assert role.tools
+        assert role.name == name
+        assert role.description.strip() and role.prompt.strip()
 
 
 @pytest.mark.parametrize("name", sorted(ROLES))
 def test_no_role_can_edit_a_file(name):
-    """The part of the containment rule that does not rely on compliance.
+    """The half of the containment rule that does not rely on compliance.
 
-    Section 1.2 forbids an agent from modifying tracked files. Telling it so is
-    an instruction; withholding the tools is a property. A shell can still write,
-    which is why the gate compares against HEAD regardless — but the ergonomic
-    path is gone, and that is worth holding.
+    Telling an agent not to modify tracked files is an instruction; withholding
+    the tools is a property. A shell can still write, which is why the gate
+    compares against HEAD regardless — but the ergonomic path is gone.
     """
     assert not (set(ROLES[name].tools) & FORBIDDEN_TOOLS)
 
 
-def test_the_reviewer_cannot_reach_the_network():
-    # deliberate: attacking a candidate's claims is the challenger's job, and
-    # repeating it here would double the requests made of other people's servers
-    for name in ("reviewer", "cleaner"):
-        assert not (set(ROLES[name].tools) & NETWORK_TOOLS), name
-    # while the three that do research upstream keep it
-    for name in ("explorer", "challenger", "updater"):
-        assert set(ROLES[name].tools) & NETWORK_TOOLS, name
+def test_a_role_that_edits_files_cannot_be_constructed():
+    with pytest.raises(ValueError, match="may not edit a file"):
+        Role(name="bad", description="d", tools=("Read", "Edit"), prompt="p")
+
+
+def test_a_role_that_fetches_without_the_shared_client_cannot_be_constructed():
+    # section 4's spacing, the stop on 429 and the run cap all live in
+    # PolitePoller; a role building its own requests inherits none of them
+    with pytest.raises(ValueError, match="PolitePoller"):
+        Role(name="bad", description="d", tools=("WebFetch",), prompt="fetch away")
+
+
+def test_a_role_proposing_a_catalog_change_must_run_the_gate_on_itself():
+    with pytest.raises(ValueError, match="without running the gate"):
+        Role(name="bad", description="d", tools=("Read",), prompt="p",
+             proposes_catalog_change=True)
+
+
+def _flat(text: str) -> str:
+    """Prompts are wrapped prose; a check should not depend on where the wrap falls."""
+    return " ".join(text.split())
 
 
 @pytest.mark.parametrize("name", sorted(n for n in ROLES if set(ROLES[n].tools) & NETWORK_TOOLS))
-def test_a_role_that_fetches_is_told_to_use_the_polite_client(name):
-    # section 4's spacing, the full stop on 429 and the run-wide cap all live in
-    # PolitePoller; a role rolling its own requests inherits none of them
-    assert "PolitePoller" in ROLES[name].body
-
-
-@pytest.mark.parametrize("name", sorted(PROPOSING))
-def test_a_role_proposing_a_catalog_change_runs_the_gate_on_itself(name):
-    assert "verify_catalog_change.py" in ROLES[name].body
+def test_every_fetching_role_carries_the_politeness_block(name):
+    prompt = _flat(ROLES[name].prompt)
+    assert "PolitePoller" in prompt
+    assert "Never bypass a login, a paywall or a bot check" in prompt
 
 
 @pytest.mark.parametrize("name", sorted(ROLES))
-def test_every_role_is_told_not_to_touch_tracked_files(name):
-    body = ROLES[name].body.lower()
-    assert "tracked file" in body or "change nothing" in body, name
+def test_every_role_carries_the_containment_rule_and_closes_the_same_way(name):
+    prompt = _flat(ROLES[name].prompt)
+    assert "you may propose anything, and nothing enters on your word" in prompt
+    assert "Do not modify any tracked file" in prompt
+    assert "What you did not do, and why" in prompt
 
 
-def test_the_readme_lists_every_role():
-    readme = (ROLE_ROOT / "README.md").read_text(encoding="utf-8")
-    for name in ROLES:
-        assert f"{name}.md" in readme, name
+@pytest.mark.parametrize("name", sorted(ROLES))
+def test_a_role_renders_to_frontmatter_the_harness_can_read(name):
+    role = ROLES[name]
+    rendered = role.to_markdown()
+    match = re.match(r"^---\n(.*?)\n---\n", rendered, re.S)
+    assert match, "no frontmatter"
+    front = dict(
+        (k.strip(), v.strip())
+        for k, _, v in (line.partition(":") for line in match.group(1).splitlines())
+    )
+    assert front["name"] == role.name
+    assert front["description"] == role.description
+    assert front["tools"] == ", ".join(role.tools)
+    # the file is an artifact, and says so, so nobody edits it and loses the edit
+    assert "Generated from src/agents/" in rendered

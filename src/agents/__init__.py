@@ -1,11 +1,21 @@
-"""The self-evolving loop's agents: their definitions, and the code they lean on.
+"""The self-evolving loop's agents.
 
-A role is a markdown definition the harness executes plus whatever part of its
-work is deterministic. Keeping the second part here rather than in the prompt is
-the same rule the loop applies everywhere: judgement to the agent, everything
-checkable to code.
+A role is a Python object (`base.Role`) carrying its description, its tools and
+its prompt, built under constraints that are checked where it is constructed. The
+markdown the harness reads is rendered from it — `python -m src.agents render` —
+so the Python is the definition and the file is an artifact.
+
+`harness` runs one; `detectors` is the deterministic half of the cleaner's work.
 """
 
-from src.agents.roles import FORBIDDEN_TOOLS, ROLE_ROOT, Role, load_roles
+from __future__ import annotations
 
-__all__ = ["FORBIDDEN_TOOLS", "ROLE_ROOT", "Role", "load_roles"]
+from src.agents import challenger, cleaner, explorer, reviewer, updater
+from src.agents.base import FORBIDDEN_TOOLS, NETWORK_TOOLS, Role
+
+ROLES: dict[str, Role] = {
+    role.name: role
+    for role in (explorer.ROLE, challenger.ROLE, updater.ROLE, reviewer.ROLE, cleaner.ROLE)
+}
+
+__all__ = ["ROLES", "Role", "FORBIDDEN_TOOLS", "NETWORK_TOOLS"]

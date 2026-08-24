@@ -187,8 +187,11 @@ unchecked, several agents only produce more confident wrong answers faster.
 
 #### How it runs
 
-- **The harness is Claude Code subagents**, not a framework of our own. The three roles are defined
-  in [`scripts/agents/`](../scripts/agents/), in that harness's own format. The repository already
+- **The harness is Claude Code subagents**, not a framework of our own. The five roles are Python
+  objects in [`src/agents/`](../src/agents/), refused at construction if they break a constraint;
+  `python -m src.agents render` writes the markdown the harness reads, so the definition and what
+  runs cannot drift. `harness.py` adds the three things `claude -p` does not: a workspace outside the
+  repository per run, the gate run by the harness rather than by the agent, and a record of the run. The repository already
   carries `.claude/CLAUDE.md` and `.mcp.json`, so an agent inherits this project's conventions for
   free, and the web search discovery needs comes with the harness. Building an API loop instead
   means rebuilding tool use, retries and sandboxing for a research dataset maintained by two people.
@@ -305,7 +308,7 @@ and `state` answers that:
 
 ### 1.6 What the expert is handed
 
-The packet is assembled by [`reviewer`](../scripts/agents/reviewer.md), the one role whose
+The packet is assembled by [`reviewer`](../src/agents/reviewer.py), the one role whose
 output is a judgement for a person to read rather than a catalog diff, so it does not pass through
 the gate. Its anchor is that every precedent it cites must resolve to a real catalog entry, which it
 checks itself; fact and judgement are listed separately; and **a recommendation must carry what
@@ -313,9 +316,9 @@ would change it** — advice without that is a decision taken on someone else's 
 
 **This role is not split into a pair.** Section 1.3 splits only where objectives conflict, and an
 assembler has no opposing objective; the adversarial step already happened upstream, between
-discovery and refutation. It also **has no web tools**: attacking a candidate's claims is the
-refuter's job, and repeating it here would double the requests made of other people's servers for
-one answer.
+discovery and refutation. It can fetch, but **attacking a candidate's claims is still the
+challenger's job**: repeating it here would double the requests made of other people's servers for
+one answer. That division is carried by the role definitions rather than by withholding the tool.
 
 What the expert gets is not a transcript. **A diff and a fixed checklist.** The checklist was not invented; every line of it
 corresponds to a real entry in the catalog, and all five are things an expert catches and an agent
@@ -369,7 +372,7 @@ fields, the self-check command, and the report sections that actually produced v
 existed only in one conversation's history, so **nobody could reproduce a run** — a larger loss than
 guessing wrong would have been.
 
-So the three exercised roles are now defined in [`scripts/agents/`](../scripts/agents/), in the
+So the three exercised roles are now defined in [`src/agents/`](../src/agents/), in the
 harness's own format, which makes them executable, diffable and reproducible. What is still not
 done:
 

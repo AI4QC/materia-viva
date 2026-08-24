@@ -1,67 +1,54 @@
-# Agent definitions
+# The agents
 
-The self-evolving loop's agent roles, in the harness's own format so that a run can be reproduced
-rather than reconstructed from someone's memory of a chat.
+Five roles, each a Python object rather than a document. The markdown the harness reads is rendered
+from them, so the definition and what runs cannot drift.
 
-They live in the source tree, next to the scripts they call, rather than in `.claude/agents/`:
-`.gitignore` classifies `.claude/` as local agent configuration and session state, and a definition
-that is not shared cannot be reproduced, which was the whole reason for writing them down. Point the
-harness at them once, per checkout:
+| Module | Role | Section |
+|---|---|---|
+| `explorer.py` | find databases the catalog does not have | 1.4, output one |
+| `challenger.py` | try to reject what the explorer proposed | 1.3 |
+| `updater.py` | work out what to pull when an upstream moved | 1.4, output two |
+| `reviewer.py` | assemble and advise at a human gate | 1.6 |
+| `cleaner.py` | find redundancy and error in what we already hold | 1.6, 6.3 |
 
 ```bash
-ln -s ../scripts/agents .claude/agents
+python -m src.agents render     # writes .claude/agents/*.md for the harness
 ```
 
-One file, one source of truth: the link is local and ignored, the definitions are versioned.
+## Why Python and not markdown
 
-`detectors.py` is the cleaner's deterministic half. Judging whether two sources overlap is not
-something a script can do; producing the candidates to judge is, and each detector answers a failure
-this repository has actually had — a candidate whose content an integrated source already holds, an
-adapter emitting a canonical property under a unit the registry does not declare, prose naming an
-upstream record the URLs have left. Keeping that in code rather than in the prompt is the same rule
-the loop applies everywhere: judgement to the agent, everything checkable to code.
+**Constraints are enforced where a role is constructed.** `base.Role` refuses to build a role that
+holds a tool able to edit a file, that can fetch without being told to use the shared HTTP client,
+or that proposes a catalog change without running the gate on itself. A definition that violates the
+containment rule does not come into existence, rather than being caught later by something reading
+its prose.
 
-`roles.py` is not ceremony. It loads and parses the definitions so their containment properties
-can be tested rather than asserted in prose — that no role holds a tool that edits a file, that the
-reviewer cannot reach the network, that a role which fetches is told to use the shared polite client,
-and that a role proposing a catalog change ends by running the gate on itself. Those properties are
-why the roles are safe to run, and a property stated only in a README is one nobody is holding.
+**The parts every role repeats are written once.** The containment rule, the politeness rule, the
+discipline of separating fact from claim, and the closing question — five copies of those in five
+markdown files is five things that drift apart.
 
-| Definition | Role | Section |
-|---|---|---|
-| `explorer.md` | find databases the catalog does not have | 1.4, output one |
-| `challenger.md` | try to reject what discovery proposed | 1.3 |
-| `updater.md` | work out what to pull when an upstream moved | 1.4, output two |
-| `reviewer.md` | assemble and advise at a human gate | 1.6 |
-| `cleaner.md` | find redundancy and error in what we already hold | 1.6, 6.3 |
+**The object is what the CLI consumes.** `claude --agents` takes exactly the JSON a `Role`
+serialises to, so nothing is transcribed by hand between the definition, the tests and the
+invocation.
 
-`reviewer` is the one that has not run yet. It is defined anyway because its output is advice
-rather than a catalog change, so the rule it has to satisfy is different: not "a gate can refuse it"
-but "every claim in it is separable from every fact". Its anchor is that a cited precedent must
-resolve to a real catalog entry, which it checks itself.
+## What the harness adds
 
-The other three were written from a run that actually happened, not from imagination, and each carries what that
-run taught — the premise a pull plan had to correct, the sections of a refuter's report that produced
-its only decisive finding, the claim-marking discipline without which a discovery proposal cannot be
-trusted.
+`harness.py` wraps a run with the three things `claude -p` does not do:
 
-**Two roles are deliberately absent.** Drafting an adapter, and independently authoring its golden
-sample, both wait on the golden sample framework, which does not exist. Section 1.8's rule is
-verification before the producer: defining those two now would be defining producers whose output
-nothing can check.
+- **a workspace outside the repository** per run, so a proposal cannot land in the working tree and a
+  bad run is undone by deleting a folder;
+- **the gate, run by the harness.** A role that proposes a catalog change is told to check itself;
+  instructing is not checking, so the harness runs the gate on what came back and records the
+  verdict beside it;
+- **a record of the run** — role, task, time, command, gate outcome — because otherwise a run's
+  reasoning lives in a terminal that gets closed, and the next run cannot know what the last one
+  already declined.
 
-## Three things these definitions rely on
+## What is still missing
 
-**The gate.** Every definition ends by running
-`scripts/datasets/verify_catalog_change.py` against its own proposal. That is what makes the
-containment rule mechanical rather than advisory: a proposal that touches anything beyond what it
-adds is refused whether or not the agent meant well.
+Two roles are absent on purpose: drafting an adapter, and independently authoring its golden sample.
+Both wait on the golden sample framework, and section 1.8's rule is verification before the producer.
 
-**Narrow tools.** None of them has `Edit` or `Write`. They read, search, run shell commands and
-fetch. This makes "do not modify tracked files" partly structural rather than purely instructed —
-partly, because a shell can still write, which is why the gate compares against `HEAD` regardless.
-
-**One HTTP client.** They are told to import `PolitePoller` instead of making their own requests, so
-they inherit one request per host per second, a full stop on 429 or 503, and a run-wide cap. This one
-is still a requirement rather than a mechanism: nothing prevents an agent from using `curl`. It is
-the largest remaining hole in the loop's outward behaviour and is recorded as such in section 4.
+There is no orchestration yet — nothing that decides to run the explorer, then the challenger on its
+output, then the reviewer on what survived. The fan-out shape belongs in a script, and that script
+does not exist.

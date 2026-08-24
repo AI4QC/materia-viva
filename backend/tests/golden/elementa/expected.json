@@ -1,0 +1,155 @@
+{
+  "authored_by": "recorded-from-adapter",
+  "records": [
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "elementa",
+          "open:Fe4:structure_01:"
+        ]
+      ],
+      "native_id": "open:Fe4:structure_01:",
+      "properties": [
+        {
+          "method": "PBE (ELEMENTA open: structure_01)",
+          "name": "max_residual_force",
+          "unit": "eV/Å",
+          "value": 0.02
+        },
+        {
+          "method": "PBE (ELEMENTA open: structure_01)",
+          "name": "max_residual_stress",
+          "unit": "eV/Å³",
+          "value": 0.001
+        },
+        {
+          "method": "PBE (ELEMENTA)",
+          "name": "total_energy_per_atom",
+          "unit": "eV/atom",
+          "value": -10.0
+        },
+        {
+          "method": "PBE (ELEMENTA) per cell",
+          "name": "total_magnetization",
+          "unit": "μB",
+          "value": 3.0
+        }
+      ],
+      "structure": null
+    },
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "elementa",
+          "open:Ni2:structure_02:"
+        ]
+      ],
+      "native_id": "open:Ni2:structure_02:",
+      "properties": [
+        {
+          "method": "PBE (ELEMENTA open: structure_02)",
+          "name": "max_residual_force",
+          "unit": "eV/Å",
+          "value": 0.01
+        },
+        {
+          "method": "PBE (ELEMENTA open: structure_02)",
+          "name": "max_residual_stress",
+          "unit": "eV/Å³",
+          "value": 0.002
+        },
+        {
+          "method": "PBE (ELEMENTA)",
+          "name": "total_energy_per_atom",
+          "unit": "eV/atom",
+          "value": -10.0
+        }
+      ],
+      "structure": null
+    },
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "elementa",
+          "open:Cu2:structure_03:"
+        ]
+      ],
+      "native_id": "open:Cu2:structure_03:",
+      "properties": [
+        {
+          "method": "PBE (ELEMENTA open: structure_03)",
+          "name": "max_residual_force",
+          "unit": "eV/Å",
+          "value": 0.01
+        }
+      ],
+      "structure": null
+    },
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "elementa",
+          "open:Al1:structure_04:"
+        ]
+      ],
+      "native_id": "open:Al1:structure_04:",
+      "properties": [
+        {
+          "method": "PBE (ELEMENTA open: structure_04)",
+          "name": "max_residual_stress",
+          "unit": "eV/Å³",
+          "value": 0.003
+        },
+        {
+          "method": "PBE (ELEMENTA)",
+          "name": "total_energy_per_atom",
+          "unit": "eV/atom",
+          "value": -4.0
+        }
+      ],
+      "structure": null
+    },
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "elementa",
+          "spin:Gd2:structure_05:fm"
+        ]
+      ],
+      "native_id": "spin:Gd2:structure_05:fm",
+      "properties": [
+        {
+          "method": "PBE (ELEMENTA spin: structure_05/fm)",
+          "name": "max_residual_force",
+          "unit": "eV/Å",
+          "value": 0.05
+        },
+        {
+          "method": "PBE (ELEMENTA spin: structure_05/fm)",
+          "name": "max_residual_stress",
+          "unit": "eV/Å³",
+          "value": 0.004
+        },
+        {
+          "method": "PBE (ELEMENTA)",
+          "name": "total_energy_per_atom",
+          "unit": "eV/atom",
+          "value": -15.0
+        },
+        {
+          "method": "PBE (ELEMENTA) per cell",
+          "name": "total_magnetization",
+          "unit": "μB",
+          "value": 7.9
+        }
+      ],
+      "structure": null
+    }
+  ],
+  "source_key": "elementa"
+}

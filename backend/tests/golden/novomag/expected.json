@@ -1,0 +1,106 @@
+{
+  "authored_by": "recorded-from-adapter",
+  "records": [
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "materials-project",
+          "mp-1234"
+        ]
+      ],
+      "native_id": "NM-1",
+      "properties": [
+        {
+          "method": "PBE (NOVOMAG)",
+          "name": "curie_temperature",
+          "unit": "K",
+          "value": 720.0
+        },
+        {
+          "method": "PBE (NOVOMAG)",
+          "name": "decomposition_energy",
+          "unit": "eV/atom",
+          "value": -0.03
+        },
+        {
+          "method": "PBE (NOVOMAG)",
+          "name": "easy_axis",
+          "unit": null,
+          "value": "100"
+        },
+        {
+          "method": "PBE (NOVOMAG)",
+          "name": "energy_above_hull",
+          "unit": "eV/atom",
+          "value": 0.025
+        },
+        {
+          "method": "PBE (NOVOMAG) 100",
+          "name": "magnetic_anisotropy_constant",
+          "unit": "MJ/m³",
+          "value": -1.7
+        },
+        {
+          "method": "PBE (NOVOMAG)",
+          "name": "magnetic_ordering",
+          "unit": null,
+          "value": "FM"
+        },
+        {
+          "method": "PBE (NOVOMAG)",
+          "name": "magnetic_polarization",
+          "unit": "T",
+          "value": 1.85
+        },
+        {
+          "method": "spglib (NOVOMAG relaxed cell)",
+          "name": "spacegroup_number",
+          "unit": null,
+          "value": 221
+        },
+        {
+          "method": "PBE (NOVOMAG) QE PAW",
+          "name": "total_energy_per_atom",
+          "unit": "eV/atom",
+          "value": -68.02846561497
+        },
+        {
+          "method": "PBE (NOVOMAG) per cell",
+          "name": "total_magnetization",
+          "unit": "μB",
+          "value": 4.2
+        }
+      ],
+      "structure": "sha256:479d97543a0801353db10579abb2b228cfb9d3c4c1ae1dd733c27711cbcacfae"
+    },
+    {
+      "experimental": false,
+      "match_ids": [],
+      "native_id": "NM-2",
+      "properties": [
+        {
+          "method": "PBE (NOVOMAG)",
+          "name": "energy_above_hull",
+          "unit": "eV/atom",
+          "value": 0.05
+        },
+        {
+          "method": "PBE (NOVOMAG) QE PAW",
+          "name": "total_energy_per_atom",
+          "unit": "eV/atom",
+          "value": -68.02846561497
+        }
+      ],
+      "structure": "sha256:479d97543a0801353db10579abb2b228cfb9d3c4c1ae1dd733c27711cbcacfae"
+    },
+    {
+      "experimental": false,
+      "match_ids": [],
+      "native_id": "NM-3",
+      "properties": [],
+      "structure": null
+    }
+  ],
+  "source_key": "novomag"
+}

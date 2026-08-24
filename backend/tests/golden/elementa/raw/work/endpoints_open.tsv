@@ -1,0 +1,5 @@
+material	structure	spin	energy	n_sites	magmom	max_force	max_abs_stress
+Fe4	structure_01		-40.0	4	3.0	0.02	0.001
+Ni2	structure_02		-20.0	2	100.0	0.01	0.002
+Cu2	structure_03		-1000.0	2		0.01	
+Al1	structure_04		-4.0	1		99.0	0.003

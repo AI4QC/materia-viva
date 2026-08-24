@@ -148,7 +148,10 @@ class SdkExecutor:
                                                          message.total_cost_usd),
                         turns=message.num_turns,
                         duration_ms=message.duration_ms,
-                        error="" if not message.is_error else str(message.errors or "error"),
+                        # `errors` is often empty while the reason is in the result text
+                        # ("OAuth session expired"); a record saying "error" helps nobody
+                        error="" if not message.is_error else str(
+                            message.errors or message.result or "error"),
                     )
                 said.append(str(getattr(message, "content", message))[:4000])
             return Outcome(ok=False, text="\n".join(said), error="no result message")

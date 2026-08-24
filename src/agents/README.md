@@ -17,6 +17,8 @@ python -m src.agents list            # the pipelines and the roles each runs
 python -m src.agents plan <name>     # what would run, and what each step is told
 python -m src.agents run <name>      # run it, gating and recording each step
 python -m src.agents tokens          # what has been spent, by role, backend or day
+python -m src.agents due             # which scheduled jobs have come round (--run, --cron)
+python -m src.agents rejected        # what a sweep already turned down
 ```
 
 ## Why Python and not markdown
@@ -106,6 +108,35 @@ report. That is section 1.3's requirement that the challenger form its own view,
 rather than something the caller has to remember. And **anything short of a passed gate stops the
 run** — refused, no proposal written, or the gate failing to run at all — because spending the next
 agent on an artifact that is unsound, missing or unchecked is worse than stopping.
+
+## Memory and cadence
+
+`memory.py` keeps the candidates a sweep turned down, in `scripts/datasets/rejected.json`, and
+`pipelines.py` reads them into the explorer's task — so the next sweep does not pay the challenger
+to kill the same four twice. It is in the repository rather than beside the run records because a
+refusal is a judgement worth reviewing as a diff. **No agent writes it**: a person runs `remember`
+after reading the outcome, and a refusal without a reason is refused.
+
+```bash
+python -m src.agents remember camd https://camd.example --why "already ingested inside odbx"
+```
+
+`schedule.py` holds how often each job runs, so cron gets one line rather than one per job and the
+cadence can be read in a diff:
+
+| Job | Cadence |
+|---|---|
+| `probe` | weekly — cheap, deterministic, 38 requests through the polite poller |
+| `audit` | monthly — one agent over what we already hold |
+| `discovery-sweep` | **manual** — nothing puts a ~300k-token job on a timer before one has run unattended and been read |
+| `upgrade` | **manual** — it has to be told which source moved |
+
+A job that fails is not marked as done, so it stays due instead of being skipped until next week.
+
+```bash
+python -m src.agents due          # what has come round
+python -m src.agents due --cron   # the crontab line, printed rather than installed
+```
 
 ## What is still missing
 

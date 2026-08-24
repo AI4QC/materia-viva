@@ -23,6 +23,7 @@ from typing import Callable, Mapping
 from src.agents import ROLES
 from src.agents.base import Role
 from src.agents.harness import PROPOSAL_NAME, Executor, Result, run
+from src.agents.memory import briefing
 from src.agents.tokens import Budget, Usage
 
 #: role name -> the proposal that role produced. Deliberately not its report.
@@ -95,10 +96,13 @@ DISCOVERY_SWEEP = Pipeline(
     steps=(
         Step(
             role=ROLES["explorer"],
-            task=lambda _artifacts: (
+            # briefing() is read when the step runs, not when this module is imported,
+            # so a refusal recorded today reaches tomorrow's sweep.
+            task=lambda _artifacts: "\n\n".join(filter(None, (
                 "Search for crystal-structure or materials-property databases that "
-                "scripts/datasets/sources.json does not already hold, and propose them."
-            ),
+                "scripts/datasets/sources.json does not already hold, and propose them.",
+                briefing(),
+            ))),
         ),
         Step(
             role=ROLES["challenger"],

@@ -24,10 +24,12 @@ src/agents/
   pipelines.py   which roles, in what order
   detectors.py   the deterministic half of the cleaner's work
   tokens.py      what a run cost, counted so it survives a change of provider
-  __main__.py    render | list | plan | run | tokens
+  memory.py      what a sweep already turned down, so the next one does not redo it
+  schedule.py    how often each job should run; cron gets one line
+  __main__.py    render | list | plan | run | tokens | due | remember | rejected
 ```
 
-## The six decisions, and what each costs
+## The eight decisions, and what each costs
 
 **1. A role is code, not a document.** `base.Role` refuses at construction to build a role holding a
 tool that can edit a file, able to fetch without being told to use the shared client, or proposing a
@@ -85,6 +87,29 @@ vendor changes; a provider's dollars and its per-model report are mapped at the 
 *Cost*: the neutral shape loses whatever a provider reports that does not fit it. *What would
 overturn it*: if a second provider is never added, the indirection bought nothing.
 
+**7. A refusal is remembered, and remembering it is a person's act.** `memory.py` keeps refused
+candidates in `scripts/datasets/rejected.json`, and `pipelines.py` reads them into the explorer's
+task, so a sweep no longer pays the challenger to kill the same four twice. It is in the repository
+rather than beside the run records because a refusal is a judgement worth reviewing as a diff, and a
+memory on one machine is lost when the work moves. No agent writes it: a person runs
+`remember` after reading the outcome.
+
+*Cost*: a refusal recorded badly is worse than none, because it suppresses a candidate for a reason
+nobody can check — which is why a reason is mandatory and the briefing tells the explorer it may
+come back with evidence. *What would overturn it*: if refusals turn out to age out quickly, a memory
+that never forgets is the wrong shape.
+
+**8. The cadence is a table, not a crontab.** `schedule.py` holds how often each job should run;
+cron gets one line calling `due --run`. A cadence living in one person's crontab cannot be read in a
+diff and does not travel with the repository.
+
+The probe runs weekly and `audit` monthly. **`discovery-sweep` is manual**, because nothing should
+put a 300k-token job on a timer before one has run unattended and been read, and none has; `upgrade`
+cannot be scheduled at all, since it has to be told which source moved. A failed job is not marked
+as done, so it stays due rather than being silently skipped for a week.
+
+*Cost*: two places now say when things happen — this table and whatever installed the cron line.
+
 ## What has actually run
 
 | Run | Cost | What it produced |
@@ -102,13 +127,6 @@ it is the strongest argument for the deterministic parts staying deterministic: 
 **Two roles.** Drafting an adapter, and independently authoring its golden sample. Both wait on the
 golden sample framework: verification before the producer, so a producer whose output nothing can
 check is not defined.
-
-**A memory of rejections.** A candidate refused at the gate never enters the catalog and leaves no
-trace, so the next sweep will propose the same four again. This is the framework's most immediate
-hole.
-
-**A schedule.** Everything is triggered by hand. Nothing should change that until a sweep has run
-unattended once and been read.
 
 ## What running it for real would need
 

@@ -5,6 +5,9 @@
     plan <pipeline>        what would run, and what each step would be told
     run <pipeline>         run it, gating and recording each step
     tokens                 what has been spent, grouped by role, backend or day
+    due [--run|--cron]     which scheduled jobs have come round
+    remember <id> <url>    record a candidate that was turned down
+    rejected               what has already been looked at and turned down
 
 The markdown is generated rather than maintained, so there is one definition and
 it is the Python: edit a role, re-render, and what the harness runs cannot drift
@@ -17,7 +20,9 @@ import argparse
 from pathlib import Path
 
 from src.agents import ROLES
+from src.agents.memory import REJECTED, load as load_rejected, remember
 from src.agents.pipelines import PIPELINES, plan, run_pipeline
+from src.agents.schedule import CADENCE, crontab_line, due, run_due
 from src.agents.tokens import Budget, report
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -41,6 +46,18 @@ def main(argv: list[str] | None = None) -> int:
     rendered = sub.add_parser("render")
     rendered.add_argument("--out", type=Path, default=DEFAULT_RENDER)
     sub.add_parser("list")
+    recall = sub.add_parser("remember", help="record a candidate that was turned down")
+    recall.add_argument("id")
+    recall.add_argument("url")
+    recall.add_argument("--why", required=True, help="why it was refused; a person's words")
+    recall.add_argument("--run-id", default="", help="the run whose outcome this was read from")
+
+    sub.add_parser("rejected", help="what has already been looked at and turned down")
+
+    when = sub.add_parser("due", help="which scheduled jobs have come round")
+    when.add_argument("--run", action="store_true", help="run them, rather than only saying so")
+    when.add_argument("--cron", action="store_true", help="print the crontab line and exit")
+
     spent = sub.add_parser("tokens")
     spent.add_argument("--root", type=Path, default=DEFAULT_RUNS)
     spent.add_argument("--by", choices=["role", "backend", "day"], default="role")
@@ -67,6 +84,36 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "tokens":
         for line in report(args.root, by=args.by):
             print(line)
+        return 0
+
+    if args.command == "remember":
+        entry = remember(args.id, args.url, args.why, run_id=args.run_id)
+        print(f"{entry.id} recorded as refused on {entry.when}: {entry.why}")
+        print(f"commit {REJECTED.relative_to(PROJECT_ROOT)} so the next sweep inherits it")
+        return 0
+
+    if args.command == "rejected":
+        rows = load_rejected()
+        if not rows:
+            print("nothing refused yet")
+            return 0
+        for row in rows:
+            print(f"  {row.when}  {row.id:24s} {row.why}")
+        return 0
+
+    if args.command == "due":
+        if args.cron:
+            print(crontab_line())
+            return 0
+        if not args.run:
+            ready = due()
+            for job in CADENCE:
+                mark = "due" if job in ready else ("manual" if job.manual else "not yet")
+                every = "on request" if job.manual else f"every {job.every_days}d"
+                print(f"  {job.name:16s} {every:12s} {mark:8s} {job.what}")
+            return 0
+        for name, outcome in run_due():
+            print(f"  {name}: {outcome}")
         return 0
 
     if args.command == "list":

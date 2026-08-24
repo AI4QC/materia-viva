@@ -2,36 +2,40 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.agents.harness import PROPOSAL_NAME
+from src.agents.harness import PROPOSAL_NAME, Outcome
 from src.agents.pipelines import DISCOVERY_SWEEP, PIPELINES, plan, run_pipeline
 
 WHEN = datetime(2026, 8, 24, 9, 0, tzinfo=timezone.utc)
+RUN_ID = "20260824T090000Z"
 
 
-class _FakeRun:
-    def __init__(self, gate_fails_for=(), exit_for=()):
+class _FakeExecutor:
+    name = "fake"
+
+    def __init__(self, fail_for=(), cost=0.5):
+        self.fail_for = set(fail_for)
+        self.cost = cost
         self.calls = []
-        self.gate_fails_for = set(gate_fails_for)
-        self.exit_for = set(exit_for)
-        self.current = None
 
-    def __call__(self, argv, cwd):
-        # keyed on argv[0], not on the text: a role's prompt contains the gate
-        # command it is told to run, so searching the whole argv classifies the
-        # agent invocation itself as a gate call
-        self.calls.append(list(argv))
-        if argv[0] == "claude":
-            self.current = argv[argv.index("--agent") + 1]
-            code = 1 if self.current in self.exit_for else 0
-        else:
-            code = 1 if self.current in self.gate_fails_for else 0
-        return type("Done", (), {"returncode": code, "stdout": "out", "stderr": ""})()
+    def __call__(self, role, prompt, workspace, *, model=None, timeout=None):
+        self.calls.append((role.name, prompt))
+        if role.name in self.fail_for:
+            return Outcome(ok=False, text="", error="exit 1")
+        return Outcome(ok=True, text="done", cost_usd=self.cost, turns=2)
 
 
-def _seed_proposal(root, role, when=WHEN):
-    workspace = root / f"{when.strftime('%Y%m%dT%H%M%SZ')}-{role}"
+def _gate(returncode=0):
+    def runner(argv, cwd):
+        return type("Done", (), {"returncode": returncode, "stdout": "g", "stderr": ""})()
+    return runner
+
+
+def _seed(root, role, ok=True):
+    workspace = root / RUN_ID / role
     workspace.mkdir(parents=True, exist_ok=True)
     (workspace / PROPOSAL_NAME).write_text("{}", encoding="utf-8")
+    (workspace / "run.json").write_text(json.dumps({"role": role, "ok": ok}), encoding="utf-8")
+    return workspace
 
 
 def test_every_pipeline_names_roles_that_exist():
@@ -39,8 +43,7 @@ def test_every_pipeline_names_roles_that_exist():
 
     for pipeline in PIPELINES.values():
         assert pipeline.steps and pipeline.purpose.strip()
-        for role in pipeline.roles:
-            assert role in ROLES
+        assert all(role in ROLES for role in pipeline.roles)
 
 
 def test_the_challenger_is_handed_the_artifact_and_never_the_report():
@@ -56,47 +59,63 @@ def test_the_challenger_is_handed_the_artifact_and_never_the_report():
     assert "That file is all you get" in steps["challenger"]
 
 
-def test_a_step_runs_with_the_previous_steps_artifact(tmp_path):
-    fake = _FakeRun()
-    for role in ("explorer", "challenger", "reviewer"):
-        _seed_proposal(tmp_path, role)
-    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, runner=fake, now=WHEN)
-    assert [r.role for r in record.results] == ["explorer", "challenger", "reviewer"]
-    challenger_task = [c for c in fake.calls if "--agent" in c and c[c.index("--agent") + 1] == "challenger"]
-    assert str(tmp_path) in challenger_task[0][2]
+def test_a_step_is_handed_the_previous_steps_artifact(tmp_path):
+    fake = _FakeExecutor()
+    run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID, executor=fake,
+                 gate_runner=_gate(), now=WHEN)
+    challenger_prompt = next(p for name, p in fake.calls if name == "challenger")
+    assert str(tmp_path / RUN_ID / "explorer" / PROPOSAL_NAME) in challenger_prompt
 
 
 def test_a_refused_gate_stops_the_pipeline(tmp_path):
     # carrying on would spend an agent reasoning about an artifact already known
     # to be unsound
-    _seed_proposal(tmp_path, "explorer")
-    fake = _FakeRun(gate_fails_for={"explorer"})
-    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, runner=fake, now=WHEN)
+    (tmp_path / RUN_ID / "explorer").mkdir(parents=True)
+    (tmp_path / RUN_ID / "explorer" / PROPOSAL_NAME).write_text("{}", encoding="utf-8")
+    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID,
+                          executor=_FakeExecutor(), gate_runner=_gate(1), now=WHEN)
     assert [r.role for r in record.results] == ["explorer"]
-    assert record.stopped_after == "explorer"
-    assert "gate refused" in record.stopped_because
+    assert record.stopped_after == "explorer" and "gate refused" in record.stopped_because
 
 
-def test_a_role_exiting_nonzero_stops_the_pipeline(tmp_path):
-    fake = _FakeRun(exit_for={"explorer"})
-    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, runner=fake, now=WHEN)
-    assert record.stopped_after == "explorer"
-    assert "exited 1" in record.stopped_because
+def test_a_role_that_does_not_succeed_stops_the_pipeline(tmp_path):
+    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID,
+                          executor=_FakeExecutor(fail_for={"explorer"}),
+                          gate_runner=_gate(), now=WHEN)
+    assert record.stopped_after == "explorer" and record.stopped_because == "exit 1"
 
 
-def test_the_whole_run_is_recorded_not_just_each_step(tmp_path):
-    for role in ("cleaner",):
-        _seed_proposal(tmp_path, role)
-    run_pipeline(PIPELINES["audit"], root=tmp_path, runner=_FakeRun(), now=WHEN)
-    record = json.loads((tmp_path / "audit.json").read_text(encoding="utf-8"))
-    assert record["pipeline"] == "audit"
-    assert [s["role"] for s in record["steps"]] == ["cleaner"]
-    assert record["stopped_after"] is None
+def test_resuming_reuses_a_step_that_already_finished(tmp_path):
+    # a sweep costs on the order of 300k tokens; redoing a step that succeeded
+    # because a later one broke is the expensive way to fail
+    _seed(tmp_path, "explorer", ok=True)
+    fake = _FakeExecutor()
+    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID, resume=True,
+                          executor=fake, gate_runner=_gate(), now=WHEN)
+    assert record.resumed == ("explorer",)
+    assert [name for name, _ in fake.calls] == ["challenger", "reviewer"]
+
+
+def test_a_step_that_failed_before_is_redone_not_resumed(tmp_path):
+    _seed(tmp_path, "explorer", ok=False)
+    fake = _FakeExecutor()
+    record = run_pipeline(DISCOVERY_SWEEP, root=tmp_path, run_id=RUN_ID, resume=True,
+                          executor=fake, gate_runner=_gate(), now=WHEN)
+    assert record.resumed == ()
+    assert [name for name, _ in fake.calls][0] == "explorer"
+
+
+def test_the_run_records_what_the_whole_pipeline_cost(tmp_path):
+    record = run_pipeline(PIPELINES["audit"], root=tmp_path, run_id=RUN_ID,
+                          executor=_FakeExecutor(cost=0.25), now=WHEN)
+    assert record.cost_usd == 0.25
+    written = json.loads((tmp_path / RUN_ID / "pipeline.json").read_text(encoding="utf-8"))
+    assert written["pipeline"] == "audit" and written["cost_usd"] == 0.25
+    assert written["run_id"] == RUN_ID
 
 
 def test_what_a_run_is_about_reaches_every_step(tmp_path):
-    fake = _FakeRun()
-    run_pipeline(PIPELINES["upgrade"], root=tmp_path, prefix="source: core-mof",
-                 runner=fake, now=WHEN)
-    agent_calls = [c for c in fake.calls if "--agent" in c]
-    assert all("source: core-mof" in c[2] for c in agent_calls)
+    fake = _FakeExecutor()
+    run_pipeline(PIPELINES["upgrade"], root=tmp_path, run_id=RUN_ID, prefix="source: core-mof",
+                 executor=fake, gate_runner=_gate(), now=WHEN)
+    assert all("source: core-mof" in prompt for _name, prompt in fake.calls)

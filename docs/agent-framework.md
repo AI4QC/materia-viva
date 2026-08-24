@@ -54,8 +54,11 @@ existed, a diff moving a source from `rejected` to `integrated` passed with zero
 *Cost*: an agent cannot do anything a check cannot verify, which is why two roles are absent.
 
 **4. The harness runs the gate, not the agent.** A role is told to check itself; the harness checks
-anyway, gives each run a workspace outside the repository, and records role, task, command and
-verdict.
+anyway, gives each run a workspace outside the repository, records role, task, backend, cost and
+verdict, retries only a failure the role never survived, and resumes a run rather than repeating
+steps that already succeeded. Two backends — `claude_agent_sdk` in process when importable, the
+`claude` CLI otherwise — because the SDK is a 93 MB platform-specific wheel and does not belong in
+the repository's requirements.
 
 *Evidence*: all three real runs wrote their proposals outside the tree and the repository stayed
 clean. *Cost*: none identified.
@@ -95,11 +98,8 @@ unattended once and been read.
 ## What running it for real would need
 
 - **A home for reports.** The harness records each run in its workspace; nothing collects them.
-- **A decision about the SDK.** The harness shells out to the `claude` CLI. An in-process harness
-  wants `claude-agent-sdk`, which is a 93 MB platform-specific wheel — an optional dependency the
-  harness prefers when present, not something the backend's requirements should carry.
-- **A cost ceiling.** 300k tokens a sweep is affordable monthly and not weekly, and nothing enforces
-  either.
+- **A cost ceiling.** 300k tokens a sweep is affordable monthly and not weekly. The harness now
+  records what each run cost — the SDK backend reports it directly — but nothing enforces a limit.
 
 ## What would falsify this framework
 

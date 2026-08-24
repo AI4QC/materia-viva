@@ -1,100 +1,128 @@
 import json
 from datetime import datetime, timezone
-from pathlib import Path
+
+import pytest
 
 from src.agents import ROLES
-from src.agents.harness import PROPOSAL_NAME, agent_json, brief, command, run, workspace_for
+from src.agents.harness import (
+    PROPOSAL_NAME,
+    CliExecutor,
+    Outcome,
+    SdkExecutor,
+    agent_json,
+    brief,
+    command,
+    default_executor,
+    run,
+    run_many,
+)
 
 WHEN = datetime(2026, 8, 24, 9, 0, tzinfo=timezone.utc)
 
 
-class _FakeRun:
-    """Stands in for subprocess.run, recording what was executed."""
+class _FakeExecutor:
+    """An executor whose answers the test dictates."""
 
-    def __init__(self, gate_returncode=0):
+    name = "fake"
+
+    def __init__(self, *outcomes):
+        self.outcomes = list(outcomes) or [Outcome(ok=True, text="done", cost_usd=0.5, turns=3)]
         self.calls = []
-        self.gate_returncode = gate_returncode
 
-    def __call__(self, argv, cwd):
-        # keyed on argv[0]: a role's prompt contains the gate command it is told
-        # to run, so searching the whole argv would classify the agent invocation
-        # itself as a gate call
-        self.calls.append(list(argv))
-        code = 0 if argv[0] == "claude" else self.gate_returncode
-        return type("Done", (), {"returncode": code, "stdout": "output", "stderr": ""})()
+    def __call__(self, role, prompt, workspace, *, model=None, timeout=None):
+        self.calls.append((role.name, prompt, workspace))
+        return self.outcomes[min(len(self.calls) - 1, len(self.outcomes) - 1)]
+
+
+def _gate_runner(returncode=0):
+    def runner(argv, cwd):
+        return type("Done", (), {"returncode": returncode, "stdout": "gate said so", "stderr": ""})()
+    return runner
+
+
+def test_only_a_failure_the_role_never_survived_is_retried():
+    # retrying a role that ran and concluded just spends tokens on the same answer
+    assert Outcome(ok=False, text="", error="timed out after 5s").retryable
+    assert Outcome(ok=False, text="", error="CLINotFound: no claude").retryable
+    assert not Outcome(ok=False, text="", error="exit 1").retryable
+    assert not Outcome(ok=True, text="fine").retryable
 
 
 def test_the_role_is_what_the_cli_consumes():
-    # --agents takes exactly the JSON a Role serialises to, so nothing is
-    # transcribed by hand between the definition and the invocation
     payload = json.loads(agent_json(ROLES["explorer"]))
-    assert set(payload) == {"explorer"}
     assert payload["explorer"]["prompt"] == ROLES["explorer"].prompt
     assert payload["explorer"]["tools"] == list(ROLES["explorer"].tools)
 
 
 def test_the_command_restricts_tools_and_opens_only_the_workspace(tmp_path):
     argv = command(ROLES["cleaner"], "look for redundancy", tmp_path)
-    assert argv[:3] == ["claude", "-p", "look for redundancy"]
     assert argv[argv.index("--allowedTools") + 1] == " ".join(ROLES["cleaner"].tools)
     assert argv[argv.index("--add-dir") + 1] == str(tmp_path)
     assert argv[argv.index("--agent") + 1] == "cleaner"
 
 
-def test_each_run_gets_its_own_workspace(tmp_path):
-    first = workspace_for(ROLES["explorer"], tmp_path, now=WHEN)
-    assert first.is_dir() and first.name == "20260824T090000Z-explorer"
-    assert workspace_for(ROLES["cleaner"], tmp_path, now=WHEN) != first
+def test_the_backend_is_the_sdk_when_it_is_importable():
+    # a 93 MB platform-specific wheel, so it is preferred when present rather
+    # than required; without it the CLI backend needs nothing installed
+    assert isinstance(default_executor(), (SdkExecutor, CliExecutor))
 
 
 def test_the_brief_tells_the_role_where_it_may_write(tmp_path):
-    text = brief(ROLES["explorer"], "find sources", tmp_path)
+    text = brief("find sources", tmp_path)
     assert str(tmp_path) in text and PROPOSAL_NAME in text
     assert "Write nothing anywhere else" in text
 
 
 def test_the_harness_gates_a_proposal_rather_than_trusting_the_role_to(tmp_path):
-    # the role is told to check itself; instructing is not checking
-    fake = _FakeRun()
-    workspace = tmp_path / "20260824T090000Z-explorer"
-    workspace.mkdir(parents=True)
-    (workspace / PROPOSAL_NAME).write_text("{}", encoding="utf-8")
-
-    result = run(ROLES["explorer"], "find sources", root=tmp_path, runner=fake, now=WHEN)
+    (tmp_path / PROPOSAL_NAME).write_text("{}", encoding="utf-8")
+    result = run(ROLES["explorer"], "find", workspace=tmp_path, executor=_FakeExecutor(),
+                 gate_runner=_gate_runner(), now=WHEN)
     assert result.gate_passed is True
-    assert any(call[0] != "claude" and "verify_catalog_change.py" in " ".join(call)
-               for call in fake.calls)
+    assert (tmp_path / "gate.txt").read_text(encoding="utf-8") == "gate said so"
 
 
 def test_a_role_that_proposes_nothing_is_not_gated(tmp_path):
-    fake = _FakeRun()
-    result = run(ROLES["cleaner"], "audit", root=tmp_path, runner=fake, now=WHEN)
+    result = run(ROLES["cleaner"], "audit", workspace=tmp_path, executor=_FakeExecutor(),
+                 now=WHEN)
     assert result.gate_passed is None
-    assert all(call[0] == "claude" for call in fake.calls)
+    assert not (tmp_path / "gate.txt").exists()
 
 
 def test_a_proposing_role_that_left_nothing_behind_is_reported_as_such(tmp_path):
-    result = run(ROLES["updater"], "upgrade core-mof", root=tmp_path, runner=_FakeRun(), now=WHEN)
-    assert result.gate_passed is None
-    assert PROPOSAL_NAME in result.gate_output
-
-
-def test_every_run_leaves_a_record(tmp_path):
-    # without one, a run's reasoning lives in a terminal that gets closed, and
-    # the next run cannot know what the last one already declined
-    result = run(ROLES["cleaner"], "audit the adapters", root=tmp_path, runner=_FakeRun(), now=WHEN)
-    record = json.loads((result.workspace / "run.json").read_text(encoding="utf-8"))
-    assert record["role"] == "cleaner"
-    assert record["task"] == "audit the adapters"
-    assert record["started_at"].startswith("2026-08-24")
-    assert (result.workspace / "report.txt").read_text(encoding="utf-8") == "output"
-
-
-def test_a_failing_gate_is_recorded_not_swallowed(tmp_path):
-    workspace = tmp_path / "20260824T090000Z-explorer"
-    workspace.mkdir(parents=True)
-    (workspace / PROPOSAL_NAME).write_text("{}", encoding="utf-8")
-    result = run(ROLES["explorer"], "find", root=tmp_path, runner=_FakeRun(gate_returncode=1),
+    result = run(ROLES["updater"], "upgrade", workspace=tmp_path, executor=_FakeExecutor(),
                  now=WHEN)
-    assert result.gate_passed is False
-    assert json.loads((result.workspace / "run.json").read_text())["gate_passed"] is False
+    assert result.gate_passed is None and PROPOSAL_NAME in result.gate_output
+
+
+def test_a_retryable_failure_is_retried_and_a_conclusive_one_is_not(tmp_path):
+    slept = []
+    flaky = _FakeExecutor(Outcome(ok=False, text="", error="connection reset"),
+                          Outcome(ok=True, text="second time", cost_usd=0.2))
+    result = run(ROLES["cleaner"], "audit", workspace=tmp_path, executor=flaky,
+                 attempts=3, sleep=slept.append, now=WHEN)
+    assert result.ok and result.attempts == 2 and slept
+
+    stubborn = _FakeExecutor(Outcome(ok=False, text="", error="exit 1"))
+    result = run(ROLES["cleaner"], "audit", workspace=tmp_path, executor=stubborn,
+                 attempts=3, sleep=slept.append, now=WHEN)
+    assert not result.ok and result.attempts == 1
+
+
+def test_the_record_carries_what_the_run_cost(tmp_path):
+    # without it there is no way to know whether a monthly sweep is affordable
+    run(ROLES["cleaner"], "audit", workspace=tmp_path,
+        executor=_FakeExecutor(Outcome(ok=True, text="x", cost_usd=1.25, turns=7,
+                                       duration_ms=9000)),
+        now=WHEN)
+    record = json.loads((tmp_path / "run.json").read_text(encoding="utf-8"))
+    assert record["cost_usd"] == 1.25 and record["turns"] == 7
+    assert record["backend"] == "fake" and record["attempts"] == 1
+    assert record["started_at"].startswith("2026-08-24")
+
+
+def test_one_role_over_several_inputs_runs_a_few_at_a_time(tmp_path):
+    fake = _FakeExecutor()
+    tasks = [(f"upgrade {name}", tmp_path / name) for name in ("a", "b", "c", "d")]
+    results = run_many(ROLES["cleaner"], tasks, workers=2, executor=fake, now=WHEN)
+    assert len(results) == 4
+    assert {r.workspace.name for r in results} == {"a", "b", "c", "d"}

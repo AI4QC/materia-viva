@@ -1,32 +1,33 @@
-"""Running a role, and the three things the harness adds around the run.
+"""Running a role: two ways to execute one, and the parts neither gives you.
 
-`claude -p --agents <json>` already runs an agent. What it does not do is any of
-the parts that make a run safe to repeat, and those are what this module is:
+Execution has two backends. `SdkExecutor` runs the agent loop in this process
+through `claude_agent_sdk`, which reports what the run cost; `CliExecutor` shells
+out to `claude -p` and needs nothing installed. The SDK is a 93 MB
+platform-specific wheel, so it is an optional dependency the harness prefers when
+it is importable rather than something the repository requires.
 
-* **a workspace outside the repository.** Every run gets its own directory and is
-  told to write there, so a proposal cannot land in the working tree by accident
-  and a bad run is undone by deleting a folder.
-* **the gate, run by the harness rather than by the agent.** A role that proposes
-  a catalog change is instructed to check itself; instructing is not the same as
-  checking, so the harness runs the gate on whatever came back and records the
-  verdict next to it.
-* **a record of the run.** Which role, on what task, when, with which command,
-  what the gate said. Without it a run's reasoning lives in a terminal that gets
-  closed, and the next run cannot know what the last one already declined.
+Around either, the harness adds what makes a run safe to repeat:
 
-The role object is what the CLI consumes: `--agents` takes exactly the JSON a
-`Role` serialises to, so nothing is transcribed by hand between the definition and
-the invocation.
+* **a workspace outside the repository** per run, so a proposal cannot land in the
+  working tree and a bad run is undone by deleting a folder;
+* **the gate, run by the harness.** A role that proposes a catalog change is told
+  to check itself; instructing is not checking;
+* **a record** — role, task, backend, attempts, cost, turns, gate verdict — because
+  otherwise a run's reasoning lives in a terminal that gets closed;
+* **a timeout and bounded retries**, retrying only what is worth retrying: a
+  transport failure, never a role that ran and reached a conclusion.
 """
 
 from __future__ import annotations
 
 import json
 import subprocess
-from dataclasses import dataclass
+import time
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Sequence
+from typing import Any, Callable, Iterable, Protocol, Sequence
 
 from src.agents.base import Role
 
@@ -34,8 +35,115 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 GATE = PROJECT_ROOT / "scripts" / "datasets" / "verify_catalog_change.py"
 CATALOG = PROJECT_ROOT / "scripts" / "datasets" / "sources.json"
 
-#: What a role that proposes a catalog change is expected to leave behind.
 PROPOSAL_NAME = "proposal.json"
+DEFAULT_TIMEOUT = 1800.0
+DEFAULT_ATTEMPTS = 2
+#: Retrying a role that ran and concluded just spends tokens on the same answer.
+#: These are the failures where the role never got to run.
+RETRYABLE = ("timed out", "connection", "CLINotFound", "ProcessError", "transport")
+
+
+@dataclass(frozen=True)
+class Outcome:
+    """What an executor got back, independent of which backend produced it."""
+
+    ok: bool
+    text: str
+    cost_usd: float | None = None
+    turns: int | None = None
+    duration_ms: int | None = None
+    error: str = ""
+
+    @property
+    def retryable(self) -> bool:
+        blob = f"{self.error}".lower()
+        return not self.ok and any(token.lower() in blob for token in RETRYABLE)
+
+
+class Executor(Protocol):
+    name: str
+
+    def __call__(self, role: Role, prompt: str, workspace: Path, *,
+                 model: str | None, timeout: float) -> Outcome: ...
+
+
+class CliExecutor:
+    """`claude -p`, in a subprocess. Needs nothing installed beyond the CLI."""
+
+    name = "cli"
+
+    def __call__(self, role: Role, prompt: str, workspace: Path, *,
+                 model: str | None = None, timeout: float = DEFAULT_TIMEOUT) -> Outcome:
+        argv = command(role, prompt, workspace, model=model)
+        try:
+            done = subprocess.run(argv, cwd=PROJECT_ROOT, capture_output=True,
+                                  text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            return Outcome(ok=False, text="", error=f"timed out after {timeout}s")
+        except FileNotFoundError as error:
+            return Outcome(ok=False, text="", error=f"CLINotFound: {error}")
+        text = (done.stdout or "") + (done.stderr or "")
+        cost = turns = None
+        try:  # --output-format json, when the run got far enough to emit it
+            payload = json.loads(done.stdout)
+            cost, turns = payload.get("total_cost_usd"), payload.get("num_turns")
+        except (ValueError, TypeError):
+            pass
+        return Outcome(ok=done.returncode == 0, text=text, cost_usd=cost, turns=turns,
+                       error="" if done.returncode == 0 else f"exit {done.returncode}")
+
+
+class SdkExecutor:
+    """The agent loop in this process, through `claude_agent_sdk`."""
+
+    name = "sdk"
+
+    def __call__(self, role: Role, prompt: str, workspace: Path, *,
+                 model: str | None = None, timeout: float = DEFAULT_TIMEOUT) -> Outcome:
+        import asyncio
+
+        from claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, ResultMessage, query
+
+        options = ClaudeAgentOptions(
+            agents={role.name: AgentDefinition(
+                description=role.description, prompt=role.prompt, tools=list(role.tools)
+            )},
+            allowed_tools=list(role.tools),
+            cwd=str(PROJECT_ROOT),
+            add_dirs=[str(workspace)],
+            **({"model": model} if model else {}),
+        )
+
+        async def drive() -> Outcome:
+            said: list[str] = []
+            async for message in query(prompt=prompt, options=options):
+                if isinstance(message, ResultMessage):
+                    return Outcome(
+                        ok=not message.is_error,
+                        text=message.result or "\n".join(said),
+                        cost_usd=message.total_cost_usd,
+                        turns=message.num_turns,
+                        duration_ms=message.duration_ms,
+                        error="" if not message.is_error else str(message.errors or "error"),
+                    )
+                said.append(str(getattr(message, "content", message))[:4000])
+            return Outcome(ok=False, text="\n".join(said), error="no result message")
+
+        try:
+            return asyncio.run(asyncio.wait_for(drive(), timeout))
+        except TimeoutError:
+            return Outcome(ok=False, text="", error=f"timed out after {timeout}s")
+        except Exception as error:  # a transport failure is worth retrying; see RETRYABLE
+            return Outcome(ok=False, text="", error=f"{type(error).__name__}: {error}")
+
+
+def default_executor() -> Executor:
+    """The SDK when it is importable, the CLI otherwise."""
+    try:
+        import claude_agent_sdk  # noqa: F401
+    except ImportError:
+        return CliExecutor()
+    return SdkExecutor()
 
 
 @dataclass(frozen=True)
@@ -43,12 +151,16 @@ class Result:
     role: str
     task: str
     workspace: Path
-    command: tuple[str, ...]
-    returncode: int
-    report: str
+    backend: str
+    outcome: Outcome
+    attempts: int
+    started_at: str
     gate_returncode: int | None = None
     gate_output: str = ""
-    started_at: str = ""
+
+    @property
+    def ok(self) -> bool:
+        return self.outcome.ok
 
     @property
     def gate_passed(self) -> bool | None:
@@ -58,9 +170,14 @@ class Result:
         return {
             "role": self.role,
             "task": self.task,
+            "backend": self.backend,
             "started_at": self.started_at,
-            "command": list(self.command),
-            "returncode": self.returncode,
+            "ok": self.ok,
+            "attempts": self.attempts,
+            "error": self.outcome.error,
+            "cost_usd": self.outcome.cost_usd,
+            "turns": self.outcome.turns,
+            "duration_ms": self.outcome.duration_ms,
             "gate_returncode": self.gate_returncode,
             "gate_passed": self.gate_passed,
             "workspace": str(self.workspace),
@@ -68,7 +185,7 @@ class Result:
 
 
 def agent_json(role: Role) -> str:
-    """The role as `--agents` expects it."""
+    """The role as the CLI's `--agents` expects it."""
     return json.dumps(
         {role.name: {"description": role.description, "prompt": role.prompt,
                      "tools": list(role.tools)}}
@@ -89,14 +206,7 @@ def command(role: Role, task: str, workspace: Path, *, model: str | None = None)
     return argv
 
 
-def workspace_for(role: Role, root: Path, *, now: datetime | None = None) -> Path:
-    stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
-    path = root / f"{stamp}-{role.name}"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
-def brief(role: Role, task: str, workspace: Path) -> str:
+def brief(task: str, workspace: Path) -> str:
     """The task, with the one thing every run has to be told: where to write."""
     return (
         f"{task}\n\n"
@@ -105,12 +215,7 @@ def brief(role: Role, task: str, workspace: Path) -> str:
     )
 
 
-def _run(argv: Sequence[str], cwd: Path) -> subprocess.CompletedProcess:
-    return subprocess.run(list(argv), cwd=cwd, capture_output=True, text=True)
-
-
-def check_proposal(workspace: Path, runner: Callable[..., Any] = _run) -> tuple[int | None, str]:
-    """Run the gate on whatever the role left behind."""
+def _gate(workspace: Path, runner: Callable[..., Any]) -> tuple[int | None, str]:
     proposal = workspace / PROPOSAL_NAME
     if not proposal.exists():
         return None, f"no {PROPOSAL_NAME} in {workspace}"
@@ -121,35 +226,69 @@ def check_proposal(workspace: Path, runner: Callable[..., Any] = _run) -> tuple[
     return done.returncode, (done.stdout or "") + (done.stderr or "")
 
 
+def _subprocess(argv: Sequence[str], cwd: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(list(argv), cwd=cwd, capture_output=True, text=True)
+
+
 def run(
     role: Role,
     task: str,
     *,
-    root: Path,
+    workspace: Path,
+    executor: Executor | None = None,
     model: str | None = None,
-    runner: Callable[..., Any] = _run,
+    timeout: float = DEFAULT_TIMEOUT,
+    attempts: int = DEFAULT_ATTEMPTS,
+    gate_runner: Callable[..., Any] = _subprocess,
     now: datetime | None = None,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> Result:
     """Run a role, gate what it produced, and record both."""
+    executor = executor or default_executor()
+    workspace.mkdir(parents=True, exist_ok=True)
     started = (now or datetime.now(timezone.utc)).isoformat()
-    workspace = workspace_for(role, root, now=now)
-    argv = command(role, brief(role, task, workspace), workspace, model=model)
+    prompt = brief(task, workspace)
 
-    done = runner(argv, PROJECT_ROOT)
-    report = (done.stdout or "") + (done.stderr or "")
-    (workspace / "report.txt").write_text(report, encoding="utf-8")
+    used = 0
+    outcome = Outcome(ok=False, text="", error="never ran")
+    for attempt in range(1, attempts + 1):
+        used = attempt
+        outcome = executor(role, prompt, workspace, model=model, timeout=timeout)
+        if outcome.ok or not outcome.retryable:
+            break
+        sleep(min(30.0, 2.0 ** attempt))
+
+    (workspace / "report.txt").write_text(outcome.text, encoding="utf-8")
 
     gate_code, gate_output = (None, "")
     if role.proposes_catalog_change:
-        gate_code, gate_output = check_proposal(workspace, runner=runner)
+        gate_code, gate_output = _gate(workspace, gate_runner)
         (workspace / "gate.txt").write_text(gate_output, encoding="utf-8")
 
     result = Result(
-        role=role.name, task=task, workspace=workspace, command=tuple(argv),
-        returncode=done.returncode, report=report,
-        gate_returncode=gate_code, gate_output=gate_output, started_at=started,
+        role=role.name, task=task, workspace=workspace, backend=executor.name,
+        outcome=outcome, attempts=used, started_at=started,
+        gate_returncode=gate_code, gate_output=gate_output,
     )
     (workspace / "run.json").write_text(
         json.dumps(result.as_record(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return result
+
+
+def run_many(
+    role: Role,
+    tasks: Iterable[tuple[str, Path]],
+    *,
+    workers: int = 3,
+    **kwargs: Any,
+) -> list[Result]:
+    """One role over several inputs, a few at a time.
+
+    The cap is not about our machine; it is about how many conversations we are
+    willing to have with other people's servers at once through agents whose
+    request volume we do not control.
+    """
+    items = list(tasks)
+    with ThreadPoolExecutor(max_workers=max(1, min(workers, len(items) or 1))) as pool:
+        return list(pool.map(lambda item: run(role, item[0], workspace=item[1], **kwargs), items))

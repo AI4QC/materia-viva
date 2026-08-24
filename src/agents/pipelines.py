@@ -22,7 +22,7 @@ from typing import Callable, Mapping, Sequence
 
 from src.agents import ROLES
 from src.agents.base import Role
-from src.agents.harness import PROPOSAL_NAME, Result, _run, run
+from src.agents.harness import PROPOSAL_NAME, Executor, Result, run
 
 #: role name -> the proposal that role produced. Deliberately not its report.
 Artifacts = Mapping[str, Path]
@@ -48,15 +48,25 @@ class Pipeline:
 @dataclass
 class PipelineRun:
     pipeline: str
+    run_id: str
     started_at: str
     results: list[Result]
+    resumed: tuple[str, ...] = ()
     stopped_after: str | None = None
     stopped_because: str = ""
+
+    @property
+    def cost_usd(self) -> float | None:
+        costs = [r.outcome.cost_usd for r in self.results if r.outcome.cost_usd is not None]
+        return round(sum(costs), 4) if costs else None
 
     def as_record(self) -> dict:
         return {
             "pipeline": self.pipeline,
+            "run_id": self.run_id,
             "started_at": self.started_at,
+            "cost_usd": self.cost_usd,
+            "resumed": list(self.resumed),
             "steps": [r.as_record() for r in self.results],
             "stopped_after": self.stopped_after,
             "stopped_because": self.stopped_because,
@@ -140,43 +150,71 @@ def plan(pipeline: Pipeline, root: Path) -> list[tuple[str, str]]:
     return out
 
 
+def _finished(workspace: Path) -> bool:
+    record = workspace / "run.json"
+    if not record.exists():
+        return False
+    try:
+        return bool(json.loads(record.read_text(encoding="utf-8")).get("ok"))
+    except ValueError:
+        return False
+
+
 def run_pipeline(
     pipeline: Pipeline,
     *,
     root: Path,
+    run_id: str | None = None,
     prefix: str = "",
-    runner: Callable[..., object] = _run,
+    resume: bool = False,
+    executor: Executor | None = None,
     now: datetime | None = None,
+    **run_kwargs,
 ) -> PipelineRun:
     """Run every step, stopping at the first whose gate refused what it produced.
 
     A proposal the gate refuses is not something the next step should reason
     about; carrying on would spend an agent on an artifact already known to be
     unsound.
+
+    `resume` reuses a step that finished in a previous attempt at the same
+    `run_id` rather than paying for it again. A step is only skipped if its own
+    record says it succeeded — a half-written workspace is redone.
     """
-    started = (now or datetime.now(timezone.utc)).isoformat()
-    record = PipelineRun(pipeline=pipeline.name, started_at=started, results=[])
+    when = now or datetime.now(timezone.utc)
+    run_id = run_id or when.strftime("%Y%m%dT%H%M%SZ")
+    record = PipelineRun(pipeline=pipeline.name, run_id=run_id,
+                         started_at=when.isoformat(), results=[])
     artifacts: dict[str, Path] = {}
+    resumed: list[str] = []
 
     for step in pipeline.steps:
+        workspace = root / run_id / step.role.name
+        if resume and _finished(workspace):
+            resumed.append(step.role.name)
+            artifacts[step.role.name] = workspace / PROPOSAL_NAME
+            continue
+
         task = step.task(artifacts)
         if prefix:
             task = f"{prefix}\n\n{task}"
-        result = run(step.role, task, root=root, runner=runner, now=now)
+        result = run(step.role, task, workspace=workspace, executor=executor,
+                     now=when, **run_kwargs)
         record.results.append(result)
-        artifacts[step.role.name] = result.workspace / PROPOSAL_NAME
+        artifacts[step.role.name] = workspace / PROPOSAL_NAME
 
         if result.gate_passed is False:
             record.stopped_after = step.role.name
             record.stopped_because = "the gate refused what it produced"
             break
-        if result.returncode != 0:
+        if not result.ok:
             record.stopped_after = step.role.name
-            record.stopped_because = f"the role exited {result.returncode}"
+            record.stopped_because = result.outcome.error or "the role did not succeed"
             break
 
-    root.mkdir(parents=True, exist_ok=True)
-    (root / f"{pipeline.name}.json").write_text(
+    record.resumed = tuple(resumed)
+    (root / run_id).mkdir(parents=True, exist_ok=True)
+    (root / run_id / "pipeline.json").write_text(
         json.dumps(record.as_record(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return record

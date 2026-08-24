@@ -34,18 +34,34 @@ markdown files is five things that drift apart.
 serialises to, so nothing is transcribed by hand between the definition, the tests and the
 invocation.
 
-## What the harness adds
+## The harness
 
-`harness.py` wraps a run with the three things `claude -p` does not do:
+Two backends. `SdkExecutor` runs the agent loop in this process through `claude_agent_sdk` and
+reports what the run cost; `CliExecutor` shells out to `claude -p` and needs nothing installed. The
+SDK is a 93 MB platform-specific wheel, so it is **optional**: the harness prefers it when it is
+importable, and the repository's requirements do not carry it.
+
+```bash
+pip install claude-agent-sdk          # optional; without it the CLI backend is used
+python -m src.agents run discovery-sweep
+python -m src.agents run discovery-sweep --run-id 20260824T090000Z --resume
+```
+
+Around either backend it adds what `claude -p` does not:
 
 - **a workspace outside the repository** per run, so a proposal cannot land in the working tree and a
   bad run is undone by deleting a folder;
 - **the gate, run by the harness.** A role that proposes a catalog change is told to check itself;
   instructing is not checking, so the harness runs the gate on what came back and records the
   verdict beside it;
-- **a record of the run** — role, task, time, command, gate outcome — because otherwise a run's
-  reasoning lives in a terminal that gets closed, and the next run cannot know what the last one
-  already declined.
+- **a record of the run** — role, task, backend, attempts, cost, turns, gate outcome — because
+  otherwise a run's reasoning lives in a terminal that gets closed;
+- **a timeout and bounded retries**, retrying only a failure the role never survived — a transport
+  error or a timeout — and never a role that ran and reached a conclusion, since that just spends
+  tokens on the same answer;
+- **resume**: a step that finished under a run id is reused rather than paid for again. A sweep is on
+  the order of 300k tokens, so redoing a step that succeeded because a later one broke is the
+  expensive way to fail.
 
 ## The pipelines
 

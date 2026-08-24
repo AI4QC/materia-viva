@@ -45,6 +45,11 @@ def main(argv: list[str] | None = None) -> int:
         node.add_argument("--root", type=Path, default=DEFAULT_RUNS)
         if name == "run":
             node.add_argument("--about", default="", help="what this run is about, e.g. a source id")
+            node.add_argument("--run-id", default=None,
+                              help="reuse a run id; with --resume, continue that run")
+            node.add_argument("--resume", action="store_true",
+                              help="skip steps that already finished under this run id")
+            node.add_argument("--backend", choices=["sdk", "cli"], default=None)
     args = parser.parse_args(argv)
 
     if args.command == "render":
@@ -64,12 +69,28 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\n[{role}]\n{task}")
         return 0
 
-    record = run_pipeline(pipeline, root=args.root, prefix=args.about)
+    executor = None
+    if args.backend:
+        from src.agents.harness import CliExecutor, SdkExecutor
+
+        executor = SdkExecutor() if args.backend == "sdk" else CliExecutor()
+
+    record = run_pipeline(pipeline, root=args.root, run_id=args.run_id, prefix=args.about,
+                          resume=args.resume, executor=executor)
+    for name in record.resumed:
+        print(f"  {name:11s} reused from an earlier attempt")
     for result in record.results:
-        gate = "" if result.gate_passed is None else f"  gate={'ok' if result.gate_passed else 'refused'}"
-        print(f"  {result.role:11s} exit={result.returncode}{gate}  {result.workspace}")
+        gate = "" if result.gate_passed is None else (
+            "  gate=ok" if result.gate_passed else "  gate=refused")
+        cost = "" if result.outcome.cost_usd is None else f"  ${result.outcome.cost_usd:.2f}"
+        print(f"  {result.role:11s} {'ok' if result.ok else 'failed'}{gate}{cost}  "
+              f"{result.workspace}")
+    if record.cost_usd is not None:
+        print(f"\nrun {record.run_id} cost ${record.cost_usd:.2f}")
     if record.stopped_after:
-        print(f"\nstopped after {record.stopped_after}: {record.stopped_because}")
+        print(f"stopped after {record.stopped_after}: {record.stopped_because}")
+        print(f"resume with: python -m src.agents run {pipeline.name} "
+              f"--run-id {record.run_id} --resume")
         return 1
     return 0
 

@@ -772,3 +772,35 @@ def test_aflow_export_is_paged_and_resumable(tmp_path):
     assert manifest["downloaded_documents"] == 3
     assert manifest["pages"] == [1, 2]
     assert len(calls) == 2
+
+
+def test_every_documented_reason_code_example_really_carries_it():
+    """The reason-code table in the design document names real catalog entries.
+
+    That table's whole claim is that no code was invented ahead of a real failure,
+    so an example that does not carry the code it illustrates makes the claim
+    false. Two rows had drifted — examples written at design time and never
+    re-derived once the backfill moved `nomad` to `scope-unbounded` — which is why
+    this is checked rather than proofread.
+    """
+    import re
+
+    document = (REPO_ROOT / "docs" / "self-evolving-loop.zh-CN.md").read_text(encoding="utf-8")
+    section = document[document.index("### 2.2"):document.index("### 2.3")]
+    catalog = load_catalog(REPO_ROOT / "scripts" / "datasets" / "sources.json")
+    bearers = {}
+    for source in catalog["sources"]:
+        bearers.setdefault(source.get("reason"), set()).add(source["id"])
+
+    # the instance column carries catalog ids in backticks and nothing else, so
+    # a backticked token that is not an id is a defect in the table, not here
+    rows = re.findall(r"^\| `([a-z-]+)` \| [^|]+ \| ([^|]+) \|$", section, re.M)
+    assert len(rows) == 8, f"expected 8 documented codes, parsed {len(rows)}"
+    for code, instances in rows:
+        named = set(re.findall(r"`([a-z0-9-]+)`", instances))
+        actual = bearers.get(code, set())
+        assert named <= actual, f"{code}: documented {sorted(named - actual)} do not carry it"
+        if actual:
+            assert named, f"{code} has instances {sorted(actual)} but the table names none"
+        else:
+            assert not named, f"{code} has no instance but the table names {sorted(named)}"

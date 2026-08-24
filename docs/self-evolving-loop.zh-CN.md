@@ -403,16 +403,22 @@ ICSD 是"整合成功 + 不可发布"的标准形态：`state` 为 `integrated`�
 
 每个码都对应 `sources.json` 里已经存在的真实情形：
 
-| 原因码 | 含义 | 现有实例 |
+实例一律写目录 id，并由测试钉住（`test_every_documented_reason_code_example_really_carries_it`）——这张表的
+全部意义就是每个码都指着一个真实条目，而它曾经漂过两行。
+
+| 原因码 | 含义 | 现有实例（目录 id） |
 |---|---|---|
-| `licence-unclear` | 再分发授权无法确认 | 默认拒绝出口 |
-| `licence-restricted` | 明确受限（付费 / 订阅 / 机构授权） | ICSD、CSD、MPDS |
-| `account-required` | 需人工注册或登录，无法自动化 | MatCloud、MatCraft |
-| `no-bulk-interface` | 无官方批量接口且禁止爬取 | NOMAD、OPTIMADE 联邦 |
-| `scope-trajectory` | 轨迹 / 中间帧数据集，超出静态结构范围 | MPtrj、OMat24 |
-| `scope-unbounded` | 有批量接口，但主动不做无边界全量镜像 | NOMAD、Perovskite Database、Open Materials DB |
-| `join-key-missing` | 抓取缺少关联键，数据无法挂接 | Catalysis-Hub |
-| `integrity-failed` | 校验和、计数或异常值检查未通过 | 见采集文档第 6 节 |
+| `licence-unclear` | 再分发授权无法确认 | 零实例：这是许可闸门的默认拒绝出口，运行期才产生 |
+| `licence-restricted` | 明确受限，且许可是比接口更硬的那道界 | `topological-materials` |
+| `account-required` | 需人工注册或登录，无法自动化 | 21 条，含 `csd` `mpds` `matcloud` `matcraft` `pearsons-crystal-data` `nist-crystal-data` |
+| `no-bulk-interface` | 无官方批量接口且禁止爬取 | `magndata` `qpod` `hetdb` `x2db` `mpod` `matterverse` `nlr-matdb` |
+| `scope-trajectory` | 轨迹 / 中间帧数据集，超出静态结构范围 | `mptrj` `omat24` `materials-cloud-li-ion-trajectories` |
+| `scope-unbounded` | 有批量接口，但主动不做无边界全量镜像 | `nomad` `perovskite-database` `open-materials-db` |
+| `join-key-missing` | 抓取缺少关联键，数据无法挂接 | `catalysis-hub` |
+| `integrity-failed` | 校验和、计数或异常值检查未通过 | 零实例：由完整性检查在隔离时写入，运行期才产生 |
+
+注意 `icsd` **不在**这张表里:它 `state=integrated`、不可发布，是第 2.1 节那个"整合成功 + 不可发布"
+的形态，不是拒收态。把它当 `licence-restricted` 的例子是这张表曾经犯过的错。
 
 新码只在真的出现新失败形态时增加，不预先铺开。回填之后 `licence-unclear` 和 `integrity-failed`
 仍是零实例，因为它们是**运行期结果而非目录类别**：前者是许可闸门的默认拒绝出口，后者由完整性检查

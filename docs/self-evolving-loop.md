@@ -474,16 +474,24 @@ ICSD is the canonical shape of "integrated and unpublishable": `state` is `integ
 
 Every code corresponds to a situation already present in `sources.json`:
 
-| Reason code | Meaning | Existing instance |
+Instances are written as catalog ids and pinned by a test
+(`test_every_documented_reason_code_example_really_carries_it`) — the whole point of this table is
+that every code points at a real entry, and two of its rows had drifted.
+
+| Reason code | Meaning | Existing instances (catalog ids) |
 |---|---|---|
-| `licence-unclear` | redistribution authorisation cannot be confirmed | the default-deny exit |
-| `licence-restricted` | explicitly restricted (paid, subscription, institutional) | ICSD, CSD, MPDS |
-| `account-required` | needs manual registration or login, cannot be automated | MatCloud, MatCraft |
-| `no-bulk-interface` | no official bulk interface, and crawling is prohibited | NOMAD, the OPTIMADE federation |
-| `scope-trajectory` | a trajectory or intermediate-frame dataset, outside the static-structure scope | MPtrj, OMat24 |
-| `scope-unbounded` | has a bulk interface, but we deliberately do not mirror it whole | NOMAD, Perovskite Database, Open Materials DB |
-| `join-key-missing` | the crawl lacks the join key, so the data cannot attach | Catalysis-Hub |
-| `integrity-failed` | a checksum, count or outlier check did not pass | acquisition notes, section 6 |
+| `licence-unclear` | redistribution authorisation cannot be confirmed | none: the licence gate's default-deny exit, produced at runtime |
+| `licence-restricted` | explicitly restricted, and the licence is a harder bound than the interface | `topological-materials` |
+| `account-required` | needs manual registration or login, cannot be automated | 21 entries, among them `csd` `mpds` `matcloud` `matcraft` `pearsons-crystal-data` `nist-crystal-data` |
+| `no-bulk-interface` | no official bulk interface, and crawling is prohibited | `magndata` `qpod` `hetdb` `x2db` `mpod` `matterverse` `nlr-matdb` |
+| `scope-trajectory` | a trajectory or intermediate-frame dataset, outside the static-structure scope | `mptrj` `omat24` `materials-cloud-li-ion-trajectories` |
+| `scope-unbounded` | has a bulk interface, but we deliberately do not mirror it whole | `nomad` `perovskite-database` `open-materials-db` |
+| `join-key-missing` | the crawl lacks the join key, so the data cannot attach | `catalysis-hub` |
+| `integrity-failed` | a checksum, count or outlier check did not pass | none: written by the integrity check when quarantining, produced at runtime |
+
+Note that `icsd` is **not** in this table: it is `state=integrated` and unpublishable, the
+"integrated and unpublishable" shape of section 2.1 rather than a rejection. Citing it as an example
+of `licence-restricted` is a mistake this table used to make.
 
 A new code is added only when a new failure mode actually occurs; the vocabulary is not laid out in
 advance. After the backfill, `licence-unclear` and `integrity-failed` still have zero instances,

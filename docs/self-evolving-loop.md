@@ -208,9 +208,20 @@ are exactly where new materials datasets tend to live. So the rule comes from th
 host is evidence of duplication only when exactly one existing source uses it**, meaning it is that
 source's own domain; two or more sharing it makes it a platform, which carries no signal.
 
-**A memory of rejections needs no new ledger.** The catalog already holds 36 `rejected` entries, so
-a discovery agent deduplicating against the whole of `sources.json` will not re-propose a source
-that was already declined — the state backfill (step 3) settled that as a side effect.
+**There is no memory of rejections at all, and that is the discovery agent's most immediate defect.**
+The intended mechanism was that the catalog's `rejected` entries are the memory, so an agent
+deduplicating against the whole of `sources.json` would not re-propose a source already declined.
+That has two holes:
+
+1. `state` / `reason` have not landed, so **no** catalog entry carries `rejected` and the mechanism's
+   precondition is absent today;
+2. even once it lands it is not enough — **a candidate rejected at the gate never enters the
+   catalog**, so it leaves no trace. This has already happened: one discovery run produced five
+   candidates, four were declined, and the next run will propose them again unchanged.
+
+For a memory to exist, the rejected candidate itself has to be recorded, which needs somewhere other
+than the catalog — or candidates have to land as `registered` before being rejected. That decision
+has not been made.
 
 ### 1.4 The three MAS outputs, and who actually pulls the data
 

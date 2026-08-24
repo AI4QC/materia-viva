@@ -1,4 +1,7 @@
 from pathlib import Path
+from urllib.error import HTTPError
+
+import pytest
 
 from scripts.datasets.acquire import load_catalog
 from scripts.datasets.probe_upstream import (
@@ -289,3 +292,121 @@ def test_no_source_is_both_probeable_and_recorded_as_having_no_bulk_interface():
         if s.get("reason") == "no-bulk-interface" and plans[s["id"]].kind != "manual"
     ]
     assert contradictions == []
+
+
+class _CountingOpener:
+    """Stands in for urlopen, recording every URL it is actually asked for."""
+
+    def __init__(self, answers):
+        self.answers = answers          # url -> status code, or an HTTPError
+        self.asked = []
+
+    def __call__(self, request, timeout=None):
+        url = request.full_url
+        self.asked.append(url)
+        answer = self.answers.get(url, 200)
+        if isinstance(answer, Exception):
+            raise answer
+        return _Response(answer)
+
+
+class _Response:
+    def __init__(self, status):
+        self.status = status
+        self.headers = {}
+
+    def read(self):
+        return b"{}"
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def _http_error(code, retry_after=None):
+    import email.message
+    headers = email.message.Message()
+    if retry_after is not None:
+        headers["Retry-After"] = str(retry_after)
+    return HTTPError("https://h/x", code, "nope", headers, None)
+
+
+def test_a_host_that_says_429_is_not_knocked_on_again(monkeypatch):
+    from scripts.datasets import probe_upstream
+
+    opener = _CountingOpener({"https://h/1": _http_error(429)})
+    monkeypatch.setattr(probe_upstream, "urlopen", opener)
+    poller = probe_upstream.PolitePoller(delay=0)
+
+    with pytest.raises(HTTPError):
+        poller.status("https://h/1")
+    # the next two must not reach the network at all: continuing to walk a host's
+    # URLs after it asked us to stop is the pattern that gets an address blocked
+    for url in ("https://h/2", "https://h/3"):
+        with pytest.raises(probe_upstream.BackedOff):
+            poller.status(url)
+    assert opener.asked == ["https://h/1"]
+    assert poller.hosts_that_asked_us_to_stop == ["h"]
+
+
+def test_one_host_backing_off_does_not_silence_the_others(monkeypatch):
+    from scripts.datasets import probe_upstream
+
+    opener = _CountingOpener({"https://a/1": _http_error(503)})
+    monkeypatch.setattr(probe_upstream, "urlopen", opener)
+    poller = probe_upstream.PolitePoller(delay=0)
+    with pytest.raises(HTTPError):
+        poller.status("https://a/1")
+    assert poller.status("https://b/1") == 200
+    assert opener.asked == ["https://a/1", "https://b/1"]
+
+
+def test_retry_after_sets_how_long_we_stay_away(monkeypatch):
+    from scripts.datasets import probe_upstream
+
+    opener = _CountingOpener({"https://h/1": _http_error(429, retry_after=0)})
+    monkeypatch.setattr(probe_upstream, "urlopen", opener)
+    poller = probe_upstream.PolitePoller(delay=0)
+    with pytest.raises(HTTPError):
+        poller.status("https://h/1")
+    # Retry-After: 0 means the block has already expired, so the host is reachable
+    assert poller.status("https://h/2") == 200
+    # and without a Retry-After the default keeps us away for the rest of the run
+    opener2 = _CountingOpener({"https://k/1": _http_error(429)})
+    monkeypatch.setattr(probe_upstream, "urlopen", opener2)
+    poller2 = probe_upstream.PolitePoller(delay=0)
+    with pytest.raises(HTTPError):
+        poller2.status("https://k/1")
+    with pytest.raises(probe_upstream.BackedOff):
+        poller2.status("https://k/2")
+
+
+def test_a_runaway_loop_hits_a_cap_rather_than_the_network(monkeypatch):
+    from scripts.datasets import probe_upstream
+
+    opener = _CountingOpener({})
+    monkeypatch.setattr(probe_upstream, "urlopen", opener)
+    poller = probe_upstream.PolitePoller(delay=0, max_requests=3)
+    for n in range(3):
+        assert poller.status(f"https://h/{n}") == 200
+    with pytest.raises(probe_upstream.BackedOff, match="cap of 3"):
+        poller.status("https://h/4")
+    assert len(opener.asked) == 3
+
+
+def test_verifying_many_urls_on_one_host_stops_at_the_first_refusal(monkeypatch):
+    # the shape that mattered: one source can carry 23 URLs on one host, and
+    # walking the rest a second apart after a 429 is what looks like an attack
+    from scripts.datasets import probe_upstream
+    from scripts.datasets.verify_catalog_change import check_urls
+
+    opener = _CountingOpener({"https://zenodo.org/f0": _http_error(429)})
+    monkeypatch.setattr(probe_upstream, "urlopen", opener)
+    entries = [{"source_id": "arc-mof", "filename": f"f{n}",
+                "url": f"https://zenodo.org/f{n}", "bytes": 1} for n in range(23)]
+    checks = check_urls(entries, probe_upstream.PolitePoller(delay=0))
+    assert len(opener.asked) == 1
+    assert checks[0]["verdict"] == "http-429"
+    assert all("BackedOff" in c["verdict"] for c in checks[1:])

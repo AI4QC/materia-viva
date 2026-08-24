@@ -41,6 +41,12 @@ DEFAULT_CATALOG = REPOSITORY_ROOT / "scripts" / "datasets" / "sources.json"
 USER_AGENT = "MateriaViva-upstream-probe/1.0 (+https://github.com/AI4QC/materia-viva)"
 HOST_DELAY_SECONDS = 1.0
 TIMEOUT_SECONDS = 30
+#: answers that mean "stop"; the host is left alone for the rest of the run
+BACKOFF_CODES = {429, 503}
+#: used when a 429 or 503 carries no Retry-After
+BACKOFF_SECONDS = 3600.0
+#: a backstop against a loop, not a policy — a real run makes tens of requests
+MAX_REQUESTS_PER_RUN = 500
 
 INVENIO_HOSTS = {"zenodo.org", "archive.materialscloud.org"}
 # the same record is addressable with or without the `/api/` prefix
@@ -157,38 +163,85 @@ def plan_probes(catalog: dict[str, Any]) -> dict[str, Probe]:
     return {source["id"]: plan_probe(source) for source in catalog["sources"]}
 
 
+class BackedOff(RuntimeError):
+    """Raised instead of contacting a host that has told us to slow down."""
+
+
 class PolitePoller:
-    """One request at a time, at most one per host per HOST_DELAY_SECONDS."""
+    """One request at a time, and never a second knock after being told to stop.
 
-    def __init__(self, delay: float = HOST_DELAY_SECONDS) -> None:
+    Spacing alone is not what keeps a run from looking like an attack. What does
+    is stopping: a host that answers 429 or 503 is asking for exactly that, and
+    continuing to walk its remaining URLs a second apart is the pattern that gets
+    an address blocked. So the first such answer puts the host out of bounds for
+    the rest of the run — honouring `Retry-After` when it is given — and further
+    requests to it raise without touching the network.
+
+    The run-wide cap is a backstop against a loop, not a policy: no legitimate
+    run comes close to it.
+    """
+
+    def __init__(self, delay: float = HOST_DELAY_SECONDS,
+                 max_requests: int = MAX_REQUESTS_PER_RUN) -> None:
         self._delay = delay
+        self._max_requests = max_requests
+        self._requests = 0
         self._last: dict[str, float] = {}
+        #: host -> monotonic time before which we must not knock again
+        self._blocked_until: dict[str, float] = {}
 
-    def _wait(self, url: str) -> None:
+    def _wait(self, url: str) -> str:
         host = urlparse(url).netloc
+        blocked_until = self._blocked_until.get(host)
+        if blocked_until is not None and time.monotonic() < blocked_until:
+            raise BackedOff(
+                f"{host} asked us to slow down earlier in this run; not contacted again"
+            )
+        self._requests += 1
+        if self._requests > self._max_requests:
+            raise BackedOff(
+                f"run-wide cap of {self._max_requests} requests reached; refusing to continue"
+            )
         elapsed = time.monotonic() - self._last.get(host, 0.0)
         if elapsed < self._delay:
             time.sleep(self._delay - elapsed)
         self._last[host] = time.monotonic()
+        return host
+
+    def _note_backoff(self, host: str, error: HTTPError) -> None:
+        retry_after = error.headers.get("Retry-After") if error.headers else None
+        try:
+            seconds = float(retry_after)
+        except (TypeError, ValueError):
+            seconds = BACKOFF_SECONDS
+        self._blocked_until[host] = time.monotonic() + seconds
+
+    def _open(self, url: str, method: str = "GET"):
+        host = self._wait(url)
+        request = Request(url, method=method, headers={"User-Agent": USER_AGENT})
+        try:
+            return urlopen(request, timeout=TIMEOUT_SECONDS)
+        except HTTPError as error:
+            if error.code in BACKOFF_CODES:
+                self._note_backoff(host, error)
+            raise
 
     def json(self, url: str) -> Any:
-        self._wait(url)
-        request = Request(url, headers={"User-Agent": USER_AGENT})
-        with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+        with self._open(url) as response:
             return json.loads(response.read())
 
     def status(self, url: str) -> int:
         """The response status of a page, without reading its body."""
-        self._wait(url)
-        request = Request(url, headers={"User-Agent": USER_AGENT})
-        with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+        with self._open(url) as response:
             return response.status
 
     def head(self, url: str) -> dict[str, str]:
-        self._wait(url)
-        request = Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
-        with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+        with self._open(url, method="HEAD") as response:
             return {k.lower(): v for k, v in response.headers.items()}
+
+    @property
+    def hosts_that_asked_us_to_stop(self) -> list[str]:
+        return sorted(self._blocked_until)
 
 
 def _seen_invenio(probe: Probe, payload: Any) -> tuple[str, dict[str, Any]]:

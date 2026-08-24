@@ -728,12 +728,31 @@ This is the only part of the loop with an outward side effect, so the rules are 
 - one request per probe (a `HEAD` or a minimal metadata query), and **never re-download an archive to
   determine a version**;
 - prefer conditional requests, `If-None-Match` / `If-Modified-Since`; a `304` settles it as unchanged;
-- one concurrent request per host, at least a second apart; a `429` or `5xx` is given up on for this
-  round, not retried;
+- one concurrent request per host, at least a second apart (a floor, not a target);
+- **no second knock after being told to stop.** Spacing is not what keeps a run from looking like an
+  attack; stopping is. A `429` or `503` is a host asking for exactly that, and walking its remaining
+  URLs a second apart afterwards is the pattern that gets an address blocked. So the first such
+  answer puts that host out of bounds for the rest of the run — further requests raise `BackedOff`
+  and **never reach the network** — honouring `Retry-After` when it is given and lasting the run when
+  it is not. This is not hypothetical: one source can carry 23 URLs on one host (`arc-mof`), and
+  knocking twenty more times after the third returned 429 was the previous behaviour;
 - a User-Agent naming the project and a contact; `robots.txt` and each source's terms respected;
 - **no bypassing accounts, paid licences or redistribution limits.** A source whose version
   information requires a login is `probe_kind: "manual"`, with `seen` updated by a person at review
   time.
+
+There is also a backstop against a runaway: a run-wide request cap, 500 by default. It is not a
+policy — a real run makes tens of requests — but a loop turning into a flood is what it exists to
+prevent.
+
+**Agents have to use the same path, and that is currently a requirement rather than a mechanism.**
+All of the above lives in `PolitePoller` in
+[`probe_upstream.py`](../scripts/datasets/probe_upstream.py), which the probe and the gate both use;
+across three real runs the agents made their own requests with their own sleeps, and one reported
+that it had not fetched `robots.txt` per host. **The rules bind the deterministic half and not the
+open-ended half, and the open-ended half is the one that can issue a lot of requests.** An agent
+should `from scripts.datasets.probe_upstream import PolitePoller` rather than building its own; until
+that is enforced it rests on the prompt saying so.
 
 Frequency: one global interval to begin with (**undecided**, on the order of weeks to a month),
 probing when due. Sources with `probe_kind: "manual"` are not probed; when they come due, a person

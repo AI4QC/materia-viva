@@ -179,8 +179,14 @@ MAS 的实际用途是：**搜索新来源与升级 → 产出拉取计划 → �
 | 每个 URL 真的存在，且 content-length 与声称的 `bytes` 一致 | 逐个 HEAD，一次请求 |
 | 下载后不会吃掉 SSD 安全余量 | `acquire.py` 的 `ensure_capacity`（50 GiB 保留）已在做 |
 | `data_path` 不与现有来源冲突 | 目录内比对 |
+| `status` / `notes` 里没有留着被替换掉的旧上游 id | 从被移除的 URL 里抽 id，在自由文本里搜 |
 
 也就是说，第二种产出几乎不需要新代码——需要的是让 agent 填这个数组，然后跑一遍已有的校验加一轮 HEAD。
+已实现：[`scripts/datasets/verify_plan.py`](../scripts/datasets/verify_plan.py)。它拿工作区的目录与
+HEAD 比，只验证这份计划新增或改动的条目——因为 agent 的产出就是一个 diff（第 1.3 节）。
+
+最后那条检查是第一次真实运行 agent 时暴露出来的：agent 自己在报告里指出"计划一旦被接受，`status` 与
+`notes` 里的旧 record id 就成了谎，而机器检查抓不到"。它是可机器检查的，所以现在归机器管。
 
 #### 产出三：拉取脚本
 

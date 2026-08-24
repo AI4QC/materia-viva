@@ -1,0 +1,113 @@
+import pytest
+
+from scripts.datasets.verify_plan import (
+    check_urls,
+    data_path_collisions,
+    proposed_downloads,
+    stale_prose,
+    verify,
+)
+
+
+class _StubPoller:
+    def __init__(self, headers=None, raises=None):
+        self._headers = headers or {}
+        self._raises = raises
+
+    def head(self, url):
+        if self._raises:
+            raise self._raises
+        return self._headers
+
+
+def _catalog(*sources):
+    return {"schema_version": 2, "sources": list(sources)}
+
+
+def _source(sid="cod", downloads=(), **extra):
+    return {
+        "id": sid, "name": sid, "access": "open",
+        "official_url": "https://example.org", "license": "CC0",
+        "data_path": f"raw/acquired/{sid}", "downloads": list(downloads), **extra,
+    }
+
+
+def _dl(name, url, size=10):
+    return {"filename": name, "url": url, "bytes": size}
+
+
+def test_only_added_or_altered_entries_count_as_proposed():
+    kept = _dl("a.csv", "https://h/records/1/files/a.csv/content")
+    before = _catalog(_source(downloads=[kept]))
+    after = _catalog(_source(downloads=[kept, _dl("b.csv", "https://h/records/1/files/b.csv/content")]))
+    proposed = proposed_downloads(before, after)
+    assert [p["filename"] for p in proposed] == ["b.csv"]
+    # an unchanged catalog proposes nothing
+    assert proposed_downloads(before, before) == []
+    # a changed byte count on an existing entry is a proposal too
+    altered = _catalog(_source(downloads=[{**kept, "bytes": 99}]))
+    assert [p["bytes"] for p in proposed_downloads(before, altered)] == [99]
+
+
+def test_two_sources_cannot_claim_one_data_path():
+    clash = _catalog(_source("cod"), {**_source("icsd"), "data_path": "raw/acquired/cod"})
+    assert len(data_path_collisions(clash)) == 1
+    assert data_path_collisions(_catalog(_source("cod"), _source("icsd"))) == []
+
+
+def test_prose_naming_a_replaced_upstream_id_is_a_problem():
+    old = _dl("a.csv", "https://zenodo.org/api/records/3677685/files/a.csv/content")
+    new = _dl("b.csv", "https://zenodo.org/api/records/14184621/files/b.csv/content")
+    before = _catalog(_source(downloads=[old]))
+    after = _catalog(_source(downloads=[new], notes="taken from record 3677685"))
+    problems = stale_prose(before, after)
+    assert len(problems) == 1 and "3677685" in problems[0]
+
+    # silent when the prose was updated with the plan
+    fixed = _catalog(_source(downloads=[new], notes="taken from record 14184621"))
+    assert stale_prose(before, fixed) == []
+    # silent when the id is still in use by a remaining entry
+    both = _catalog(_source(downloads=[old, new], notes="record 3677685"))
+    assert stale_prose(before, both) == []
+    # silent when the plan drops nothing
+    assert stale_prose(before, _catalog(_source(downloads=[old], notes="record 3677685"))) == []
+
+
+def test_a_url_is_ok_only_when_it_resolves_at_the_size_claimed():
+    entry = [{"source_id": "cod", "filename": "a.csv",
+              "url": "https://h/a.csv", "bytes": 10}]
+    assert check_urls(entry, _StubPoller({"content-length": "10"}))[0]["verdict"] == "ok"
+    assert "size mismatch" in check_urls(entry, _StubPoller({"content-length": "11"}))[0]["verdict"]
+    assert "no content-length" in check_urls(entry, _StubPoller({}))[0]["verdict"]
+    assert check_urls(entry, _StubPoller(raises=TimeoutError("slow")))[0]["verdict"].startswith(
+        "TimeoutError"
+    )
+    # a plan that claims no size cannot be contradicted, and says so
+    sizeless = [{"source_id": "cod", "filename": "a.csv", "url": "https://h/a.csv"}]
+    assert "claims no size" in check_urls(sizeless, _StubPoller({"content-length": "10"}))[0]["verdict"]
+
+
+def test_an_invalid_catalog_stops_before_any_request_is_made():
+    before = _catalog(_source())
+    broken = _catalog(_source(downloads=[_dl("a.csv", "http://insecure/a.csv")]))
+    poller = _StubPoller(raises=AssertionError("must not be called"))
+    report = verify(before, broken, poller, free_bytes=10**12)
+    assert len(report["problems"]) == 1
+    assert "does not validate" in report["problems"][0]
+    assert report["proposed"] == []
+
+
+def test_a_plan_that_would_eat_the_reserve_is_refused():
+    before = _catalog(_source())
+    after = _catalog(_source(downloads=[_dl("big.zip", "https://h/big.zip", size=10**12)]))
+    report = verify(after=after, before=before, poller=_StubPoller({"content-length": str(10**12)}),
+                    free_bytes=10**12)
+    assert any("reserve" in p for p in report["problems"])
+
+
+def test_a_sound_plan_reports_no_problem():
+    before = _catalog(_source())
+    after = _catalog(_source(downloads=[_dl("a.csv", "https://h/a.csv", size=10)]))
+    report = verify(before, after, _StubPoller({"content-length": "10"}), free_bytes=10**12)
+    assert report["problems"] == []
+    assert report["expected_bytes"] == 10

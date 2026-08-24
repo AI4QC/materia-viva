@@ -9,7 +9,8 @@ of the plan contract without trusting whoever produced it:
 * does the catalog still validate (https, safe relative filename, integer bytes);
 * does each new URL resolve, and is it the size the plan claims;
 * would the download fit inside the SSD reserve `acquire.py` protects;
-* does a new source claim a `data_path` some other source already owns.
+* does a new source claim a `data_path` some other source already owns;
+* does any free-text field still name an upstream id the plan just replaced.
 
 Nothing is downloaded and nothing is written. A non-zero exit means the plan is
 not ready for the licence and admission gates, never that the data is bad.
@@ -19,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -73,6 +75,32 @@ def data_path_collisions(after: dict[str, Any]) -> list[str]:
     return collisions
 
 
+def stale_prose(before: dict[str, Any], after: dict[str, Any]) -> list[str]:
+    """Free text still naming an upstream id the plan just replaced.
+
+    `status` and `notes` are prose, so nothing else notices when a plan moves a
+    source to a new upstream record and leaves the old id written in them. The
+    catalog then states two different upstream versions at once.
+    """
+    old, new = _downloads(before), _downloads(after)
+    stale = []
+    for source in after["sources"]:
+        source_id = source["id"]
+        dropped = [e["url"] for e in old.get(source_id, []) if e not in new.get(source_id, [])]
+        if not dropped:
+            continue
+        gone = {i for url in dropped for i in re.findall(r"\d{6,}", url)}
+        kept = {i for e in new.get(source_id, []) for i in re.findall(r"\d{6,}", e["url"])}
+        for field in ("status", "notes"):
+            text = source.get(field) or ""
+            for identifier in sorted(gone - kept):
+                if identifier in text:
+                    stale.append(
+                        f"{source_id}: {field} still names the replaced upstream id {identifier}"
+                    )
+    return stale
+
+
 def check_urls(proposed: list[dict[str, Any]], poller: PolitePoller) -> list[dict[str, Any]]:
     checks = []
     for entry in proposed:
@@ -108,6 +136,7 @@ def verify(before: dict[str, Any], after: dict[str, Any], poller: PolitePoller,
         return report
 
     report["problems"].extend(data_path_collisions(after))
+    report["problems"].extend(stale_prose(before, after))
     proposed = proposed_downloads(before, after)
     report["proposed"] = check_urls(proposed, poller)
     report["problems"].extend(

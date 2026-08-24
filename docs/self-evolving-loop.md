@@ -181,7 +181,13 @@ unchecked, several agents only produce more confident wrong answers faster.
   script — with no upside.
 - **No manager agent orchestrating the pipeline.** The fan-out shape belongs in a **script**: which
   step fans out, into how many, how the results are merged. That is reviewable code and it is the
-  same every run. **Judgement to the agents, control flow to code.**
+  same every run. **Judgement to the agents, control flow to code.** Implemented:
+  [`src/agents/pipelines.py`](../src/agents/pipelines.py) defines `discovery-sweep` (explorer →
+  challenger → reviewer), `upgrade` (updater → reviewer) and `audit` (cleaner). One design rule
+  becomes a **property rather than a discipline** there: a step builds its task from a mapping of
+  role name to the file that role left behind, with no route to a report, so the challenger forming
+  its own view is not something the caller has to remember. A refused gate stops the run, because
+  spending the next agent on an artifact already known to be unsound is worse than stopping.
 - **The licence decision does not split.** Two agents do not make a legal call safer; it needs a
   human (step [2]).
 

@@ -12,7 +12,10 @@ from them, so the definition and what runs cannot drift.
 | `cleaner.py` | find redundancy and error in what we already hold | 1.6, 6.3 |
 
 ```bash
-python -m src.agents render     # writes .claude/agents/*.md for the harness
+python -m src.agents render          # write .claude/agents/*.md for the harness
+python -m src.agents list            # the pipelines and the roles each runs
+python -m src.agents plan <name>     # what would run, and what each step is told
+python -m src.agents run <name>      # run it, gating and recording each step
 ```
 
 ## Why Python and not markdown
@@ -44,11 +47,26 @@ invocation.
   reasoning lives in a terminal that gets closed, and the next run cannot know what the last one
   already declined.
 
+## The pipelines
+
+`pipelines.py` is the fan-out shape, in code rather than decided per run — the same every time and
+reviewable as a diff. Section 1.3 puts judgement in the agents and control flow in a script, and a
+manager agent deciding the shape instead would add a way to get it wrong with no upside.
+
+| Pipeline | Steps |
+|---|---|
+| `discovery-sweep` | explorer → challenger → reviewer |
+| `upgrade` | updater → reviewer |
+| `audit` | cleaner |
+
+Two properties are worth naming. **A step sees artifacts, not reports**: it builds its task from a
+mapping of role name to the file that role left behind, and there is no route from there to a
+report. That is section 1.3's requirement that the challenger form its own view, made a property
+rather than something the caller has to remember. And **a refused gate stops the run**, because
+spending the next agent on an artifact already known to be unsound is worse than stopping.
+
 ## What is still missing
 
 Two roles are absent on purpose: drafting an adapter, and independently authoring its golden sample.
-Both wait on the golden sample framework, and section 1.8's rule is verification before the producer.
-
-There is no orchestration yet — nothing that decides to run the explorer, then the challenger on its
-output, then the reviewer on what survived. The fan-out shape belongs in a script, and that script
-does not exist.
+Both wait on the golden sample framework, and section 1.8's rule is verification before the
+producer.

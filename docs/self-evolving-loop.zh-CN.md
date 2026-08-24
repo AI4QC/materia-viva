@@ -153,7 +153,12 @@ agent 在文字里论证要改，动手仍是人的事。
 - **步骤 [1] [5] [6]**（探测、统一、去重）是确定性脚本且已在跑。让 agent 去指挥它们只增加一种新
   失败方式（agent 跑错脚本），没有上行收益。
 - **不设 manager agent 编排流水线。** 编排形状写在**脚本**里：哪一步 fan out、几路、结果怎么汇总，
-  都是可审计的代码，每次运行一样。**judgment 归 agent，workflow 归脚本。**
+  都是可审计的代码，每次运行一样。**judgment 归 agent，workflow 归脚本。** 已实现:
+  [`src/agents/pipelines.py`](../src/agents/pipelines.py) 定义 `discovery-sweep`（explorer →
+  challenger → reviewer）、`upgrade`（updater → reviewer）、`audit`（cleaner）。其中一条设计规则在这里
+  变成了**性质而非纪律**:每一步只从"角色名 → 该角色留下的产物文件"这个映射里取任务输入，**没有通往
+  报告的路径**，所以 challenger 看不见 explorer 的报告不需要调用方记得。闸门拒绝则整条链停下——让下一个
+  agent 去推理一份已知不成立的产物，比停下更糟。
 - **许可判定不拆。** 两个 agent 不会让法律判断更可靠，它需要人（步骤 [2]）。
 
 #### 运行形态

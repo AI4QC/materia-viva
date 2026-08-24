@@ -16,9 +16,11 @@ class _FakeRun:
         self.gate_returncode = gate_returncode
 
     def __call__(self, argv, cwd):
+        # keyed on argv[0]: a role's prompt contains the gate command it is told
+        # to run, so searching the whole argv would classify the agent invocation
+        # itself as a gate call
         self.calls.append(list(argv))
-        is_gate = any("verify_catalog_change.py" in part for part in argv)
-        code = self.gate_returncode if is_gate else 0
+        code = 0 if argv[0] == "claude" else self.gate_returncode
         return type("Done", (), {"returncode": code, "stdout": "output", "stderr": ""})()
 
 
@@ -60,14 +62,15 @@ def test_the_harness_gates_a_proposal_rather_than_trusting_the_role_to(tmp_path)
 
     result = run(ROLES["explorer"], "find sources", root=tmp_path, runner=fake, now=WHEN)
     assert result.gate_passed is True
-    assert any("verify_catalog_change.py" in " ".join(call) for call in fake.calls)
+    assert any(call[0] != "claude" and "verify_catalog_change.py" in " ".join(call)
+               for call in fake.calls)
 
 
 def test_a_role_that_proposes_nothing_is_not_gated(tmp_path):
     fake = _FakeRun()
     result = run(ROLES["cleaner"], "audit", root=tmp_path, runner=fake, now=WHEN)
     assert result.gate_passed is None
-    assert not any("verify_catalog_change.py" in " ".join(call) for call in fake.calls)
+    assert all(call[0] == "claude" for call in fake.calls)
 
 
 def test_a_proposing_role_that_left_nothing_behind_is_reported_as_such(tmp_path):

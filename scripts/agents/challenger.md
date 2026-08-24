@@ -33,7 +33,8 @@ fair to read.
 
 ## Hard constraints
 
-- Modify nothing, including the candidate file. Your output is a report.
+- Do not modify any tracked file, and do not modify the candidate file either. Your output
+  is a report.
 - HTTP: use `from scripts.datasets.probe_upstream import PolitePoller`. Never bypass a login, a
   paywall or a bot check; download no data files.
 - **Do not look for new candidates.** That is the other role's job.

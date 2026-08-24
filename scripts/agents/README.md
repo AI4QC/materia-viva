@@ -3,15 +3,22 @@
 The self-evolving loop's agent roles, in the harness's own format so that a run can be reproduced
 rather than reconstructed from someone's memory of a chat.
 
-They live here rather than in `.claude/agents/` because `.gitignore` classifies `.claude/` as local
-agent configuration and session state, and definitions that are not shared cannot be reproduced —
-which was the whole reason for writing them down. Point the harness at them once, per checkout:
+They live in the source tree, next to the scripts they call, rather than in `.claude/agents/`:
+`.gitignore` classifies `.claude/` as local agent configuration and session state, and a definition
+that is not shared cannot be reproduced, which was the whole reason for writing them down. Point the
+harness at them once, per checkout:
 
 ```bash
-ln -s ../docs/agents .claude/agents
+ln -s ../scripts/agents .claude/agents
 ```
 
 One file, one source of truth: the link is local and ignored, the definitions are versioned.
+
+`__init__.py` is not ceremony. It loads and parses the definitions so their containment properties
+can be tested rather than asserted in prose — that no role holds a tool that edits a file, that the
+reviewer cannot reach the network, that a role which fetches is told to use the shared polite client,
+and that a role proposing a catalog change ends by running the gate on itself. Those properties are
+why the roles are safe to run, and a property stated only in a README is one nobody is holding.
 
 | Definition | Role | Section |
 |---|---|---|

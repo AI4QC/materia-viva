@@ -92,22 +92,41 @@ def _name_key(value: str) -> str:
 def duplicate_candidates(before: dict[str, Any], added: list[dict[str, Any]]) -> list[str]:
     """A candidate the catalog already holds under another id.
 
-    Matched on the official_url's host and on the name, because those are what a
-    search turns up twice; an exact URL match is the easy case and is caught by
-    either.
+    Three signals, in descending strength: the same official_url, the same name,
+    and the same host.
+
+    The host signal has to be qualified, and the catalog says how. 46 of its 106
+    sources sit on 13 shared hosts — figshare.com alone carries 8 — so treating
+    any shared host as a duplicate would reject every new figshare, zenodo or
+    github-hosted candidate, which is where a large share of new materials
+    datasets live. A host is therefore evidence of duplication only when exactly
+    one existing source uses it, meaning it is that source's own domain rather
+    than a platform.
     """
-    hosts = {urlparse(s.get("official_url", "")).netloc: s["id"] for s in before["sources"]}
-    names = {_name_key(s.get("name", "")): s["id"] for s in before["sources"]}
+    owners: dict[str, list[str]] = {}
+    urls: dict[str, str] = {}
+    names: dict[str, str] = {}
+    for source in before["sources"]:
+        url = (source.get("official_url") or "").rstrip("/").lower()
+        owners.setdefault(urlparse(url).netloc, []).append(source["id"])
+        urls[url] = source["id"]
+        names[_name_key(source.get("name", ""))] = source["id"]
+
     problems = []
     for source in added:
-        host = urlparse(source.get("official_url", "")).netloc
-        if host and host in hosts:
-            problems.append(
-                f"{source['id']}: {hosts[host]} already uses the host {host}"
-            )
+        url = (source.get("official_url") or "").rstrip("/").lower()
+        if url in urls:
+            problems.append(f"{source['id']}: {urls[url]} already has this official_url")
+            continue
         key = _name_key(source.get("name", ""))
         if key and key in names:
             problems.append(f"{source['id']}: {names[key]} already has this name")
+        host_owners = owners.get(urlparse(url).netloc, [])
+        if len(host_owners) == 1:
+            problems.append(
+                f"{source['id']}: {host_owners[0]} is the only source on "
+                f"{urlparse(url).netloc}, so this is probably the same database"
+            )
     return problems
 
 

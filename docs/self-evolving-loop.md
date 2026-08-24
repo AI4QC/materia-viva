@@ -186,9 +186,14 @@ Implemented:
 [`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py). Both
 agent roles that touch the catalog produce the same kind of artifact — a branch whose diff either
 adds a source (a candidate) or changes `downloads[]` (a pull plan) — so it is one gate reading one
-diff. The candidate side adds two checks: whether `official_url` resolves, and whether the candidate
-collides with an existing source **by host or by name**, which are the two shapes a search hits
-twice.
+diff. The candidate side adds three checks: whether `official_url` resolves, whether it duplicates an
+existing `official_url`, and whether it duplicates a name.
+
+**The host check needs qualifying, or what it rejects is legitimate candidates.** 46 of the catalog's
+106 sources sit on 13 shared hosts, `figshare.com` alone carrying 8 — and figshare, zenodo and github
+are exactly where new materials datasets tend to live. So the rule comes from the catalog itself: **a
+host is evidence of duplication only when exactly one existing source uses it**, meaning it is that
+source's own domain; two or more sharing it makes it a platform, which carries no signal.
 
 **A memory of rejections needs no new ledger.** The catalog already holds 36 `rejected` entries, so
 a discovery agent deduplicating against the whole of `sources.json` will not re-propose a source

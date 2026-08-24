@@ -132,18 +132,36 @@ def test_only_sources_the_diff_adds_count_as_candidates():
 def test_a_candidate_the_catalog_already_holds_is_refused():
     before = _catalog({**_source("cod"), "name": "Crystallography Open Database",
                        "official_url": "https://www.crystallography.net/cod/"})
-    # same host under a different id and name
+    # the same official_url, trailing slash and case aside
+    same_url = [{**_source("cod2"), "name": "Whatever",
+                 "official_url": "https://www.crystallography.net/cod"}]
+    assert len(duplicate_candidates(before, same_url)) == 1
+    # the same name, punctuation and case aside
+    same_name = [{**_source("cod3"), "name": "crystallography open database",
+                  "official_url": "https://elsewhere.example/"}]
+    assert len(duplicate_candidates(before, same_name)) == 1
+    # a host only one source uses is that source's own domain
     same_host = [{**_source("codmirror"), "name": "Something else",
                   "official_url": "https://www.crystallography.net/other"}]
     assert len(duplicate_candidates(before, same_host)) == 1
-    # same name, punctuation and case aside
-    same_name = [{**_source("cod2"), "name": "crystallography open database",
-                  "official_url": "https://elsewhere.example/"}]
-    assert len(duplicate_candidates(before, same_name)) == 1
-    # genuinely new on both counts
+    # genuinely new on every count
     fresh = [{**_source("newdb"), "name": "Some New DB",
               "official_url": "https://newdb.example/"}]
     assert duplicate_candidates(before, fresh) == []
+
+
+def test_a_shared_platform_host_is_not_evidence_of_duplication():
+    # 46 of the catalog's 106 sources sit on 13 shared hosts, figshare.com alone
+    # carrying 8, so a shared host must not reject a new figshare-hosted dataset
+    before = _catalog(
+        {**_source("hmof"), "name": "hMOF",
+         "official_url": "https://figshare.com/articles/dataset/15127758"},
+        {**_source("snumat"), "name": "SNUMAT",
+         "official_url": "https://figshare.com/articles/dataset/21713885"},
+    )
+    candidate = [{**_source("newdb"), "name": "Some New DB",
+                  "official_url": "https://figshare.com/articles/dataset/19601956"}]
+    assert duplicate_candidates(before, candidate) == []
 
 
 def test_a_candidate_reports_its_urls_and_says_when_a_licence_url_is_absent():

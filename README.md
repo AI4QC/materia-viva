@@ -13,10 +13,10 @@
 > a separate account for each.** MateriaViva delivers a unified, deduplicated, licence-reviewed
 > snapshot behind a single Hugging Face download.
 >
-> **MateriaViva is also not meant to stay a one-off collection.** The next stage builds an
-> auditable self-evolving loop that keeps discovering new databases and new versions of existing
-> ones, then runs admission checks, field mapping and structural deduplication. Automatic
-> discovery and integration are still under development and not yet live.
+> **MateriaViva is also not meant to stay a one-off collection.** The next stage is an auditable
+> self-evolving loop, and its read-only half now runs: upstream change detection over 40 of the 106
+> catalogued sources, which found four sitting behind their upstream. Discovering new databases and
+> drafting adapters are not implemented, and nothing runs unattended.
 
 ## About MateriaViva
 
@@ -236,35 +236,33 @@ while protected original files and fields are not published with the snapshot.
 ## A self-evolving materials integration database
 
 The long-term goal is not to maintain a one-off static collection, but to keep discovering new
-materials databases and new versions of existing sources, then publish a new unified snapshot
-after licence judgement, format mapping, structural deduplication and quality checks.
+materials databases and new versions of existing sources, then publish a new unified snapshot after
+licence judgement, format mapping, structural deduplication and quality checks.
 
-> [!IMPORTANT]
-> Automatic discovery and integration are not implemented yet. All 106 catalogued sources are still
-> found and reviewed manually, then ingested by resumable acquisition scripts. This README keeps
-> planned capabilities separate from what is implemented today.
+The loop is being built verification-first: each step's checks are written before the thing that
+produces work for them, so an agent can later be plugged in as a producer without the contract or
+the gate changing. What exists today is read-only and triggered by hand.
 
-The intended loop is:
+| Part of the loop | State |
+|---|---|
+| Detect that a source published a new version | **runs** — 40 of 106 sources, one request each. The other 66 cannot be probed: 61 have no fixed endpoint at all, and 5 are figshare entries whose article id is not yet known |
+| Derive what to pull for an upgrade, routed by file-name overlap | **runs** — read-only, output is a proposal |
+| Lifecycle state and a failure reason code for every source | **runs** — all 106 |
+| Gate a proposed pull plan (URLs resolve at the size claimed, capacity, licence, stale prose) | **runs** |
+| Measure how much of a candidate the pool already holds, for admission | **runs** |
+| Regression baselines for the property adapters | partial — framework plus 10 of 55 |
+| Snapshot metadata and the change report between two snapshots | **runs** |
+| Discover databases not in the catalog; draft adapters | not implemented |
+| Anything unattended, or anything that publishes without a human | not implemented, by design |
 
-```text
-discover a new source or version
-        ↓
-check licence, access mode, static structure scope and trajectory contamination
-        ↓
-generate or recommend an acquisition and field-mapping adapter
-        ↓
-unify format, units and provenance
-        ↓
-deduplicate by structural fingerprint and merge cross-database properties
-        ↓
-integrity and outlier checks + human approval
-        ↓
-publish a new Hugging Face snapshot and change report
-```
+Four human gates are fixed in the design and cannot be automated away: the licence decision,
+admission, the adapter review and publication approval. The process never bypasses accounts, paid
+licences or redistribution limits, and data whose authorization cannot be confirmed stays
+unpublished by default.
 
-Failure records and manual corrections feed the next round of source identification, field
-mapping and deduplication strategy. The process never bypasses accounts, paid licences or
-redistribution limits; data whose authorization cannot be confirmed stays unpublished by default.
+The full design — the loop with its failure exits, the state machine, what an agent may and may not
+do, and what each snapshot promises — is in
+[`docs/self-evolving-loop.md`](docs/self-evolving-loop.md).
 
 ## One download instead of scraping a hundred databases
 

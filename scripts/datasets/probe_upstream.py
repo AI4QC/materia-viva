@@ -177,6 +177,13 @@ class PolitePoller:
         with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
             return json.loads(response.read())
 
+    def status(self, url: str) -> int:
+        """The response status of a page, without reading its body."""
+        self._wait(url)
+        request = Request(url, headers={"User-Agent": USER_AGENT})
+        with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+            return response.status
+
     def head(self, url: str) -> dict[str, str]:
         self._wait(url)
         request = Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})

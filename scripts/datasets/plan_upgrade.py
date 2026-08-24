@@ -34,7 +34,7 @@ from scripts.datasets.probe_upstream import (
 )
 # the gate owns "does this proposed download resolve, and is it the size claimed";
 # deriving a plan and vetting one must not grow two answers to that
-from scripts.datasets.verify_plan import check_urls
+from scripts.datasets.verify_catalog_change import check_urls
 
 DERIVABLE_KINDS = {"invenio-latest", "figshare-article"}
 

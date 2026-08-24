@@ -1,7 +1,10 @@
 import pytest
 
-from scripts.datasets.verify_plan import (
+from scripts.datasets.verify_catalog_change import (
+    check_candidate_urls,
     check_urls,
+    duplicate_candidates,
+    proposed_sources,
     data_path_collisions,
     proposed_downloads,
     stale_prose,
@@ -10,14 +13,20 @@ from scripts.datasets.verify_plan import (
 
 
 class _StubPoller:
-    def __init__(self, headers=None, raises=None):
+    def __init__(self, headers=None, raises=None, status=200):
         self._headers = headers or {}
         self._raises = raises
+        self._status = status
 
     def head(self, url):
         if self._raises:
             raise self._raises
         return self._headers
+
+    def status(self, url):
+        if self._raises:
+            raise self._raises
+        return self._status
 
 
 def _catalog(*sources):
@@ -111,3 +120,52 @@ def test_a_sound_plan_reports_no_problem():
     report = verify(before, after, _StubPoller({"content-length": "10"}), free_bytes=10**12)
     assert report["problems"] == []
     assert report["expected_bytes"] == 10
+
+
+def test_only_sources_the_diff_adds_count_as_candidates():
+    before = _catalog(_source("cod"))
+    after = _catalog(_source("cod"), _source("newdb"))
+    assert [s["id"] for s in proposed_sources(before, after)] == ["newdb"]
+    assert proposed_sources(before, before) == []
+
+
+def test_a_candidate_the_catalog_already_holds_is_refused():
+    before = _catalog({**_source("cod"), "name": "Crystallography Open Database",
+                       "official_url": "https://www.crystallography.net/cod/"})
+    # same host under a different id and name
+    same_host = [{**_source("codmirror"), "name": "Something else",
+                  "official_url": "https://www.crystallography.net/other"}]
+    assert len(duplicate_candidates(before, same_host)) == 1
+    # same name, punctuation and case aside
+    same_name = [{**_source("cod2"), "name": "crystallography open database",
+                  "official_url": "https://elsewhere.example/"}]
+    assert len(duplicate_candidates(before, same_name)) == 1
+    # genuinely new on both counts
+    fresh = [{**_source("newdb"), "name": "Some New DB",
+              "official_url": "https://newdb.example/"}]
+    assert duplicate_candidates(before, fresh) == []
+
+
+def test_a_candidate_reports_its_urls_and_says_when_a_licence_url_is_absent():
+    added = [{**_source("newdb"), "official_url": "https://newdb.example/"}]
+    check = check_candidate_urls(added, _StubPoller(status=200))[0]
+    assert check["official_url"] == "http-200"
+    # the catalog has no licence_url field, so absence is reported, not passed over
+    assert check["licence_url"] == "not supplied"
+
+    with_licence = [{**added[0], "licence_url": "https://newdb.example/terms"}]
+    assert check_candidate_urls(with_licence, _StubPoller(status=200))[0]["licence_url"] == "http-200"
+    # an unreachable official_url is recorded rather than raised
+    broken = check_candidate_urls(added, _StubPoller(raises=TimeoutError("slow")))[0]
+    assert broken["official_url"].startswith("TimeoutError")
+
+
+def test_a_candidate_whose_official_url_does_not_resolve_is_a_problem():
+    before = _catalog(_source("cod"))
+    after = _catalog(_source("cod"), {**_source("newdb"), "official_url": "https://newdb.example/"})
+    report = verify(before, after, _StubPoller(status=404), free_bytes=10**12)
+    assert any("official_url http-404" in p for p in report["problems"])
+    # and a resolving one raises no problem, while still being reported
+    ok = verify(before, after, _StubPoller(status=200), free_bytes=10**12)
+    assert ok["problems"] == []
+    assert ok["candidates"][0]["source_id"] == "newdb"

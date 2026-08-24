@@ -177,10 +177,18 @@ candidate database, what is checkable is:
 |---|---|
 | `official_url` resolves and returns 200 | ✅ |
 | not a duplicate of a catalogued entry (host plus name) | ✅ |
-| a licence statement exists at a resolvable URL | ✅ (that the URL exists; judging its content is step [2]) |
+| a licence statement exists at a resolvable URL | ⚠️ conditional — the catalog has **no such field**, and `license` is free text (`Materials Project terms`). The verifier checks an optional `licence_url` a candidate may volunteer and reports "not supplied" otherwise. What it anchors is that the licence claim has a page a reviewer can open; judging the content is still step [2] |
 | `validate_catalog` passes | ✅ |
 | whether `plan_probe` can probe it | ✅ free, and it answers directly whether the source can enter the loop |
 | the record count it claims, whether it really is a crystal structure database | ❌ a claim only, and it must be marked as a claim and queued for a human |
+
+Implemented:
+[`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py). Both
+agent roles that touch the catalog produce the same kind of artifact — a branch whose diff either
+adds a source (a candidate) or changes `downloads[]` (a pull plan) — so it is one gate reading one
+diff. The candidate side adds two checks: whether `official_url` resolves, and whether the candidate
+collides with an existing source **by host or by name**, which are the two shapes a search hits
+twice.
 
 **A memory of rejections needs no new ledger.** The catalog already holds 36 `rejected` entries, so
 a discovery agent deduplicating against the whole of `sources.json` will not re-propose a source
@@ -215,9 +223,9 @@ trusting a word the agent said:
 
 Which is to say output two needs almost no new code — what it needs is an agent filling that array,
 followed by the existing validation and a round of HEADs. Implemented:
-[`scripts/datasets/verify_plan.py`](../scripts/datasets/verify_plan.py). It compares the working
-tree's catalog against HEAD and verifies only the entries this plan adds or alters, because the
-agent's output is a diff (section 1.3).
+[`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py). It
+compares the working tree's catalog against HEAD and verifies only what this diff adds or alters,
+because the agent's output is a diff (section 1.3).
 
 The last of those checks came out of running the agent for real the first time: the agent itself
 noted in its report that once the plan is accepted, the old record id left in `status` and `notes`
@@ -283,8 +291,8 @@ rounds), while a verifier's shape follows from what must be true, and that is al
 
 | Data contract | Its verifier | Useful to a person today |
 |---|---|---|
-| `downloads[]` plus `data_path` | `validate_catalog` + a HEAD per URL + `ensure_capacity` | yes: a hand-written pull plan goes through the same gate |
-| a candidate source entry | the five checks in section 1.2 | yes: adding a source by hand should pass the same ones |
+| `downloads[]` plus `data_path` | `validate_catalog` + a HEAD per URL + `ensure_capacity` | yes: a hand-written pull plan goes through the same gate (implemented) |
+| a candidate source entry | `official_url` resolves + host and name deduplication + `validate_catalog` + probeability | yes: adding a source by hand should pass the same ones (implemented) |
 | an adapter plus its golden sample | a zero-diff regression | **yes, and overdue**: the adapters had no test coverage at all |
 
 Once the verifier exists, plugging an agent in is only swapping the producer; the contract and the
@@ -928,7 +936,7 @@ amounts to treating an agent's mistakes as data. By that rule the three roles fa
 | Agent role | Its verification | Can it be built now |
 |---|---|---|
 | pull plan ([2.5], output two) | `validate_catalog` + a HEAD per URL + `ensure_capacity` + the stale-prose check | **has run once on a real case** |
-| discover candidates ([0]) | the five checks of section 1.2 plus the human licence gate, all present | yes |
+| discover candidates ([0]) | the checks of section 1.2 plus the human licence gate, all present | yes |
 | draft adapters or acquisition scripts ([3], output three) | the golden sample framework — **absent** | must wait for step 5 |
 
 So the pull-plan agent comes first: the one role whose verification was already complete, and the one
@@ -940,7 +948,7 @@ candidate for nothing. The drafting agents come last.
 about this design:**
 
 - what it produced was a proposal, not a change: the catalog was untouched, the proposal was written
-  outside the repository, and `verify_plan.py` passed it on all four machine checks;
+  outside the repository, and `verify_catalog_change.py` passed it on all four machine checks;
 - **it corrected the premise it was given**: both `full_unmodified.csv` files were already present in
   v1.1.3 with byte-identical size and md5, so only 7 of the 9 files are genuinely new. That claim was
   verified independently against the API — which is section 1.2's "nothing enters on the agent's

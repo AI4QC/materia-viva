@@ -150,10 +150,15 @@ README 的线性七步改成带失败出口的形态。`✋` 标记人工闸门�
 |---|---|
 | `official_url` 解析且返回 200 | ✅ |
 | 不与目录现有条目重复（host + 名称） | ✅ |
-| 存在可解析的许可声明 URL | ✅（URL 存在可查；内容判断留步骤 [2]） |
+| 存在可解析的许可声明 URL | ⚠️ 有条件——目录里**没有这个字段**，`license` 是自由文本（`Materials Project terms`）。验证器检查候选自愿提供的可选 `licence_url`，没给就如实报"未提供"。它锚的是"许可说法有一个人能打开的页面"，内容判断仍留步骤 [2] |
 | `validate_catalog` 通过 | ✅ |
 | `plan_probe` 能否探测它 | ✅ 免费，且直接回答"它能不能进入闭环" |
 | 声称的记录数、是否真是晶体结构库 | ❌ 只能是 claim，必须标记为 claim 进人工闸门 |
+
+已实现：[`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py)。
+两个碰目录的 agent 角色产出的是同一种东西——一个分支，其 diff 要么新增来源（候选），要么改动
+`downloads[]`（拉取计划）——所以闸门是同一个，读的是同一份 diff。候选侧多两条:`official_url` 是否
+解析，以及是否与既有来源**撞主机名或撞名字**（那是搜索会重复命中的两种形态）。
 
 **拒收记忆不需要新建台账。** 目录里已有 36 条 `rejected`，发现 agent 对全量 `sources.json` 去重，
 就自动不会重复提议已被否掉的来源——`state` 回填（第 3 步）顺带把这件事解决了。
@@ -182,8 +187,9 @@ MAS 的实际用途是：**搜索新来源与升级 → 产出拉取计划 → �
 | `status` / `notes` 里没有留着被替换掉的旧上游 id | 从被移除的 URL 里抽 id，在自由文本里搜 |
 
 也就是说，第二种产出几乎不需要新代码——需要的是让 agent 填这个数组，然后跑一遍已有的校验加一轮 HEAD。
-已实现：[`scripts/datasets/verify_plan.py`](../scripts/datasets/verify_plan.py)。它拿工作区的目录与
-HEAD 比，只验证这份计划新增或改动的条目——因为 agent 的产出就是一个 diff（第 1.3 节）。
+已实现：[`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py)。它拿
+工作区的目录与 HEAD 比，只验证这份 diff 新增或改动的东西——因为 agent 的产出就是一个 diff
+（第 1.3 节）。
 
 最后那条检查是第一次真实运行 agent 时暴露出来的：agent 自己在报告里指出"计划一旦被接受，`status` 与
 `notes` 里的旧 record id 就成了谎，而机器检查抓不到"。它是可机器检查的，所以现在归机器管。
@@ -240,8 +246,8 @@ agent 不自己拉数据，它产出计划，由 `acquire.py` 执行。
 
 | 数据契约 | 它的验证器 | 今天对人有用吗 |
 |---|---|---|
-| `downloads[]` + `data_path` | `validate_catalog` + 逐 URL HEAD + `ensure_capacity` | 有：人手写的拉取计划走同一道检查 |
-| 候选来源条目 | 第 1.2 节那五条 | 有：人添一个新来源时同样该过 |
+| `downloads[]` + `data_path` | `validate_catalog` + 逐 URL HEAD + `ensure_capacity` | 有：人手写的拉取计划走同一道检查（已实现） |
+| 候选来源条目 | `official_url` 解析 + 撞名/撞主机去重 + `validate_catalog` + 可探测性 | 有：人添一个新来源时同样该过（已实现） |
 | 适配器 + golden sample | 零 diff 回归 | **有，而且最急**：55 个适配器目前零测试覆盖 |
 
 验证器一旦存在，agent 接进来就只是"换一个生产者"，契约与闸门一行都不用改。这才是"空间"的实体。
@@ -769,7 +775,7 @@ site 上限，以及**两份互不相同的例外清单**——它们都属于�
 | agent 角色 | 它的验证机制 | 现在能不能做 |
 |---|---|---|
 | 拉取计划（[2.5]，产出二） | `validate_catalog` + 逐个 HEAD + `ensure_capacity` + 陈旧散文检查 | **已跑过一次真实案子** |
-| 发现候选来源（[0]） | 第 1.2 节那五条检查 + 人工许可闸门，均已存在 | 能 |
+| 发现候选来源（[0]） | 第 1.2 节那些检查 + 人工许可闸门，均已存在 | 能 |
 | 起草适配器 / 拉取脚本（[3]、产出三） | golden sample 框架 —— **不存在** | 必须等第 5 步 |
 
 所以先做的是**拉取计划 agent**：它是唯一一个验证机制已经齐备的角色，而且对着历史上最大的人工瓶颈
@@ -778,7 +784,7 @@ site 上限，以及**两份互不相同的例外清单**——它们都属于�
 
 **拉取计划 agent 的第一次真实运行（`core-mof` 的 v2.0.1 重构）验证了这套设计的三处：**
 
-- 它产出的是提案而非改动:目录未被触碰，提案写在仓库外，`verify_plan.py` 通过四项机器检查；
+- 它产出的是提案而非改动:目录未被触碰，提案写在仓库外，`verify_catalog_change.py` 通过四项机器检查；
 - **它修正了任务前提**:两个 `full_unmodified.csv` 在 v1.1.3 里就有且 size 与 md5 逐字节相同，所以
   9 个文件里真正新增的只有 7 个。这一条我用 API 独立核实过——正是 §1.2"没有东西凭 agent 的话入库"
   该起作用的地方，而它这次起作用的方式是**证实**而不是否证；

@@ -52,11 +52,14 @@ or through OVITO/Tachyon.
 | The boundary between commercial and open data is unclear | Licence review precedes publication; restricted data never enters the public package |
 | After downloading, there is still no convenient way to inspect anything | Periodic-table search, combined filters, interactive 3D and high-quality offline rendering in one interface |
 
-The unified index currently contains:
+The unified index, as measured on 2026-08-19 and reported in
+[`docs/property-integration.md`](docs/property-integration.md):
 
 | Experimental structures | Computational candidates | Unified search records |
 |---:|---:|---:|
 | 357,127 | 13,186,150 | 13,543,277 |
+
+A running instance answers `GET /api/stats` with the live figures, which is the number to trust.
 
 On top of the structure pool sits a cross-database property layer: **121,620,776 property
 rows** covering **166 distinct properties** from **54 integrated source databases**, with
@@ -435,7 +438,8 @@ export MATERIALS_OVITO_PYTHON=/path/to/ovito-enabled/python
 Without OVITO configured, interactive 3D still works in the browser, but server-side Tachyon image
 rendering is unavailable.
 
-Validate all 13,077,781 published records and build the index (rebuild the property layer afterwards with scripts/properties/run_all.py):
+Validate every published record against the row counts `scripts/validate_data.py` enforces, then
+build the index (rebuild the property layer afterwards with `scripts/properties/run_all.py`):
 
 ```bash
 make validate-data

@@ -2,7 +2,10 @@
 
 **English** · [简体中文](storage-layout.zh-CN.md)
 
-The Git repository and large data are intentionally separated:
+The Git repository and large data are intentionally separated. The paths below are the reference
+deployment; any volume works, and `MV_DATA_ROOT` is how a different one is named (see the README).
+Record counts are deliberately absent — [`README.md`](../README.md) explains why every figure this
+project hardcoded went stale, and `GET /api/stats` on a running instance answers instead.
 
 ```text
 /home/zhilong/workspace/materia-viva/             Git working tree
@@ -10,8 +13,8 @@ The Git repository and large data are intentionally separated:
 
 /home/zhilong/SSD/workspace_data/materia-viva/data/
 ├── sources/
-│   ├── experimental/                        99,162 records
-│   └── candidate/                           8,125,976 records
+│   ├── experimental/                        measured structures, one export per dataset
+│   └── candidate/                           computed structures, one export per dataset
 ├── index/                                   SQLite + compressed CIF blob
 ├── manifests/                               Crystal Record v1 reports
 └── raw/                                     rebuild and provenance inputs

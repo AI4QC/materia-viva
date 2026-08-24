@@ -799,6 +799,15 @@ site 上限，以及**两份互不相同的例外清单**——它们都属于�
 `downloads[]`（拉取计划）——所以闸门是同一个，读的是同一份 diff。
 → 验证：`pytest backend/tests/test_verify_catalog_change.py`。
 
+**agent 与跑它们的 harness**（[`src/agents/`](../src/agents/)）。五个角色是 Python 对象，违反约束
+就构造不出来；harness 给每次运行一个仓库外的工作区，对产出**自己跑闸门**而不是相信角色跑过，并记录
+花费；`pipelines.py` 固定谁按什么顺序跑。这套框架连同它的代价，作为提案写在
+[`agent-framework.zh-CN.md`](agent-framework.zh-CN.md)。没有任何角色持有能改文件的工具，所以
+**这一件同样不写目录**。
+→ 验证：`pytest backend/tests/test_agent_roles.py backend/tests/test_agent_harness.py
+backend/tests/test_agent_pipelines.py backend/tests/test_agent_tokens.py
+backend/tests/test_agent_detectors.py`。
+
 ### 未落地，按"验证机制在不在"排序
 
 | 要做的 | 它的验证机制 | 前置 |

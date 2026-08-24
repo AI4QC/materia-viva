@@ -45,11 +45,14 @@ OVITO/Tachyon 检查结构。
 | 商业数据与开放数据的边界不清楚 | 许可审查先于发布；受限数据不进入公开包 |
 | 下载后仍缺少直观检查工具 | 周期表检索、组合筛选、交互式 3D 和高质量离线渲染在同一界面完成 |
 
-当前统一索引包含：
+统一索引在 2026-08-19 的实测值，出处
+[`docs/property-integration.zh-CN.md`](docs/property-integration.zh-CN.md)：
 
 | 实验晶体结构 | 计算候选结构 | 统一检索记录 |
 |---:|---:|---:|
 | 357,127 | 13,186,150 | 13,543,277 |
+
+运行中的实例用 `GET /api/stats` 回答实时数字，那个才是该信的。
 
 结构池之上另有跨数据库性质层：来自 **54 个已整合来源库**、覆盖 **166 种性质**的
 **121,620,776 条性质行**，每个数值都保留来源数据库、原始记录号和计算 / 测量方法；
@@ -395,7 +398,8 @@ export MATERIALS_OVITO_PYTHON=/path/to/ovito-enabled/python
 
 未配置 OVITO 时，浏览器交互式 3D 仍可使用，服务端 Tachyon 图片渲染不可用。
 
-校验全部 13,077,781 条发布记录并构建索引（性质层随后用 scripts/properties/run_all.py 重建）：
+按 `scripts/validate_data.py` 强制的行数校验全部发布记录，然后构建索引（性质层随后用
+`scripts/properties/run_all.py` 重建）：
 
 ```bash
 make validate-data

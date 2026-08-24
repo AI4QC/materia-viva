@@ -20,7 +20,8 @@ MateriaViva 应用代码从原先嵌套的 web 目录迁出，进入独立的
 | 解压后的 ICSD CIF | 1.1 GB，203,830 个文件 | `data/raw/icsd_extracted` | 每个文件的源/目标 SHA-256 |
 | ICSD 原始归档 | 635 MB | `data/raw/ICSD_data.zip` | 源/目标 SHA-256 |
 
-来源 CSV 校验在迁移当时给出的发布计数为：
+来源 CSV 校验在 **2026-07-26 迁移当时**给出的发布计数如下。它们是那次迁移的记录，不是当前池——
+当前值见 [`../README.zh-CN.md`](../README.zh-CN.md) 的表格，或向运行中的实例请求 `GET /api/stats`：
 
 - 实验：94,204 train + 4,958 validation = 99,162。
 - 候选：5,814,133 train + 306,007 validation = 6,120,140。

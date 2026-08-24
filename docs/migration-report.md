@@ -20,7 +20,9 @@ SSD. Repository and legacy paths resolve to this single active data tree.
 | Extracted ICSD CIFs | 1.1 GB, 203,830 files | `data/raw/icsd_extracted` | source/destination SHA-256 for every file |
 | Original ICSD archive | 635 MB | `data/raw/ICSD_data.zip` | source/destination SHA-256 |
 
-The source CSV validation produced these released counts:
+The source CSV validation produced these released counts **as of 2026-07-26**. They are a record
+of that migration, not the present pool — for that, see the table in
+[`../README.md`](../README.md) or ask a running instance for `GET /api/stats`:
 
 - Experimental: 94,204 train + 4,958 validation = 99,162.
 - Candidate: 5,814,133 train + 306,007 validation = 6,120,140.

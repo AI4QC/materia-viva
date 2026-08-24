@@ -2,7 +2,9 @@
 
 **简体中文** · [English](storage-layout.md)
 
-Git 仓库与大体积数据有意分开存放：
+Git 仓库与大体积数据有意分开存放。下面的路径是参考部署；换任何卷都可以，用 `MV_DATA_ROOT`
+指定（见 README）。这里**故意不写记录数**——[`README.md`](../README.zh-CN.md) 说明了为什么这个项目
+写死过的每个数字都过期过，运行中的实例用 `GET /api/stats` 回答。
 
 ```text
 /home/zhilong/workspace/materia-viva/             Git 工作区
@@ -10,8 +12,8 @@ Git 仓库与大体积数据有意分开存放：
 
 /home/zhilong/SSD/workspace_data/materia-viva/data/
 ├── sources/
-│   ├── experimental/                        99,162 条记录
-│   └── candidate/                           8,125,976 条记录
+│   ├── experimental/                        实测结构，每个数据集一份导出
+│   └── candidate/                           计算结构，每个数据集一份导出
 ├── index/                                   SQLite + 压缩 CIF blob
 ├── manifests/                               Crystal Record v1 校验报告
 └── raw/                                     重建与 provenance 输入

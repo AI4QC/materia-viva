@@ -697,3 +697,28 @@ def test_the_acquisition_notes_state_the_number_of_sources_the_catalog_holds():
         assert claim in text, f"{name} does not say the catalog holds {total}"
         for stale in range(total - 10, total):
             assert f"{stale} sources" not in text and f"{stale} 个来源" not in text
+
+
+def test_no_document_reports_a_pool_size_that_belongs_to_an_earlier_era():
+    """Four values for one quantity is what "unify the documents" was about.
+
+    `13,077,781` agreed with nothing. `8,125,976` / `8,225,138` describe the 8.2M
+    era and still live in `scripts/validate_data.py`, which is a separate
+    argument. Prose is not where a count belongs, so prose is where they are
+    barred. `docs/migration-report.*` is exempt: it is a dated record of a
+    migration, and its title says which date.
+    """
+    import subprocess
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2]
+    tracked = subprocess.run(["git", "ls-files", "*.md"], cwd=root,
+                             capture_output=True, text=True).stdout.split()
+    retired = ("13,077,781", "8,225,138", "8,125,976")
+    offenders = [
+        (name, value)
+        for name in tracked if "migration-report" not in name
+        for value in retired
+        if value in (root / name).read_text(encoding="utf-8")
+    ]
+    assert not offenders, f"retired pool sizes are back in prose: {offenders}"

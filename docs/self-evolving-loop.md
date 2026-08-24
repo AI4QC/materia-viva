@@ -977,6 +977,16 @@ touch the catalog produce the same artifact — a branch whose diff either adds 
 or changes `downloads[]` (a pull plan) — so it is one gate reading one diff.
 → Verified: `pytest backend/tests/test_verify_catalog_change.py`.
 
+**The agents and the harness that runs them** ([`src/agents/`](../src/agents/)). Five roles as Python
+objects, refused at construction if they break a constraint; a harness that gives each run a
+workspace outside the repository, runs the gate on what came back rather than trusting the role to,
+and records what it cost; and `pipelines.py` fixing which roles run in what order. The framework is
+proposed, with its costs, in [`agent-framework.md`](agent-framework.md). No role holds a tool that
+can edit a file, so **nothing here writes to the catalog either**.
+→ Verified: `pytest backend/tests/test_agent_roles.py backend/tests/test_agent_harness.py
+backend/tests/test_agent_pipelines.py backend/tests/test_agent_tokens.py
+backend/tests/test_agent_detectors.py`.
+
 ### Not landed, ordered by whether the verification exists
 
 | To build | Its verification | Prerequisite |

@@ -25,6 +25,7 @@ import re
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
+from urllib.parse import urlparse
 
 from scripts.datasets.acquire import default_data_root, load_catalog
 from scripts.datasets.probe_upstream import (
@@ -71,9 +72,7 @@ def upstream_files(probe: Probe, payload: dict[str, Any]) -> list[dict[str, Any]
     # invenio: zenodo answers with a list, InvenioRDM with a keyed dict, and the
     # record id in the reply is the new one we must build URLs against
     record_id = payload.get("id")
-    host = "zenodo.org" if probe.endpoint and "zenodo.org" in probe.endpoint else (
-        "archive.materialscloud.org"
-    )
+    host = urlparse(probe.endpoint or "").netloc
     raw = payload.get("files") or []
     if isinstance(raw, dict):  # InvenioRDM keys its files by name
         entries = list((raw.get("entries") or {}).values())
@@ -205,7 +204,6 @@ def lagging_sources(probe_file: Path) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--source", action="append", default=[], metavar="SOURCE_ID")
-    parser.add_argument("--no-verify", action="store_true", help="skip the HEAD pass")
     args = parser.parse_args(argv)
 
     catalog = load_catalog(DEFAULT_CATALOG)
@@ -224,7 +222,7 @@ def main(argv: list[str] | None = None) -> int:
     report: dict[str, Any] = {}
     for source_id in wanted:
         plan = derive(sources[source_id], probes[source_id], poller)
-        if plan.get("proposed_downloads") and not args.no_verify:
+        if plan.get("proposed_downloads"):
             plan["head_checks"] = verify(plan["proposed_downloads"], poller)
         report[source_id] = plan
 

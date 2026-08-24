@@ -43,15 +43,16 @@ def test_failures_are_tallied_by_reason_and_never_counted_as_structures(tmp_path
             ("e", 4, "hash-2"),
         ],
     )
-    fingerprints, failures = read_fingerprints(path)
-    assert fingerprints == ["hash-1", "hash-2"]
+    fingerprints, rows, failures = read_fingerprints(path)
+    assert fingerprints == {"hash-1", "hash-2"}
+    assert rows == 2
     assert dict(failures) == {"TOO_LARGE": 2, "DISORDERED": 1}
 
 
 def test_a_failure_reason_keeps_only_its_leading_token(tmp_path):
     # hashing.py writes FAIL:<reason>:<repr of the exception>
     path = _hashes_file(tmp_path / "h.tsv", [("a", 1, "FAIL:BAD_ROW:ValueError('x: y')")])
-    _, failures = read_fingerprints(path)
+    _, _, failures = read_fingerprints(path)
     assert dict(failures) == {"BAD_ROW": 1}
 
 
@@ -69,6 +70,18 @@ def test_a_file_without_the_fingerprint_column_is_refused(tmp_path):
         read_fingerprints(path)
 
 
+def test_a_repeated_structure_counts_once_however_many_rows_carry_it(tmp_path):
+    # a trajectory dump repeats one structure thousands of times; the row count
+    # and the structure count must not be the same number
+    path = _hashes_file(
+        tmp_path / "h.tsv",
+        [("a", 1, "hash-1"), ("b", 1, "hash-1"), ("c", 1, "hash-1"), ("d", 1, "hash-2")],
+    )
+    fingerprints, rows, _ = read_fingerprints(path)
+    assert fingerprints == {"hash-1", "hash-2"}
+    assert rows == 4
+
+
 def test_overlap_counts_unique_structures_and_names_the_sources_holding_them(tmp_path):
     match_map = tmp_path / "map.sqlite"
     _match_map(
@@ -76,8 +89,7 @@ def test_overlap_counts_unique_structures_and_names_the_sources_holding_them(tmp
         [("hash-1", "mv-1"), ("hash-2", "mv-2")],
         [("cod", "c1", "mv-1"), ("icsd", "i1", "mv-1"), ("cod", "c2", "mv-2")],
     )
-    # hash-1 twice: a candidate repeating a structure must not inflate the count
-    result = measure(["hash-1", "hash-1", "hash-2", "hash-9"], match_map)
+    result = measure({"hash-1", "hash-2", "hash-9"}, 4, match_map)
     assert result["rows_with_a_fingerprint"] == 4
     assert result["unique_fingerprints"] == 3
     assert result["already_in_the_pool"] == 2
@@ -93,17 +105,21 @@ def test_a_candidate_the_pool_already_holds_entirely_reports_nothing_new(tmp_pat
     # the open-materials-db shape: everything in it comes from a source we have
     match_map = tmp_path / "map.sqlite"
     _match_map(match_map, [("h1", "mv-1"), ("h2", "mv-2")], [("cod", "c1", "mv-1"), ("cod", "c2", "mv-2")])
-    result = measure(["h1", "h2"], match_map)
+    result = measure({"h1", "h2"}, 2, match_map)
     assert result["new_to_the_pool"] == 0
     assert result["new_fraction_of_unique"] == 0.0
 
 
-def test_the_pool_map_is_opened_read_only(tmp_path):
+def test_the_pool_map_is_attached_read_only(tmp_path):
+    # asserting the file is unchanged proves nothing, since nothing here writes;
+    # what needs proving is that a write would be refused if it were attempted
     match_map = tmp_path / "map.sqlite"
     _match_map(match_map, [("h1", "mv-1")], [("cod", "c1", "mv-1")])
-    before = match_map.read_bytes()
-    measure(["h1", "h2"], match_map)
-    assert match_map.read_bytes() == before
+    db = sqlite3.connect(":memory:", uri=True)
+    db.execute(f"ATTACH DATABASE 'file:{match_map}?mode=ro' AS pool")
+    with pytest.raises(sqlite3.OperationalError, match="readonly"):
+        db.execute("INSERT INTO pool.hash_map VALUES ('x', 'y')")
+    db.close()
 
 
 def test_end_to_end_writes_a_report(tmp_path):

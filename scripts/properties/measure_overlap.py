@@ -31,10 +31,18 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MATCH_MAP = PROJECT_ROOT / "data" / "props_work" / "match_map.sqlite"
 
 
-def read_fingerprints(path: Path) -> tuple[list[str], Counter]:
-    """Return the successful fingerprints and a tally of failure reasons."""
+def read_fingerprints(path: Path) -> tuple[set[str], int, Counter]:
+    """Return the distinct fingerprints, how many rows carried one, and why the
+    rest failed.
+
+    Only the distinct set and the row count are ever used, so the fingerprints
+    are not kept in a list: a trajectory dump repeats the same structure
+    thousands of times, and holding every row would scale memory with the dump
+    rather than with the structures in it.
+    """
     opener = gzip.open if path.suffix == ".gz" else open
-    fingerprints: list[str] = []
+    fingerprints: set[str] = set()
+    rows_with_a_fingerprint = 0
     failures: Counter = Counter()
     with opener(path, "rt", encoding="utf-8") as handle:
         header = handle.readline().rstrip("\n").split("\t")
@@ -52,15 +60,15 @@ def read_fingerprints(path: Path) -> tuple[list[str], Counter]:
                 # keep the reason, drop the payload that follows a second colon
                 failures[value[5:].split(":", 1)[0]] += 1
             elif value:
-                fingerprints.append(value)
+                fingerprints.add(value)
+                rows_with_a_fingerprint += 1
             else:
                 failures["EMPTY"] += 1
-    return fingerprints, failures
+    return fingerprints, rows_with_a_fingerprint, failures
 
 
-def measure(fingerprints: list[str], match_map: Path) -> dict[str, Any]:
-    """Split the candidate's unique fingerprints into already-held and new."""
-    unique = set(fingerprints)
+def measure(unique: set[str], rows_with_a_fingerprint: int, match_map: Path) -> dict[str, Any]:
+    """Split the candidate's distinct fingerprints into already-held and new."""
     db = sqlite3.connect(":memory:", uri=True)
     db.execute(f"ATTACH DATABASE 'file:{match_map}?mode=ro' AS pool")
     db.execute("CREATE TABLE candidate (hash TEXT PRIMARY KEY)")
@@ -90,7 +98,7 @@ def measure(fingerprints: list[str], match_map: Path) -> dict[str, Any]:
     db.close()
 
     return {
-        "rows_with_a_fingerprint": len(fingerprints),
+        "rows_with_a_fingerprint": rows_with_a_fingerprint,
         "unique_fingerprints": len(unique),
         "already_in_the_pool": held,
         "new_to_the_pool": len(unique) - held,
@@ -114,16 +122,16 @@ def main(argv: list[str] | None = None) -> int:
             "scripts/properties/match_map.py on the machine holding the index"
         )
 
-    fingerprints, failures = read_fingerprints(args.hashes)
+    fingerprints, rows_with_a_fingerprint, failures = read_fingerprints(args.hashes)
     report: dict[str, Any] = {
         "source": args.source,
         "hashes_file": str(args.hashes),
-        "rows_read": len(fingerprints) + sum(failures.values()),
+        "rows_read": rows_with_a_fingerprint + sum(failures.values()),
         "parse_failures": sum(failures.values()),
         "parse_failures_by_reason": dict(failures.most_common()),
     }
     if fingerprints:
-        report.update(measure(fingerprints, args.match_map))
+        report.update(measure(fingerprints, rows_with_a_fingerprint, args.match_map))
     total = report["rows_read"]
     report["parse_failure_fraction"] = round(report["parse_failures"] / total, 4) if total else None
 

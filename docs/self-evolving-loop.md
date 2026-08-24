@@ -9,13 +9,14 @@ ingested by resumable acquisition scripts" to an auditable self-evolving loop. I
 document, not a description of the present.
 
 > [!IMPORTANT]
-> **This is a design, not a description of the present.** Two things actually exist in the
+> **This is a design, not a description of the present.** Three things actually exist in the
 > repository:
 >
 > | Landed | What it is |
 > |---|---|
 > | [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py) | read-only upstream change detection, covering 38 of the 106 sources |
 > | [`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py) | the gate an agent's output passes through (candidate or pull plan) |
+> | [`src/agents/`](../src/agents/) | five roles, a harness that runs one and gates what it returns, and the pipelines they run in — proposed in [`agent-framework.md`](agent-framework.md) |
 >
 > Everything else is planned, including upgrade-plan derivation, the golden sample framework, the
 > admission overlap measurement, snapshot metadata and the change report, and the catalog's `state` /
@@ -755,10 +756,10 @@ Therefore:
 
 Existing consumers to check when the fields change:
 
-- [`scripts/datasets/acquire.py:278`](../scripts/datasets/acquire.py:278) — the `--catalog` default;
-- [`scripts/properties/registry.py:20`](../scripts/properties/registry.py:20) — the `SOURCES_JSON`
+- [`scripts/datasets/acquire.py:278`](../scripts/datasets/acquire.py) — the `--catalog` default;
+- [`scripts/properties/registry.py:20`](../scripts/properties/registry.py) — the `SOURCES_JSON`
   constant, and the "source is not registered in scripts/datasets/sources.json" error;
-- [`scripts/properties/base.py:115`](../scripts/properties/base.py:115) — an adapter's source id
+- [`scripts/properties/base.py:115`](../scripts/properties/base.py) — an adapter's source id
   doubles as its provenance tag.
 
 ## 4. Politeness while probing

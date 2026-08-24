@@ -675,3 +675,25 @@ def test_aflow_export_is_paged_and_resumable(tmp_path):
     assert manifest["downloaded_documents"] == 3
     assert manifest["pages"] == [1, 2]
     assert len(calls) == 2
+
+
+def test_the_acquisition_notes_state_the_number_of_sources_the_catalog_holds():
+    """This count drifted to three different values across two files before.
+
+    English said 102, Chinese said 100, the catalog held 106. The prose is
+    maintained by hand; the catalog is the fact, so the fact is asserted here.
+    """
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2]
+    catalog = json.loads(
+        (root / "scripts" / "datasets" / "sources.json").read_text(encoding="utf-8")
+    )
+    total = len(catalog["sources"])
+
+    for name, claim in (("dataset-acquisition.md", f"{total} sources"),
+                        ("dataset-acquisition.zh-CN.md", f"{total} 个来源")):
+        text = (root / "docs" / name).read_text(encoding="utf-8")
+        assert claim in text, f"{name} does not say the catalog holds {total}"
+        for stale in range(total - 10, total):
+            assert f"{stale} sources" not in text and f"{stale} 个来源" not in text

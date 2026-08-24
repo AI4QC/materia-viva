@@ -23,7 +23,8 @@ src/agents/
   harness.py     run one role: workspace, gate, record
   pipelines.py   which roles, in what order
   detectors.py   the deterministic half of the cleaner's work
-  __main__.py    render | list | plan | run
+  tokens.py      what a run cost, counted so it survives a change of provider
+  __main__.py    render | list | plan | run | tokens
 ```
 
 ## The six decisions, and what each costs
@@ -60,8 +61,15 @@ steps that already succeeded. Two backends — `claude_agent_sdk` in process whe
 `claude` CLI otherwise — because the SDK is a 93 MB platform-specific wheel and does not belong in
 the repository's requirements.
 
-*Evidence*: all three real runs wrote their proposals outside the tree and the repository stayed
-clean. *Cost*: none identified.
+*Evidence*: the three runs below wrote their proposals outside the tree and the repository stayed
+clean — though they were driven by hand, before this harness existed, so they are evidence for the
+workspace rule and not for the harness that now enforces it.
+
+*Cost*: a layer between the operator and the gate is a layer the gate can fail behind. It did: the
+harness invoked the gate without `PYTHONPATH`, so it exited on `ImportError`, and because the gate
+also exits 1 for a refusal, a gate that never ran was indistinguishable from one that said no. Fixed
+by giving refusal its own exit code and recording which of five things happened, but the class of
+failure is inherent to the decision.
 
 **5. Control flow is a script, judgement is an agent.** No manager agent. `pipelines.py` fixes the
 shape, and a step sees only the artifact the previous role left, never its report.
@@ -107,7 +115,7 @@ unattended once and been read.
 - **A home for reports.** The harness records each run in its workspace; nothing collects them.
 - **Someone to read the traces.** `python -m src.agents tokens` groups what has been spent by role,
   by backend or by day, and `--max-tokens` stops a run before the step that would exceed it. What is
-  missing is a decision about what the ceiling should be: 334k tokens for a sweep plus an upgrade is
+  missing is a decision about what the ceiling should be: ~300k tokens for a sweep plus an upgrade is
   affordable monthly and not weekly, and nobody has said which.
 
 ## What would falsify this framework

@@ -16,6 +16,7 @@ python -m src.agents render          # write .claude/agents/*.md for the harness
 python -m src.agents list            # the pipelines and the roles each runs
 python -m src.agents plan <name>     # what would run, and what each step is told
 python -m src.agents run <name>      # run it, gating and recording each step
+python -m src.agents tokens          # what has been spent, by role, backend or day
 ```
 
 ## Why Python and not markdown
@@ -44,7 +45,9 @@ importable, and the repository's requirements do not carry it.
 ```bash
 pip install claude-agent-sdk          # optional; without it the CLI backend is used
 python -m src.agents run discovery-sweep
+python -m src.agents run upgrade --about mc2d          # what the run is about, given to every step
 python -m src.agents run discovery-sweep --run-id 20260824T090000Z --resume
+python -m src.agents run discovery-sweep --backend cli # override which backend runs it
 ```
 
 Around either backend it adds what `claude -p` does not:
@@ -52,8 +55,9 @@ Around either backend it adds what `claude -p` does not:
 - **a workspace outside the repository** per run, so a proposal cannot land in the working tree and a
   bad run is undone by deleting a folder;
 - **the gate, run by the harness.** A role that proposes a catalog change is told to check itself;
-  instructing is not checking, so the harness runs the gate on what came back and records the
-  verdict beside it;
+  instructing is not checking, so the harness runs the gate on what came back and records which of
+  five things happened — `not-applicable`, `passed`, `refused`, `no-proposal`, `did-not-run`. A
+  boolean here once hid a gate that could not even start;
 - **a record of the run** — role, task, backend, attempts, cost, turns, gate outcome — because
   otherwise a run's reasoning lives in a terminal that gets closed;
 - **a timeout and bounded retries**, retrying only a failure the role never survived — a transport
@@ -99,8 +103,9 @@ manager agent deciding the shape instead would add a way to get it wrong with no
 Two properties are worth naming. **A step sees artifacts, not reports**: it builds its task from a
 mapping of role name to the file that role left behind, and there is no route from there to a
 report. That is section 1.3's requirement that the challenger form its own view, made a property
-rather than something the caller has to remember. And **a refused gate stops the run**, because
-spending the next agent on an artifact already known to be unsound is worse than stopping.
+rather than something the caller has to remember. And **anything short of a passed gate stops the
+run** — refused, no proposal written, or the gate failing to run at all — because spending the next
+agent on an artifact that is unsound, missing or unchecked is worse than stopping.
 
 ## What is still missing
 

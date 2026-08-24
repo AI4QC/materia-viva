@@ -246,8 +246,11 @@ MateriaViva 的长期目标不是维护一次性的静态合集，而是持续�
 付费许可或再分发限制；无法确认授权的数据默认不公开。
 
 这个闭环背后的设计——每一步由谁执行、agent 能做与不能做什么、每个快照对外承诺了什么——见
-[`docs/self-evolving-loop.zh-CN.md`](docs/self-evolving-loop.zh-CN.md)。其中已落地的只有两件，都是只读的：
-对目录中 38 个来源的上游变更检测，以及 agent 提出的目录改动必须通过的那道闸门。
+[`docs/self-evolving-loop.zh-CN.md`](docs/self-evolving-loop.zh-CN.md)。跑这些 agent 的那套机制、以及
+它已被测出的代价，作为提案写在 [`docs/agent-framework.zh-CN.md`](docs/agent-framework.zh-CN.md)。
+
+已落地的有三件，没有一件会写目录：对目录中 38 个来源的上游变更检测、agent 提出的目录改动必须通过的
+那道闸门，以及五个 agent 角色和跑它们的 harness（[`src/agents/`](src/agents/)）。
 
 ## 一次下载，而不是重复抓取一百个数据库
 

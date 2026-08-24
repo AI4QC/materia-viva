@@ -8,12 +8,13 @@
 目标设计。它是设计文档，不是现状描述。
 
 > [!IMPORTANT]
-> **本文件是设计，不是现状。** 仓库里实际存在的只有两件东西：
+> **本文件是设计，不是现状。** 仓库里实际存在的有三件东西：
 >
 > | 已落地 | 是什么 |
 > |---|---|
 > | [`scripts/datasets/probe_upstream.py`](../scripts/datasets/probe_upstream.py) | 只读上游变更探测，覆盖 106 个来源中的 38 个 |
 > | [`scripts/datasets/verify_catalog_change.py`](../scripts/datasets/verify_catalog_change.py) | agent 产出（候选 / 拉取计划）的闸门 |
+> | [`src/agents/`](../src/agents/) | 五个角色、跑一个角色并对其产出过闸的 harness，以及它们所在的流水线——提案见 [`agent-framework.zh-CN.md`](agent-framework.zh-CN.md) |
 >
 > 其余全部是计划，包括拉取计划推导、golden sample 框架、准入重叠测量、快照与变更报告，以及
 > 目录里的 `state` / `reason` 字段。**自动发现和自动整合尚未实现**，106 个来源全部由人工发现审核。
@@ -627,10 +628,10 @@ URL、`rruff` 16 个、`mofx-db` 6 个，对它们而言这是**局部覆盖**�
 
 改字段时需同步检查的现有消费方：
 
-- [`scripts/datasets/acquire.py:278`](../scripts/datasets/acquire.py:278)——`--catalog` 默认值；
-- [`scripts/properties/registry.py:20`](../scripts/properties/registry.py:20)——`SOURCES_JSON`
+- [`scripts/datasets/acquire.py:278`](../scripts/datasets/acquire.py)——`--catalog` 默认值；
+- [`scripts/properties/registry.py:20`](../scripts/properties/registry.py)——`SOURCES_JSON`
   常量，以及第 336 行"source 未在 sources.json 注册"的报错；
-- [`scripts/properties/base.py:115`](../scripts/properties/base.py:115)——适配器的 source id
+- [`scripts/properties/base.py:115`](../scripts/properties/base.py)——适配器的 source id
   同时作为 provenance 标签。
 
 ## 4. 探测的礼貌规则

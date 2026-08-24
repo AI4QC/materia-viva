@@ -267,9 +267,13 @@ mapping and deduplication strategy. The process never bypasses accounts, paid li
 redistribution limits; data whose authorization cannot be confirmed stays unpublished by default.
 
 The design behind that loop — who runs each step, what an agent may and may not do, and what each
-snapshot promises — is in [`docs/self-evolving-loop.md`](docs/self-evolving-loop.md). Two pieces of it
-exist today, both read-only: upstream change detection over 38 of the catalogued sources, and the gate
-an agent's proposed catalog change has to pass.
+snapshot promises — is in [`docs/self-evolving-loop.md`](docs/self-evolving-loop.md). The machinery that
+runs the agents, and what it has been shown to cost, is proposed in
+[`docs/agent-framework.md`](docs/agent-framework.md).
+
+Three pieces of the loop exist today, and none of them writes to the catalog: upstream change
+detection over 38 of the catalogued sources, the gate an agent's proposed catalog change has to pass,
+and five agent roles with a harness that runs them ([`src/agents/`](src/agents/)).
 
 ## One download instead of scraping a hundred databases
 

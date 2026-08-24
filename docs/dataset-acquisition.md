@@ -2,25 +2,22 @@
 
 **English** · [简体中文](dataset-acquisition.zh-CN.md)
 
-Updated: 2026-07-31
+Updated: 2026-08-24
 
 This file records MateriaViva's coverage of external crystal databases, actual download status,
 licence boundaries and required manual steps. The machine-readable catalog lives at
 [`scripts/datasets/sources.json`](../scripts/datasets/sources.json).
 
-"Coverage" here is not the same as "already downloaded". The catalog currently registers exactly
-**102 sources**: 62 source paths already exist on this machine, of which 56 sit under
-`data/raw/acquired/`, 5 reuse existing data in `data/raw/external_structs/`, and the licensed ICSD
-sits in `data/raw/icsd_extracted/`. The remaining 40 have no local source path yet, for reasons
-including account or paid licences, no official bulk interface, provider prohibitions on bulk
-download, and trajectories excluded by project scope. The true state of each entry is whatever the
-catalog's `status` and `data_path` say; a source-discovery count must never be read as a
-download-completion count.
+"Coverage" here is not the same as "already downloaded". The catalog currently registers
+**106 sources**, and every one carries a `data_path`: 99 under `raw/acquired/`, 5 reusing existing
+data in `raw/external_structs/`, the licensed ICSD in `raw/icsd_extracted/`, and one legacy import.
+Whether a path exists is a property of the machine, not of the catalog — this repository is often
+checked out without the data. The true state of each entry is whatever the catalog's `status` and
+`data_path` say; a source-discovery count must never be read as a download-completion count.
 
-Split by catalog status: 59 acquired or reusing existing data, 18 registered only or awaiting an
-official bulk route, 22 requiring a user account, provider authorization or a paid licence, and 3
-trajectory sources excluded by scope. There are no unfinished background downloads. The four groups
-total 102 sources.
+Split by what `status` begins with: 64 acquired or reusing existing data, 18 registered only or
+awaiting an official bulk route, 21 requiring a user account, provider authorization or a paid
+licence, and 3 trajectory sources excluded by scope. The four groups total 106 sources.
 
 ## 1. Storage and format conventions
 
@@ -143,7 +140,7 @@ find data/raw/acquired -type f -name '*.receipt.json' | sort
 
 ### 3.2 Second-round expansion sources
 
-The machine-readable catalog now contains 102 sources. The following were added in the second round
+The machine-readable catalog now contains 106 sources. The following were added in the second round
 as specialized structure/property libraries:
 
 | Source | Scale / contents | Automation status | Overlap handling |

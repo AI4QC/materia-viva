@@ -2,7 +2,7 @@
 
 **简体中文** · [English](legacy-ssd-data-inventory.md)
 
-更新时间：2026-07-26
+更新：2026-07-26
 
 ## 1. 接入方式
 

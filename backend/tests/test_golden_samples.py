@@ -99,22 +99,10 @@ def test_serialise_is_order_independent_and_digests_the_structure():
     assert serialise(other)["structure"] != serialise(first)["structure"]
 
 
-# Units an adapter emits for a canonical property but which disagree with the
-# registry. Each is a real disagreement awaiting a decision, not a false alarm:
-# the first five put the magnetisation normalisation in the unit where the
-# registry keeps it neutral and expects it in the method string, and mc2d looks
-# like a factor-of-1000 error — the registry declares meV/Å² and the adapter
-# passes the value through labelled eV/Å², with no conversion of the kind
-# 2dmatpedia does for exfoliation energy.
-KNOWN_UNIT_DEVIATIONS = {
-    ("2dmatpedia", "total_magnetization", "μB/cell"),
-    ("alexandria", "total_magnetization", "μB/cell"),
-    ("elementa", "total_magnetization", "μB/cell"),
-    ("materials_project", "total_magnetization", "μB/cell"),
-    ("materials_project", "total_magnetization", "μB/f.u."),
-    ("novomag", "total_magnetization", "μB/cell"),
-    ("mc2d", "interlayer_binding_energy", "eV/Å²"),
-}
+# Every adapter now agrees with the registry. The set is asserted empty rather
+# than the test being deleted: it is what catches the next disagreement, and the
+# last one it caught was a factor of 1000 in published rows.
+KNOWN_UNIT_DEVIATIONS: set[tuple[str, str, str]] = set()
 
 
 def test_no_adapter_grows_a_new_unit_that_the_registry_does_not_declare():

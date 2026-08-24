@@ -102,8 +102,14 @@ class Mc2dAdapter(SourceAdapter):
                 if binding is not None:
                     properties.append(
                         PropertyValue(
-                            "interlayer_binding_energy", binding, "eV/Å²",
-                            method,
+                            # upstream ships eV/Å²: over the 2,865 values in
+                            # structure_2d.json the median is 0.0251, i.e.
+                            # 25 meV/Å², the expected magnitude for interlayer
+                            # binding. Reading them as meV/Å² would put them a
+                            # hundredfold below van der Waals. Canonical unit is
+                            # meV/Å², so scale like 2dmatpedia does exfoliation.
+                            "interlayer_binding_energy", binding * 1000.0,
+                            "meV/Å²", method,
                         )
                     )
         spacegroup = safe_text(row.get("space_group"))

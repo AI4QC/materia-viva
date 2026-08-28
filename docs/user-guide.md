@@ -78,6 +78,11 @@ Numeric filters are ranges; leave either end blank for open-ended. The ones wort
 Filters combine with AND. If a search returns nothing, the usual cause is one numeric range that is
 narrower than you meant, or too many included elements.
 
+**A numeric range also excludes records that have no value for it.** Four structures in the
+development slice carry no density, so any density range — even one wide enough to admit everything
+— returns 996 rather than 1000. A range cannot be satisfied by an unknown, so asking for one is also
+asking for the property to be present.
+
 ## Reading a material
 
 ### Basic properties

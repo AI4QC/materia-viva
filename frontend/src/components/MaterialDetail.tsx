@@ -10,6 +10,7 @@ import {
   type MaterialSourceRef,
 } from '../api/client'
 import { useAtlasStats } from '../hooks/useMaterials'
+import { collapseIdenticalRows } from '../lib/crystal'
 import { useI18n, type TranslationKey } from '../i18n'
 import { CrystalViewer } from './CrystalViewer'
 import { SpectraPanel } from './SpectraPanel'
@@ -179,13 +180,20 @@ function CrossDatabaseProperties({ properties }: { properties: MaterialProperty[
                 </tr>
               </thead>
               <tbody>
-                {properties.map((row, index) => (
+                {collapseIdenticalRows(properties).map(({ row, count, nativeIds }, index) => (
                   <tr key={index}>
                     <td>{prettyPropertyName(row.property)}</td>
                     <td className="crossdb-table__value">{formatPropertyValue(row)}</td>
                     <td className="crossdb-table__method">{row.method ?? '—'}</td>
                     <td className="crossdb-table__source" title={row.source_license ?? undefined}>
                       {row.source_name}
+                      {count > 1 && (
+                        // one source can hold many records for one crystal; they were
+                        // printed as identical rows, which reads as a bug rather than data
+                        <span className="crossdb-table__repeat" title={nativeIds.join('\n')}>
+                          ×{count}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

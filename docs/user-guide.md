@@ -102,6 +102,18 @@ several records for the same structure.
 Every row carries its **Method** and **Source**, so you can decide which one answers *your* question.
 If you need a single number, choose it on the method — do not assume the top one is best.
 
+#### What the ×N badge means
+
+A source can also hold **several records for one crystal** — AFLOW keeps a dozen calculation entries
+for some structures — and fingerprint deduplication matches them all to one MateriaViva material.
+When those records agree exactly, printing each one gives you the same line over and over, which
+reads as a bug rather than as data.
+
+Rows that match on **property, value, unit, method and source** are therefore shown once with a
+`×N` badge; hover it for the upstream ids it stands for. Anything that differs is never folded:
+cadmium sulfide shows `band gap 1.1886 eV ×3` and `band gap 1.1883 eV ×3` as two separate rows,
+three thousandths of an eV apart.
+
 ### Where the structure came from
 
 **Source databases** lists the contributing databases and how each was matched to this record:

@@ -9,14 +9,17 @@ const InteractiveCrystal = lazy(() => import('./InteractiveCrystal').then((modul
 interface CrystalViewerProps {
   materialId: string
   structure: CrystalStructure
+  /** From /api/stats. When false the server has no OVITO worker, so a render
+   *  request can only fail — do not open on that tab and do not send one. */
+  ovitoAvailable?: boolean
 }
 
 type View = 'isometric' | 'front' | 'top'
 type Representation = 'ball_stick' | 'spacefill'
 
-export function CrystalViewer({ materialId, structure }: CrystalViewerProps) {
+export function CrystalViewer({ materialId, structure, ovitoAvailable = true }: CrystalViewerProps) {
   const { t } = useI18n()
-  const [mode, setMode] = useState<'ovito' | 'interactive'>('ovito')
+  const [mode, setMode] = useState<'ovito' | 'interactive'>(ovitoAvailable ? 'ovito' : 'interactive')
   const [view, setView] = useState<View>('isometric')
   const [representation, setRepresentation] = useState<Representation>('ball_stick')
   const [supercell, setSupercell] = useState('2,2,2')
@@ -43,7 +46,14 @@ export function CrystalViewer({ materialId, structure }: CrystalViewerProps) {
   return (
     <section className="crystal-viewer" aria-label={t('viewer.label')}>
       <div className="viewer-tabs" role="tablist" aria-label={t('viewer.engines')}>
-        <button role="tab" aria-selected={mode === 'ovito'} onClick={() => setMode('ovito')} type="button">
+        <button
+          role="tab"
+          aria-selected={mode === 'ovito'}
+          onClick={() => setMode('ovito')}
+          disabled={!ovitoAvailable}
+          title={ovitoAvailable ? undefined : t('viewer.ovitoUnavailable')}
+          type="button"
+        >
           <span className="engine-live" /> OVITO render
         </button>
         <button role="tab" aria-selected={mode === 'interactive'} aria-label={t('viewer.interactive')} onClick={() => setMode('interactive')} type="button">

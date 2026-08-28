@@ -34,6 +34,24 @@ describe('CrystalViewer', () => {
     expect(screen.getByRole('img', { name: 'OVITO crystal structure render of SiO2' })).toHaveAttribute('src', expect.stringContaining('view=top'))
   })
 
+  it('does not open on OVITO, or request a render, when the server says it is unavailable', () => {
+    // /api/stats carries ovito_available; the viewer used to ignore it and always
+    // open the OVITO tab, so the user waited out a render that could only fail.
+    render(<CrystalViewer materialId="exp-000001" structure={structure} ovitoAvailable={false} />)
+
+    expect(screen.queryByRole('img', { name: /OVITO crystal structure render/ })).toBeNull()
+    expect(screen.getByRole('tab', { name: 'Interactive 3D' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('says why the OVITO tab is unavailable rather than failing silently', () => {
+    render(<CrystalViewer materialId="exp-000001" structure={structure} ovitoAvailable={false} />)
+
+    const ovitoTab = screen.getByRole('tab', { name: /OVITO/ })
+    expect(ovitoTab).toBeDisabled()
+    fireEvent.click(ovitoTab)
+    expect(screen.getByRole('tab', { name: 'Interactive 3D' })).toHaveAttribute('aria-selected', 'true')
+  })
+
   it('offers an interactive fallback without loading WebGL', () => {
     render(<CrystalViewer materialId="pool-000001" structure={structure} />)
 

@@ -9,6 +9,7 @@ import {
   type MaterialProperty,
   type MaterialSourceRef,
 } from '../api/client'
+import { useAtlasStats } from '../hooks/useMaterials'
 import { useI18n, type TranslationKey } from '../i18n'
 import { CrystalViewer } from './CrystalViewer'
 import { SpectraPanel } from './SpectraPanel'
@@ -23,6 +24,8 @@ export function MaterialDetail({ materialId, onClose }: MaterialDetailProps) {
   const [material, setMaterial] = useState<MaterialDetailRecord | null>(null)
   const [structure, setStructure] = useState<CrystalStructure | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // false when the server has no OVITO worker; the viewer must not open on that tab
+  const ovitoAvailable = useAtlasStats()?.ovito_available ?? true
 
   useEffect(() => {
     const controller = new AbortController()
@@ -75,7 +78,7 @@ export function MaterialDetail({ materialId, onClose }: MaterialDetailProps) {
           </header>
 
           <div className="detail-layout">
-            <CrystalViewer materialId={materialId} structure={structure} />
+            <CrystalViewer materialId={materialId} structure={structure} ovitoAvailable={ovitoAvailable} />
             <aside className="material-inspector">
               <div className="inspector-ruler"><span>MATERIAL RECORD</span><b>{material.material_id}</b></div>
               <PropertySection title={t('detail.basic')}>

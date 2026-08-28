@@ -3,6 +3,7 @@ import { Box, Camera, ImageOff, Layers3, Rotate3D } from 'lucide-react'
 
 import type { CrystalStructure } from '../api/client'
 import { useI18n } from '../i18n'
+import { formulaText } from './Formula'
 
 const InteractiveCrystal = lazy(() => import('./InteractiveCrystal').then((module) => ({ default: module.InteractiveCrystal })))
 
@@ -69,7 +70,7 @@ export function CrystalViewer({ materialId, structure, ovitoAvailable = true }: 
               <img
                 key={renderUrl}
                 src={renderUrl}
-                alt={`${t('viewer.ovitoAlt')} ${structure.formula}`}
+                alt={`${t('viewer.ovitoAlt')} ${formulaText(structure.formula)}`}
                 onLoad={() => setRenderLoaded(true)}
                 onError={() => setRenderFailed(true)}
               />

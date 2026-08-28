@@ -11,6 +11,7 @@ import {
 } from '../api/client'
 import { useAtlasStats } from '../hooks/useMaterials'
 import { collapseIdenticalRows } from '../lib/crystal'
+import { Formula, formulaText } from './Formula'
 import { useI18n, type TranslationKey } from '../i18n'
 import { CrystalViewer } from './CrystalViewer'
 import { SpectraPanel } from './SpectraPanel'
@@ -70,7 +71,7 @@ export function MaterialDetail({ materialId, onClose }: MaterialDetailProps) {
                   {t(`family.${material.material_family}` as TranslationKey)}
                 </span>
               ) : null}
-              <h1 aria-label={material.formula}><Formula value={material.formula} /></h1>
+              <h1 aria-label={formulaText(material.formula)}><Formula value={material.formula} /></h1>
               <p>{material.material_id} <i /> {material.chemical_system}</p>
             </div>
             <a className="download-button" href={`/api/materials/${encodeURIComponent(materialId)}/cif`} download>
@@ -232,10 +233,6 @@ function SourceRefs({ refs }: { refs: MaterialSourceRef[] }) {
 
 function Property({ label, value, wide = false }: { label: string; value: string | number | null | undefined; wide?: boolean }) {
   return <dl className={wide ? 'wide' : ''}><dt>{label}</dt><dd>{value ?? '—'}</dd></dl>
-}
-
-function Formula({ value }: { value: string }) {
-  return <>{value.split(/(\d+(?:\.\d+)?)/g).map((part, index) => /^\d/.test(part) ? <sub key={index}>{part}</sub> : part)}</>
 }
 
 function fixed(value: number | null | undefined, digits = 3) {

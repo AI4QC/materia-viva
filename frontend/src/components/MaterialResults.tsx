@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Atom, Database, TriangleAlert } from 'lucide-rea
 
 import type { MaterialSummary, SearchResponse } from '../api/client'
 import { useI18n } from '../i18n'
+import { Formula, formulaText } from './Formula'
 
 interface MaterialResultsProps {
   loading: boolean
@@ -85,9 +86,9 @@ function MaterialCard({ material, index, onSelect, locale }: MaterialCardProps) 
           className="material-card__open"
           onClick={() => onSelect(material.material_id)}
           type="button"
-          aria-label={`${t('results.view')} ${material.formula}`}
+          aria-label={`${t('results.view')} ${formulaText(material.formula)}`}
         >
-          <Formula value={material.formula} />
+          <h3 aria-label={formulaText(material.formula)}><Formula value={material.formula} /></h3>
           <span aria-hidden="true">↗</span>
         </button>
         <p className="material-card__chemsys">{material.chemical_system}</p>
@@ -100,11 +101,6 @@ function MaterialCard({ material, index, onSelect, locale }: MaterialCardProps) 
       </div>
     </article>
   )
-}
-
-function Formula({ value }: { value: string }) {
-  const parts = value.split(/(\d+(?:\.\d+)?)/g)
-  return <h3 aria-label={value}>{parts.map((part, index) => /^\d/.test(part) ? <sub key={index}>{part}</sub> : part)}</h3>
 }
 
 function formatNumber(value: number | null | undefined, digits: number, locale: string) {

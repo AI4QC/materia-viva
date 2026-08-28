@@ -282,3 +282,33 @@ def test_detail_returns_per_source_properties_and_refs(tmp_path):
     assert other is not None
     assert other["properties"] == []
     assert other["source_refs"] == []
+
+
+def test_a_formula_search_does_not_require_typing_the_ones(tmp_path):
+    """Stored formulas spell every count out: CdS is held as `Cd1S1`.
+
+    Searching for `CdS` matched nothing at all, so formula search was unusable
+    for any compound with a 1 subscript — which is most of them.
+    """
+    from materials_api.repository import explicit_and_implicit_counts
+
+    assert explicit_and_implicit_counts("CdS") == {"CdS", "Cd1S1"}
+    assert explicit_and_implicit_counts("Cd1S1") == {"CdS", "Cd1S1"}
+    assert explicit_and_implicit_counts("Th1O2") == {"ThO2", "Th1O2"}
+
+
+def test_normalising_a_formula_never_reduces_the_cell():
+    """`Ag2I2` is a cell with two formula units and is not the same record as `AgI`."""
+    from materials_api.repository import explicit_and_implicit_counts
+
+    assert explicit_and_implicit_counts("Ag2I2") == {"Ag2I2"}
+    assert "AgI" not in explicit_and_implicit_counts("Ag2I2")
+    assert "Ag2I2" not in explicit_and_implicit_counts("AgI")
+
+
+def test_a_formula_that_is_not_one_is_left_alone():
+    from materials_api.repository import explicit_and_implicit_counts
+
+    # fractional occupancies and unparseable input must not be mangled
+    assert explicit_and_implicit_counts("Fe0.5Ni0.5") == {"Fe0.5Ni0.5"}
+    assert explicit_and_implicit_counts("not a formula") == {"not a formula"}

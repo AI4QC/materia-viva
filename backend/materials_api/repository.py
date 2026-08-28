@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sqlite3
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -53,6 +54,33 @@ MATERIAL_FAMILIES = (
 )
 
 INSERT_COLUMNS = PUBLIC_COLUMNS + ("blob_offset", "blob_length")
+
+
+#: One element symbol followed by an optional count, e.g. `Cd`, `O2`, `Fe0.5`.
+_FORMULA_TERM = re.compile(r"([A-Z][a-z]?)(\d+(?:\.\d+)?)?")
+
+
+def explicit_and_implicit_counts(formula: str) -> set[str]:
+    """Both spellings of a formula: `CdS` and `Cd1S1`.
+
+    Indexed formulas spell every count out, so `CdS` matched nothing and formula
+    search was unusable for any compound carrying a 1 — which is most of them.
+    Rather than reindex, a search tries both spellings.
+
+    Counts other than 1 are never touched: `Ag2I2` is a cell holding two formula
+    units and is a different record from `AgI`, so nothing here reduces a
+    formula to its lowest terms.
+    """
+    term = formula.strip()
+    matched = list(_FORMULA_TERM.finditer(term))
+    if not matched or "".join(m.group(0) for m in matched) != term:
+        return {term}  # not a formula we can read; match it as typed
+
+    explicit, implicit = [], []
+    for element, count in ((m.group(1), m.group(2)) for m in matched):
+        explicit.append(f"{element}{count or '1'}")
+        implicit.append(element if count in (None, "1") else f"{element}{count}")
+    return {"".join(explicit), "".join(implicit)}
 
 
 @dataclass(frozen=True)
@@ -423,8 +451,10 @@ class MaterialRepository:
                 where.append("m.chemical_system = ?")
                 params.append(chemical_system)
             else:
-                where.append("m.formula = ? COLLATE NOCASE")
-                params.append(term)
+                spellings = sorted(explicit_and_implicit_counts(term))
+                placeholders = ", ".join("?" for _ in spellings)
+                where.append(f"m.formula IN ({placeholders}) COLLATE NOCASE")
+                params.extend(spellings)
         self._add_range(where, params, "m.pbes_gap", query.gap_min, query.gap_max, "gap")
         self._add_range(where, params, "m.density", query.density_min, query.density_max, "density")
         self._add_range(where, params, "m.volume", query.volume_min, query.volume_max, "volume")

@@ -57,6 +57,11 @@ studying a specific chemical system and binaries of it are noise.
 
 It works alongside the periodic table rather than replacing it.
 
+Formulas are held with every count spelled out — cadmium sulfide is stored as `Cd1S1` — but you can
+type it either way and both find it. Counts other than 1 are part of the identity: `Ag2I2` is a cell
+of two formula units and is a **different record** from `AgI`, so searching one does not return the
+other.
+
 ### Advanced filters
 
 Numeric filters are ranges; leave either end blank for open-ended. The ones worth explaining:

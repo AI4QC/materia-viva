@@ -58,4 +58,22 @@ describe('CrystalViewer', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Interactive 3D' }))
     expect(screen.getByText('This browser cannot start WebGL')).toBeInTheDocument()
   })
+
+  it('hands the camera and cell-size controls to the interactive view too', () => {
+    // both only ever went into the OVITO image URL, so in the interactive view
+    // pressing I / F / T and changing cell size did nothing at all
+    render(<CrystalViewer materialId="exp-1" structure={structure} ovitoAvailable={false} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Front' }))
+    fireEvent.change(screen.getByLabelText('Supercell'), { target: { value: '3,3,3' } })
+
+    expect(screen.getByRole('button', { name: 'Front' })).toHaveAttribute('data-active', 'true')
+    expect(screen.getByLabelText('Supercell')).toHaveValue('3,3,3')
+  })
+
+  it('disables ray-tracing quality when nothing is being ray-traced', () => {
+    render(<CrystalViewer materialId="exp-1" structure={structure} ovitoAvailable={false} />)
+
+    expect(screen.getByRole('combobox', { name: /quality/i })).toBeDisabled()
+  })
 })

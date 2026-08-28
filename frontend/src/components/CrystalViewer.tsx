@@ -120,7 +120,11 @@ export function CrystalViewer({ materialId, structure, ovitoAvailable = true }: 
           </select>
         </ControlGroup>
         <label className="viewer-toggle"><input type="checkbox" checked={showCell} onChange={(event) => updateRender(() => setShowCell(event.target.checked))} /><span>{t('viewer.cellEdges')}</span></label>
-        <label className="viewer-quality">{t('viewer.quality')}<select value={quality} disabled={mode !== 'ovito'} title={mode === 'ovito' ? undefined : t('viewer.qualityOvitoOnly')} onChange={(event) => updateRender(() => setQuality(event.target.value as 'preview' | 'high'))}><option value="preview">PREVIEW</option><option value="high">HIGH</option></select></label>
+        {/* Tachyon's ray-tracing quality. The live WebGL view has no equivalent, and a
+            disabled select frozen on one value reads as broken rather than as inapplicable. */}
+        {mode === 'ovito' && (
+          <label className="viewer-quality">{t('viewer.quality')}<select value={quality} onChange={(event) => updateRender(() => setQuality(event.target.value as 'preview' | 'high'))}><option value="preview">PREVIEW</option><option value="high">HIGH</option></select></label>
+        )}
       </div>
     </section>
   )

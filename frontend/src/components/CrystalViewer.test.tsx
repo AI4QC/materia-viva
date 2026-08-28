@@ -71,9 +71,16 @@ describe('CrystalViewer', () => {
     expect(screen.getByLabelText('Supercell')).toHaveValue('3,3,3')
   })
 
-  it('disables ray-tracing quality when nothing is being ray-traced', () => {
+  it('does not show ray-tracing quality when nothing is being ray-traced', () => {
+    // it used to be disabled, which left a select frozen on PREVIEW that read as broken
     render(<CrystalViewer materialId="exp-1" structure={structure} ovitoAvailable={false} />)
 
-    expect(screen.getByRole('combobox', { name: /quality/i })).toBeDisabled()
+    expect(screen.queryByRole('combobox', { name: /quality/i })).not.toBeInTheDocument()
+  })
+
+  it('shows ray-tracing quality on the tab it applies to', () => {
+    render(<CrystalViewer materialId="exp-1" structure={structure} ovitoAvailable />)
+
+    expect(screen.getByRole('combobox', { name: /quality/i })).toBeInTheDocument()
   })
 })

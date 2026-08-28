@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { DEFAULT_QUERY, parseQuery, serializeQuery } from './query'
+import { DEFAULT_QUERY, SORT_KEYS, parseQuery, serializeQuery } from './query'
 
 
 describe('query URL state', () => {
@@ -47,5 +47,32 @@ describe('query URL state', () => {
     expect(parsed.pageSize).toBe(48)
     expect(parsed.sort).toBe('density')
     expect(parsed.direction).toBe('desc')
+  })
+})
+
+describe('sort keys from the address bar', () => {
+  it('keeps a key the API will accept', () => {
+    expect(parseQuery(new URLSearchParams('sort=density')).sort).toBe('density')
+  })
+
+  it('falls back on one it will not, rather than leaving a dead Retry button', () => {
+    // an unknown key reached the API, came back 422, and the page offered a
+    // "Try again" that could never succeed because the key was still in state
+    for (const bad of ['garbage', 'DROP TABLE materials', '', 'Formula']) {
+      expect(parseQuery(new URLSearchParams(`sort=${encodeURIComponent(bad)}`)).sort)
+        .toBe('material_id')
+    }
+  })
+
+  it('validates direction the same way, as it already did', () => {
+    expect(parseQuery(new URLSearchParams('direction=desc')).direction).toBe('desc')
+    expect(parseQuery(new URLSearchParams('direction=sideways')).direction).toBe('asc')
+  })
+
+  it('offers every key the sort control can produce', () => {
+    // the dropdown and the parser drifting apart is how this got through
+    for (const key of SORT_KEYS) {
+      expect(parseQuery(new URLSearchParams(`sort=${key}`)).sort).toBe(key)
+    }
   })
 })

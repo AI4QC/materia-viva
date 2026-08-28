@@ -1,5 +1,15 @@
 export type ElementMode = 'all' | 'any' | 'exact'
 export type SortDirection = 'asc' | 'desc'
+
+/** What the API will sort by. A URL naming anything else is not obeyed. */
+export const SORT_KEYS = [
+  'material_id', 'formula', 'pbes_gap', 'density', 'n_atoms', 'n_elements',
+  'spacegroup_number', 'volume', 'formation_energy_per_atom', 'energy_above_hull',
+  'bulk_modulus',
+] as const
+
+export type SortKey = (typeof SORT_KEYS)[number]
+
 export type StabilityFilter = '' | 'stable' | 'unstable'
 export type MetallicityFilter = '' | 'metal' | 'nonmetal'
 
@@ -146,7 +156,9 @@ export function parseQuery(params: URLSearchParams): MaterialQuery {
     hasProperties: splitCsv(params.get('has_properties')),
     page: positiveInteger(params.get('page'), 1),
     pageSize: positiveInteger(params.get('page_size'), 24),
-    sort: params.get('sort') ?? 'material_id',
+    // validated like elementMode and direction beside it: an unknown key used to
+    // reach the API, come back 422, and leave a Retry button that could not work
+    sort: isSortKey(params.get('sort')) ? (params.get('sort') as SortKey) : 'material_id',
     direction: direction === 'desc' ? 'desc' : 'asc',
   }
 }
@@ -176,4 +188,8 @@ function parseNumber(value: string | null): number | undefined {
 function positiveInteger(value: string | null, fallback: number): number {
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
+function isSortKey(value: string | null): value is SortKey {
+  return value !== null && (SORT_KEYS as readonly string[]).includes(value)
 }

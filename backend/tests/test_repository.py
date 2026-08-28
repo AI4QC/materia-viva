@@ -335,3 +335,28 @@ def test_an_index_built_before_the_sort_key_still_searches(tmp_path):
 
     # misordered as it was before, but answering rather than failing
     assert [row["formula"] for row in result.items] == ["Fe2O3", "Li2O", "LiFePO4", "NaCl", "Si"]
+
+
+def test_the_frontend_offers_exactly_the_sort_keys_the_api_accepts():
+    """Drift between the two is what let `?sort=garbage` reach the API.
+
+    It came back 422 and the page showed a Retry button that could never work,
+    because the key stayed in the query state. The parser validates now, and this
+    keeps its list honest.
+    """
+    import re
+    from pathlib import Path
+
+    from materials_api.repository import SORT_COLUMNS
+
+    source = (Path(__file__).resolve().parents[2] / "frontend" / "src" / "lib" / "query.ts").read_text(
+        encoding="utf-8"
+    )
+    block = re.search(r"SORT_KEYS = \[(.*?)\] as const", source, re.S)
+    assert block, "SORT_KEYS is no longer where this test looks for it"
+    frontend = set(re.findall(r"'([a-z_]+)'", block.group(1)))
+
+    assert frontend == set(SORT_COLUMNS), (
+        f"only in the frontend: {sorted(frontend - set(SORT_COLUMNS))}; "
+        f"only in the API: {sorted(set(SORT_COLUMNS) - frontend)}"
+    )

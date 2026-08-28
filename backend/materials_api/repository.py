@@ -7,6 +7,8 @@ import math
 import re
 import sqlite3
 from dataclasses import dataclass, field
+
+from .formula import sort_key
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -53,7 +55,7 @@ MATERIAL_FAMILIES = (
     "2d-material", "1d-material", "carbon-allotrope",
 )
 
-INSERT_COLUMNS = PUBLIC_COLUMNS + ("blob_offset", "blob_length")
+INSERT_COLUMNS = PUBLIC_COLUMNS + ("formula_sort", "blob_offset", "blob_length")
 
 
 #: One element symbol followed by an optional count, e.g. `Cd`, `O2`, `Fe0.5`.
@@ -167,6 +169,8 @@ class MaterialRepository:
         missing = {"material_id", "formula", "chemical_system", "dataset", "elements"} - record.keys()
         if missing:
             raise ValueError(f"missing material fields: {', '.join(sorted(missing))}")
+        # derived here rather than asked of the caller, so every writer gets it
+        record = {**record, "formula_sort": sort_key(str(record["formula"]))}
         values = [record.get(column) for column in INSERT_COLUMNS]
         placeholders = ", ".join("?" for _ in INSERT_COLUMNS)
         cursor = self.connection.execute(
@@ -242,6 +246,21 @@ class MaterialRepository:
             return row["fmt"], reader.read(
                 int(row["blob_offset"]), int(row["blob_length"])
             )
+
+    def _order_by(self, sort: str) -> str:
+        """The sort expression, preferring the padded key when the index carries it.
+
+        `formula_sort` arrived after some indexes were built. Falling back keeps
+        those readable — misordered as before, but working — instead of failing
+        on a missing column.
+        """
+        if sort == "formula" and self._has_column("materials", "formula_sort"):
+            return "m.formula_sort"
+        return SORT_COLUMNS[sort]
+
+    def _has_column(self, table: str, column: str) -> bool:
+        return any(row[1] == column
+                   for row in self.connection.execute(f"PRAGMA table_info({table})"))
 
     def _has_table(self, name: str) -> bool:
         return self.connection.execute(
@@ -320,7 +339,7 @@ class MaterialRepository:
         rows = self.connection.execute(
             f"SELECT {', '.join('m.' + column for column in PUBLIC_COLUMNS)} "
             f"FROM materials m WHERE {where_sql} "
-            f"ORDER BY {SORT_COLUMNS[query.sort]} {direction.upper()}, m.pk ASC "
+            f"ORDER BY {self._order_by(query.sort)} {direction.upper()}, m.pk ASC "
             "LIMIT ? OFFSET ?",
             (*params, query.page_size, offset),
         ).fetchall()

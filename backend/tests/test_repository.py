@@ -113,8 +113,10 @@ def test_search_paginates_with_stable_sorting(tmp_path):
 
     assert first.total == 5
     assert first.pages == 3
-    assert _ids(first) == ["exp-3", "pool-2"]
-    assert _ids(second) == ["exp-1", "pool-5"]
+    # Fe2O3, then LiFePO4 before Li2O: Li1 precedes Li2. Sorting the stored text
+    # put Li2O first, because '2' sorts below 'F'.
+    assert _ids(first) == ["exp-3", "exp-1"]
+    assert _ids(second) == ["pool-2", "pool-5"]
 
 
 def test_search_rejects_unknown_sort_key(tmp_path):
@@ -312,3 +314,24 @@ def test_a_formula_that_is_not_one_is_left_alone():
     # fractional occupancies and unparseable input must not be mangled
     assert explicit_and_implicit_counts("Fe0.5Ni0.5") == {"Fe0.5Ni0.5"}
     assert explicit_and_implicit_counts("not a formula") == {"not a formula"}
+
+
+def test_sorting_by_formula_reads_counts_as_numbers(tmp_path):
+    """`Li2O` used to sort before `LiFePO4` because '2' sorts below 'F'."""
+    with _repository(tmp_path) as repo:
+        result = repo.search(SearchQuery(sort="formula", direction="asc", page_size=10))
+        order = [row["formula"] for row in result.items]
+
+    assert order == ["Fe2O3", "LiFePO4", "Li2O", "NaCl", "Si"]
+
+
+def test_an_index_built_before_the_sort_key_still_searches(tmp_path):
+    """The column arrived after some indexes were built; they must not break."""
+    with _repository(tmp_path) as repo:
+        # an index from before this change has neither the column nor its index
+        repo.connection.execute("DROP INDEX idx_materials_formula_sort")
+        repo.connection.execute("ALTER TABLE materials DROP COLUMN formula_sort")
+        result = repo.search(SearchQuery(sort="formula", direction="asc", page_size=10))
+
+    # misordered as it was before, but answering rather than failing
+    assert [row["formula"] for row in result.items] == ["Fe2O3", "Li2O", "LiFePO4", "NaCl", "Si"]

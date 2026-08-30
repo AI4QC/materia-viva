@@ -21,9 +21,16 @@ FOLDER=data/hf-upload
 REPO=AI4QC/MateriaViva
 PY=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
 
-#: no progress for this long -> assume the tunnel died and restart
-STALL_SECONDS=600
-POLL=60
+#: No progress for this long -> assume the tunnel died and restart.
+#
+#  Measured on this link: the tunnel drops every 12-20 minutes, so every second
+#  of the stall window is dead time. At 600s the first run wasted ~40 of its
+#  first 110 minutes waiting for the detector to fire. 180s is comfortably
+#  above the longest legitimate quiet period observed (xet commits a batch and
+#  re-hashes before the next transfer starts, which takes well under a minute)
+#  and cuts the dead time by two thirds.
+STALL_SECONDS=180
+POLL=30
 
 IFACE=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+' | head -1)
 tx() { cat "/sys/class/net/$IFACE/statistics/tx_bytes" 2>/dev/null || echo 0; }

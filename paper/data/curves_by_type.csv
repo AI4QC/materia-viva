@@ -1,0 +1,11 @@
+curve_type,n_curves,n_materials
+xas,586626,91181
+band_structure,231162,130183
+dos,164381,118984
+xrd,150460,142640
+phonon_dos,46421,27591
+kappa_spectral,7836,7103
+kappa_cumulative,7836,7103
+raman,2084,706
+absorption,1924,1924
+ir,167,116

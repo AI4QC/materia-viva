@@ -1,0 +1,80 @@
+% ======================================================================
+% Discussion.
+% Widen from the central advance: what changes, what the corpus now says
+% about how materials data should be used, where the claims stop.
+% ======================================================================
+\section{Discussion}
+
+Resolving identity at the level of the crystal changes what a materials database
+is for. A repository answers questions about its own contents; a structurally
+resolved union answers questions about the field. How many distinct crystals are
+actually known, as opposed to how many records exist. Which groups have already
+computed a given compound, and whether they agreed. Whether a training set and a
+test set drawn from two repositories share the same crystals. None of these is a
+property of any member, and none can be recovered afterwards from a corpus
+assembled by concatenation.
+
+The most consequential finding is the one that a single repository is
+structurally incapable of producing. Independent databases reporting the same
+formation energy for the same crystal agree within 50~meV\,atom$^{-1}$ only 60.5\%
+of the time, and the least concordant tenth differ by margins several times the
+thresholds on which stability screening turns. Because the discrepancy is a
+systematic offset rather than scatter, it does not average away with sample size,
+and a model trained on a corpus that merged the contributing columns would learn
+the offset as though it were physics. The remedy is not to choose a preferred
+provider but to keep the provenance, which costs one column per value and makes
+the disagreement an observable rather than a hazard. The complementary caution is
+equally practical: a pair of databases agreeing to the last decimal is usually
+carrying one calculation twice, so agreement between repositories should be read
+as evidence of shared provenance until shown otherwise.
+
+The second finding concerns what the corpus is missing. Coverage of the property
+space follows the price of the calculation, not the value of the answer. Not one
+of the 50 general-purpose properties requiring a calculation of its own reaches a
+tenth of the pool, and within that group coverage tracks whether a dedicated
+high-throughput campaign happened to exist rather than the cost itself. The
+resulting landscape is therefore a record of where the community spent computer
+time, which is a different thing from a record of what is worth knowing.
+
+That landscape is also a well-posed learning problem, and the corpus supplies
+what such a problem needs: 497 candidate tasks once each property name is split
+by level of theory, 162 of them realised as training sets over 93 million labels,
+deduplicated structures to split on, labels that retain the quantity they denote
+and, on the entries with two independent sources, a measurement of the floor
+below which a prediction cannot be distinguished from the disagreement of its own
+training data. Section~\ref{sec:completion} also shows how easily that problem is
+posed wrongly. Roughly two thirds of the tasks are defined on less than half the
+pool, and asking each of them about every crystal would generate 2.19 billion
+numbers of which more than half would be undefined rather than merely uncertain.
+Enforcing the domains is not a loss of coverage; it is the difference between a
+completed property layer and a plausible-looking one.
+
+The construction has a property worth separating from the results it produced.
+Admission and matching are the same mechanism seen from two sides: a record that
+matches nothing is not an error to be logged but the pool's next member, and once
+admitted it becomes part of the criterion by which the next record is judged.
+Over the full assembly, 15.9\% of matches resolved onto crystals that assembly
+itself had added, approaching unity for chemistries the starting pool did not
+cover. The same relation reappears one level up in the completion stage, where
+seventeen tasks can only be gated once earlier models have supplied the property
+their domain is defined by. A database built this way does not have a final state:
+each round of ingestion enlarges what the next round can recognise, and each
+round of prediction enlarges the domain over which the next round is defined.
+
+Several limitations bound these conclusions. Structural fingerprinting has a
+domain of validity, and enumerated framework libraries fall outside it; the
+composite key rescues the two families we encountered but is a remedy for a known
+failure rather than a general solution. Agreement can be measured only where two
+providers report the same quantity under comparable methods, which the method
+strings make checkable but which holds for a minority of the occupied matrix, so
+the disagreement reported here is measured on the part of the corpus most likely
+to be well behaved. The applicability gate is currently structural rather than
+geometric: a porous domain is enforced through family labels rather than through
+a computed pore-limiting diameter, which is the stricter test and remains to be
+run over the whole pool. Licence fragmentation persists downstream, since four
+sources contributing 26.0\% of all values cannot be redistributed, so a public
+artifact and a locally built one are not the same object and any published
+statistic has to say which it describes. And no value here was recomputed. Every
+number is as its source reported it, and integration inherits whatever errors
+those sources contain; what it adds is the ability to see when two of them
+disagree.

@@ -1,0 +1,55 @@
+\documentclass[pdflatex,sn-nature]{sn-jnl}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{url}
+\usepackage{longtable,array}
+
+\input{layout_tune.tex}
+
+\AtBeginDocument{\hypersetup{colorlinks=true,
+  linkcolor={blue!55!black}, citecolor={blue!55!black},
+  urlcolor={blue!55!black}, filecolor={blue!55!black},
+  breaklinks=true, bookmarksnumbered=true, pdfstartview={FitH}}}
+
+% Supplementary numbering: Note S1, Fig. S1, Table S1
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+\raggedbottom
+
+\begin{document}
+
+\title[Supplementary Information]{Supplementary Information for\\
+A self-evolving materials database of 13.5 million crystals reveals systematic
+disagreement between its sources}
+
+\author[1,2]{\fnm{Zhilong}\sur{Song}}
+\author*[1,2,3]{\fnm{Lixue}\sur{Cheng}}\email{lixuecheng@ust.hk}
+\affil[1]{\orgdiv{Department of Chemistry}, \orgname{Hong Kong University of
+Science and Technology}, \orgaddress{\city{Kowloon}, \state{Hong Kong 999077},
+\country{China}}}
+\affil[2]{\orgdiv{IAS Center for AI for Scientific Discoveries}, \orgname{Hong
+Kong University of Science and Technology}, \orgaddress{\city{Kowloon},
+\state{Hong Kong 999077}, \country{China}}}
+\affil[3]{\orgdiv{Department of Chemical and Biological Engineering},
+\orgname{Hong Kong University of Science and Technology},
+\orgaddress{\city{Kowloon}, \state{Hong Kong 999077}, \country{China}}}
+
+\maketitle
+
+\tableofcontents
+\clearpage
+
+\input{si_body.tex}
+
+\clearpage
+\input{si_tables.tex}
+
+\end{document}

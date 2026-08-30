@@ -1,0 +1,55 @@
+key,name,license,property_rows,n_properties,n_materials,refs_id,refs_hash,refs_origin,new_structures,matched_refs,loaded_at
+alexandria,Alexandria Materials Database,Alexandria dataset terms,60588138,10,5894222,3646950,1553835,1514488,1514488,4836267,2026-08-17T18:15:48
+aflow,AFLOW,AFLOW academic non-commercial terms,18464119,14,2275947,34849,1367046,1650288,1650288,985855,2026-08-17T19:49:08
+elementa,ELEMENTA and ELEMENTA Spin,CC BY-NC 4.0,8023344,4,2005836,2005836,0,0,0,2005836,2026-08-19T02:36:17
+oqmd,Open Quantum Materials Database,CC BY 4.0,6086500,5,1229047,516869,505285,255085,255085,1022154,2026-08-17T14:37:27
+mof-carbon-capture,Hypothetical MOFs for wet flue-gas carbon capture,CC BY 4.0,5454666,13,287610,0,0,287610,0,0,2026-08-19T02:27:32
+gnome,GNoME materials discovery dataset,CC BY-NC 4.0,4897901,5,554056,0,6453,547603,0,6453,2026-08-19T01:51:29
+materials-project,Materials Project,Materials Project terms,4291860,61,211854,58770,154562,3157,0,220396,2026-08-19T02:11:16
+deem-zeolites,Michael Deem PCOD hypothetical zeolite structures v2.1,CC BY 4.0,2977166,15,136008,0,0,136008,0,0,2026-08-19T12:14:51
+jarvis-qetb,NIST JARVIS-QETB tight-binding dataset,NIST/JARVIS dataset terms,2524250,3,191606,0,716844,124598,0,841442,2026-08-19T00:10:55
+matbench-discovery,Matbench Discovery / WBM,CC BY 4.0,1734187,5,401437,47028,243221,136041,0,322954,2026-08-19T02:01:32
+jarvis-dft,NIST JARVIS-DFT 3D,NIST/JARVIS dataset terms,1569924,26,120277,69953,47874,14986,0,156357,2026-08-19T02:39:10
+hmof,Hypothetical MOF database,Figshare record licence,892486,6,127498,0,0,127498,88927,0,2026-08-17T07:06:55
+materiae,Materiae - Material Sciences Database (catalogue of topological electronic materials),"Materiae site terms; cite Zhang et al., Nature 566, 475-479 (2019)",589993,6,67688,53985,9627,4769,0,83592,2026-08-19T02:40:25
+carolina,Carolina Materials Database,CC BY 4.0,428272,2,210000,0,170438,43801,43801,170340,2026-08-18T22:18:00
+cod,Crystallography Open Database,CC0,354350,4,265903,0,41249,238839,0,280087,2026-08-19T11:54:03
+qmof,Quantum MOF Database,CC BY 4.0,339443,9,26615,8091,1431,17142,0,10701,2026-08-19T02:31:39
+cmr-static,DTU Computational Materials Repository static periodic datasets,CC BY-SA 4.0,305346,10,192185,151632,22755,33044,0,206825,2026-08-19T11:54:30
+odbx,Open Databases Integration for Materials Design,ODBX provider terms and source-dataset provenance,287006,2,142987,1554,40502,103138,103138,42056,2026-08-17T04:46:23
+fair-mofs,FAIR-MOFs experimental and optimized structures,CC BY 4.0,277454,8,33030,0,308,32847,0,308,2026-08-19T02:33:32
+icsd,Inorganic Crystal Structure Database,FIZ Karlsruhe ICSD licence,257558,3,77041,0,49579,73823,0,123402,2026-08-19T11:06:28
+snumat,SNUMAT hybrid-functional database,Figshare record licence,170893,4,21115,9657,8530,3273,0,18684,2026-08-19T10:33:18
+core-mof,CoRE MOF 2019,CC BY 4.0,155488,8,11784,15813,2017,1606,3,29354,2026-08-19T22:30:09
+phonix,Phonix anharmonic phonon and thermal-conductivity database,CC BY 4.0,155192,8,22733,24292,3955,2171,0,28247,2026-08-19T02:41:18
+materials-cloud-archive-static,"Materials Cloud Archive static optical, topological, and electride datasets","record-specific open licences, predominantly CC BY 4.0",143153,11,68547,48320,20904,2811,0,93245,2026-08-19T11:54:54
+csllm-negatives,CSLLM non-synthesizable screening set,CC BY 4.0,98303,1,94797,0,98303,0,0,98303,2026-08-17T23:50:29
+mofx-db,MOFX-DB adsorption structures and isotherms,MOFX-DB dataset terms,87845,10,10665,0,595,10377,0,595,2026-08-19T02:30:02
+phonondb,NIMS MDR harmonic phonon calculation database,CC BY 4.0,86616,7,15245,8073,5823,1700,1700,17972,2026-08-18T15:52:29
+mc3d,Materials Cloud MC3D,Materials Cloud record licence,70508,1,68487,39957,23818,6733,6733,72162,2026-08-17T23:23:58
+novomag,NovoMag magnetic materials database,CC BY 4.0,38884,10,5309,2864,997,1573,0,5473,2026-08-19T10:28:07
+3dsc,3DSC superconductors with crystal structures,3DSC repository licence and upstream MP/ICSD terms,36531,2,3123,28324,0,0,0,28324,2026-08-19T11:06:38
+2dmatpedia,2DMatPedia,2DMatPedia terms,30583,5,6491,0,2246,4275,4275,2246,2026-08-17T04:04:54
+spse,High-Throughput Screening Platform for Solid Electrolytes,CC BY 4.0 record; underlying ICSD-derived structures retain ICSD terms,29953,2,3599,5005,0,0,0,5085,2026-08-19T11:06:47
+jarvis-specialized-structures,NIST JARVIS specialized crystal endpoint and property datasets,NIST/JARVIS dataset terms,26154,22,3443,0,3562,574,0,4134,2026-08-19T02:40:38
+amcsd,American Mineralogist Crystal Structure Database,AMCSD terms,24639,2,7790,0,13518,1203,1203,13521,2026-08-17T04:28:08
+pcod,Predicted Crystallography Open Database,public domain,24416,2,12418,0,0,12418,0,0,2026-08-19T12:13:48
+c2db,Computational 2D Materials Database,CC BY-SA 4.0,14120,4,3493,0,1277,2253,2253,1277,2026-08-17T04:04:28
+mc2d,Materials Cloud MC2D,Materials Cloud record licence,13202,4,3164,0,1319,1873,0,1319,2026-08-19T10:33:35
+omdb-organic,"Organic Materials Database (OMDB, omdb.mathub.io)",OMDB terms,12013,1,11975,0,125,11888,0,0,
+sacada,Samara Carbon Allotrope Database,SACADA site terms and source-publication provenance,10349,7,1532,0,27,1508,0,27,2026-08-19T10:30:31
+bidb,2DHub van der Waals Bilayer Database,2DHub dataset terms,9405,7,1023,0,1032,17,0,1032,2026-08-19T10:30:14
+superband,SuperBand electronic-band and Fermi-surface database of superconductors,CC BY 4.0 data; MIT software,8985,2,3147,4078,3163,7,0,7248,2026-08-17T23:00:39
+ec-mof,EC-MOF Phase-I electrically conductive MOFs,EC-MOF site terms and source-publication provenance,7848,10,1067,0,0,1067,0,0,2026-08-19T10:30:48
+aflow-prototypes,AFLOW Encyclopedia of Crystallographic Prototypes,Apache-2.0,6251,5,1788,1169,630,0,0,1799,2026-08-19T10:30:39
+webmineral,Webmineral mineralogy database,Webmineral site and cited-source terms,4698,4,1320,1330,0,0,0,1330,2026-08-19T11:06:58
+openmx-2d-ab2,OpenMX AB2 two-dimensional structure map,OpenMX database and source-publication terms,4305,2,2151,0,382,1797,1797,382,2026-08-18T15:50:04
+hex-high-pressure,HEX high-pressure elemental crystal structures,CC0,1456,2,241,0,694,37,0,694,2026-08-19T10:31:30
+rruff,"RRUFF mineral chemistry, diffraction, Raman, and infrared database",RRUFF terms and source-citation provenance,1302,2,829,0,940,123,0,940,2026-08-19T10:32:54
+open-framework-aluminophosphate,Open-framework aluminophosphate structure database,CC BY 4.0,925,6,186,0,49,139,0,49,2026-08-19T10:31:37
+curated-cof,Curated COF structures,repository licence,684,1,757,0,0,757,757,0,2026-08-17T23:03:44
+amdb,Anyterial Altermagnets Database,AMDB terms and source-publication provenance,622,6,103,104,0,0,0,104,2026-08-19T11:07:07
+iza-zeolite,IZA Database of Zeolite Structures,IZA Structure Commission terms,529,2,213,0,241,24,24,241,2026-08-18T15:49:52
+hadb,Hard-coating Alloys Database,HADB terms and source-publication provenance,492,4,123,0,18,105,105,18,2026-08-17T04:14:28
+tcod,Theoretical Crystallography Open Database,CC0,357,3,2803,0,856,2227,0,856,2026-08-19T10:32:25
+obelix,OBELiX solid-state electrolyte structures and ionic conductivity,CC BY 4.0,112,2,60,61,0,0,0,61,2026-08-19T11:07:14

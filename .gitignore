@@ -61,6 +61,7 @@ ipython_config.py
 
 # Python environments and local interpreter selection
 .venv/
+.venv-cgtnet/
 venv/
 env/
 ENV/

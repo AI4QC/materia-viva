@@ -1,0 +1,498 @@
+property,theory_level,n_materials,kind,unit,n_sources,property_total_materials
+total_energy_per_atom,gga,10117201,num,eV/atom,14,11576328
+formation_energy_per_atom,gga,8491348,num,eV/atom,14,9872344
+total_magnetization,gga,7229974,num,μB,8,8071469
+spacegroup_number,gga,7194366,num,,21,8018193
+energy_above_hull,gga,6530937,num,eV/atom,11,7309591
+band_gap,gga,6321787,num,eV,23,7817982
+dos_at_fermi,gga,5220234,num,states/eV,2,5934625
+phase_separation_energy,gga,5171389,num,eV/atom,1,5894220
+band_gap_direct,gga,5170364,num,eV,3,5894763
+structure_prototype,gga,2357674,text,,11,2794238
+volume_per_atom,gga,2275023,num,Å³/atom,1,2275947
+density,gga,2254603,num,g/cm³,10,2494079
+max_residual_force,gga,2005836,num,eV/Å,1,2005836
+max_residual_stress,gga,2005836,num,eV/Å³,1,2005836
+magnetization_per_atom,gga,938459,num,μB/atom,1,938459
+band_gap,tight-binding,632143,num,eV,23,7817982
+total_energy_per_atom,tight-binding,630096,num,eV/atom,14,11576328
+formation_energy_per_atom,tight-binding,606176,num,eV/atom,14,9872344
+decomposition_energy,PBE GNoME,554056,num,eV/atom,3,617476
+decomposition_energy,PBE GNoME vs GNoME hull,554056,num,eV/atom,3,617476
+decomposition_energy,PBE GNoME vs MP hull,554056,num,eV/atom,3,617476
+decomposition_energy,PBE GNoME vs MP+OQMD hull,554056,num,eV/atom,3,617476
+largest_cavity_diameter,geometric,473324,num,Å,7,473815
+pore_limiting_diameter,geometric,473282,num,Å,6,473282
+dimensionality,other,470829,text,,12,895781
+void_fraction,geometric,454309,num,,6,455303
+structure_prototype,other,435607,text,,11,2794238
+surface_area_gravimetric,geometric,429815,num,m²/g,5,430332
+spacegroup_number,pbesol,386638,num,,21,8018193
+total_magnetization,pbesol,365920,num,μB,8,8071469
+total_magnetization,scan,364392,num,μB,8,8071469
+phase_separation_energy,pbesol,362171,num,eV/atom,1,5894220
+band_gap_direct,pbesol,361971,num,eV,3,5894763
+phase_separation_energy,scan,360659,num,eV/atom,1,5894220
+band_gap_direct,scan,360460,num,eV,3,5894763
+dos_at_fermi,pbesol,357942,num,states/eV,2,5934625
+dos_at_fermi,scan,356447,num,states/eV,2,5934625
+energy_above_hull,pbesol,335467,num,eV/atom,11,7309591
+energy_above_hull,scan,334066,num,eV/atom,11,7309591
+spacegroup_number,scan,318550,num,,21,8018193
+band_gap,pbesol,311206,num,eV,23,7817982
+total_energy_per_atom,pbesol,308983,num,eV/atom,14,11576328
+band_gap,scan,308692,num,eV,23,7817982
+total_energy_per_atom,scan,307693,num,eV/atom,14,11576328
+pore_volume,geometric,299394,num,cm³/g,2,299394
+formation_energy_per_atom,pbesol,297279,num,eV/atom,14,9872344
+formation_energy_per_atom,scan,296037,num,eV/atom,14,9872344
+co2_uptake,GCMC 0.10bar 363K,287610,num,mol/kg,2,415108
+co2_uptake,GCMC 0.15bar 298K,287610,num,mol/kg,2,415108
+co2_uptake,GCMC binary CO2/N2 0.15bar 298K,287610,num,mol/kg,2,415108
+n2_uptake,GCMC binary CO2/N2 0.85bar 298K,287610,num,mol/kg,2,295508
+co2_n2_selectivity,gcmc,287610,num,,1,287610
+working_capacity_vacuum_swing,GCMC VSA,287610,num,mol/kg,1,287610
+working_capacity_temperature_swing,GCMC TSA 0.15bar 298K -> 0.70bar 413K,287610,num,mol/kg,1,287610
+co2_uptake,GCMC 0.70bar 413K,287564,num,mol/kg,2,415108
+n2_heat_of_adsorption,GCMC binary CO2/N2 0.85bar 298K,285827,num,kJ/mol,1,285827
+co2_heat_of_adsorption,GCMC 0.70bar 413K,285765,num,kJ/mol,1,286229
+co2_heat_of_adsorption,GCMC 0.15bar 298K,285663,num,kJ/mol,1,286229
+co2_heat_of_adsorption,GCMC 0.10bar 363K,285649,num,kJ/mol,1,286229
+co2_heat_of_adsorption,GCMC binary CO2/N2 0.15bar 298K,285268,num,kJ/mol,1,286229
+measurement_temperature,experiment,238161,num,K,1,238161
+fermi_energy,gga,215053,num,eV,2,215053
+experimentally_observed,experiment,212167,bool,,2,234892
+is_stable,gga,211854,bool,,1,211854
+magnetization_per_volume,gga,211854,num,μB/Å³,1,211854
+is_metal,gga,211652,bool,,2,211753
+is_gap_direct,gga,194382,bool,,3,243327
+magnetic_ordering,gga,182374,text,,4,182470
+surface_area_volumetric,geometric,167087,num,m²/cm³,5,167537
+chemical_name,experiment,165051,text,,3,165051
+dimensionality,gga,160333,text,,12,895781
+oxidation_states,gga,158465,text,,1,158465
+average_oxidation_states,other,158465,text,,1,158465
+decomposes_to,gga,153455,text,,1,153455
+energy_per_t_atom,forcefield,136008,num,kJ/mol,1,136008
+framework_density,forcefield,136006,num,T/1000 Å³,3,148195
+poisson_ratio,GULP SLC forcefield (ν_zy),135980,num,,5,195059
+poisson_ratio,GULP SLC forcefield (ν_zx),135976,num,,5,195059
+poisson_ratio,GULP SLC forcefield (ν_yz),135975,num,,5,195059
+poisson_ratio,GULP SLC forcefield (ν_xz),135970,num,,5,195059
+poisson_ratio,GULP SLC forcefield (ν_yx),135941,num,,5,195059
+poisson_ratio,GULP SLC forcefield (ν_xy),135940,num,,5,195059
+bulk_modulus_voigt,forcefield,135909,num,GPa,2,156720
+youngs_modulus,GULP SLC forcefield (stress axis z),135887,num,GPa,2,136108
+bulk_modulus_reuss,forcefield,135849,num,GPa,2,156660
+sound_velocity_longitudinal,forcefield,135834,num,m/s,2,156645
+dimensionality,geometric,135543,text,,12,895781
+youngs_modulus,GULP SLC forcefield (stress axis y),135504,num,GPa,2,136108
+youngs_modulus,GULP SLC forcefield (stress axis x),135485,num,GPa,2,136108
+shear_modulus_voigt,forcefield,134250,num,GPa,2,155061
+sound_velocity_transverse,forcefield,132952,num,m/s,2,153763
+dielectric_constant_total,forcefield,131026,num,,5,154893
+shear_modulus_reuss,forcefield,130939,num,GPa,2,151750
+dimensionality,gga-vdw,128893,text,,12,895781
+co2_uptake,GCMC (hMOF) 0.01 bar,127498,num,mol/kg,2,415108
+co2_uptake,GCMC (hMOF) max over pressures,127498,num,mol/kg,2,415108
+cbm,gga,123288,num,eV,1,123288
+vbm,gga,123288,num,eV,1,123288
+bulk_modulus_vrh,forcefield,121704,num,GPa,6,196615
+shear_modulus_vrh,forcefield,118793,num,GPa,5,192267
+decomposition_energy,r2SCAN GNoME,117045,num,eV/atom,3,617476
+decomposition_energy,r2SCAN GNoME vs GNoME hull,117045,num,eV/atom,3,617476
+decomposition_energy,r2SCAN GNoME vs MP hull,117045,num,eV/atom,3,617476
+decomposition_energy,r2SCAN GNoME vs MP+OQMD hull,117045,num,eV/atom,3,617476
+total_magnetization,gga-vdw,111181,num,μB,8,8071469
+energy_above_hull,gga-vdw,108999,num,eV/atom,11,7309591
+dielectric_constant_electronic,forcefield,107200,num,,5,226290
+density,experiment,103819,num,g/cm³,10,2494079
+spacegroup_number,gga-vdw,102963,num,,21,8018193
+band_gap,gga-vdw,100720,num,eV,23,7817982
+density,forcefield,100490,num,g/cm³,10,2494079
+total_energy_per_atom,gga-vdw,100394,num,eV/atom,14,11576328
+formation_energy_per_atom,gga-vdw,96719,num,eV/atom,14,9872344
+predicted_synthesizable,other,94797,bool,,1,94797
+total_energy_per_atom,r2scan,87646,num,eV/atom,14,11576328
+formation_energy_per_atom,r2scan,84326,num,eV/atom,14,9872344
+magnetic_species,gga,80996,text,,1,80996
+dielectric_constant_electronic,gga-vdw,68771,num,,5,226290
+topology_class,PBE+SOC TQC,66640,text,,2,80342
+topology_class,PBE SymTopo,62605,text,,2,80342
+topology_class,PBE+SOC SymTopo,62131,text,,2,80342
+decomposition_energy,PBE(+U) MP2026 equilibrium reaction energy,59007,num,eV/atom,3,617476
+band_gap,hse06,56631,num,eV,23,7817982
+topology_invariant,TQC,50815,text,,2,70967
+poisson_ratio,OptB88vdW ElaStic,46665,num,,5,195059
+band_gap,gllbsc,45918,num,eV,23,7817982
+topology_invariant,"PBE+SOC SymTopo (z2,z2,z2,z4)",43922,text,,2,70967
+bulk_modulus_vrh,gga-vdw,42019,num,GPa,6,196615
+shear_modulus_vrh,gga-vdw,41923,num,GPa,5,192267
+symmetry_indicators,gga,41916,text,,1,41916
+seebeck_coefficient,BoltzTraP n-type,40378,num,μV/K,2,40378
+seebeck_coefficient,BoltzTraP p-type,40378,num,μV/K,2,40378
+power_factor,BoltzTraP n-type,40375,num,μW/cm·K²,2,40375
+power_factor,BoltzTraP p-type,40375,num,μW/cm·K²,2,40375
+topology_invariant,"PBE SymTopo (z2,z2,z2,z4)",38957,text,,2,70967
+is_gap_direct,hse06,37934,bool,,3,243327
+largest_free_path_diameter,geometric,36602,num,Å,2,36602
+density,geometric,34061,num,g/cm³,10,2494079
+bulk_modulus_vrh,gga,31517,num,GPa,6,196615
+shear_modulus_vrh,gga,31445,num,GPa,5,192267
+pore_channel_count,geometric,27089,num,,1,27089
+lattice_thermal_conductivity,gga,26507,num,W/m·K,2,26507
+debye_temperature,gga,25997,num,K,2,25997
+band_gap,mbj,25331,num,eV,23,7817982
+dielectric_constant_electronic,mbj,24809,num,,5,226290
+poisson_ratio,PBE(+U) MP2026,24518,num,,5,195059
+elastic_anisotropy,gga,24430,num,,1,24430
+experimentally_observed,other,22724,bool,,2,234892
+total_energy_per_atom,hse06,22483,num,eV/atom,14,11576328
+bulk_modulus_voigt,gga,20810,num,GPa,2,156720
+bulk_modulus_reuss,gga,20810,num,GPa,2,156660
+sound_velocity_longitudinal,gga,20810,num,m/s,2,156645
+shear_modulus_voigt,gga,20810,num,GPa,2,155061
+sound_velocity_transverse,gga,20810,num,m/s,2,153763
+shear_modulus_reuss,gga,20810,num,GPa,2,151750
+framework_bond_dissociation_energy,other,20194,num,eV/atom,1,20194
+nmr_efg_max,gga-vdw,19740,num,V/m²,1,19740
+phonon_max_frequency,gga,19394,num,THz,4,44408
+phonon_min_frequency,gga,19392,num,THz,4,44432
+has_imaginary_phonon,gga,19392,bool,,4,44432
+average_voltage,gga,19280,num,V,1,19280
+capacity_gravimetric,gga,19280,num,mAh/g,1,19280
+capacity_volumetric,gga,19280,num,mAh/cm³,1,19280
+energy_density_gravimetric,gga,19280,num,Wh/kg,1,19280
+energy_density_volumetric,gga,19280,num,Wh/L,1,19280
+max_voltage_step,gga,19280,num,V,1,19280
+num_voltage_steps,gga,19280,num,,1,19280
+electrode_stability_charged,gga,19280,num,eV/atom,1,19280
+electrode_stability_discharged,gga,19280,num,eV/atom,1,19280
+electrode_volume_change,gga,19280,num,fraction,1,19280
+working_ion,gga,19280,text,,1,19280
+battery_formula,gga,19280,text,,1,19280
+spillage,gga-vdw,19113,num,,2,19113
+heat_of_formation,gllbsc,18683,num,eV/atom,1,24570
+slme,gga-vdw,16815,num,%,2,16815
+phonon_min_frequency,dfpt-phonon,16169,num,THz,4,44432
+has_imaginary_phonon,dfpt-phonon,16169,bool,,4,44432
+phonon_max_frequency,dfpt-phonon,16142,num,THz,4,44408
+refractive_index,gga,15136,num,,3,19080
+spacegroup_number,other,14521,num,,21,8018193
+dielectric_constant_total,gga,13710,num,,5,154893
+band_gap,other,13599,num,eV,23,7817982
+heat_capacity,pbesol,13059,num,J/mol·K,2,23135
+structure_prediction_r_factor,geometric,12415,num,,1,12415
+framework_density,other,12188,num,T/1000 Å³,3,148195
+dielectric_constant_ionic,gga,11191,num,,3,19484
+dielectric_constant_electronic,gga,11177,num,,5,226290
+is_gap_direct,other,11010,bool,,3,243327
+poisson_ratio,PBE AEL (AFLOW),10690,num,,5,195059
+thermal_conductivity,gga,10565,num,W/m·K,1,10565
+thermal_expansion,gga,10563,num,1/K,1,10563
+heat_capacity,gga,10075,num,J/mol·K,2,23135
+mineral_name,experiment,9522,text,,6,9632
+dielectric_constant_total,dfpt-phonon,8965,num,,5,154893
+phonon_max_frequency,pbesol,8870,num,THz,4,44408
+phonon_min_frequency,pbesol,8869,num,THz,4,44432
+has_imaginary_phonon,pbesol,8869,bool,,4,44432
+gllbsc_derivative_discontinuity,gllbsc,8236,num,eV,1,8236
+eos_bulk_modulus,dfpt-phonon,8060,num,GPa,1,8060
+ar_uptake,GCMC 87K ~1bar TraPPE,7898,num,mol/kg,1,7898
+lattice_thermal_conductivity_coherence,gga,7689,num,W/m·K,1,7689
+lattice_thermal_conductivity_particle,gga,7678,num,W/m·K,1,7678
+born_effective_charge_max,pbesol,7558,num,e,1,7558
+piezoelectric_modulus,dfpt-phonon,7466,num,C/m²,2,12222
+dielectric_constant_ionic,dfpt-phonon,7446,num,,3,19484
+dielectric_constant_electronic,dfpt-phonon,7420,num,,5,226290
+effective_mass_electron,transport-postproc,6250,num,m_e,3,7324
+effective_mass_hole,transport-postproc,6235,num,m_e,3,7309
+coordination_environments,other,6108,text,,1,6108
+continuous_symmetry_measure,other,6108,num,,1,6108
+dielectric_constant_electronic,pbesol,6065,num,,5,226290
+piezoelectric_max_direction,gga,5926,text,,1,5926
+heat_of_formation,gga,5886,num,eV/atom,1,24570
+decomposition_energy,PBE (NOVOMAG),5434,num,eV/atom,3,617476
+magnetic_polarization,gga,5309,num,T,1,5309
+n2_uptake,GCMC 77K ~1bar TraPPE,5088,num,mol/kg,2,295508
+piezoelectric_modulus,gga,4755,num,C/m²,2,12222
+exfoliation_energy,gga,4062,num,meV/atom,3,6395
+tc_superconducting,experiment,3873,num,K,4,5091
+work_function,gga,3730,num,eV,2,3730
+pearson_symbol,other,3312,text,,2,3312
+migration_barrier,BVSE 1D Na,2904,num,eV,1,3598
+migration_barrier,BVSE 2D Na,2897,num,eV,1,3598
+migration_barrier,BVEL 1D Na,2881,num,eV,1,3598
+migration_barrier,BVEL 2D Na,2857,num,eV,1,3598
+migration_barrier,BVSE 3D Na,2774,num,eV,1,3598
+superconductor_class,experiment,2621,text,,1,2621
+n2_uptake,GCMC 77K ~0.999bar TraPPE,2568,num,mol/kg,2,295508
+h2_uptake,GCMC 130K ~100bar Michels-Degraaff-Tenseldam with Darkrim-,2549,num,g/L,1,2767
+h2_uptake,GCMC 160K ~5bar Michels-Degraaff-Tenseldam with Darkrim-,2549,num,g/L,1,2767
+h2_uptake,GCMC 200K ~100bar Michels-Degraaff-Tenseldam with Darkrim-,2549,num,g/L,1,2767
+h2_uptake,GCMC 243K ~100bar Michels-Degraaff-Tenseldam with Darkrim-,2549,num,g/L,1,2767
+h2_uptake,GCMC 77K ~6bar Michels-Degraaff-Tenseldam with Darkrim-,2549,num,g/L,1,2767
+xe_uptake,"GCMC 298K ~1bar in Xe/Kr y=0.2 Talu et al., Colloids Surf A 2001 187-18",2549,num,mol/kg,1,2549
+kr_uptake,"GCMC 298K ~1bar in Xe/Kr y=0.8 Talu et al., Colloids Surf A 2001 187-18",2549,num,mol/kg,1,2549
+migration_barrier,BVEL 3D Na,2501,num,eV,1,3598
+refractive_index,lda,2368,num,,3,19080
+exfoliation_energy,gga-vdw,2332,num,meV/atom,3,6395
+migration_barrier,BVEL 1D Li,2195,num,eV,1,3598
+migration_barrier,BVEL 2D Li,2195,num,eV,1,3598
+migration_barrier,BVSE 1D Li,2195,num,eV,1,3598
+migration_barrier,BVSE 2D Li,2195,num,eV,1,3598
+migration_barrier,BVSE 3D Li,2182,num,eV,1,3598
+migration_barrier,BVEL 3D Li,2176,num,eV,1,3598
+interlayer_binding_energy,gga-vdw,2136,num,meV/Å²,2,4126
+birefringence,lda,2084,num,,1,4796
+birefringence,gga,2077,num,,1,4796
+shg_coefficient,lda,1967,num,pm/V,1,2566
+magnetic_anisotropy_constant,gga,1489,num,MJ/m³,1,1489
+easy_axis,gga,1489,num,,1,1489
+relative_energy_to_diamond,other,1452,num,eV/atom,1,1452
+electron_phonon_coupling,other,1431,num,,1,1431
+phonon_log_average_frequency,other,1431,num,K,1,1431
+hardness_vickers,other,1414,num,GPa,1,1414
+bulk_modulus_vrh,other,1373,num,GPa,6,196615
+interlayer_binding_energy,other,1243,num,meV/Å²,2,4126
+tc_superconducting,other,1217,num,K,4,5091
+dielectric_constant_total,other,1190,num,,5,154893
+mohs_hardness,experiment,1183,num,,1,1183
+spacegroup_number,experiment,1152,num,,21,8018193
+density,other,1103,num,g/cm³,10,2494079
+measurement_pressure,experiment,1088,num,GPa,2,1303
+effective_mass_electron,other,1073,num,m_e,3,7324
+effective_mass_hole,other,1073,num,m_e,3,7309
+dynamically_stable,gga,1023,bool,,1,1023
+layer_group_number,other,1023,num,,1,1023
+band_gap_direct,lda,994,num,eV,3,5894763
+void_fraction,gga,993,num,,6,455303
+band_gap_direct,hse06,971,num,eV,3,5894763
+structure_prototype,experiment,956,text,,11,2794238
+band_gap,experiment,930,num,eV,23,7817982
+total_energy_per_atom,experiment,927,num,eV/atom,14,11576328
+volume_per_atom,experiment,923,num,Å³/atom,1,2275947
+total_energy_per_atom,other,901,num,eV/atom,14,11576328
+band_gap,lda,882,num,eV,23,7817982
+refractive_index,experiment,854,num,,3,19080
+dielectric_constant_ionic,other,845,num,,3,19484
+dielectric_constant_electronic,other,844,num,,5,226290
+interlayer_binding_energy,gga,746,num,meV/Å²,2,4126
+refractive_index,hse06,720,num,,3,19080
+birefringence,hse06,634,num,,1,4796
+shg_coefficient,hse06,598,num,pm/V,1,2566
+surface_area_gravimetric,gga,516,num,m²/g,5,430332
+bulk_modulus_eos,gga,502,num,GPa,1,502
+bulk_modulus_pressure_derivative,gga,502,num,,1,502
+largest_cavity_diameter,gga,490,num,Å,7,473815
+d_band_center,gga,485,num,eV,1,485
+strukturbericht,other,473,text,,1,473
+surface_area_volumetric,gga,449,num,m²/cm³,5,167537
+h2_uptake,GCMC 110.88K ~1bar TraPPE-H2-3SM,257,num,g/L,1,2767
+h2_uptake,GCMC 133.06K ~1bar TraPPE-H2-3SM,257,num,g/L,1,2767
+h2_uptake,GCMC 159.67K ~1bar TraPPE-H2-3SM,257,num,g/L,1,2767
+h2_uptake,GCMC 191.6K ~1bar TraPPE-H2-3SM,257,num,g/L,1,2767
+h2_uptake,GCMC 229.92K ~1bar TraPPE-H2-3SM,257,num,g/L,1,2767
+h2_uptake,GCMC 275.9K ~1bar TraPPE-H2-3SM,257,num,g/L,1,2767
+h2_uptake,GCMC 77K ~1bar TraPPE-H2-3SM,257,num,g/L,1,2767
+h2_uptake,GCMC 92.4K ~1bar TraPPE-H2-3SM,257,num,g/L,1,2767
+formation_energy_per_atom,experiment,251,num,eV/atom,14,9872344
+has_reconstructed_surface,gga,237,bool,,1,237
+surface_energy,PBE surface-weighted,233,num,J/m²,1,237
+surface_anisotropy,gga,230,num,,1,230
+wulff_shape_factor,gga,230,num,,1,230
+measurement_pressure,other,214,num,GPa,2,1303
+formation_energy_per_atom,other,203,num,eV/atom,14,9872344
+r_factor,experiment,183,num,,1,183
+dimensionality,experiment,181,text,,12,895781
+measured_chemistry,other,176,text,,1,176
+elf_max,gga,145,num,,1,145
+energy_above_hull,other,120,num,eV/atom,11,7309591
+poisson_ratio,DFT 0K,117,num,,5,195059
+youngs_modulus,DFT 0K,117,num,GPa,2,136108
+mineral_name,other,109,text,,6,9632
+grain_boundary_types,gga,106,text,,1,106
+shear_modulus_vrh,other,104,num,GPa,5,192267
+altermagnetic_splitting_max,gga+u,103,num,eV,1,103
+altermagnetic_splitting_avg,gga+u,103,num,eV,1,103
+altermagnetic_split_fraction,gga+u,103,num,%,1,103
+is_metal,gga+u,100,bool,,2,211753
+magnetic_ordering,gga+u,95,text,,4,182470
+n2_uptake,GCMC 77K ~0.23714bar TraPPE,91,num,mol/kg,2,295508
+band_gap,gga+u,77,num,eV,23,7817982
+n2_uptake,GCMC 77K ~0.05623bar TraPPE,65,num,mol/kg,2,295508
+band_gap,gw-bse,61,num,eV,23,7817982
+work_of_separation,"PBE MP grain boundary, maximum over 10 boundaries",56,num,J/m²,1,106
+n2_uptake,GCMC 77K ~0.00316bar TraPPE,50,num,mol/kg,2,295508
+ionic_conductivity,experiment RT total,49,num,S/cm,1,49
+n2_uptake,GCMC 77K ~0.01334bar TraPPE,48,num,mol/kg,2,295508
+work_of_separation,"PBE MP grain boundary, maximum over 1 boundaries",48,num,J/m²,1,106
+grain_boundary_energy,PBE MP grain boundary Σ7 twist,48,num,J/m²,1,106
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (0 0 0 1))",44,num,J/m²,1,237
+n2_uptake,GCMC 77K ~0.02bar TraPPE,35,num,mol/kg,2,295508
+n2_uptake,GCMC 77K ~0.2bar TraPPE,32,num,mol/kg,2,295508
+n2_uptake,GCMC 77K ~0.015bar TraPPE,28,num,mol/kg,2,295508
+n2_uptake,GCMC 77K ~0.4bar TraPPE,24,num,mol/kg,2,295508
+grain_boundary_energy,"PBE MP grain boundary, highest of 10 boundaries (Σ9 twist)",24,num,J/m²,1,106
+surface_energy,"PBE MP surface slab, lowest of 13 facets (facet (1 1 1))",23,num,J/m²,1,237
+n2_uptake,GCMC 77K ~0.05bar TraPPE,22,num,mol/kg,2,295508
+surface_energy,"PBE MP surface slab, lowest of 13 facets (facet (1 1 0))",22,num,J/m²,1,237
+grain_boundary_energy,"PBE MP grain boundary, highest of 10 boundaries (Σ5 twist)",22,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, lowest of 10 boundaries (Σ3 tilt)",22,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, lowest of 10 boundaries (Σ3 twist)",22,num,J/m²,1,106
+n2_uptake,GCMC 77K ~0.01bar TraPPE,20,num,mol/kg,2,295508
+n2_uptake,GCMC 77K ~0.6bar TraPPE,19,num,mol/kg,2,295508
+n2_uptake,GCMC 77K ~0.8bar TraPPE,18,num,mol/kg,2,295508
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (1 0 -1 0))",15,num,J/m²,1,237
+n2_uptake,GCMC 77K ~0.00075bar TraPPE,14,num,mol/kg,2,295508
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (1 1 -2 1))",14,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (2 0 -2 1))",14,num,J/m²,1,237
+n2_uptake,GCMC 77K ~0.00018bar TraPPE,13,num,mol/kg,2,295508
+n2_uptake,GCMC 77K ~0.002bar TraPPE,12,num,mol/kg,2,295508
+n2_uptake,GCMC 77K ~0.005bar TraPPE,12,num,mol/kg,2,295508
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (1 0 -1 1))",11,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (2 1 0))",11,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (2 -1 -1 2))",10,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (1 1 1))",10,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 14 facets (facet (2 1 0))",10,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (2 1 1))",8,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (3 2 2))",8,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 13 facets (facet (1 0 0))",8,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 14 facets (facet (1 1 1))",8,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (1 1 -2 0))",7,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (2 1 -3 2))",7,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (1 0 -1 1))",7,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 13 facets (facet (0 0 1))",7,num,J/m²,1,237
+grain_boundary_energy,"PBE MP grain boundary, highest of 9 boundaries (Σ9 twist)",6,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, lowest of 9 boundaries (Σ7 twist)",6,num,J/m²,1,106
+curie_temperature,gga,6,num,K,1,6
+n2_uptake,GCMC 77K ~0.0008bar TraPPE,5,num,mol/kg,2,295508
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (1 0 0))",5,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 14 facets (facet (3 2 0))",5,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (3 2 0))",4,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (3 3 2))",4,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 14 facets (facet (1 0 0))",4,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 3 facets (facet (0 1 0))",4,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 11 facets (facet (0 0 0 1))",4,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 14 facets (facet (1 1 1) reconstructed)",4,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 8 facets (facet (1 0 -1 0))",4,num,J/m²,1,237
+poisson_ratio,MLIP 700K,3,num,,5,195059
+youngs_modulus,MLIP 700K,3,num,GPa,2,136108
+surface_energy,"PBE MP surface slab, facet (0 0 0 1)",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, facet (0 0 1)",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, facet (1 0 -1 1)",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 11 facets (facet (2 1 0))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (1 0 -1 0))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (1 1 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (2 1 -3 0))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (2 1 -3 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (3 2 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 3 facets (facet (1 1 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 7 facets (facet (2 1 -3 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 8 facets (facet (2 1 -3 0))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 11 facets (facet (0 0 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (0 0 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (1 0 -1 2))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 14 facets (facet (1 0 0))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 3 facets (facet (0 0 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 4 facets (facet (0 0 0 1))",3,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 7 facets (facet (1 0 -1 1))",3,num,J/m²,1,237
+n2_uptake,GCMC 77K ~4e-05bar TraPPE,2,num,mol/kg,2,295508
+surface_energy,"PBE MP surface slab, highest of 11 facets (facet (1 0 -1 2))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 11 facets (facet (1 1 -2 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (3 1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (3 2 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (3 2 2))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (2 0 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (2 2 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (3 1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (3 1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 13 facets (facet (3 3 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 14 facets (facet (0 1 -1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 14 facets (facet (3 1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 15 facets (facet (0 1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 16 facets (facet (1 0 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 19 facets (facet (1 0 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 19 facets (facet (1 2 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 3 facets (facet (1 0 -1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 4 facets (facet (2 0 -2 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 5 facets (facet (0 0 0 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 6 facets (facet (1 0 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 6 facets (facet (2 1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 7 facets (facet (1 1 -2 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 7 facets (facet (2 0 -2 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 8 facets (facet (1 1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 8 facets (facet (2 1 -3 2))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 8 facets (facet (2 1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 9 facets (facet (1 0 -1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 9 facets (facet (2 1 -3 2))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (1 0 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (1 1 -2 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (1 1 -2 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (1 1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 12 facets (facet (2 1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 13 facets (facet (2 1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 14 facets (facet (1 0 0) reconstructed)",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 14 facets (facet (1 1 -2 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 14 facets (facet (3 2 2))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 14 facets (facet (3 3 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 15 facets (facet (0 1 2))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 16 facets (facet (1 0 0) reconstructed)",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 19 facets (facet (0 1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 19 facets (facet (0 2 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 3 facets (facet (1 0 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 3 facets (facet (1 1 -2))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 5 facets (facet (1 0 -1 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 6 facets (facet (0 0 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 6 facets (facet (1 0 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 7 facets (facet (0 0 0 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 7 facets (facet (1 0 -1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 8 facets (facet (0 0 1))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 8 facets (facet (1 0 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 9 facets (facet (1 0 -1 0))",2,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 9 facets (facet (2 -1 -1 2))",2,num,J/m²,1,237
+work_of_separation,"PBE MP grain boundary, maximum over 8 boundaries",2,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, highest of 10 boundaries (Σ7 twist)",2,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, highest of 7 boundaries (Σ5 twist)",2,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, highest of 9 boundaries (Σ9 tilt)",2,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, lowest of 10 boundaries (Σ7 twist)",2,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, lowest of 10 boundaries (Σ9 twist)",2,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, lowest of 7 boundaries (Σ7 twist)",2,num,J/m²,1,106
+grain_boundary_energy,"PBE MP grain boundary, lowest of 9 boundaries (Σ3 tilt)",2,num,J/m²,1,106
+poisson_ratio,MLIP 1100K,1,num,,5,195059
+poisson_ratio,MLIP 300K,1,num,,5,195059
+poisson_ratio,MLIP 450K,1,num,,5,195059
+youngs_modulus,MLIP 1100K,1,num,GPa,2,136108
+youngs_modulus,MLIP 300K,1,num,GPa,2,136108
+youngs_modulus,MLIP 450K,1,num,GPa,2,136108
+surface_energy,"PBE MP surface slab, highest of 10 facets (facet (0 1 0))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 12 facets (facet (0 0 0 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 15 facets (facet (2 1 0))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 17 facets (facet (1 0 0))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 2 facets (facet (1 0 -1 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 3 facets (facet (1 1 -2 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 3 facets (facet (2 0 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 4 facets (facet (2 1 -3 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 5 facets (facet (3 2 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 6 facets (facet (1 1 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 6 facets (facet (2 2 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 8 facets (facet (1 0 -1 2))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 9 facets (facet (0 1 0))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, highest of 9 facets (facet (1 1 -2 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 10 facets (facet (0 0 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 13 facets (facet (2 2 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 15 facets (facet (1 1 1) reconstructed)",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 17 facets (facet (0 0 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 2 facets (facet (1 0 -1 0))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 3 facets (facet (0 0 0 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 3 facets (facet (0 2 -1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 3 facets (facet (1 0 -1 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 3 facets (facet (1 1 -2 0))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 5 facets (facet (0 0 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 6 facets (facet (1 0 0))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 6 facets (facet (2 1 0))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 8 facets (facet (0 0 0 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 8 facets (facet (1 0 -1 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 9 facets (facet (0 0 0 1))",1,num,J/m²,1,237
+surface_energy,"PBE MP surface slab, lowest of 9 facets (facet (1 0 0))",1,num,J/m²,1,237
+ionic_conductivity,experiment RT bulk,1,num,S/cm,1,49

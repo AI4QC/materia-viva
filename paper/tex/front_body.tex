@@ -1,0 +1,96 @@
+% ======================================================================
+% Introduction.
+% Research-paper funnel: field stake -> the bottleneck -> what prior work
+% solved -> the capability still missing and what it costs -> this study.
+% Implementation detail (identifiers, fingerprint protocol, admission rules)
+% belongs to Methods and the Supplementary Information, not here.
+% ======================================================================
+\section{Introduction}
+
+Materials discovery has become an exercise in reusing other people's
+calculations. Public repositories now hold millions of computed crystals
+\cite{jain2013commentary,saal2013materials,curtarolo2012aflow,schmidt2022dataset},
+generative models propose new ones directly
+\cite{xie2022crystal,zeni2025generative,merchant2023scaling}, and the universal
+interatomic potentials used to filter those proposals are trained on whatever
+the community has already published
+\cite{chen2022universal,deng2023chgnet,batatia2023foundation,yang2024mattersim,wood2025uma}.
+None of these activities consumes a single repository. Each draws on the union
+of them, and each therefore rests on an assumption about that union: that it is
+known what it contains, and that the numbers inside it mean the same thing.
+
+Neither assumption has been tested, because the union has never been formed. The
+repositories describe overlapping sets of crystals, but they were built
+independently and share no key at the level of the object they describe. The same
+arrangement of atoms carries a different accession number in every database that
+holds it, and the one property that is genuinely shared, the chemical formula,
+cannot serve as a key, because polymorphs share a formula and differ in almost
+everything a screening campaign cares about. As a result three quantities that
+bear directly on how materials data is used remain unmeasured. How much of the
+corpus is the same crystal counted repeatedly. Whether two groups that computed
+the same quantity for the same crystal obtained the same answer. And how the
+properties a discovery campaign actually needs are distributed over the structures
+that exist.
+
+Forming the union once would in any case not be enough. Every repository
+publishes new releases, and new repositories appear faster than any is retired,
+so a union assembled in a single pass is out of date before it is finished and
+has to be rebuilt from nothing to incorporate what arrived while it was being
+made. A corpus that is to stay current has to do something a merge does not: it
+has to recognise material it has never seen, and fold it in without discarding
+the ability to recognise that it has already acquired.
+
+Each of these gaps has already produced visible difficulty. Counts of newly
+discovered stable materials cannot be reconciled between catalogues, and the
+scale of recent generative releases has drawn precisely this criticism
+\cite{cheetham2024artificial,leeman2024challenges,smit2026dataonly}. Benchmarks
+that train on one repository and test on another inherit an unquantified overlap
+term, which is why the Matbench Discovery protocol had to define its splits over
+structures rather than records \cite{riebesell2025framework}. And a value that
+two independent groups computed differently is, in the present corpus,
+indistinguishable from a value that only one group ever computed, so no reader
+can tell corroboration from coincidence.
+
+Substantial progress has been made on the parts of this problem that can be
+solved one layer at a time. The OPTIMADE specification gave more than twenty
+providers a common query interface, removing the burden of a separate account
+and format for each \cite{andersen2021optimade,evans2024developments}. Structural
+fingerprints made deduplication tractable at scale, and the LeMaterial initiative
+used one to publish a deduplicated union of several large repositories
+\cite{ramlaoui2025lemat}. What neither delivers is the layer where the difficulty
+actually resides. Knowing that two records describe the same crystal does not
+attach what each database says about it, and attaching those statements is
+useless unless they stay apart afterwards. Two repositories publishing a column
+labelled band gap are frequently not reporting the same physical quantity: a
+semilocal, a hybrid and a measured value differ by more than the differences a
+screening campaign is trying to resolve. A union built by matching column names
+would average them, and would destroy the very disagreement that makes the
+corpus worth auditing.
+
+Here we assemble that layer and use it to characterise the corpus. We resolve
+identity across 54 databases at the level of the crystal structure, and retain for
+every one of the resulting property values the database, the native record and the
+calculation or measurement that produced it, so that several databases speaking
+about one crystal remain separately audible. The construction answers the second
+half of the problem as well, because admission and recognition are made the same
+operation. A record that matches nothing is not an error to be logged but the
+corpus's next member, and the moment it is admitted its structural fingerprint
+joins the criterion against which every subsequent record is judged. The database
+therefore evolves as it ingests: each round of assimilation enlarges what the next
+round can recognise, so a newly released version or an entirely new repository is
+folded into a substrate that has grown since the last one, rather than matched
+against a frozen reference. We find that redundancy is large and
+strongly concentrated, that independent databases reporting the same quantity
+disagree by margins exceeding the thresholds on which materials selection
+routinely turns, that a substantial part of the apparent agreement between them
+is shared provenance rather than independent confirmation, and that coverage of
+the property space is governed by what a property costs to compute rather than by
+what it is worth knowing. We also find that the self-extension is
+substantial rather than nominal: a sixth of all cross-database links exist only
+because earlier assimilation had already created the structure they point to, and
+for repositories whose chemistry the starting pool did not cover the figure
+approaches unity. The same relation reappears at the next level up, where the
+learned completion of the property layer is itself staged, each stage widening
+the domain on which the next is defined. The instrument and the corpus it
+produces are described in Methods and in the Supplementary Information; what
+follows is what the corpus turns out to contain.

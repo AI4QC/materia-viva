@@ -1,0 +1,70 @@
+tier,tier_label,property,n_materials,coverage,n_sources
+1,single self-consistent run,total_energy_per_atom,11576328,0.854765652360208,14
+1,single self-consistent run,formation_energy_per_atom,9872344,0.7289479495989043,14
+1,single self-consistent run,energy_above_hull,7309591,0.5397209995778718,11
+1,single self-consistent run,band_gap,7817982,0.5772592556439626,23
+1,single self-consistent run,total_magnetization,8071469,0.5959760698980018,8
+1,single self-consistent run,magnetization_per_atom,938459,0.06929334754062846,1
+1,single self-consistent run,is_metal,211753,0.015635285315363484,2
+1,single self-consistent run,is_stable,211854,0.015642742890070106,1
+1,single self-consistent run,magnetic_ordering,182470,0.013473105512055907,4
+1,single self-consistent run,dos_at_fermi,5934625,0.43819712171581515,2
+1,single self-consistent run,fermi_energy,215053,0.01587894864736208,2
+1,single self-consistent run,decomposition_energy,617476,0.04559280593611133,3
+1,single self-consistent run,heat_of_formation,24570,0.0018141842627895745,1
+1,single self-consistent run,phase_separation_energy,5894220,0.435213722646299,1
+1,single self-consistent run,magnetization_per_volume,211854,0.015642742890070106,1
+1,single self-consistent run,band_gap_direct,5894763,0.43525381634001875,3
+1,single self-consistent run,is_gap_direct,243327,0.017966626540976752,3
+1,single self-consistent run,cbm,123288,0.009103262083467687,1
+1,single self-consistent run,vbm,123288,0.009103262083467687,1
+2,a few extra self-consistent runs,work_function,3730,0.0002754134025317506,2
+2,a few extra self-consistent runs,effective_mass_electron,7324,0.0005407849222902256,3
+2,a few extra self-consistent runs,effective_mass_hole,7309,0.000539677361690232,3
+2,a few extra self-consistent runs,surface_energy,237,1.7499457479899435e-05,1
+2,a few extra self-consistent runs,exfoliation_energy,6395,0.00047219000246395313,3
+2,a few extra self-consistent runs,interlayer_binding_energy,4126,0.0003046530023715826,2
+2,a few extra self-consistent runs,d_band_center,485,3.581112606646087e-05,1
+2,a few extra self-consistent runs,spillage,19113,0.00141125371651189,2
+2,a few extra self-consistent runs,grain_boundary_energy,106,7.826761573288356e-06,1
+2,a few extra self-consistent runs,work_of_separation,106,7.826761573288356e-06,1
+3,linear response or finite differences,bulk_modulus_vrh,196615,0.014517535157849907,6
+3,linear response or finite differences,shear_modulus_vrh,192267,0.014196490258598418,5
+3,linear response or finite differences,youngs_modulus,136108,0.01004985720959558,2
+3,linear response or finite differences,poisson_ratio,195059,0.0144026442049439,5
+3,linear response or finite differences,elastic_anisotropy,24430,0.0018038470305229673,1
+3,linear response or finite differences,bulk_modulus_voigt,156720,0.011571793148733502,2
+3,linear response or finite differences,bulk_modulus_reuss,156660,0.011567362906333527,2
+3,linear response or finite differences,shear_modulus_voigt,155061,0.011449296946374204,2
+3,linear response or finite differences,shear_modulus_reuss,151750,0.011204821403268943,2
+3,linear response or finite differences,sound_velocity_transverse,153763,0.011353456035788089,2
+3,linear response or finite differences,sound_velocity_longitudinal,156645,0.011566255345733533,2
+3,linear response or finite differences,debye_temperature,25997,0.0019195501945356355,2
+3,linear response or finite differences,dielectric_constant_total,154893,0.011436892267654276,5
+3,linear response or finite differences,dielectric_constant_electronic,226290,0.01670865921150398,5
+3,linear response or finite differences,dielectric_constant_ionic,19484,0.0014386473820183993,3
+3,linear response or finite differences,born_effective_charge_max,7558,0.0005580628676501263,1
+3,linear response or finite differences,piezoelectric_modulus,12222,0.000902440376874814,2
+3,linear response or finite differences,phonon_max_frequency,44408,0.0032789700749678236,4
+3,linear response or finite differences,phonon_min_frequency,44432,0.0032807421719278133,4
+3,linear response or finite differences,has_imaginary_phonon,44432,0.0032807421719278133,4
+3,linear response or finite differences,eos_bulk_modulus,8060,0.0005951292290632467,1
+3,linear response or finite differences,bulk_modulus_pressure_derivative,502,3.7066361413120325e-05,1
+4,"anharmonic, transport or beyond-semilocal",lattice_thermal_conductivity,26507,0.0019572072549354194,2
+4,"anharmonic, transport or beyond-semilocal",lattice_thermal_conductivity_particle,7678,0.0005669233524500754,1
+4,"anharmonic, transport or beyond-semilocal",lattice_thermal_conductivity_coherence,7689,0.0005677355635567374,1
+4,"anharmonic, transport or beyond-semilocal",thermal_conductivity,10565,0.0007800918492621837,1
+4,"anharmonic, transport or beyond-semilocal",thermal_expansion,10563,0.0007799441745155179,1
+4,"anharmonic, transport or beyond-semilocal",heat_capacity,23135,0.00170822763205685,2
+4,"anharmonic, transport or beyond-semilocal",seebeck_coefficient,40378,0.0029814054604362004,2
+4,"anharmonic, transport or beyond-semilocal",power_factor,40375,0.0029811839483162013,2
+4,"anharmonic, transport or beyond-semilocal",slme,16815,0.0012415754325928651,2
+4,"anharmonic, transport or beyond-semilocal",shg_coefficient,2566,0.00018946669997224453,1
+4,"anharmonic, transport or beyond-semilocal",birefringence,4796,0.00035412404250463164,1
+4,"anharmonic, transport or beyond-semilocal",refractive_index,19080,0.001408817083191904,3
+4,"anharmonic, transport or beyond-semilocal",gllbsc_derivative_discontinuity,8236,0.0006081246067698386,1
+4,"anharmonic, transport or beyond-semilocal",tc_superconducting,5091,0.0003759060676378398,4
+4,"anharmonic, transport or beyond-semilocal",electron_phonon_coupling,1431,0.0001056612812393928,1
+4,"anharmonic, transport or beyond-semilocal",phonon_log_average_frequency,1431,0.0001056612812393928,1
+4,"anharmonic, transport or beyond-semilocal",curie_temperature,6,4.4302423999745406e-07,1
+4,"anharmonic, transport or beyond-semilocal",migration_barrier,3598,0.0002656668692518066,1

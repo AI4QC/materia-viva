@@ -1,0 +1,12 @@
+# LaTeX build artefacts. si-xr.tex is generated too, but is kept so that
+# main.tex can be compiled without building si.tex first.
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk

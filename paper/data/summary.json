@@ -1,0 +1,17 @@
+{
+  "n_materials": 13543277,
+  "max_pk": 13543277,
+  "n_sources": 54,
+  "n_properties": 166,
+  "pool_dataset": {
+    "candidate": 13186150,
+    "experimental": 357127
+  },
+  "n_source_refs": 17327895,
+  "n_annotated_materials": 12827418,
+  "n_multi_source_materials": 1190447,
+  "n_property_rows": 121620776,
+  "n_materials_with_any_property": 12812918,
+  "n_curves": 1198897,
+  "n_materials_with_curves": 298662
+}

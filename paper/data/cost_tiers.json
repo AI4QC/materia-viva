@@ -1,0 +1,42 @@
+{
+  "1": {
+    "label": "single self-consistent run",
+    "n_properties": 19,
+    "median_coverage": 0.04559280593611133,
+    "max_coverage": 0.854765652360208,
+    "min_coverage": 0.0018141842627895745,
+    "median_materials": 617476,
+    "max_property": "total_energy_per_atom",
+    "max_materials": 11576328
+  },
+  "2": {
+    "label": "a few extra self-consistent runs",
+    "n_properties": 10,
+    "median_coverage": 0.00029003320245166663,
+    "max_coverage": 0.00141125371651189,
+    "min_coverage": 7.826761573288356e-06,
+    "median_materials": 3928,
+    "max_property": "spillage",
+    "max_materials": 19113
+  },
+  "3": {
+    "label": "linear response or finite differences",
+    "n_properties": 22,
+    "median_coverage": 0.010627339306432261,
+    "max_coverage": 0.01670865921150398,
+    "min_coverage": 3.7066361413120325e-05,
+    "median_materials": 143929,
+    "max_property": "dielectric_constant_electronic",
+    "max_materials": 226290
+  },
+  "4": {
+    "label": "anharmonic, transport or beyond-semilocal",
+    "n_properties": 18,
+    "median_coverage": 0.0005879300851632881,
+    "max_coverage": 0.0029814054604362004,
+    "min_coverage": 4.4302423999745406e-07,
+    "median_materials": 7962,
+    "max_property": "seebeck_coefficient",
+    "max_materials": 40378
+  }
+}

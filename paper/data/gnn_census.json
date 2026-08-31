@@ -1,0 +1,68 @@
+{
+  "n_census_tasks": 497,
+  "n_properties_with_data": 151,
+  "tiers": {
+    "T1": {
+      "threshold": 1000000,
+      "regression_tasks": 13,
+      "regression_properties": 13,
+      "classification_tasks": 1,
+      "classification_properties": 1
+    },
+    "T2": {
+      "threshold": 100000,
+      "regression_tasks": 97,
+      "regression_properties": 47,
+      "classification_tasks": 15,
+      "classification_properties": 11
+    },
+    "T3": {
+      "threshold": 10000,
+      "regression_tasks": 161,
+      "regression_properties": 77,
+      "classification_tasks": 31,
+      "classification_properties": 19
+    },
+    "T4": {
+      "threshold": 2000,
+      "regression_tasks": 210,
+      "regression_properties": 97,
+      "classification_tasks": 37,
+      "classification_properties": 24
+    },
+    "T5": {
+      "threshold": 300,
+      "regression_tasks": 249,
+      "regression_properties": 110,
+      "classification_tasks": 40,
+      "classification_properties": 26
+    }
+  },
+  "n_training_sets": 162,
+  "n_labels_total": 93462873,
+  "n_predictable_gated": 871097089,
+  "n_predictable_ungated": 2194010874,
+  "gating_ratio": 2.5186754745314044,
+  "declared_domains": {
+    "pool-wide": 78,
+    "porous": 25,
+    "ion-conducting": 22,
+    "gapped": 15,
+    "pool-wide-biased-labels": 7,
+    "synthesized-only": 5,
+    "framework": 4,
+    "magnetic": 2,
+    "surface-derived": 2,
+    "layered": 2
+  },
+  "share_of_pool_bands": {
+    ">=90%": 35,
+    "50-90%": 22,
+    "10-50%": 36,
+    "1-10%": 39,
+    "<1%": 30
+  },
+  "tasks_below_half_pool": 105,
+  "max_theory_levels": 131,
+  "max_theory_levels_property": "surface_energy"
+}

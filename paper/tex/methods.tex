@@ -1,0 +1,106 @@
+% ======================================================================
+% Methods.
+% Compact by design: what a reader needs to judge the result, with the
+% implementation detail in the Supplementary Information.
+% ======================================================================
+\section{Methods}
+
+\subsection{Sources and their ingestion}
+
+Each of the 54 databases is reached through one adapter emitting a stream of
+records, each carrying the source's native identifier, its property values with
+units and methods, its structure where the licence permits redistribution, and
+any cross-database identifiers the source is authoritative for. Sources that may
+not redistribute structures are marked properties-only in code, so no structure
+of theirs can enter the pool. The complete inventory, with each database's
+licence, contribution and reference routes, is Supplementary
+Table~\ref{si-tab:sources}; the adapter protocol and staging pipeline are
+Supplementary Note~\ref{si-note:pipeline}.
+
+Property names are mapped onto a canonical registry of 166 entries, each with a
+fixed unit and value kind. A source field enters the registry under an existing
+name only when the quantity is the same physical quantity, and otherwise gains
+its own name. Method strings are required to distinguish values that a source
+reports for the same material under different settings, and the loader treats
+(native identifier, property, method) as the uniqueness key. The registry and its
+boundary cases are Supplementary Note~\ref{si-note:provenance}.
+
+\subsection{Identity resolution}
+
+Structures are fingerprinted with the BAWL hasher \cite{ramlaoui2025lemat} under
+the protocol used for the original deduplicated merge, so that fingerprints
+computed here are comparable with those already in the pool: parse, reject cells
+above 500 sites and disordered occupancies, reduce to the primitive cell with
+pymatgen \cite{ong2013python}, reject primitive cells above 300 sites, then hash.
+
+Matching proceeds in two ordered paths against a map holding
+fingerprint-to-material and (source, identifier)-to-material entries. A record is
+looked up first by every authoritative cross-database identifier it carries, and
+then by fingerprint. Chemical formula is never a match criterion. A record
+matching nothing is admitted as a new pool material, and its fingerprint and
+identifiers enter the map, which is the mechanism measured in
+Section~\ref{sec:index}. Enumerated framework libraries, whose siblings are
+indistinguishable to a bonding-graph fingerprint, are detected at the level of
+the source and admitted under a composite key adding the cell volume per site
+(Supplementary Note~\ref{si-note:fingerprint}).
+
+Every match records the material, source, native identifier and route taken.
+Values are never overwritten or averaged: several databases reporting one
+property for one material coexist as separate rows.
+
+\subsection{Audit}
+
+Completeness is verified by three checks applied to each source independently:
+the row count the loader reported must equal the row count the database holds; every
+staged row must be either loaded or accounted for as an identifier no pool
+material corresponds to; and every property name present in the staged data must
+be present in the database for that source. The third catches a field the adapter
+maps but the loader never lands, which leaves row totals plausible while an
+entire quantity goes missing. The completed database passes all three for all 54
+sources (Supplementary Note~\ref{si-note:audit}).
+
+Every aggregate statistic reported here is computed with a single grouped scan
+over the property table. The natural alternative, a correlated subquery per
+source, rescans 121 million rows 54 times and evaluates each source against a
+different snapshot.
+
+\subsection{Cross-database comparison}
+
+Agreement was computed for eight properties whose values are comparable between
+databases once the method is fixed; extensive and convention-dependent quantities
+were excluded, because two databases disagreeing on a total energy reflects a
+different reference state rather than a different answer. Within each material,
+each source was reduced to the median of its own values, so a source reporting
+several methods is counted once, and the spread was taken as the range across
+sources. Tolerances, the excluded quantities and the full pair table are
+Supplementary Note~\ref{si-note:agreement} and Table~\ref{si-tab:pairs}.
+
+The 69 general-purpose properties of Fig.~\ref{fig:landscape}b were assigned by
+hand to four tiers by the calculation each requires, excluding properties whose
+domain is one material family. The assignment is listed in full in Supplementary
+Table~\ref{si-tab:tiers} so that it can be disputed item by item.
+
+\subsection{Census and training-set construction}
+
+A task is defined as one property at one level of theory, since method strings
+collapsed onto a single name denote different physical quantities. Under that
+definition the populated properties yield 497 candidate tasks, and a default
+policy keeping the largest level of theory per property realises 162 of them as
+training sets over 93{,}462{,}873 labels. Condition-dependent properties are
+split by condition rather than reduced to a median; cross-database spread is
+retained beside the resolved label; and splits are taken over chemical systems,
+falling back through formula to random where a task occupies too few systems to
+yield non-empty folds. Each task carries a declared applicability domain and an
+empirical one measured from its training set, and predictions are admitted only
+inside both. The full protocol, the four constraints it addresses and the domain
+assignments are Supplementary Note~\ref{si-note:census}.
+
+\subsection{Software and reproducibility}
+
+The pipeline is implemented in Python; structure handling uses pymatgen
+\cite{ong2013python} and symmetry analysis uses spglib \cite{togo2024spglib}. The
+database is one SQLite file with two side-car binary blobs holding structures
+and spectra. Every figure is produced by a script reading
+comma-separated data files, and each of those files is produced by a named
+extraction script reading the published database read-only. No number quoted in this
+work was transcribed by hand.

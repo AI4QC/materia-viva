@@ -1,0 +1,112 @@
+\documentclass[pdflatex,sn-nature]{sn-jnl}% Springer Nature, Nature Portfolio reference style
+
+\usepackage{graphicx}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{booktabs}%
+\usepackage{xcolor}%
+\usepackage{float}%      [H] figure placement
+\usepackage{placeins}%   \FloatBarrier
+\usepackage{url}%
+\usepackage{siunitx}%
+
+\input{layout_tune.tex}
+
+% SI cross-references, generated from si.aux by gen-si-xr.py
+\usepackage{xr-hyper}
+\input{si-xr}
+
+\AtBeginDocument{\hypersetup{colorlinks=true,
+  linkcolor={blue!55!black}, citecolor={blue!55!black},
+  urlcolor={blue!55!black}, filecolor={blue!55!black},
+  breaklinks=true, bookmarksnumbered=true, pdfstartview={FitH}}}
+
+% Placeholders for the two sections whose numbers are not yet in hand.
+% They render as visible, unmissable blocks rather than silently empty space.
+\newcommand{\PENDINGBLOCK}[2]{%
+  \par\medskip\noindent\fcolorbox{orange!70!black}{orange!6}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+      \textbf{[#1]}\\[2pt]\small #2}}\par\medskip}
+
+\newcommand{\PENDINGAGREEMENT}{\PENDINGBLOCK{Subsection pending: cross-database
+  agreement}{The cross-source value scan is still running; this subsection and
+  Fig.~\ref{fig:redundancy}d--f are written from its output.}}
+
+\newcommand{\PENDINGGNN}{\PENDINGBLOCK{In progress: the trained models}{%
+  The models themselves are still training. This block becomes the closing
+  passage of Section~\ref{sec:completion} and adds panels to
+  Fig.~\ref{fig:completion}: the multi-task backbone over the thirteen tier-1
+  tasks and the fine-tuned heads over the smaller ones, held-out accuracy per
+  task set against the multi-source noise floor of
+  Section~\ref{sec:redundancy}, the coverage the completed layer reaches for
+  the properties of Fig.~\ref{fig:landscape}b, and the boundary within which a
+  predicted entry may be used. It is written when the held-out numbers exist,
+  so that no claim precedes its evidence.}}
+
+\raggedbottom
+
+\begin{document}
+
+\input{front_meta.tex}
+
+\author[1,2]{\fnm{Zhilong}\sur{Song}}
+
+\author*[1,2,3]{\fnm{Lixue}\sur{Cheng}}\email{lixuecheng@ust.hk}
+
+\affil[1]{\orgdiv{Department of Chemistry}, \orgname{Hong Kong University of Science
+and Technology}, \orgaddress{\city{Kowloon}, \state{Hong Kong 999077},
+\country{China}}}
+
+\affil[2]{\orgdiv{IAS Center for AI for Scientific Discoveries}, \orgname{Hong Kong
+University of Science and Technology}, \orgaddress{\city{Kowloon},
+\state{Hong Kong 999077}, \country{China}}}
+
+\affil[3]{\orgdiv{Department of Chemical and Biological Engineering}, \orgname{Hong
+Kong University of Science and Technology}, \orgaddress{\city{Kowloon},
+\state{Hong Kong 999077}, \country{China}}}
+
+\keywords{materials databases, data integration, crystal structure deduplication,
+provenance, cross-database benchmarking, machine learning for materials}
+
+\maketitle
+
+\input{front_body.tex}
+
+\input{body.tex}
+
+\input{discussion.tex}
+
+\input{methods.tex}
+
+\backmatter
+
+\bmhead{Acknowledgements}
+We thank the maintainers of the 54 source databases integrated here. This work
+redistributes none of their data beyond what their licences permit, and depends
+entirely on their decision to publish in the first place.
+
+\section*{Declarations}
+
+\bmhead{Competing interests} The authors declare no competing interests.
+
+\bmhead{Data availability}
+The unified database is published as a versioned dataset on the Hugging Face Hub
+together with a development slice sized for interactive work. Four of the 54
+sources restrict redistribution: AFLOW's terms are academic and
+non-commercial, ELEMENTA and GNoME are CC BY-NC 4.0, and Inorganic Crystal
+Structure Database records may be held only by a subscriber to the FIZ Karlsruhe
+licence. Those sources are searchable in a database built locally from the
+published pipeline and are filtered out before any public release. The database
+contains no ICSD structure. The comma-separated data files behind every figure
+are provided as source data.
+
+\bmhead{Code availability}
+The acquisition adapters, the fingerprinting and matching pipeline, the loader,
+the completeness audit, the extraction scripts and the figure scripts are
+available in the repository accompanying this work.
+
+\begingroup
+\linespread{1.60}\selectfont
+\bibliography{refs}
+\endgroup
+
+\end{document}

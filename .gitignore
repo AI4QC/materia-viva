@@ -154,3 +154,6 @@ token-usage*.json
 *_credentials.json
 !*.example
 !*.example.*
+
+# Recovered CGTNet working tree: 177 MB of checkpoints, kept out of the repo
+/cgtnet_recovered/

@@ -1,0 +1,181 @@
+[
+ {
+  "abundance": 6.7e-08,
+  "initial_3D_spg": "R-3m",
+  "binding_energy_per_substructure_per_unit_area_rvv10": {
+   "value": 0.036647614546939,
+   "key": "binding_energy_per_substructure_per_unit_area",
+   "uuid": "c5271c4c-7225-4e2a-9ff0-d9b966105629"
+  },
+  "number_of_atoms": 7,
+  "bands_uuid": "c85e8621-9638-4d91-9f28-f791c1139b1a",
+  "initial_3D_bulk_structure_uuid": "a194b8ca-7ef6-4950-87b6-47a233233da9",
+  "band_gap": {
+   "key": "band_gap",
+   "value": 1.1870632781844077,
+   "uuid": "32a4e0bd-a078-4793-8788-75d8a2fa37a0"
+  },
+  "initial_3D_formula": "Na4HgP2",
+  "point_group": "-3m",
+  "binding_energy_per_substructure_per_unit_area_df2": {
+   "value": 0.0324667541373471,
+   "key": "binding_energy_per_substructure_per_unit_area",
+   "uuid": "845d27c0-f1b3-4a6e-be43-aef63a7808ba"
+  },
+  "formula": "Na4HgP2",
+  "all_3D_parents": [
+   {
+    "db_id": "67260",
+    "binding_energy_per_substructure_per_unit_area_rvv10": {
+     "value": 0.036647614546939,
+     "key": "binding_energy_per_substructure_per_unit_area",
+     "uuid": "c5271c4c-7225-4e2a-9ff0-d9b966105629"
+    },
+    "uuid": "a194b8ca-7ef6-4950-87b6-47a233233da9",
+    "binding_energy_per_substructure_per_unit_area_df2": {
+     "value": 0.0324667541373471,
+     "key": "binding_energy_per_substructure_per_unit_area",
+     "uuid": "845d27c0-f1b3-4a6e-be43-aef63a7808ba"
+    },
+    "source_db": "ICSD",
+    "formula": "Na4HgP2",
+    "spg": "R-3m"
+   }
+  ],
+  "initial_3D_source_db": "ICSD",
+  "relaxed_3D_bulk_structure_rvv10_uuid": "c3fb66af-7a2f-4e98-b193-2c544d324306",
+  "space_group": "P-3m1 (164)",
+  "number_of_species": 3,
+  "as_extracted_2D_structure_uuid": "1675f933-693c-4e58-a7f7-e164956f3c6b",
+  "relaxed_3D_bulk_structure_df2_uuid": "bec69e02-9b9b-4594-b93e-965fd790d0d5",
+  "prototype": "As2CdK4",
+  "initial_3D_db_id": "67260",
+  "optimized_2D_structure_uuid": "aeaa0d21-ef60-427a-acaa-8f038f40057c"
+ },
+ {
+  "abundance": 5.0000000000000004e-08,
+  "initial_3D_spg": "P2_1/c",
+  "band_gap": {
+   "key": "band_gap",
+   "value": 4.006325670648691,
+   "uuid": "f14bb2a8-9d7c-4727-9570-ee071f6e7531"
+  },
+  "number_of_atoms": 38,
+  "bands_uuid": "019ef4b9-b184-4643-9fb7-fa21c8d3a058",
+  "initial_3D_bulk_structure_uuid": "bea3c00d-bb9d-4c81-a06d-e18145efe657",
+  "initial_3D_formula": "Zn2In4Se8O24",
+  "point_group": "m",
+  "binding_energy_per_substructure_per_unit_area_df2": {
+   "value": 0.0149816350662265,
+   "key": "binding_energy_per_substructure_per_unit_area",
+   "uuid": "bd666977-a210-457f-a860-2b1a9211b8a3"
+  },
+  "formula": "ZnIn2Se4O12",
+  "all_3D_parents": [
+   {
+    "db_id": "263061",
+    "uuid": "bea3c00d-bb9d-4c81-a06d-e18145efe657",
+    "binding_energy_per_substructure_per_unit_area_df2": {
+     "value": 0.0149816350662265,
+     "key": "binding_energy_per_substructure_per_unit_area",
+     "uuid": "bd666977-a210-457f-a860-2b1a9211b8a3"
+    },
+    "source_db": "ICSD",
+    "formula": "Zn2In4Se8O24",
+    "spg": "P2_1/c"
+   }
+  ],
+  "initial_3D_source_db": "ICSD",
+  "space_group": "Pc (7)",
+  "number_of_species": 4,
+  "as_extracted_2D_structure_uuid": "47e2d50c-9387-4500-aab8-97bffca3fce6",
+  "relaxed_3D_bulk_structure_df2_uuid": "098afd24-f620-4c5d-9bf6-47276c13219c",
+  "prototype": "In2O12Se4Zn",
+  "initial_3D_db_id": "263061",
+  "optimized_2D_structure_uuid": "47df4485-5c81-4597-921b-70f06df6a848"
+ },
+ {
+  "abundance": 9.9e-10,
+  "initial_3D_spg": "P6_3/mmc",
+  "band_gap": {
+   "key": "band_gap",
+   "value": 0,
+   "uuid": "5f1d60d4-12b2-4f3d-ab4e-a40febcfed96"
+  },
+  "number_of_atoms": 6,
+  "bands_uuid": "c649fa92-26b9-4847-8596-225a26755da1",
+  "initial_3D_bulk_structure_uuid": "a9f7610d-46f6-44a4-ac9d-6f48baafe68b",
+  "point_group": "-6m2",
+  "space_group": "P-6m2",
+  "all_3D_parents": [
+   {
+    "db_id": "S1947023",
+    "uuid": "a9f7610d-46f6-44a4-ac9d-6f48baafe68b",
+    "binding_energy_per_substructure_per_unit_area_df2": {
+     "key": "binding_energy_per_substructure_per_unit_area",
+     "index_in_3D_parents": 1,
+     "value": 0.03265215159910664,
+     "uuid": "a97c7f22-21fc-4625-a313-9fd109036258"
+    },
+    "source_db": "mpds",
+    "formula": "Ge2Ni6Te4",
+    "spg": "P6_3/mmc"
+   }
+  ],
+  "initial_3D_source_db": "mpds",
+  "number_of_species": 3,
+  "as_extracted_2D_structure_uuid": "cfeb65b7-e55e-47fe-a60e-e63973b0a980",
+  "formula": "Ni3GeTe2",
+  "prototype": "GeNi3Te2",
+  "initial_3D_db_id": "S1947023",
+  "optimized_2D_structure_uuid": "56589d94-fd12-4319-9cfb-e81af2e30875"
+ },
+ {
+  "abundance": 2.9999999999999997e-06,
+  "initial_3D_spg": "R-3m",
+  "binding_energy_per_substructure_per_unit_area_rvv10": {
+   "value": 0.0175106471721727,
+   "index_in_3D_parents": 0,
+   "key": "binding_energy_per_substructure_per_unit_area",
+   "uuid": "d373efed-9377-46ed-86c5-c663cb5e2b01"
+  },
+  "number_of_atoms": 4,
+  "initial_3D_bulk_structure_uuid": "6d859cde-407f-4076-af91-5342f1ec9a92",
+  "initial_3D_formula": "La2Br2",
+  "point_group": "-3m",
+  "binding_energy_per_substructure_per_unit_area_df2": {
+   "value": 0.011673787712445,
+   "index_in_3D_parents": 0,
+   "key": "binding_energy_per_substructure_per_unit_area",
+   "uuid": "64d52efe-7e4b-47e2-b36b-9b2c20c9a01c"
+  },
+  "formula": "LaBr",
+  "all_3D_parents": [
+   {
+    "db_id": "23354",
+    "binding_energy_per_substructure_per_unit_area_rvv10": {
+     "value": 0.0175106471721727,
+     "key": "binding_energy_per_substructure_per_unit_area",
+     "uuid": "d373efed-9377-46ed-86c5-c663cb5e2b01"
+    },
+    "uuid": "6d859cde-407f-4076-af91-5342f1ec9a92",
+    "binding_energy_per_substructure_per_unit_area_df2": {
+     "value": 0.011673787712445,
+     "key": "binding_energy_per_substructure_per_unit_area",
+     "uuid": "64d52efe-7e4b-47e2-b36b-9b2c20c9a01c"
+    },
+    "source_db": "ICSD",
+    "formula": "La2Br2",
+    "spg": "R-3m"
+   }
+  ],
+  "initial_3D_source_db": "ICSD",
+  "relaxed_3D_bulk_structure_rvv10_uuid": "5a872291-a019-4e9c-865c-dc3e71c24570",
+  "space_group": "P-3m1",
+  "number_of_species": 2,
+  "as_extracted_2D_structure_uuid": "3165ccb6-8f44-41df-a5d2-87ffc89fea21",
+  "relaxed_3D_bulk_structure_df2_uuid": "54d29147-41af-4353-be90-fc6c96e2d75b",
+  "prototype": "ZrCl",
+  "initial_3D_db_id": "23354"
+ }
+]

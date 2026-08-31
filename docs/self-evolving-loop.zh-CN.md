@@ -831,10 +831,10 @@ backend/tests/test_agent_detectors.py`。
 
 ## 附录：已验证但未落地的发现
 
-以下都是跑实验时核实过的事实。它们的实现改动已被撤回（属于数据侧，不属于智能体系统），但**问题依然
-存在**，记在这里以免知识随代码一起丢掉。
+以下都是跑实验时核实过的事实。它们的实现改动曾被撤回（属于数据侧，不属于智能体系统），记在这里以免
+知识随代码一起丢掉。**第一条已经修复**（见下），其余仍然存在。
 
-前两条现在**有探测器也有主人**:`src/agents/detectors.py` 的 `unit_disagreements()` 会随时重新算出
+单位类的发现**有探测器也有主人**:`src/agents/detectors.py` 的 `unit_disagreements()` 会随时重新算出
 它们，而 `cleaner` 角色负责判断与上报。注意它**不得**直接改适配器代码——能检查适配器改动的只有零 diff
 的 golden sample，而那个框架不存在（第 5 节），提议一份没人能检查的代码正是第 1.8 节禁止的事。
 
@@ -844,7 +844,12 @@ backend/tests/test_agent_detectors.py`。
 转换。方向由上游数据定：`structure_2d.json` 里 2,865 个值的 median 是 0.0251，按 eV/Å² 读即 25 meV/Å²，
 正是层间结合能该有的量级；按 meV/Å² 读则比范德华力还弱两个数量级。**而且这个错被静默隐藏**：
 `property_defs` 由注册表预先播种、`material_properties` 没有 unit 列，所以适配器给的单位被丢弃，发布
-出去的行标着 `meV/Å²`、装的是 eV/Å² 的数。修法与 `2dmatpedia` 处理 exfoliation 同型（`* 1000.0`）。
+出去的行标着 `meV/Å²`、装的是 eV/Å² 的数。
+
+**已修复。** `mc2d.py` 现在乘 1000 并发出 `meV/Å²`，与 `2dmatpedia` 处理 exfoliation 同型。守住它的是
+黄金样本（[`backend/tests/golden/mc2d`](../backend/tests/golden/mc2d)）而**不是**静态审计：标签一改正，
+静态检查就满足了；即使日后有人删掉 `* 1000.0` 而保留正确标签，静态检查**照样满足**。只有带真实数值的
+固定样本能抓住这种回退。样本的四条记录按 CC BY 4.0 抄自上游记录，每个分支一条。
 
 **6 处磁化归一化写在了单位里而非 method 串里。** 注册表刻意把 `total_magnetization` 的单位保持中性
 （`μB`），并在注释里说 per cell / per f.u. 应记在 method 串。`alexandria` 与 `materials_project` 已

@@ -1,0 +1,103 @@
+{
+  "authored_by": "recorded-from-adapter",
+  "records": [
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "icsd",
+          "icsd-155950"
+        ]
+      ],
+      "native_id": "A1",
+      "properties": [
+        {
+          "method": "experiment RT bulk",
+          "name": "ionic_conductivity",
+          "unit": "S/cm",
+          "value": 0.0034
+        },
+        {
+          "method": "experiment RT total",
+          "name": "ionic_conductivity",
+          "unit": "S/cm",
+          "value": 0.0012
+        },
+        {
+          "method": "experiment",
+          "name": "spacegroup_number",
+          "unit": null,
+          "value": 62
+        }
+      ],
+      "structure": null
+    },
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "icsd",
+          "icsd-155951"
+        ]
+      ],
+      "native_id": "A2",
+      "properties": [
+        {
+          "method": "experiment RT total",
+          "name": "ionic_conductivity",
+          "unit": "S/cm",
+          "value": 5e-05
+        }
+      ],
+      "structure": null
+    },
+    {
+      "experimental": false,
+      "match_ids": [
+        [
+          "icsd",
+          "icsd-111757"
+        ]
+      ],
+      "native_id": "A3",
+      "properties": [
+        {
+          "method": "experiment RT total",
+          "name": "ionic_conductivity",
+          "unit": "S/cm",
+          "value": 7e-06
+        }
+      ],
+      "structure": null
+    },
+    {
+      "experimental": false,
+      "match_ids": [],
+      "native_id": "A7",
+      "properties": [
+        {
+          "method": "experiment RT total",
+          "name": "ionic_conductivity",
+          "unit": "S/cm",
+          "value": 0.0002
+        }
+      ],
+      "structure": null
+    },
+    {
+      "experimental": false,
+      "match_ids": [],
+      "native_id": "A8",
+      "properties": [
+        {
+          "method": "experiment",
+          "name": "spacegroup_number",
+          "unit": null,
+          "value": 14
+        }
+      ],
+      "structure": null
+    }
+  ],
+  "source_key": "obelix"
+}

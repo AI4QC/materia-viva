@@ -1011,10 +1011,10 @@ Same rule: **verification first, then the agent that produces work for it.**
 ## Appendix: findings verified but not landed
 
 Each of these was verified while running experiments. The changes that acted on them were reverted
-as data-side work rather than agent system, but **the problems are still there**; they are recorded
-so the knowledge does not go with the code.
+as data-side work rather than agent system; they are recorded so the knowledge does not go with the
+code. **The first has since been fixed** — see below — and the rest are still there.
 
-The first two now have both a detector and an owner: `unit_disagreements()` in
+The unit findings have both a detector and an owner: `unit_disagreements()` in
 `src/agents/detectors.py` recomputes them on demand, and the `cleaner` role judges and reports them.
 It may **not** edit the adapters — the only thing that can check a change to one is a zero-diff
 golden sample, and that framework does not exist (section 5), so proposing code nothing can check is
@@ -1029,8 +1029,14 @@ conversion between them. The upstream data settles which way it goes: across the
 binding; read as meV/Å² they would sit a hundredfold below van der Waals. **And the error is hidden
 by the very mechanism that should surface it**: `property_defs` is seeded from the registry and
 `material_properties` has no unit column, so the unit an adapter passes is discarded and the rows are
-published as `meV/Å²` carrying eV/Å² numbers. The fix mirrors what `2dmatpedia` already does for
-exfoliation energy (`* 1000.0`).
+published as `meV/Å²` carrying eV/Å² numbers.
+
+**Fixed.** `mc2d.py` now scales by 1000 and emits `meV/Å²`, mirroring what `2dmatpedia` already does
+for exfoliation energy. What holds it is a golden sample
+([`backend/tests/golden/mc2d`](../backend/tests/golden/mc2d)), not the static audit: once the label
+is corrected the static pass is satisfied, and it would stay satisfied if someone later dropped the
+`* 1000.0` while leaving the label right. Only a fixture carrying the numbers catches that. The
+sample's four records were copied from the upstream record under CC BY 4.0, one per branch.
 
 **Six magnetisation normalisations live in the unit instead of the method string.** The registry
 deliberately keeps `total_magnetization`'s unit neutral (`μB`) and says in its own comment that

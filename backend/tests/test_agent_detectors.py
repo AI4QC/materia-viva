@@ -22,14 +22,27 @@ def test_mentions_of_matches_whole_words_only(tmp_path):
     assert mentions_of("CAMD", catalog=catalog, adapters=adapters) == []
 
 
-def test_unit_disagreements_still_finds_the_thousandfold_error():
-    # mc2d passes eV/Å² through under a property the registry declares as meV/Å²,
-    # and the adapter's unit is discarded on the way into property_defs, so the
-    # published rows carry the wrong magnitude under the right label
-    found = unit_disagreements()
-    assert ("mc2d", "interlayer_binding_energy", "eV/Å²", "meV/Å²") in found
-    # and the magnetisation normalisations that live in a unit that gets dropped
-    assert sum(1 for a in found if a[1] == "total_magnetization") >= 5
+def test_unit_disagreements_finds_an_adapter_that_contradicts_the_registry(tmp_path):
+    # Against a fixture rather than against whichever bug the tree happens to
+    # hold: this used to assert mc2d's factor of 1000 was present, so fixing
+    # that broke the test for the detector. What is under test is the detector.
+    adapters = tmp_path / "adapters"
+    adapters.mkdir()
+    (adapters / "wrong.py").write_text(
+        'PropertyValue("interlayer_binding_energy", x, "eV/Å²", "m")\n', encoding="utf-8"
+    )
+    (adapters / "right.py").write_text(
+        'PropertyValue("interlayer_binding_energy", x, "meV/Å²", "m")\n', encoding="utf-8"
+    )
+    found = unit_disagreements(adapters=adapters)
+    assert found == [("wrong", "interlayer_binding_energy", "eV/Å²", "meV/Å²")]
+
+
+def test_mc2d_no_longer_contradicts_the_registry():
+    # the factor of 1000 this detector was built to find. The golden sample in
+    # backend/tests/golden/mc2d holds the conversion itself; this holds the
+    # label, which is the half a static pass can see.
+    assert not [d for d in unit_disagreements() if d[0] == "mc2d"]
 
 
 def test_stale_upstream_ids_does_not_mistake_a_count_for_a_record():

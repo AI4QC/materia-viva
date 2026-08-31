@@ -34,7 +34,9 @@ src/agents/
 **1. A role is code, not a document.** `base.Role` refuses at construction to build a role holding a
 tool that can edit a file, able to fetch without being told to use the shared client, or proposing a
 catalog change without running the gate on itself. The markdown the harness reads is rendered from
-the object, so the definition and what runs cannot drift.
+the object, so the definition and what runs cannot drift, and `claude --agents` consumes exactly the
+JSON a `Role` serialises to, so nothing is transcribed by hand between the definition, the tests and
+the invocation.
 
 *Cost*: the prompts are now inside Python string literals, which is a worse place to write prose
 than a markdown file. *What would overturn it*: if the constraints turn out to be better expressed

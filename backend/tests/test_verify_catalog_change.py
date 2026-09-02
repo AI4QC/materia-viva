@@ -252,3 +252,32 @@ def test_many_sources_differing_reads_as_a_stale_baseline_not_as_edits():
     few_before = _catalog(*({**_source(i), "state": "acquired"} for i in ids[:2]))
     few_after = _catalog(*({**_source(i), "state": "integrated"} for i in ids[:2]))
     assert len(out_of_scope_edits(few_before, few_after)) == 2
+
+
+def test_a_diff_that_downloads_nothing_is_not_refused_for_lack_of_room():
+    """CI has 12 GiB free, under the 50 GiB reserve, and refused every proposal.
+
+    `ensure_capacity` is also the pre-flight for a streaming download of unknown
+    size, where `expected_bytes=0` asks "is there room at all" and refusing is
+    correct — five acquisition scripts rely on that. A catalog diff adding no
+    download is the other case: it cannot take the disk anywhere.
+    """
+    catalog = {"schema_version": 1, "sources": []}
+    report = verify(catalog, catalog, _StubPoller(raises=AssertionError("must not be called")),
+                    free_bytes=1)
+
+    assert report["expected_bytes"] == 0
+    assert not [problem for problem in report["problems"] if "reserve" in problem]
+
+
+def test_a_diff_that_does_download_still_has_to_fit():
+    huge = 200 * 1024**3
+    before = {"schema_version": 1, "sources": [_source("s1")]}
+    after = {"schema_version": 1, "sources": [
+        _source("s1", downloads=[_dl("big.tar", "https://h/records/1/files/big.tar/content", huge)]),
+    ]}
+
+    report = verify(before, after, _StubPoller({"content-length": str(huge)}),
+                    free_bytes=10 * 1024**3)
+
+    assert [problem for problem in report["problems"] if "reserve" in problem]

@@ -319,10 +319,17 @@ def verify(before: dict[str, Any], after: dict[str, Any], poller: PolitePoller,
 
     expected = sum(e.get("bytes") or 0 for e in proposed)
     report["expected_bytes"] = expected
-    try:
-        ensure_capacity(available_bytes=free_bytes, expected_bytes=expected)
-    except CapacityError as error:
-        report["problems"].append(str(error))
+    # Only when the diff actually asks for bytes. `ensure_capacity` is also the
+    # pre-flight for a streaming download of unknown size, where `expected=0`
+    # means "check the floor before I start" and refusing is the point — but a
+    # diff that adds no download cannot take the disk anywhere, and refusing one
+    # on a small machine made the gate unusable for reasons the diff did not
+    # cause. CI has 12 GiB free and was refusing every proposal.
+    if expected:
+        try:
+            ensure_capacity(available_bytes=free_bytes, expected_bytes=expected)
+        except CapacityError as error:
+            report["problems"].append(str(error))
     return report
 
 

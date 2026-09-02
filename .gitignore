@@ -13,14 +13,19 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Python packaging and build artifacts
+# Python packaging and build artifacts.
+# `lib/` and `lib64/` are anchored to the repository root: without the leading
+# slash Git matches them at any depth, and `frontend/src/lib/` was silently
+# never staged — CI failed on an import of a file that only existed on one
+# laptop. The rest are left unanchored, since a `dist/` or `build/` anywhere is
+# still a build artifact.
 build/
 dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/

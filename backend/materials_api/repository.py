@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sqlite3
 from dataclasses import dataclass, field
+
+from .formula import sort_key
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -52,7 +55,34 @@ MATERIAL_FAMILIES = (
     "2d-material", "1d-material", "carbon-allotrope",
 )
 
-INSERT_COLUMNS = PUBLIC_COLUMNS + ("blob_offset", "blob_length")
+INSERT_COLUMNS = PUBLIC_COLUMNS + ("formula_sort", "blob_offset", "blob_length")
+
+
+#: One element symbol followed by an optional count, e.g. `Cd`, `O2`, `Fe0.5`.
+_FORMULA_TERM = re.compile(r"([A-Z][a-z]?)(\d+(?:\.\d+)?)?")
+
+
+def explicit_and_implicit_counts(formula: str) -> set[str]:
+    """Both spellings of a formula: `CdS` and `Cd1S1`.
+
+    Indexed formulas spell every count out, so `CdS` matched nothing and formula
+    search was unusable for any compound carrying a 1 — which is most of them.
+    Rather than reindex, a search tries both spellings.
+
+    Counts other than 1 are never touched: `Ag2I2` is a cell holding two formula
+    units and is a different record from `AgI`, so nothing here reduces a
+    formula to its lowest terms.
+    """
+    term = formula.strip()
+    matched = list(_FORMULA_TERM.finditer(term))
+    if not matched or "".join(m.group(0) for m in matched) != term:
+        return {term}  # not a formula we can read; match it as typed
+
+    explicit, implicit = [], []
+    for element, count in ((m.group(1), m.group(2)) for m in matched):
+        explicit.append(f"{element}{count or '1'}")
+        implicit.append(element if count in (None, "1") else f"{element}{count}")
+    return {"".join(explicit), "".join(implicit)}
 
 
 @dataclass(frozen=True)
@@ -139,6 +169,8 @@ class MaterialRepository:
         missing = {"material_id", "formula", "chemical_system", "dataset", "elements"} - record.keys()
         if missing:
             raise ValueError(f"missing material fields: {', '.join(sorted(missing))}")
+        # derived here rather than asked of the caller, so every writer gets it
+        record = {**record, "formula_sort": sort_key(str(record["formula"]))}
         values = [record.get(column) for column in INSERT_COLUMNS]
         placeholders = ", ".join("?" for _ in INSERT_COLUMNS)
         cursor = self.connection.execute(
@@ -214,6 +246,21 @@ class MaterialRepository:
             return row["fmt"], reader.read(
                 int(row["blob_offset"]), int(row["blob_length"])
             )
+
+    def _order_by(self, sort: str) -> str:
+        """The sort expression, preferring the padded key when the index carries it.
+
+        `formula_sort` arrived after some indexes were built. Falling back keeps
+        those readable — misordered as before, but working — instead of failing
+        on a missing column.
+        """
+        if sort == "formula" and self._has_column("materials", "formula_sort"):
+            return "m.formula_sort"
+        return SORT_COLUMNS[sort]
+
+    def _has_column(self, table: str, column: str) -> bool:
+        return any(row[1] == column
+                   for row in self.connection.execute(f"PRAGMA table_info({table})"))
 
     def _has_table(self, name: str) -> bool:
         return self.connection.execute(
@@ -292,7 +339,7 @@ class MaterialRepository:
         rows = self.connection.execute(
             f"SELECT {', '.join('m.' + column for column in PUBLIC_COLUMNS)} "
             f"FROM materials m WHERE {where_sql} "
-            f"ORDER BY {SORT_COLUMNS[query.sort]} {direction.upper()}, m.pk ASC "
+            f"ORDER BY {self._order_by(query.sort)} {direction.upper()}, m.pk ASC "
             "LIMIT ? OFFSET ?",
             (*params, query.page_size, offset),
         ).fetchall()
@@ -423,8 +470,10 @@ class MaterialRepository:
                 where.append("m.chemical_system = ?")
                 params.append(chemical_system)
             else:
-                where.append("m.formula = ? COLLATE NOCASE")
-                params.append(term)
+                spellings = sorted(explicit_and_implicit_counts(term))
+                placeholders = ", ".join("?" for _ in spellings)
+                where.append(f"m.formula IN ({placeholders}) COLLATE NOCASE")
+                params.extend(spellings)
         self._add_range(where, params, "m.pbes_gap", query.gap_min, query.gap_max, "gap")
         self._add_range(where, params, "m.density", query.density_min, query.density_max, "density")
         self._add_range(where, params, "m.volume", query.volume_min, query.volume_max, "volume")

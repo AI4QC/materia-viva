@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { DEFAULT_QUERY, parseQuery, serializeQuery } from './query'
+import { DEFAULT_QUERY, SORT_KEYS, parseQuery, serializeQuery } from './query'
 
 
 describe('query URL state', () => {
@@ -36,6 +36,7 @@ describe('query URL state', () => {
 
   it('omits defaults and round-trips supported filters', () => {
     expect(serializeQuery(DEFAULT_QUERY).toString()).toBe('')
+    expect(DEFAULT_QUERY.pageSize).toBe(12)
 
     const parsed = parseQuery(new URLSearchParams(
       'elements=Fe,O&crystal_systems=cubic,trigonal&n_atoms_min=2&page_size=48&sort=density&direction=desc',
@@ -47,5 +48,45 @@ describe('query URL state', () => {
     expect(parsed.pageSize).toBe(48)
     expect(parsed.sort).toBe('density')
     expect(parsed.direction).toBe('desc')
+  })
+
+  it('normalizes unsafe address-bar filters before they reach the API', () => {
+    const parsed = parseQuery(new URLSearchParams(
+      'elements=fe,NotAnElement&exclude=Fe,O&crystal_systems=cubic,wrong&material_families=mof,wrong&has_properties=density,wrong&page_size=999',
+    ))
+
+    expect(parsed.includedElements).toEqual(['Fe'])
+    expect(parsed.excludedElements).toEqual(['O'])
+    expect(parsed.crystalSystems).toEqual(['cubic'])
+    expect(parsed.materialFamilies).toEqual(['mof'])
+    expect(parsed.hasProperties).toEqual(['density'])
+    expect(parsed.pageSize).toBe(100)
+  })
+})
+
+describe('sort keys from the address bar', () => {
+  it('keeps a key the API will accept', () => {
+    expect(parseQuery(new URLSearchParams('sort=density')).sort).toBe('density')
+  })
+
+  it('falls back on one it will not, rather than leaving a dead Retry button', () => {
+    // an unknown key reached the API, came back 422, and the page offered a
+    // "Try again" that could never succeed because the key was still in state
+    for (const bad of ['garbage', 'DROP TABLE materials', '', 'Formula']) {
+      expect(parseQuery(new URLSearchParams(`sort=${encodeURIComponent(bad)}`)).sort)
+        .toBe('material_id')
+    }
+  })
+
+  it('validates direction the same way, as it already did', () => {
+    expect(parseQuery(new URLSearchParams('direction=desc')).direction).toBe('desc')
+    expect(parseQuery(new URLSearchParams('direction=sideways')).direction).toBe('asc')
+  })
+
+  it('offers every key the sort control can produce', () => {
+    // the dropdown and the parser drifting apart is how this got through
+    for (const key of SORT_KEYS) {
+      expect(parseQuery(new URLSearchParams(`sort=${key}`)).sort).toBe(key)
+    }
   })
 })

@@ -1,37 +1,16 @@
 import { ChevronDown, Filter, RotateCcw, Search } from 'lucide-react'
 
 import { useI18n, type TranslationKey } from '../i18n'
-import type { MaterialQuery } from '../lib/query'
+import { CRYSTAL_SYSTEMS, MATERIAL_FAMILIES, PROPERTY_OPTIONS, type MaterialQuery } from '../lib/query'
 
 interface AdvancedFiltersProps {
   query: MaterialQuery
   onChange: (query: MaterialQuery) => void
-  onApply: () => void
 }
 
-const CRYSTAL_SYSTEMS = [
-  'triclinic', 'monoclinic', 'orthorhombic', 'tetragonal', 'trigonal', 'hexagonal', 'cubic',
-] as const
-
-const PROPERTY_OPTIONS = [
-  'band_gap', 'density', 'spacegroup', 'formation_energy', 'energy_above_hull',
-  'magnetism', 'elasticity',
-] as const
-
-const MATERIAL_FAMILIES = [
-  'bulk', 'mof', 'cof', 'hof', 'zeolite', 'zeotype', 'molecular-crystal',
-  '2d-material', '1d-material', 'carbon-allotrope',
-] as const
-
-export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersProps) {
+export function AdvancedFilters({ query, onChange }: AdvancedFiltersProps) {
   const { t } = useI18n()
   const update = (patch: Partial<MaterialQuery>) => onChange({ ...query, ...patch, page: 1 })
-  const toggleDataset = (dataset: 'experimental' | 'candidate') => {
-    const datasets = query.datasets.includes(dataset)
-      ? query.datasets.filter((value) => value !== dataset)
-      : [...query.datasets, dataset]
-    update({ datasets })
-  }
   const toggleSystem = (system: string) => {
     const crystalSystems = query.crystalSystems.includes(system)
       ? query.crystalSystems.filter((value) => value !== system)
@@ -67,14 +46,14 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
   })
 
   return (
-    <form className="filters" onSubmit={(event) => { event.preventDefault(); onApply() }}>
+    <form className="filters" onSubmit={(event) => event.preventDefault()}>
       <div className="filters__heading">
         <div>
           <span className="eyebrow"><Filter size={13} /> {t('filters.eyebrow')}</span>
           <h2>{t('filters.title')}</h2>
         </div>
         <button className="icon-button" type="button" onClick={reset} aria-label={t('filters.reset')}>
-          <RotateCcw size={16} />
+          <RotateCcw size={15} /><span>{t('filters.resetShort')}</span>
         </button>
       </div>
 
@@ -93,14 +72,20 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
 
       <fieldset className="field-group">
         <legend>{t('filters.datasets')}</legend>
-        <label className="check-row">
-          <input checked={query.datasets.includes('experimental')} onChange={() => toggleDataset('experimental')} type="checkbox" />
-          <span><i className="source-dot source-dot--exp" />{t('filters.experimentalOnly')}</span>
-        </label>
-        <label className="check-row">
-          <input checked={query.datasets.includes('candidate')} onChange={() => toggleDataset('candidate')} type="checkbox" />
-          <span><i className="source-dot source-dot--pool" />{t('filters.candidateOnly')}</span>
-        </label>
+        <div className="source-switch" role="group" aria-label={t('filters.datasets')}>
+          {([
+            [[], 'filters.all'],
+            [['experimental'], 'filters.experimental'],
+            [['candidate'], 'filters.candidate'],
+          ] as const).map(([datasets, label]) => (
+            <button
+              aria-pressed={query.datasets.length === datasets.length && datasets.every((value) => query.datasets.includes(value))}
+              key={label}
+              onClick={() => update({ datasets: [...datasets] })}
+              type="button"
+            >{t(label)}</button>
+          ))}
+        </div>
       </fieldset>
 
       <RangeField
@@ -121,7 +106,7 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
       />
       <RangeField
         label={t('filters.nAtoms')}
-        unit="atoms"
+        unit={t('unit.atoms')}
         min={query.nAtomsMin}
         max={query.nAtomsMax}
         onMin={(nAtomsMin) => update({ nAtomsMin })}
@@ -143,6 +128,7 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
           {CRYSTAL_SYSTEMS.map((value) => (
             <button
               className="filter-chip"
+              aria-pressed={query.crystalSystems.includes(value)}
               data-active={query.crystalSystems.includes(value)}
               key={value}
               onClick={() => toggleSystem(value)}
@@ -160,6 +146,7 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
           {MATERIAL_FAMILIES.map((value) => (
             <button
               className="filter-chip"
+              aria-pressed={query.materialFamilies.includes(value)}
               data-active={query.materialFamilies.includes(value)}
               key={value}
               onClick={() => toggleFamily(value)}
@@ -175,7 +162,7 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
         <summary><span>{t('filters.more')}</span><ChevronDown size={14} /></summary>
         <div className="mp-filters__body">
           <RangeField
-            label={t('filters.nElements')} unit="elements"
+            label={t('filters.nElements')} unit={t('unit.elements')}
             min={query.nElementsMin} max={query.nElementsMax}
             onMin={(nElementsMin) => update({ nElementsMin })}
             onMax={(nElementsMax) => update({ nElementsMax })}
@@ -244,7 +231,6 @@ export function AdvancedFilters({ query, onChange, onApply }: AdvancedFiltersPro
         </div>
       </details>
       <p className="filters__note">{t('filters.note')}</p>
-      <button aria-label={t('filters.apply')} className="primary-button" type="submit">{t('filters.apply')} <span aria-hidden="true">↗</span></button>
     </form>
   )
 }
@@ -261,12 +247,14 @@ interface RangeFieldProps {
 function RangeField({ label, unit, min, max, onMin, onMax }: RangeFieldProps) {
   const { t } = useI18n()
   const number = (value: string) => value === '' ? undefined : Number(value)
+  const invalid = min !== undefined && max !== undefined && min > max
   return (
     <fieldset className="field-group range-field">
       <legend>{label} <small>{unit}</small></legend>
-      <label><span>{t('range.min')}</span><input type="number" value={min ?? ''} onChange={(event) => onMin(number(event.target.value))} /></label>
+      <label><span>{t('range.min')}</span><input aria-invalid={invalid} type="number" value={min ?? ''} onChange={(event) => onMin(number(event.target.value))} /></label>
       <span className="range-field__line" />
-      <label><span>{t('range.max')}</span><input type="number" value={max ?? ''} onChange={(event) => onMax(number(event.target.value))} /></label>
+      <label><span>{t('range.max')}</span><input aria-invalid={invalid} type="number" value={max ?? ''} onChange={(event) => onMax(number(event.target.value))} /></label>
+      {invalid && <small className="range-field__error">{t('range.invalid')}</small>}
     </fieldset>
   )
 }

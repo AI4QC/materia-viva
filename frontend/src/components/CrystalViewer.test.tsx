@@ -23,9 +23,10 @@ const structure = {
 }
 
 describe('CrystalViewer', () => {
-  it('uses the OVITO render as the primary crystal view and updates the camera', () => {
+  it('offers the OVITO render on demand and updates the camera', () => {
     render(<CrystalViewer materialId="exp-000001" structure={structure} />)
 
+    fireEvent.click(screen.getByRole('tab', { name: 'OVITO' }))
     const image = screen.getByRole('img', { name: 'OVITO crystal structure render of SiO2' })
     expect(image).toHaveAttribute('src', expect.stringContaining('/api/materials/exp-000001/render?'))
     expect(image).toHaveAttribute('src', expect.stringContaining('view=isometric'))
@@ -34,10 +35,62 @@ describe('CrystalViewer', () => {
     expect(screen.getByRole('img', { name: 'OVITO crystal structure render of SiO2' })).toHaveAttribute('src', expect.stringContaining('view=top'))
   })
 
+  it('does not open on OVITO, or request a render, when the server says it is unavailable', () => {
+    // /api/stats carries ovito_available; the viewer used to ignore it and always
+    // open the OVITO tab, so the user waited out a render that could only fail.
+    render(<CrystalViewer materialId="exp-000001" structure={structure} ovitoAvailable={false} />)
+
+    expect(screen.queryByRole('img', { name: /OVITO crystal structure render/ })).toBeNull()
+    expect(screen.getByRole('tab', { name: 'Interactive 3D' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('hides the OVITO option when the server cannot provide it', () => {
+    render(<CrystalViewer materialId="exp-000001" structure={structure} ovitoAvailable={false} />)
+
+    expect(screen.queryByRole('tab', { name: /OVITO/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Interactive 3D' })).toHaveAttribute('aria-selected', 'true')
+  })
+
   it('offers an interactive fallback without loading WebGL', () => {
     render(<CrystalViewer materialId="pool-000001" structure={structure} />)
 
     fireEvent.click(screen.getByRole('tab', { name: 'Interactive 3D' }))
     expect(screen.getByText('This browser cannot start WebGL')).toBeInTheDocument()
+  })
+
+  it('hands the camera and cell-size controls to the interactive view too', () => {
+    // both only ever went into the OVITO image URL, so in the interactive view
+    // pressing I / F / T and changing cell size did nothing at all
+    render(<CrystalViewer materialId="exp-1" structure={structure} ovitoAvailable={false} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Front' }))
+    fireEvent.change(screen.getByLabelText('Supercell'), { target: { value: '3,3,3' } })
+
+    expect(screen.getByRole('button', { name: 'Front' })).toHaveAttribute('data-active', 'true')
+    expect(screen.getByLabelText('Supercell')).toHaveValue('3,3,3')
+  })
+
+  it('does not show ray-tracing quality when nothing is being ray-traced', () => {
+    // it used to be disabled, which left a select frozen on PREVIEW that read as broken
+    render(<CrystalViewer materialId="exp-1" structure={structure} ovitoAvailable={false} />)
+
+    expect(screen.queryByRole('combobox', { name: /quality/i })).not.toBeInTheDocument()
+  })
+
+  it('opens with a scientifically legible crystal presentation', () => {
+    render(<CrystalViewer materialId="exp-1" structure={structure} ovitoAvailable={false} />)
+
+    expect(screen.getByLabelText('Representation')).toHaveValue('spacefill')
+    expect(screen.queryByLabelText('Color scheme')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Supercell')).toHaveValue('1,1,1')
+    expect(screen.getByRole('checkbox', { name: 'Cell edges' })).toBeChecked()
+    expect(screen.getByLabelText('Element colors')).toHaveTextContent('Si')
+  })
+
+  it('shows ray-tracing quality on the tab it applies to', () => {
+    render(<CrystalViewer materialId="exp-1" structure={structure} ovitoAvailable />)
+
+    fireEvent.click(screen.getByRole('tab', { name: 'OVITO' }))
+    expect(screen.getByRole('combobox', { name: /quality/i })).toBeInTheDocument()
   })
 })

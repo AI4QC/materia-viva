@@ -54,6 +54,9 @@ def _app(tmp_path):
     build_index(IndexConfig(experimental, candidate, runtime))
 
     def runner(command, **kwargs):
+        # the service makes two kinds of call: an availability probe, and a render
+        if "-c" in command:
+            return subprocess.CompletedProcess(command, 0, "", "")
         output = command[command.index("--output") + 1]
         with open(output, "wb") as handle:
             handle.write(PNG)
@@ -88,6 +91,8 @@ def test_stats_and_material_search_endpoints(tmp_path):
     assert stats.status_code == 200
     assert stats.json()["total"] == 2
     assert stats.json()["datasets"] == {"candidate": 1, "experimental": 1}
+    # the frontend decides which viewer to open from this; it must reflect the probe
+    assert stats.json()["ovito_available"] is True
     assert result.status_code == 200
     assert result.json()["total"] == 1
     assert result.json()["items"][0]["material_id"] == "exp-train-1"

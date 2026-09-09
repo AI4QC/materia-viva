@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '../test/render'
+import { fireEvent, render, screen, waitFor } from '../test/render'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { MaterialDetail } from './MaterialDetail'
@@ -46,7 +46,9 @@ describe('MaterialDetail', () => {
     expect(screen.getByText('Experimental')).toBeInTheDocument()
     expect(screen.getByText('Fd-3m · 227')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Download CIF' })).toHaveAttribute('href', '/api/materials/exp-000001/cif')
-    expect(screen.getByText('train · row 17')).toBeInTheDocument()
+    expect(screen.getByText('Dataset: Training split · Record: 17')).toBeInTheDocument()
+    expect(screen.getByText('Material properties')).toBeInTheDocument()
+    expect(screen.getByText('Formation energy, stability, magnetic and mechanical properties are not recorded for this structure.')).toBeInTheDocument()
   })
 
   it('renders cross-database properties with source tags, refs and the family badge', async () => {
@@ -83,13 +85,13 @@ describe('MaterialDetail', () => {
 
     await waitFor(() => expect(screen.getByRole('heading', { name: 'SiO2' })).toBeInTheDocument())
     expect(screen.getByText('MOF')).toBeInTheDocument()
-    expect(screen.getByText('Cross-database properties')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Cross-database properties/ }))
     expect(screen.getByText('2.05 eV')).toBeInTheDocument()
     expect(screen.getByText('HSE06')).toBeInTheDocument()
     expect(screen.getAllByText('SNUMAT').length).toBeGreaterThanOrEqual(2)
     expect(screen.getByText('TI')).toBeInTheDocument()
     expect(screen.getByText('Materiae')).toBeInTheDocument()
-    expect(screen.getByText('Representative properties')).toBeInTheDocument()
+    expect(screen.getByText('Material properties')).toBeInTheDocument()
     expect(screen.getByText('-2.410 eV/atom')).toBeInTheDocument()
     expect(screen.getByText('SM-1888')).toBeInTheDocument()
   })
@@ -100,10 +102,26 @@ describe('MaterialDetail', () => {
     render(<MaterialDetail materialId="exp-000001" onClose={() => undefined} />)
 
     await waitFor(() => expect(screen.getByRole('heading', { name: 'SiO2' })).toBeInTheDocument())
-    expect(screen.getByText('Spectra & curves')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Spectra & curves/ }))
     await waitFor(() => expect(screen.getByRole('img', { name: 'Powder XRD' })).toBeInTheDocument())
     expect(screen.getByText('Simulated (CuKα)')).toBeInTheDocument()
+    expect(screen.getByText('Band structure')).toBeInTheDocument()
+    expect(screen.getByText('Electronic DOS')).toBeInTheDocument()
+    expect(screen.getByText('Phonons')).toBeInTheDocument()
+    expect(screen.getAllByText('Not recorded')).toHaveLength(3)
+    expect(screen.getByText('Simulation ready')).toBeInTheDocument()
     const chart = screen.getByRole('img', { name: 'Powder XRD' })
     expect(chart.querySelectorAll('.chart-stick')).toHaveLength(3)
+  })
+
+  it('can retry after a temporary detail request failure', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('', { status: 503 }))))
+    render(<MaterialDetail materialId="exp-000001" onClose={() => undefined} />)
+
+    await screen.findByRole('button', { name: 'Try loading again' })
+    stubFetch(detail)
+    fireEvent.click(screen.getByRole('button', { name: 'Try loading again' }))
+
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'SiO2' })).toBeInTheDocument())
   })
 })

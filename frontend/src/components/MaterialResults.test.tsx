@@ -39,9 +39,17 @@ describe('MaterialResults', () => {
     expect(screen.getByText('No structures matched')).toBeVisible()
 
     rerender(<MaterialResults {...common} loading={false} data={null} error="Index unavailable" />)
-    expect(screen.getByRole('alert')).toHaveTextContent('Index unavailable')
+    expect(screen.getByRole('alert')).toHaveTextContent('Your filters are preserved')
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(common.onRetry).toHaveBeenCalledOnce()
+
+    rerender(<MaterialResults {...common} loading={false} data={response} error="invalid-range" />)
+    expect(screen.getByRole('alert')).toHaveTextContent('The minimum cannot be greater than the maximum')
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument()
+
+    rerender(<MaterialResults {...common} loading={false} data={response} error="invalid-spacegroups" />)
+    expect(screen.getByRole('alert')).toHaveTextContent('whole numbers from 1 to 230')
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument()
   })
 
   it('opens a result and advances pagination', () => {
@@ -58,6 +66,7 @@ describe('MaterialResults', () => {
       />,
     )
 
+    expect(screen.getByText('PBEsol band gap')).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: /View LiFePO4/ }))
     expect(onSelect).toHaveBeenCalledWith('exp-train-1')
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))

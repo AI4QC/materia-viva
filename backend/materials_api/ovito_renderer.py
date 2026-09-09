@@ -10,6 +10,7 @@ import asyncio
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -25,6 +26,24 @@ RENDERER_VERSION = "2"
 
 class OvitoRenderError(RuntimeError):
     pass
+
+
+#: Terminal colour codes. The worker inherits a tty-shaped environment, so its
+#: traceback arrives dressed for a terminal and was being handed to a browser.
+ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _worker_failure(material_id: str, code: int, stderr: str, stdout: str) -> str:
+    """One readable line, not the worker's traceback.
+
+    A caller needs the reason; the traceback belongs in the server's log, and
+    the escape codes belong nowhere near an HTTP body.
+    """
+    blob = ANSI.sub("", (stderr or stdout or "").strip())
+    # the last non-empty line of a traceback is the exception, which is the reason
+    reason = next((line.strip() for line in reversed(blob.splitlines()) if line.strip()),
+                  "unknown OVITO failure")
+    return f"OVITO render failed for {material_id} (exit {code}): {reason[:400]}"
 
 
 @dataclass(frozen=True)
@@ -66,9 +85,34 @@ class OvitoRenderService:
         self.runner = runner
         self._locks: dict[str, threading.Lock] = {}
         self._locks_guard = threading.Lock()
+        self._available: bool | None = None
 
     def available(self) -> bool:
-        return Path(self.worker_python).is_file()
+        """Whether the worker interpreter can actually import OVITO.
+
+        Asking whether the file exists is not the same question: when no OVITO
+        environment is configured the worker falls back to `sys.executable`,
+        which always exists. That made this return True on a machine with no
+        OVITO at all, so `/api/stats` promised a render that could only fail.
+
+        Decided once. `/api/stats` sits on the landing page's critical path and
+        a subprocess per request is not free.
+        """
+        if self._available is None:
+            self._available = self._probe_worker()
+        return self._available
+
+    def _probe_worker(self) -> bool:
+        if not Path(self.worker_python).is_file():
+            return False
+        try:
+            done = self.runner(
+                [self.worker_python, "-c", "import ovito"],
+                env=self._environment(), capture_output=True, text=True, timeout=30,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return False
+        return done.returncode == 0
 
     def render(self, cif: str, material_id: str, options: RenderOptions) -> Path:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -104,10 +148,8 @@ class OvitoRenderService:
                         f"OVITO render timed out after {self.timeout_seconds}s"
                     ) from exc
                 if result.returncode != 0:
-                    error = (result.stderr or result.stdout or "unknown OVITO failure").strip()[-2_000:]
-                    raise OvitoRenderError(
-                        f"OVITO subprocess failed for {material_id} (code {result.returncode}): {error}"
-                    )
+                    raise OvitoRenderError(_worker_failure(
+                        material_id, result.returncode, result.stderr, result.stdout))
                 if not self._valid_png(temp_output):
                     raise OvitoRenderError("OVITO worker did not produce a valid PNG")
                 os.replace(temp_output, target)
@@ -162,12 +204,10 @@ class OvitoRenderService:
                     f"OVITO render timed out after {self.timeout_seconds}s"
                 ) from exc
             if process.returncode != 0:
-                error = (stderr or stdout or b"unknown OVITO failure").decode(
-                    "utf-8", errors="replace"
-                ).strip()[-2_000:]
-                raise OvitoRenderError(
-                    f"OVITO subprocess failed for {material_id} (code {process.returncode}): {error}"
-                )
+                raise OvitoRenderError(_worker_failure(
+                    material_id, process.returncode,
+                    (stderr or b"").decode("utf-8", errors="replace"),
+                    (stdout or b"").decode("utf-8", errors="replace")))
             if not self._valid_png(temp_output):
                 raise OvitoRenderError("OVITO worker did not produce a valid PNG")
             if self._valid_png(target):

@@ -1,5 +1,31 @@
+import { ELEMENTS } from '../data/elements'
+
 export type ElementMode = 'all' | 'any' | 'exact'
 export type SortDirection = 'asc' | 'desc'
+
+/** What the API will sort by. A URL naming anything else is not obeyed. */
+export const SORT_KEYS = [
+  'material_id', 'formula', 'pbes_gap', 'density', 'n_atoms', 'n_elements',
+  'spacegroup_number', 'volume', 'formation_energy_per_atom', 'energy_above_hull',
+  'bulk_modulus',
+] as const
+
+export const CRYSTAL_SYSTEMS = [
+  'triclinic', 'monoclinic', 'orthorhombic', 'tetragonal', 'trigonal', 'hexagonal', 'cubic',
+] as const
+
+export const PROPERTY_OPTIONS = [
+  'band_gap', 'density', 'spacegroup', 'formation_energy', 'energy_above_hull',
+  'magnetism', 'elasticity',
+] as const
+
+export const MATERIAL_FAMILIES = [
+  'bulk', 'mof', 'cof', 'hof', 'zeolite', 'zeotype', 'molecular-crystal',
+  '2d-material', '1d-material', 'carbon-allotrope',
+] as const
+
+export type SortKey = (typeof SORT_KEYS)[number]
+
 export type StabilityFilter = '' | 'stable' | 'unstable'
 export type MetallicityFilter = '' | 'metal' | 'nonmetal'
 
@@ -56,7 +82,7 @@ export const DEFAULT_QUERY: MaterialQuery = {
   materialFamilies: [],
   hasProperties: [],
   page: 1,
-  pageSize: 24,
+  pageSize: 12,
   sort: 'material_id',
   direction: 'asc',
 }
@@ -107,10 +133,11 @@ export function serializeQuery(query: MaterialQuery): URLSearchParams {
 export function parseQuery(params: URLSearchParams): MaterialQuery {
   const mode = params.get('element_mode')
   const direction = params.get('direction')
+  const includedElements = parseElements(params.get('elements'))
   return {
     ...DEFAULT_QUERY,
-    includedElements: splitCsv(params.get('elements')),
-    excludedElements: splitCsv(params.get('exclude')),
+    includedElements,
+    excludedElements: parseElements(params.get('exclude')).filter((symbol) => !includedElements.includes(symbol)),
     elementMode: mode === 'any' || mode === 'exact' ? mode : 'all',
     datasets: splitCsv(params.get('datasets')).filter(
       (value): value is 'experimental' | 'candidate' =>
@@ -128,7 +155,7 @@ export function parseQuery(params: URLSearchParams): MaterialQuery {
     nElementsMin: parseNumber(params.get('n_elements_min')),
     nElementsMax: parseNumber(params.get('n_elements_max')),
     spacegroups: params.get('spacegroups') ?? '',
-    crystalSystems: splitCsv(params.get('crystal_systems')),
+    crystalSystems: allowedCsv(params.get('crystal_systems'), CRYSTAL_SYSTEMS),
     formationEnergyMin: parseNumber(params.get('formation_energy_min')),
     formationEnergyMax: parseNumber(params.get('formation_energy_max')),
     energyAboveHullMin: parseNumber(params.get('e_hull_min')),
@@ -136,17 +163,19 @@ export function parseQuery(params: URLSearchParams): MaterialQuery {
     stability: parseStability(params.get('stability')),
     metallicity: parseMetallicity(params.get('metallicity')),
     magneticOrderings: params.get('magnetic_orderings') ?? '',
-    materialFamilies: splitCsv(params.get('material_families')),
+    materialFamilies: allowedCsv(params.get('material_families'), MATERIAL_FAMILIES),
     magnetizationMin: parseNumber(params.get('magnetization_min')),
     magnetizationMax: parseNumber(params.get('magnetization_max')),
     bulkModulusMin: parseNumber(params.get('bulk_modulus_min')),
     bulkModulusMax: parseNumber(params.get('bulk_modulus_max')),
     shearModulusMin: parseNumber(params.get('shear_modulus_min')),
     shearModulusMax: parseNumber(params.get('shear_modulus_max')),
-    hasProperties: splitCsv(params.get('has_properties')),
+    hasProperties: allowedCsv(params.get('has_properties'), PROPERTY_OPTIONS),
     page: positiveInteger(params.get('page'), 1),
-    pageSize: positiveInteger(params.get('page_size'), 24),
-    sort: params.get('sort') ?? 'material_id',
+    pageSize: boundedInteger(params.get('page_size'), DEFAULT_QUERY.pageSize, 100),
+    // validated like elementMode and direction beside it: an unknown key used to
+    // reach the API, come back 422, and leave a Retry button that could not work
+    sort: isSortKey(params.get('sort')) ? (params.get('sort') as SortKey) : 'material_id',
     direction: direction === 'desc' ? 'desc' : 'asc',
   }
 }
@@ -163,6 +192,17 @@ function splitCsv(value: string | null): string[] {
   return [...new Set((value ?? '').split(',').map((item) => item.trim()).filter(Boolean))]
 }
 
+const ELEMENT_BY_LOWERCASE = new Map(ELEMENTS.map(({ symbol }) => [symbol.toLowerCase(), symbol]))
+
+function parseElements(value: string | null): string[] {
+  return splitCsv(value).map((symbol) => ELEMENT_BY_LOWERCASE.get(symbol.toLowerCase())).filter((symbol): symbol is string => Boolean(symbol))
+}
+
+function allowedCsv<const T extends readonly string[]>(value: string | null, allowed: T): Array<T[number]> {
+  const valid = new Set<string>(allowed)
+  return splitCsv(value).filter((item): item is T[number] => valid.has(item))
+}
+
 function setNumber(params: URLSearchParams, key: string, value?: number) {
   if (value !== undefined && Number.isFinite(value)) params.set(key, String(value))
 }
@@ -176,4 +216,12 @@ function parseNumber(value: string | null): number | undefined {
 function positiveInteger(value: string | null, fallback: number): number {
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
+function boundedInteger(value: string | null, fallback: number, maximum: number): number {
+  return Math.min(positiveInteger(value, fallback), maximum)
+}
+
+function isSortKey(value: string | null): value is SortKey {
+  return value !== null && (SORT_KEYS as readonly string[]).includes(value)
 }

@@ -1,3 +1,12 @@
+---
+title: MateriaViva
+emoji: 🔬
+colorFrom: red
+colorTo: gray
+sdk: docker
+app_port: 7860
+---
+
 <p align="center">
   <img src="frontend/public/logo.svg" alt="Materia Viva" width="760">
 </p>
@@ -34,36 +43,6 @@ again.
 
 The result: the data already exists, but a large share of the time goes into acquiring and
 tidying it before any candidate screening begins.
-
-### Why it matters: probing the limit of forward screening, and feeding inverse design
-
-Materials discovery runs on two routes. **Forward screening** searches the known set for a
-material that already has the property you want. **Inverse design** generates a structure to
-order. The state of the public record has kept them apart, and MateriaViva is built to serve
-both.
-
-Forward screening is usually described as limited by how many materials are known. It is not.
-It is limited by how few of them have been characterised. The unified pool holds 13.5 million
-distinct crystals, and **no property that requires a calculation of its own reaches a fiftieth
-of them** — elastic moduli cover 1.45%, lattice thermal conductivity 0.20%. A screen run over
-the public record today therefore ranks the materials somebody chose to compute, not the
-materials that exist, and its apparent frontier is an artefact of where computer time was spent.
-
-Integrating every source and then **predicting the missing entries across the whole pool** turns
-that artefact into something closer to the real frontier. It also answers a question the field
-has not been able to pose: *how much of the known record has been passed over for want of a
-calculation rather than for want of merit?* Both answers matter. A large yield means forward
-screening has been operating far inside its own reach, and a substantial number of
-already-synthesisable materials are waiting to be recognised. A small one means the known set is
-close to exhausted and further progress has to come from designing structures rather than
-finding them.
-
-That second route needs exactly what this database holds. A generative model has to judge
-novelty against everything published rather than against one repository, which requires
-structures deduplicated across all 54 sources; and it has to be conditioned on a defined
-quantity rather than a column heading, which requires property labels that name the method
-behind them. Standardised structure and property data at this scale is what makes the two
-routes comparable rather than separate literatures.
 
 ### How we address it
 
@@ -318,20 +297,12 @@ index, render cache or partial downloads. Two index variants are published:
 | Variant | Size | What it is for |
 |---|---:|---|
 | `index/` | ~47 GB | the full index, what the site serves |
-| `slice/` | ~112 MB | developing the web UI without the full download |
+| `slice/` | ~tens of MB | developing the web UI without the full download |
 
-The slice is **not** a random sample, on two counts. A greedy set cover runs first, so every
-source, property name, curve type, material family and element appears at least once — a random
+The slice is **not** a random sample. It is a greedy set cover chosen so that every source, every
+property name, every curve type and every material family appears at least once. A random
 thousand rows out of thirteen million would miss almost every rare property, which is exactly the
-set of UI panels most likely to be broken. The remaining budget then goes to the **richest**
-materials rather than a representative spread, because only 2.2% of the pool carries any spectrum
-at all: sample representatively and you spend the day opening materials that show three numbers
-and no curves. The result is 1,000 materials holding 186,893 property rows and 18,290 curves, with
-**921 of them carrying seven or more curve types**.
-
-Raising the limit makes it *sparser*, not richer — only 1,049 materials in the whole pool have
-seven or more curve types — and no slice size gets you "every material has everything": exactly
-three materials have all ten. See [`scripts/export_slice.py`](scripts/export_slice.py).
+set of UI panels most likely to be broken — see [`scripts/export_slice.py`](scripts/export_slice.py).
 
 ### Copyright and redistribution boundary
 

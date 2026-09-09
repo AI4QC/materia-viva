@@ -24,7 +24,7 @@ const structure = {
 
 describe('InteractiveCrystal', () => {
   it('offers an OVITO fallback without requiring WebGL', () => {
-    render(<InteractiveCrystal structure={structure} showCell representation="ball_stick" />)
+    render(<InteractiveCrystal structure={structure} showCell representation="ball_stick" view="isometric" supercell="1,1,1" />)
 
     expect(screen.getByText('This browser cannot start WebGL')).toBeInTheDocument()
     expect(screen.getByText('You can still browse the structure with the OVITO render above.')).toBeInTheDocument()

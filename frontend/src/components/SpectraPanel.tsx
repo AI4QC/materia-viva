@@ -8,7 +8,7 @@ import {
   type MaterialCurve,
   type XrdPattern,
 } from '../api/client'
-import { useI18n } from '../i18n'
+import { useI18n, type TranslationKey } from '../i18n'
 
 interface SpectraPanelProps {
   materialId: string
@@ -19,13 +19,22 @@ interface SpectraPanelProps {
 export function SpectraPanel({ materialId, curves }: SpectraPanelProps) {
   const { t } = useI18n()
   const xrdCurves = curves.filter((curve) => curve.curve_type === 'xrd')
+  const bandCount = curves.filter((curve) => curve.curve_type === 'band_structure').length
+  const dosCount = curves.filter((curve) => curve.curve_type === 'dos').length
+  const phononCount = curves.filter((curve) => curve.curve_type.startsWith('phonon')).length
   const xyCurves = curves.filter(
     (curve) => curve.fmt !== 'svg' && curve.curve_type !== 'xrd',
   )
   const svgCurves = curves.filter((curve) => curve.fmt === 'svg')
   return (
     <section className="property-section detail-spectra" aria-label={t('spectra.label')}>
-      <h2>{t('spectra.label')}</h2>
+      <p className="spectra-intro">{t('spectra.intro')}</p>
+      <div className="spectra-availability" aria-label={t('spectra.availability')}>
+        <SpectrumStatus count={bandCount} label={t('spectra.bandStructure')} />
+        <SpectrumStatus count={dosCount} label={t('spectra.electronicDos')} />
+        <SpectrumStatus count={phononCount} label={t('spectra.phonons')} />
+        <SpectrumStatus count={xrdCurves.length} label={t('spectra.xrd')} simulated />
+      </div>
       <div className="spectra-grid">
         <XrdPanel materialId={materialId} stored={xrdCurves} />
         {xyCurves.map((curve) => (
@@ -37,12 +46,12 @@ export function SpectraPanel({ materialId, curves }: SpectraPanelProps) {
           {svgCurves.map((curve) => (
             <figure className="bandplot" key={curve.id}>
               <img
-                alt={`${curve.label ?? curve.curve_type} — ${curve.source_name}`}
+                alt={`${curve.label ?? curveTypeLabel(curve.curve_type, t)} — ${curve.source_name}`}
                 loading="lazy"
                 src={curveUrl(materialId, curve.id)}
               />
               <figcaption>
-                <span>{curve.label ?? curve.curve_type}</span>
+                <span>{curve.label ?? curveTypeLabel(curve.curve_type, t)}</span>
                 <span className="chart-source">{curve.source_name}</span>
               </figcaption>
             </figure>
@@ -51,6 +60,29 @@ export function SpectraPanel({ materialId, curves }: SpectraPanelProps) {
       )}
     </section>
   )
+}
+
+function SpectrumStatus({ count, label, simulated = false }: { count: number; label: string; simulated?: boolean }) {
+  const { t } = useI18n()
+  return (
+    <div data-available={count > 0 || simulated}>
+      <span>{label}</span>
+      <strong>{count > 0 ? t('spectra.records', { count: String(count) }) : simulated ? t('spectra.simulationReady') : t('spectra.notRecorded')}</strong>
+    </div>
+  )
+}
+
+function curveTypeLabel(type: string, t: (key: TranslationKey) => string) {
+  if (type === 'band_structure') return t('spectra.bandStructure')
+  if (type === 'dos') return t('spectra.electronicDos')
+  if (type === 'phonon_dos') return t('spectra.phononDos')
+  if (type === 'raman') return t('spectra.raman')
+  if (type === 'ir') return t('spectra.ir')
+  if (type === 'xas') return t('spectra.xas')
+  if (type === 'absorption') return t('spectra.absorption')
+  if (type === 'kappa_spectral') return t('spectra.kappaSpectral')
+  if (type === 'kappa_cumulative') return t('spectra.kappaCumulative')
+  return type.replace(/_/g, ' ')
 }
 
 function XrdPanel({ materialId, stored }: { materialId: string; stored: MaterialCurve[] }) {
@@ -229,13 +261,13 @@ function StoredCurvePanel({ materialId, curve }: { materialId: string; curve: Ma
   return (
     <figure className="chart-card">
       <figcaption>
-        <span>{curve.label ?? curve.curve_type}{curve.method ? ` · ${curve.method}` : ''}</span>
+        <span>{curve.label ?? curveTypeLabel(curve.curve_type, t)}{curve.method ? ` · ${curve.method}` : ''}</span>
         <span className="chart-source">{curve.source_name}</span>
       </figcaption>
       {failed ? (
         <p className="provenance-note">{t('spectra.curveFailed')}</p>
       ) : !data ? (
-        <p className="provenance-note">{t('spectra.loading')}</p>
+        <p className="provenance-note">{t('spectra.curveLoading')}</p>
       ) : (
         <LineChart data={data} />
       )}
@@ -243,26 +275,41 @@ function StoredCurvePanel({ materialId, curve }: { materialId: string; curve: Ma
   )
 }
 
+const SERIES_COLORS = ['#8f2f48', '#4f7088', '#69805e', '#9a6f55', '#71657e', '#a45f68', '#4f7f7a', '#947f47']
+
+export function curveTraces(data: CurvePayload) {
+  return [
+    { name: data.y_label ?? 'Total', y: data.y, color: 'var(--brand-accent)' },
+    ...(data.series ?? []).map((series, index) => ({
+      name: series.name,
+      y: series.y,
+      color: SERIES_COLORS[index % SERIES_COLORS.length],
+    })),
+  ].filter((trace) => trace.y.length === data.x.length)
+}
+
 function LineChart({ data }: { data: CurvePayload }) {
   const [hover, setHover] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
-  const { x, y } = data
+  const { x } = data
   if (!x.length) return null
+  const traces = curveTraces(data)
+  const values = traces.flatMap((trace) => trace.y)
   const xMin = x[0]
   const xMax = x[x.length - 1] || 1
-  const yMax = Math.max(...y, 1e-9)
-  const yMin = Math.min(...y, 0)
+  const yMax = Math.max(...values, 1e-9)
+  const yMin = Math.min(...values, 0)
   const plotW = WIDTH - PAD.left - PAD.right
   const plotH = HEIGHT - PAD.top - PAD.bottom
   const toX = (value: number) => PAD.left + ((value - xMin) / (xMax - xMin || 1)) * plotW
   const toY = (value: number) => PAD.top + (1 - (value - yMin) / (yMax - yMin || 1)) * plotH
-  const path = x.map((value, index) =>
+  const path = (y: number[]) => x.map((value, index) =>
     `${index === 0 ? 'M' : 'L'}${toX(value).toFixed(1)},${toY(y[index]).toFixed(1)}`,
   ).join('')
   const tickCount = 6
   const ticks = Array.from({ length: tickCount + 1 }, (_, index) => xMin + ((xMax - xMin) / tickCount) * index)
 
-  return (
+  return (<>
     <svg
       className="chart"
       onMouseLeave={() => setHover(null)}
@@ -291,17 +338,26 @@ function LineChart({ data }: { data: CurvePayload }) {
       <text className="chart-tick" textAnchor="middle" transform={`rotate(-90 12 ${HEIGHT / 2})`} x={12} y={HEIGHT / 2}>
         {data.y_label ?? 'y'}{data.y_unit ? ` (${data.y_unit})` : ''}
       </text>
-      <path className="chart-line" d={path} />
+      {traces.map((trace, index) => (
+        <path className="chart-line" d={path(trace.y)} key={`${trace.name}-${index}`} style={{ stroke: trace.color }}>
+          <title>{trace.name}</title>
+        </path>
+      ))}
       {hover !== null && (
         <g>
           <line className="chart-crosshair" x1={toX(x[hover])} x2={toX(x[hover])} y1={PAD.top} y2={HEIGHT - PAD.bottom} />
           <g className="chart-tooltip" transform={`translate(${Math.min(toX(x[hover]) + 8, WIDTH - 150)}, ${PAD.top + 6})`}>
             <rect height={33} rx={2} width={142} />
             <text x={8} y={16}>{data.x_label ?? 'x'} = {x[hover].toFixed(2)}</text>
-            <text x={8} y={29}>{data.y_label ?? 'y'} = {y[hover].toPrecision(4)}</text>
+            <text x={8} y={29}>{data.y_label ?? 'y'} = {data.y[hover].toPrecision(4)}</text>
           </g>
         </g>
       )}
     </svg>
-  )
+    {traces.length > 1 && (
+      <div className="chart-series-legend" aria-label={`${traces.length} series`}>
+        {traces.map((trace, index) => <span key={`${trace.name}-${index}`}><i style={{ background: trace.color }} />{trace.name}</span>)}
+      </div>
+    )}
+  </>)
 }

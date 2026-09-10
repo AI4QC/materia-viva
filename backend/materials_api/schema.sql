@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS materials (
     pk INTEGER PRIMARY KEY,
     material_id TEXT NOT NULL UNIQUE,
     formula TEXT NOT NULL,
+    -- formula with each count zero-padded, so ordering it as text orders it as
+    -- chemistry: plain text put Al12P12O48 before Al1As1.
+    formula_sort TEXT,
     chemical_system TEXT NOT NULL,
     dataset TEXT NOT NULL CHECK (dataset IN ('experimental', 'candidate')),
     is_experimental INTEGER NOT NULL CHECK (is_experimental IN (0, 1)),
@@ -114,6 +117,7 @@ CREATE INDEX IF NOT EXISTS idx_curves_material ON material_curves(material_pk);
 
 CREATE INDEX IF NOT EXISTS idx_materials_dataset ON materials(dataset, pk);
 CREATE INDEX IF NOT EXISTS idx_materials_formula ON materials(formula COLLATE NOCASE, pk);
+CREATE INDEX IF NOT EXISTS idx_materials_formula_sort ON materials(formula_sort, pk);
 CREATE INDEX IF NOT EXISTS idx_materials_chemsys ON materials(chemical_system, pk);
 CREATE INDEX IF NOT EXISTS idx_materials_gap ON materials(pbes_gap, pk) WHERE pbes_gap IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_materials_density ON materials(density, pk) WHERE density IS NOT NULL;

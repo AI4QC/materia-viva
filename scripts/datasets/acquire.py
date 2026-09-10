@@ -226,7 +226,7 @@ def write_receipt(
     payload = {
         "source_id": source_id,
         "url": url,
-        "path": str(path.relative_to(data_root)),
+        "path": path.relative_to(data_root).as_posix(),
         "bytes": path.stat().st_size,
         "sha256": digest.hexdigest(),
         "completed_at": datetime.now(timezone.utc).isoformat(),

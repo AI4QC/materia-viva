@@ -1,6 +1,8 @@
 # Large datasets and generated indexes live on the secondary SSD.
 /data
 /runtime
+/hf-dataset/
+/hf-cache*/
 *.part
 *.receipt.json
 materials.sqlite
@@ -19,8 +21,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -154,6 +156,3 @@ token-usage*.json
 *_credentials.json
 !*.example
 !*.example.*
-
-# Recovered CGTNet working tree: 177 MB of checkpoints, kept out of the repo
-/cgtnet_recovered/

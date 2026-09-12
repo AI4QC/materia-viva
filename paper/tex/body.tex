@@ -69,7 +69,7 @@ reports no discrepancies over the completed database
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.99\textwidth]{figs/fig1_architecture.pdf}
-  \caption{\textbf{Making 55 materials databases comparable at the level of the
+  \caption{\textbf{Making the source databases comparable at the level of the
   crystal.}
   \textbf{a},~The obstacle and the resolution. Each database labels the same
   arrangement of atoms with its own accession number, and no key relates them.
@@ -78,22 +78,18 @@ reports no discrepancies over the completed database
   fingerprint, never on the chemical formula. The dashed loop is the mechanism
   that makes the corpus self-evolving: a record matching nothing is admitted, and
   its fingerprint re-enters the matcher, so each source is matched against a
-  larger pool than the one before it. Twenty-four per cent of all matches
-  land on a crystal admitted this way. The right column reports what the
-  assembled corpus holds.
-  \textbf{b},~Property values contributed by each of the 55 databases on a
-  logarithmic axis, coloured by family, with labels at regular intervals through
-  the ranking. The contributions span 5.7 orders of magnitude and the largest
-  database supplies 46\% of all values.
+  larger pool than the one before it. The figure on the loop is the percentage of
+  all matches that land on a crystal admitted this way. The right column reports
+  what the assembled corpus holds.
+  \textbf{b},~Property values contributed by each database on a logarithmic axis,
+  coloured by family, with labels at regular intervals through the ranking.
   \textbf{c},~The loop of \textbf{a}, measured. Each step is one source's
   admissions entering the match map, so the height at any point is the number of
-  crystals the next source could be matched against. The substrate grew from
-  8{,}225{,}138 to 14{,}590{,}485 during assembly, and the five largest single
+  crystals the next source could be matched against. The largest single
   contributions are labelled.
-  \textbf{d},~How the references were resolved, grouped by database family.
-  Identifier matching dominates where a database publishes cross-references it
-  owns. Fingerprint matching is available everywhere, and own entry records that
-  the database contains the structure itself.}
+  \textbf{d},~How the references were resolved, grouped by database family: by an
+  identifier the source owns, by structural fingerprint, or as a record that the
+  database contains the structure itself.}
   \label{fig:architecture}
 \end{figure}
 
@@ -161,7 +157,10 @@ far:
 chemistry. It is concentrated where the field has concentrated its effort. The
 largest single overlap holds 1{,}672{,}167 shared crystals, and the eight largest
 overlaps are all between general-purpose density functional theory repositories
-(Fig.~\ref{fig:redundancy}b). These are the numbers a federated query cannot
+(Fig.~\ref{fig:redundancy}b). The enumerated framework libraries sit outside this
+entirely, sharing almost nothing with the general-purpose repositories or with one
+another, so the blank rows of the overlap matrix are a statement about where
+effort has gone rather than a gap in the record. These are the numbers a federated query cannot
 report and a formula-level join would misstate in both directions, and they bound
 what any cross-database evaluation can claim: for the largest overlapping pairs,
 a model trained on one repository and tested on another is tested on hundreds of
@@ -173,29 +172,26 @@ structures.
   \includegraphics[width=0.99\textwidth]{figs/fig2_redundancy.pdf}
   \caption{\textbf{Redundancy between databases, and whether the duplicates
   agree.}
-  \textbf{a},~Number of databases describing one crystal. Grey marks the
-  10{,}669{,}067 crystals held by a single database, blue the 3{,}233{,}769 held
-  by two or more. The distribution reaches 25.
-  \textbf{b},~Shared crystals between the 18 databases annotating the most
-  structures, on a logarithmic colour scale. Empty rows are not missing data: the
-  hypothetical-framework libraries share almost nothing with the general-purpose
-  repositories.
-  \textbf{c},~The growing recognition substrate. For each database with at least
-  1{,}000 matched references, in ingestion order, the fraction of its matches
-  landing on a crystal absent from the starting pool and admitted during
-  assembly. Marker area scales with the number of matches, and the dashed line is
-  the value pooled over all databases.
+  \textbf{a},~Number of databases describing one crystal. Grey marks the crystals
+  held by a single database, blue those held by two or more.
+  \textbf{b},~Shared crystals between the databases annotating the most
+  structures, on a logarithmic colour scale. An empty cell marks a pair with no
+  crystal in common rather than missing data.
+  \textbf{c},~The growing recognition substrate. For each database, in ingestion
+  order, the fraction of its matches landing on a crystal absent from the
+  starting pool and admitted during assembly. Marker area scales with the number
+  of matches, and the dashed line is the value pooled over all databases.
   \textbf{d},~For each comparable property, the fraction of multi-source crystals
   whose independent values fall within the tolerance stated in
-  Supplementary Note~\ref{si-note:agreement}. The figure at the right of each bar
-  is the number of crystals carrying that property from two or more databases.
+  Supplementary Note~\ref{si-note:agreement}. The figure beside each bar is the
+  number of crystals carrying that property from two or more databases at one
+  level of theory.
   \textbf{e},~Cumulative distribution of the spread between databases, in the
   property's own unit for energies, magnetisation and moduli and as a relative
-  difference for density.
-  \textbf{f},~Median absolute difference in formation energy for the twelve
-  database pairs sharing the most crystals, coloured by the fraction agreeing
-  within 50~meV\,atom$^{-1}$. Pairs at the left agree because they carry the same
-  underlying calculation, and pairs at the right differ by a systematic offset.}
+  difference for density and volume per atom.
+  \textbf{f},~Median absolute difference in formation energy for the database
+  pairs sharing the most crystals, coloured by the fraction agreeing within the
+  tolerance marked by the dashed line.}
   \label{fig:redundancy}
 \end{figure}
 
@@ -310,36 +306,31 @@ crystals carry at most seven of the 151 properties (Fig.~\ref{fig:landscape}c).
   \centering
   \includegraphics[width=0.99\textwidth]{figs/fig3_landscape.pdf}
   \caption{\textbf{What the corpus contains, and what it does not.}
-  \textbf{a},~The 151 properties carrying at least one value, ranked by the
-  number of crystals that carry them. Colour marks the calculation tier assigned
-  in \textbf{b}. Grey marks properties outside that classification, whose domain
-  is a single material family.
-  \textbf{b},~Coverage of the 69 general-purpose properties grouped by the
+  \textbf{a},~Every property carrying at least one value, ranked by the number of
+  crystals that carry it. Colour marks the calculation tier assigned in
+  \textbf{b}. Grey marks properties outside that classification, whose domain is
+  a single material family. The horizontal lines mark the stated fractions of the
+  pool.
+  \textbf{b},~Coverage of the general-purpose properties grouped by the
   calculation each requires: tier~1, readable from a single self-consistent run;
   tier~2, a few extra self-consistent runs such as a slab or a strained cell;
   tier~3, linear response or finite differences over many displacements; tier~4,
   anharmonic, transport or beyond-semilocal treatment. Each point is one property,
-  horizontal bars are group medians and the percentages above give those medians.
-  No property in tiers 2 to 4 reaches 10\% of the pool.
-  \textbf{c},~How many of the 151 populated properties a single crystal carries.
-  The median is seven.
-  \textbf{d},~Which database supplies which property, for the 34 most widely
-  covered properties and the 26 databases annotating the most crystals. Marker
-  area scales with the number of crystals carrying that value, and colour marks
-  the database family.
+  horizontal bars are group medians and the figures above them give those medians.
+  \textbf{c},~How many populated properties a single crystal carries.
+  \textbf{d},~Which database supplies which property, for the most widely covered
+  properties and the databases annotating the most crystals. Marker area scales
+  with the number of crystals carrying that value, and colour marks the database
+  family.
   \textbf{e},~The spectrum store by curve type: spectra held, and the number of
-  distinct crystals they reach. X-ray absorption spectra are the most numerous
-  and among the least widely spread, because one crystal carries one spectrum per
-  absorbing element and edge.
-  \textbf{f},~What each database's own structures gained from the other 54. Every
+  distinct crystals they reach.
+  \textbf{f},~What each database's own structures gained from the others. Every
   structure has one contributing database, the one that introduced it; the open
   marker is the property record that database supplied and the filled marker what
-  the structure carries after the rest are merged onto it, averaged over the
-  structures each contributed. Numbers above each database give the percentage of
-  its structures that gained at least one value it never reported. A database's
-  own structures are those no earlier source held, so only sources loaded after it
-  can annotate them and the most recent, NOMAD, is necessarily at zero. The 24
-  databases contributing at least 2{,}000 structures are shown.}
+  the structure carries once the others are merged onto it, averaged over the
+  structures each contributed. The figure above each database is the percentage
+  of its structures that gained at least one value it never reported. The
+  databases contributing the most structures are shown.}
   \label{fig:landscape}
 \end{figure}
 
@@ -375,7 +366,10 @@ no single repository can report on effort it did not spend.
 
 The same stratification governs non-scalar data and provenance. The curve store
 holds 1{,}198{,}897 spectra across ten types but reaches only 298{,}662 crystals,
-2.0\% of the pool (Fig.~\ref{fig:landscape}e). And only 66 of the 151 populated
+2.0\% of the pool (Fig.~\ref{fig:landscape}e). X-ray absorption spectra are the
+most numerous of the ten and among the least widely spread, because one crystal
+carries a separate spectrum for every absorbing element and edge, so the count of
+spectra held says little about the number of crystals reached. And only 66 of the 151 populated
 properties are reported by two or more databases, and the other 85 have a single
 supplier and therefore no independent check of any kind. Of the 99{,}493{,}466
 occupied cells, 6.3\% carry values from two or more sources, which is the exact
@@ -431,23 +425,17 @@ supplies all three. What follows establishes how far they reach.
   \includegraphics[width=0.99\textwidth]{figs/fig4_completion.pdf}
   \caption{\textbf{What the corpus offers a learned completion of the property
   layer.}
-  \textbf{a},~How 166 registered properties become 513 separable learning tasks
-  and 176 realised training sets. Every stage filters except one: splitting a
-  property name by level of theory multiplies the count by 3.4, because a single
-  name covers several distinct physical quantities that a model cannot tell
-  apart from structure alone.
-  \textbf{b},~Composition of the nine largest properties by level of theory, as a
-  fraction of the labels filed under each property name. The figure at the right
-  gives the number of distinct levels. Band gap carries 15, of which the
-  semilocal group holds 83\%.
-  \textbf{c},~The 176 constructed training sets by declared applicability domain,
-  the set of structures for which the property is defined at all.
+  \textbf{a},~How the registered properties become separable learning tasks and
+  then realised training sets. The arrow marks the one stage that multiplies
+  rather than filters, splitting a property name by level of theory.
+  \textbf{b},~Composition of the most widely covered properties by level of
+  theory, as a fraction of the labels filed under each property name. The figure
+  at the right gives the number of distinct levels.
+  \textbf{c},~The constructed training sets by declared applicability domain, the
+  set of structures for which the property is defined at all.
   \textbf{d},~For each training set, the crystals already labelled against the
   crystals the task may legitimately be asked about once its domain is enforced.
   The dotted line marks the whole pool and the dashed diagonal marks parity.
-  Points far above the diagonal are the tasks with the most to gain. Points on
-  the right at low height are tasks whose domain is already almost fully
-  labelled.
   Panels reporting the trained models are added when their held-out numbers
   exist.}
   \label{fig:completion}
@@ -507,7 +495,12 @@ the 176 tasks are defined on less than half the pool, and the number of
 predictions that lie inside a declared domain is 1{,}105{,}593{,}143 rather than
 the 2.57 billion that asking every task about every crystal would produce, a
 factor of 2.3. The difference is not a loss of coverage. It is the removal of numbers
-that would have looked like data.
+that would have looked like data. Plotting what a task may be asked about against
+what it already knows separates the two situations that matter
+(Fig.~\ref{fig:completion}d): a task lying far above the diagonal has the most to
+gain, because its domain is large and its labels are few, while a task lying to
+the right and low is one whose domain is already nearly labelled and where a
+model has little left to add.
 
 One dependency in that structure is worth stating because it closes the loop with
 Section~\ref{sec:index}. Twenty-one of the tasks are gated on a property the

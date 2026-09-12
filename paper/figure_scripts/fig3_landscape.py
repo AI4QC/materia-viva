@@ -47,11 +47,11 @@ TIER_SHORT = {1: "one self-consistent\nrun", 2: "a few extra\nruns",
               4: "anharmonic, transport,\nbeyond-semilocal"}
 tier_of = {r["property"]: int(r["tier"]) for r in TIER}
 
-fig = plt.figure(figsize=(W2, 20.2 * CM))
+fig = plt.figure(figsize=(W2, 19.6 * CM))
 gs = fig.add_gridspec(3, 3, height_ratios=[1.0, 1.12, 0.80],
                       width_ratios=[1.10, 0.92, 0.98],
-                      hspace=0.82, wspace=0.40,
-                      left=0.070, right=0.980, top=0.966, bottom=0.075)
+                      hspace=0.84, wspace=0.40,
+                      left=0.070, right=0.980, top=0.966, bottom=0.072)
 
 # ------------------------------------------------------- a coverage ranking
 ax = fig.add_subplot(gs[0, 0])
@@ -83,9 +83,6 @@ for i, r in enumerate(rows):
                     color=TIER_COL.get(tier_of.get(r["property"]), "#555555"),
                     ha="left" if dx >= 0 else "right",
                     arrowprops=dict(arrowstyle="-", color=GRY, lw=0.35))
-n_lt1 = sum(1 for r in rows if float(r["coverage_fraction"]) < 0.01)
-ax.text(0.98, 0.05, f"{n_lt1} of {NPROP} properties reach\nfewer than 1% of the pool",
-        transform=ax.transAxes, ha="right", va="bottom", fontsize=6.0, linespacing=1.45)
 stamp(fig, ax, "a")
 
 # ------------------------------------------------------------- b cost tiers
@@ -112,9 +109,6 @@ for t in (1, 2, 3, 4):
 ax.set_ylabel("Pool covered (%)")
 ax.axhline(10, color=GRY, lw=0.5, ls=(0, (4, 2)))
 ax.text(4.5, 12, "10%", fontsize=5.8, color=GRY, ha="right")
-ax.text(0.5, -0.245, "median coverage falls 43-fold once a property needs a\ncalculation of its own, and none of the 50 reaches 10%",
-        transform=ax.transAxes, ha="center", va="top", fontsize=6.0, style="italic",
-        linespacing=1.4)
 stamp(fig, ax, "b", dx=-0.050)
 
 # ------------------------------------------- c properties per material
@@ -131,10 +125,6 @@ if HAVE_COUNT:
     ax.set_xlim(-0.8, min(k.max(), 45) + 0.8)
     ax.set_ylim(0.6, v.max() * 4)
     med = int(np.repeat(k, np.minimum(v, 10**7)).mean()) if v.sum() else 0
-    ax.text(0.97, 0.95, f"of {NPROP} populated properties,\n"
-                        f"half the pool carries at most "
-                        f"{int(k[np.searchsorted(np.cumsum(v), v.sum()/2)])}",
-            transform=ax.transAxes, ha="right", va="top", fontsize=6.0, linespacing=1.45)
 else:
     ax.axis("off")
     ax.text(0.5, 0.5, "properties per structure\n(scan running)", ha="center", va="center",
@@ -173,10 +163,6 @@ ax.grid(True, lw=0.25, color="#EDEDED", zorder=0)
 ax.set_axisbelow(True)
 for spine in ax.spines.values():
     spine.set_visible(False)
-n_single = sum(1 for r in P if int(r["n_sources"]) == 1)
-ax.text(0.995, 1.015, f"{n_single} of {NPROP} properties have exactly one supplier, "
-                      f"so they carry no independent check",
-        transform=ax.transAxes, ha="right", va="bottom", fontsize=6.0)
 for s, lab in ((2.0 + 3.6 * 2, "$10^2$"), (2.0 + 3.6 * 4, "$10^4$"),
                (2.0 + 3.6 * 6, "$10^6$")):
     ax.scatter([], [], s=s, c=GRY, alpha=0.7, label=lab)
@@ -213,10 +199,6 @@ ax.legend([mpatches.Patch(facecolor=(*to_rgb(PUR), 0.5), edgecolor=PUR, lw=0.6,
           ["spectra stored", "structures reached"], frameon=False, loc="lower right",
           bbox_to_anchor=(1.03, 0.10), handlelength=0.9, handleheight=0.8,
           labelspacing=0.3, borderpad=0.0, fontsize=6.0)
-ax.text(0.5, -0.215, f"{SUM['n_curves']:,} spectra reach {SUM['n_materials_with_curves']:,}\n"
-                     f"structures, {SUM['n_materials_with_curves']/NMAT*100:.1f}% of the pool",
-        transform=ax.transAxes, ha="center", va="top", fontsize=6.0, style="italic",
-        linespacing=1.4)
 stamp(fig, ax, "e", dx=-0.055)
 
 # ------------------------------------------------- f what the merge redistributed
@@ -254,29 +236,12 @@ ax.set_ylim(0, 18.4)
 ax.set_ylabel("Property values per structure")
 ax.grid(axis="y", lw=0.3, color="#EEEEEE", zorder=0)
 ax.set_axisbelow(True)
-ax.text(0.005, 0.985, "numbers above each database: % of its structures that gained "
-                      "a value it never reported itself",
-        transform=ax.transAxes, ha="left", va="top", fontsize=6.0, color=GRY)
 ax.legend([plt.Line2D([], [], marker="o", ls="none", mfc="white", mec=GRY, mew=0.7, ms=3.4),
            plt.Line2D([], [], marker="o", ls="none", color=GRY, ms=3.6)],
           ["supplied by the contributing database",
            "carried after the other 54 are merged on"],
           frameon=False, loc="upper right", bbox_to_anchor=(1.005, 0.90),
           handletextpad=0.4, labelspacing=0.35, borderpad=0.0, fontsize=6.0)
-ax.text(0.5, -0.62, f"{XFS['admitted_materials_with_external_property']:,} of "
-                    f"{XFS['admitted_materials_with_any_property']:,} structures "
-                    f"({XFS['frac_admitted_materials_with_external']*100:.1f}%) carry at "
-                    f"least one value their own database never reported, and "
-                    f"{XFS['cells_from_other_databases_admitted']:,} of "
-                    f"{XFS['cells_occupied_admitted']:,} filled cells "
-                    f"({XFS['frac_cells_external_admitted']*100:.1f}%) come from elsewhere.\n"
-                    f"Independently of who arrived first, "
-                    f"{XFS['materials_with_two_or_more_property_sources']:,} crystals "
-                    f"({XFS['frac_materials_with_two_or_more_property_sources']*100:.1f}% "
-                    f"of all that carry a value) draw their property record from two or "
-                    f"more databases",
-        transform=ax.transAxes, ha="center", va="top", fontsize=6.0, style="italic",
-        linespacing=1.5)
 stamp(fig, ax, "f")
 
 save(fig, "fig3_landscape")

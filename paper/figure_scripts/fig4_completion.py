@@ -38,9 +38,9 @@ DOM_COL = {
     "magnetic": "#B07AA1", "surface-derived": GRY, "layered": "#76B7B2",
 }
 
-fig = plt.figure(figsize=(W2, 11.6 * CM))
+fig = plt.figure(figsize=(W2, 11.0 * CM))
 gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.02], width_ratios=[1.0, 1.0],
-                      hspace=0.50, wspace=0.34,
+                      hspace=0.42, wspace=0.34,
                       left=0.075, right=0.975, top=0.955, bottom=0.135)
 
 # --------------------------------------------------------------- a cascade
@@ -81,10 +81,6 @@ ax.annotate("", xy=(C["n_census_tasks"] - 8, y[2] + 0.36), xytext=(176, y[1] - 0
 ax.text(322, y[1] + 0.16,
         f"$\\times${C['n_census_tasks'] / C['n_properties_with_data']:.1f}",
         fontsize=7.6, color=ORA, fontweight="bold", ha="center", va="bottom")
-ax.text(0.985, 0.055, "one property name is several quantities;\n"
-                      "separating them is what makes them learnable",
-        transform=ax.transAxes, ha="right", va="bottom", fontsize=5.9,
-        color=SOFT, linespacing=1.5, style="italic")
 stamp(fig, ax, "a")
 
 # ------------------------------------------------------- b theory-level split
@@ -122,10 +118,6 @@ ax.set_xlim(0, 110)
 ax.set_xticks([0, 25, 50, 75, 100])
 ax.set_xlabel("Labels under the property name (%)")
 ax.text(103.0, len(props) - 0.20, "levels", fontsize=5.6, color=SOFT, ha="left")
-ax.text(0.5, -0.255, "one property name covers several quantities; each name is\n"
-                     "split by level of theory before a task is counted",
-        transform=ax.transAxes, ha="center", va="top", fontsize=6.0, style="italic",
-        color=SOFT, linespacing=1.45)
 stamp(fig, ax, "b", dx=-0.058)
 
 # --------------------------------------------------------- c domains restrict
@@ -144,10 +136,6 @@ ax.set_xlim(0, max(vals) * 1.22)
 for yi, v in zip(y, vals):
     ax.text(v + max(vals) * 0.018, yi, str(v), va="center", ha="left", fontsize=5.9,
             color=SOFT)
-ax.text(0.97, 0.06, f"{C['tasks_below_half_pool']} of {C['n_training_sets']} tasks\n"
-                    "are defined on less than\nhalf the pool",
-        transform=ax.transAxes, ha="right", va="bottom", fontsize=6.0,
-        linespacing=1.5, color=SOFT)
 stamp(fig, ax, "c")
 
 # ------------------------------------------------- d what can actually be asked
@@ -173,11 +161,6 @@ ax.legend(frameon=False, loc="lower left", bbox_to_anchor=(-0.025, -0.02),
           handlelength=0.7, labelspacing=0.20, borderpad=0.0, fontsize=5.0,
           markerscale=0.8, ncol=2, columnspacing=0.8, handletextpad=0.35)
 gated, naive = C["n_predictable_gated"], C["n_predictable_ungated"]
-ax.text(0.5, -0.255, f"{gated/1e6:.0f} million predictions lie inside a declared domain,\n"
-                     f"against {naive/1e9:.2f} billion without one: a factor of "
-                     f"{C['gating_ratio']:.1f}",
-        transform=ax.transAxes, ha="center", va="top", fontsize=6.0, linespacing=1.45,
-        color=SOFT, style="italic")
 stamp(fig, ax, "d", dx=-0.058)
 
 save(fig, "fig4_completion")

@@ -34,9 +34,9 @@ CURVE = list(csv.DictReader((DATA / "substrate_curve.csv").open()))
 INK = "#1A1A1A"
 SOFT = "#5C5C5C"
 
-fig = plt.figure(figsize=(W2, 15.8 * CM))
+fig = plt.figure(figsize=(W2, 15.0 * CM))
 gs = fig.add_gridspec(2, 3, height_ratios=[1.00, 0.96], width_ratios=[1.20, 0.90, 0.96],
-                      hspace=0.30, wspace=0.42,
+                      hspace=0.24, wspace=0.42,
                       left=0.070, right=0.980, top=0.980, bottom=0.120)
 
 # ----------------------------------------------------------------- a schematic
@@ -45,7 +45,7 @@ gs = fig.add_gridspec(2, 3, height_ratios=[1.00, 0.96], width_ratios=[1.20, 0.90
 # nothing overruns a border. Widen a box before lengthening its text.
 ax = fig.add_subplot(gs[0, :])
 ax.set_xlim(0, 100)
-ax.set_ylim(0, 42)
+ax.set_ylim(4.7, 42)
 ax.set_aspect("auto")
 ax.axis("off")
 
@@ -174,13 +174,6 @@ ax.text(BADGE_X, badge_y + 0.05,
         f"{SUB['frac_matches_onto_admitted']*100:.0f}%", ha="center", va="center",
         fontsize=8.6, color=ORA, fontweight="bold", zorder=6)
 
-ax.text(CARD_X, 2.6, "every admitted crystal joins the substrate the next source",
-        fontsize=6.1, color=ORA, ha="left", va="center")
-ax.text(CARD_X, 0.7, f"is matched against: "
-                     f"{SUB['frac_matches_onto_admitted']*100:.0f}% of all "
-                     f"{(SUB['matched_onto_base']+SUB['matched_onto_admitted'])/1e6:.1f}M "
-                     "matches land there",
-        fontsize=6.1, color=ORA, ha="left", va="center", style="italic")
 
 # ---- column 3: the corpus ---------------------------------------------------
 COL3, COL3W = 71.6, 27.4
@@ -246,10 +239,6 @@ handles = [mpatches.Patch(facecolor=(*to_rgb(GROUP_COLOUR[g]), 0.62), edgecolor=
 ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.46, -0.205),
           ncol=2, frameon=False, handlelength=0.9, handleheight=0.8,
           labelspacing=0.28, columnspacing=1.0, borderpad=0.0, fontsize=5.9)
-ax.text(0.985, 0.03, f"{len(rows)} databases,\n"
-                     f"{np.log10(vals[0] / vals[-1]):.1f} orders of magnitude",
-        transform=ax.transAxes, ha="right", va="bottom", fontsize=5.9,
-        linespacing=1.5, color=SOFT)
 stamp(fig, ax, "b", dx=-0.064)
 
 # --------------------------------------------------- c the growing substrate
@@ -286,10 +275,6 @@ for key, dx, dy in (("alexandria", 1.4, -0.55), ("aflow", 1.4, 0.58),
                         fontsize=5.7, color="#5A3A10", linespacing=1.35,
                         ha="left" if dx > 0 else "right", va="center",
                         arrowprops=dict(arrowstyle="-", color=GRY, lw=0.4))
-ax.text(0.5, -0.235, f"the pool grew {(y[-1]*1e6 - base)/base*100:.0f}% while it was "
-                     "being assembled,\nand every gain was matchable by the sources after it",
-        transform=ax.transAxes, ha="center", va="top", fontsize=6.1, style="italic",
-        linespacing=1.4, color=SOFT)
 stamp(fig, ax, "c", dx=-0.062)
 
 # ------------------------------------------------------------ d match routes
@@ -316,10 +301,6 @@ ax.legend(frameon=False, loc="upper right", bbox_to_anchor=(1.04, 1.03),
           fontsize=6.1)
 tot_id = sum(agg[g][0] for g in order)
 tot_hash = sum(agg[g][1] for g in order)
-ax.text(0.5, -0.225, f"{tot_id/1e6:.1f}M references resolved by identifier,\n"
-                     f"{tot_hash/1e6:.1f}M by fingerprint alone",
-        transform=ax.transAxes, ha="center", va="top", fontsize=6.1, style="italic",
-        linespacing=1.4, color=SOFT)
 stamp(fig, ax, "d", dx=-0.058)
 
 save(fig, "fig1_architecture")

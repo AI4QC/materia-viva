@@ -53,10 +53,6 @@ def draw(fig, gs, pairs, perp, spread):
     for i, r in enumerate(perp):
         ax.text(frac[i] + 2.0, i, f"{int(r['n_multi_source_materials']):,}",
                 va="center", ha="left", fontsize=5.6, color=GRY)
-    ax.text(0.5, -0.245, "figures at the right of each bar give the number of\n"
-                         "crystals carrying that property from two or more databases",
-            transform=ax.transAxes, ha="center", va="top", fontsize=5.9,
-            color=GRY, linespacing=1.45)
     stamp(fig, ax, "d")
 
     # ------------------------------------------------------- e spread curves
@@ -120,6 +116,4 @@ def draw(fig, gs, pairs, perp, spread):
     cb.set_label("within tolerance (%)", fontsize=5.8)
     cb.ax.tick_params(labelsize=5.4, length=1.4, width=0.4)
     cb.outline.set_linewidth(0.4)
-    ax.text(0.5, -0.245, "the 12 database pairs sharing the most structures",
-            transform=ax.transAxes, ha="center", va="top", fontsize=6.0, style="italic")
     stamp(fig, ax, "f", dx=-0.050)

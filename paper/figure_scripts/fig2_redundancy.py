@@ -38,9 +38,9 @@ if HAVE_AGREE:
     PERP = list(csv.DictReader((DATA / "agreement_per_property.csv").open()))
     SPREAD = list(csv.DictReader((DATA / "agreement_spread_samples.csv").open()))
 
-fig = plt.figure(figsize=(W2, 14.4 * CM))
+fig = plt.figure(figsize=(W2, 13.4 * CM))
 gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 1.0], width_ratios=[1.0, 1.06, 1.0],
-                      hspace=0.62, wspace=0.52,
+                      hspace=0.46, wspace=0.52,
                       left=0.072, right=0.978, top=0.955, bottom=0.100)
 
 # --------------------------------------------------- a degree distribution
@@ -91,9 +91,6 @@ cb = fig.colorbar(im, ax=ax, fraction=0.038, pad=0.018)
 cb.set_label("shared structures", fontsize=6.0)
 cb.ax.tick_params(labelsize=5.8, length=1.6, width=0.5)
 cb.outline.set_linewidth(0.4)
-top_pair = max(OVL, key=lambda r: int(r["n_shared"]))
-ax.set_title(f"largest overlap: {top_pair['source_a']} $\\cap$ {top_pair['source_b']} "
-             f"= {int(top_pair['n_shared']):,}", fontsize=6.2, pad=3.5)
 stamp(fig, ax, "b", dx=-0.050)
 
 # --------------------------------------------------- c substrate growth

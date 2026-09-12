@@ -1,10 +1,10 @@
 % ======================================================================
-% Results, five sections, built around the two halves of the title.
+% Results, four sections, built around the two halves of the title.
 %   2.1 the record: one identity across 55 databases
-%   2.2 forward, first bound: what the labels are worth
-%   2.3 forward, second bound: what the record covers
-%   2.4 probing the limit: completing the property layer  <- models pending
-%   2.5 inverse: judging the novelty claimed by inverse design  <- audit pending
+%   2.2 what a forward screen inherits: the labels, then the pool, then what
+%       the integration itself added to the pool
+%   2.3 probing the limit: completing the property layer  <- models pending
+%   2.4 inverse: judging the novelty claimed by inverse design  <- audit pending
 % Implementation detail lives in Methods and the Supplementary Information.
 % ======================================================================
 \section{Results}
@@ -119,48 +119,46 @@ crystals admitted during assembly. The JARVIS tight-binding set, whose fitting
 geometries are deliberately non-equilibrium and largely absent from the starting
 pool, reached 67.6\%. The framework libraries show the effect in its purest form:
 CoRE MOF, ingested last among them, resolved 99.5\% of its matches onto
-frameworks contributed by four earlier libraries in the same run. Databases whose
-chemistry the starting pool already covered show the converse, at or near zero. The
-practical consequence is that the marginal value of adding a database is not
-confined to the values it brings: CoRE MOF contributed 155{,}488 experimental
+frameworks contributed by four earlier libraries. NOMAD
+\cite{draxl2019nomad}, the last source ingested of the 55 and so the one matched
+against the largest substrate, resolved 56.1\% of its 3{,}168{,}530 matches onto
+crystals the starting pool did not contain, and contributed 1{,}047{,}208
+structures of its own that now form part of the criterion applied to whatever is
+ingested next. Databases whose chemistry the starting pool already covered show
+the converse, at or near zero.
+
+The practical consequence is that the marginal value of adding a database is not
+confined to the values it brings. CoRE MOF contributed 155{,}488 experimental
 porosity measurements, and the reason 99.5\% of them landed on an existing
-crystal rather than creating an isolated set of new ones is that earlier
-libraries had already put those frameworks in the pool. Assembled against a
-frozen reference, the same measurements would have arrived as an unconnected
-island.
+crystal rather than forming an isolated set of new ones is that earlier libraries
+had already put those frameworks in the pool. Assembled against a frozen
+reference, the same measurements would have arrived as an unconnected island, and
+the corpus would have to be rebuilt from the beginning to connect them.
 
-The clearest test of the mechanism is a source that arrives after the corpus is
-finished. NOMAD \cite{draxl2019nomad} was ingested three weeks after the
-assembly above had completed, and was therefore matched against the corpus as it
-then stood rather than against anything built for it. Of its 3{,}168{,}530
-matches, 56.1\% landed on crystals that the starting pool did not contain and
-that exist in the corpus only because an earlier source was admitted; it
-contributed 1{,}047{,}208 structures of its own, which are now part of the
-criterion applied to whatever is ingested next. A corpus assembled once against a
-frozen reference gains none of these links, and would have to be rebuilt from the
-beginning to gain them.
+\subsection{What a forward screen inherits}
+\label{sec:inherits}
 
-\subsection{What the labels are worth}
-\label{sec:redundancy}
+A forward screen inherits two things from whichever database it loads: the labels
+it trains on and the pool it ranks. Neither is a property of the method, and
+neither can be measured from inside a single database, because each is a property
+of the record as a whole. The resolved union measures both. This section takes
+them in turn, and closes with the part of the second that the integration itself
+supplied.
 
-A forward screen inherits two things from whichever database it loads: the
-labels it trains on and the pool it ranks. This section measures the first, by
-asking how often two databases that describe the same crystal agree about it.
-That question begins with how much of the record is one crystal counted several
-times, which no member source can answer and a formula-level join would answer
-wrongly in both directions. The resolved union answers it. Of the 13{,}902{,}836 structures
-carrying at least one reference, 3{,}233{,}769 carry two or more
+Measuring the labels begins with how much of the record is one crystal counted
+several times, which no member source can answer and a formula-level join would
+answer wrongly in both directions. Of the 13{,}902{,}836 structures carrying at
+least one reference, 3{,}233{,}769 carry two or more
 (Fig.~\ref{fig:redundancy}a), and the distribution falls steeply while reaching
-far:
-2{,}395{,}350 crystals are described by exactly two databases, 568{,}507 by three,
-2{,}416 by thirteen and two by 25. Redundancy is not spread evenly over
-chemistry. It is concentrated where the field has concentrated its effort. The
-largest single overlap holds 1{,}672{,}167 shared crystals, and the eight largest
-overlaps are all between general-purpose density functional theory repositories
-(Fig.~\ref{fig:redundancy}b). The enumerated framework libraries sit outside this
-entirely, sharing almost nothing with the general-purpose repositories or with one
-another, so the blank rows of the overlap matrix are a statement about where
-effort has gone rather than a gap in the record. These are the numbers a federated query cannot
+far: 2{,}395{,}350 crystals are described by exactly two databases, 568{,}507 by
+three, 2{,}416 by thirteen and two by 25. Redundancy is concentrated where the
+field has concentrated its effort. The largest single overlap holds
+1{,}672{,}167 shared crystals, and the eight largest are all between
+general-purpose density functional theory repositories
+(Fig.~\ref{fig:redundancy}b); the enumerated framework libraries sit outside this
+entirely, sharing almost nothing with the general-purpose repositories or with
+one another, so the blank rows of the overlap matrix record where effort has gone
+rather than a gap in the corpus. These are the numbers a federated query cannot
 report and a formula-level join would misstate in both directions, and they bound
 what any cross-database evaluation can claim: for the largest overlapping pairs,
 a model trained on one repository and tested on another is tested on hundreds of
@@ -236,6 +234,18 @@ than noise. This is precisely the structure that merging columns by name would
 absorb without trace, and precisely the structure a model trained on the merged
 column would learn as if it were physics.
 
+The offsets are not a failure of the underlying theory, and the distinction
+decides how they should be read. Forty independent implementations of density
+functional theory, run on the same systems with the same functional, agree on the
+equation of state to well within the differences reported here
+\cite{lejaeghere2016reproducibility}. What separates two databases is therefore
+not the solver but the accumulation of choices each provider makes around it, the
+pseudopotentials, the functional, the convergence criteria and the elemental or
+anionic corrections applied afterwards, none of which is visible in a column of
+numbers labelled formation energy. The reproducibility of the theory bounds what
+a careful user could hope for; the disagreement measured here is what a user
+actually receives.
+
 Method strings do more than make these offsets interpretable; they decide which
 comparisons are admissible at all. A further 24{,}380 crystals carry a formation
 energy from two databases that worked at different levels of theory, and are
@@ -246,55 +256,37 @@ experimental catalogues and the computed repositories are not reporting the same
 quantity. A union that merged these columns by name would have reported every one
 of them as a discrepancy.
 
-This is a different quantity from the reproducibility of the underlying theory,
-and the distinction decides how the numbers should be read. A comparison of
-forty independent implementations of density functional theory, run on the same
-systems with the same functional, established that the codes agree on the
-equation of state to well within the differences reported here
-\cite{lejaeghere2016reproducibility}. What separates two databases is therefore
-not the solver. It is the accumulation of the choices each provider makes around
-it, the pseudopotentials, the functional, the convergence criteria and the
-elemental or anionic corrections applied afterwards, none of which is visible in
-a column of numbers labelled formation energy. The reproducibility of the theory
-bounds what a careful user could hope for. The disagreement measured here is what
-a user actually receives.
+Holding several databases against one another also exposes what no single-source
+check would question, and it does so at two scales. At the scale of the value,
+1{,}161 of the shared elastic moduli lie outside any physically plausible range,
+being negative or above 1000~GPa: 769 from one repository, 381 from another, the
+largest reaching $1.4\times10^{13}$~GPa. These are unconverged elastic-tensor fits
+published as they stand, and in isolation each is simply a number in a column;
+set against a partner value on the same crystal, each is immediately
+identifiable.
 
-Holding several databases against one another also exposes values that no
-single-source check would question. Among the shared elastic moduli, 1{,}161
-values lie outside any physically plausible range, being negative or above
-1000~GPa: 769 from one repository, 381 from another, the largest reaching
-$1.4\times10^{13}$~GPa. These are unconverged elastic-tensor fits published as
-they stand. In isolation each is a number in a column. Set against a partner
-value on the same crystal, each is immediately identifiable.
-
-The same comparison can qualify a whole column rather than a single value. NOMAD
-aggregates calculations deposited by their authors rather than running a campaign
-of its own, so it carries several levels of theory for one crystal and records
-which is which. Held against the largest computed repository at matching levels,
-its two band-gap columns behave differently. The semilocal column agrees within
+At the scale of a whole column, one source carries several levels of theory for
+one crystal and records which is which, so its columns can be judged separately.
+Held against the largest computed repository at matching levels, its two
+band-gap columns behave quite differently. The semilocal column agrees within
 50~meV on 84.4\% of the 1{,}093{,}091 crystals the two share and correlates at
-$r=0.85$ over the 75{,}420 that both call gapped. The meta-GGA column, on 345{,}421
-shared crystals, correlates at $r=0.09$: it reports a zero gap for 94.7\% of them
-against the partner's 86.8\%, and on 9.2\% it returns exactly zero where the
-partner returns more than 0.5~eV. The error has a direction. Against each of the
-six large computed repositories it overlaps, NOMAD returns zero where the partner
-returns a gap above 0.5~eV two to five times more often than the reverse, and at
-the meta-GGA level up to twelve times; two curated repositories disagree in this
-way about equally often in both directions and five to ten times less often in
-absolute terms. A one-sided error
-of this shape is what a gap read off whatever density of states the depositor
-uploaded would produce: a coarse $k$-mesh with smearing closes a small gap and
-never opens one. None of this is visible from inside the column,
-where it reads as a list of metals. It is legible here only because the same
-crystals carry an independent value, and separable from the usable semilocal
-column only because the level of theory travelled with every number.
+$r=0.85$ over the 75{,}420 both call gapped. The meta-GGA column, on 345{,}421
+shared crystals, correlates at $r=0.09$, and on 9.2\% of them returns exactly
+zero where the partner returns more than 0.5~eV. The error has a direction:
+against each of the six large repositories it overlaps, this source calls a
+gapped crystal metallic two to five times more often than the reverse, and at the
+meta-GGA level up to twelve times, where two curated repositories disagree about
+equally often in either direction and far less often in absolute terms. That
+one-sidedness is the signature of a gap read off whatever density of states a
+depositor uploaded, since a coarse $k$-mesh with smearing closes a small gap and
+never opens one. From inside the column the result reads as a list of metals. It
+is legible here only because the same crystals carry an independent value, and
+separable from the usable semilocal column only because the level of theory
+travelled with every number.
 
-\subsection{What the record covers}
-\label{sec:coverage}
-
-The second thing a forward screen inherits is the pool, and the question is how
-much of it carries any label at all. The corpus is complete enough to measure
-this, and the deficiency is large. Of the 166 properties in the registry, 151 carry at least one value. Treating the pool and
+The pool is the second inheritance, and the question it raises is how much of it
+carries any label at all. The corpus is complete enough to measure this, and the
+deficiency is large. Of the 166 properties in the registry, 151 carry at least one value. Treating the pool and
 those 151 properties as a matrix gives 2{,}203{,}163{,}235 cells, of which
 99{,}493{,}466 are occupied, so the matrix is 4.52\% full
 (Fig.~\ref{fig:landscape}a). Occupancy is extremely uneven: nine properties cover
@@ -373,8 +365,7 @@ spectra held says little about the number of crystals reached. And only 66 of th
 properties are reported by two or more databases, and the other 85 have a single
 supplier and therefore no independent check of any kind. Of the 99{,}493{,}466
 occupied cells, 6.3\% carry values from two or more sources, which is the exact
-extent of the corpus on which the comparison of Section~\ref{sec:redundancy} is
-possible.
+extent of the corpus on which the comparison of the labels above is possible.
 
 Sparse as the matrix is, part of it was filled by the integration itself, and
 measuring that part says what a unified record is worth beyond tidiness
@@ -395,25 +386,26 @@ give to the record without receiving from it.
 
 This figure depends on ingestion order, since a database's own structures are by
 construction those no earlier source held, and only later arrivals can annotate
-them; the most recent source is therefore necessarily at zero. The
+them; the source ingested last is therefore necessarily at zero. The
 order-independent statement is that 3{,}153{,}748 crystals, 22.9\% of all that
 carry any value, draw their property record from more than one database. Either
-way the same conclusion follows for a forward screen. Almost a quarter of the
-labelled record is not available from any single provider, and a campaign that
-loads one database is working from a strictly smaller property layer than the one
-that exists, without any indication of what it is missing.
+way the same conclusion follows. Almost a quarter of the labelled record is not
+available from any single provider, so a campaign that loads one database ranks a
+smaller pool than the one that exists and has no indication of what it is
+missing. The two inheritances therefore bound a screen from opposite directions:
+the pool fixes what it can be asked about, and the labels fix how far its answer
+can be trusted.
 
 \subsection{Probing the limit of forward screening}
 \label{sec:completion}
 
-The two bounds of Sections~\ref{sec:redundancy} and \ref{sec:coverage} can be
-moved together. Completing the property layer by prediction over the whole record
+The two bounds of Section~\ref{sec:inherits} can be moved together. Completing the property layer by prediction over the whole record
 replaces one database's slice with the deduplicated union as the pool, and
 carries every label's cross-source spread beside it. That spread is the
 resolution with which a completed value can be read, because a prediction closer
 to the truth than the sources are to each other cannot be shown to be so.
-Section~\ref{sec:redundancy} therefore sets how finely the results of this
-section can be read. Filling the gap by calculation would take an effort no single
+The agreement measured in Section~\ref{sec:inherits} therefore sets how finely
+the results of this section can be read. Filling the gap by calculation would take an effort no single
 group can supply. Filling it by prediction needs three things no single database
 provides: structures deduplicated, so that a train--test split falls on distinct
 crystals rather than on records, labels that keep the quantity they denote rather
@@ -466,7 +458,7 @@ dioxide uptake is reported at four distinct grand-canonical conditions and
 hydrogen uptake at five temperature and pressure combinations, so a material
 legitimately carries several different correct values and taking their median
 produces a number that is not any physical quantity. The third is the
-cross-database disagreement of Section~\ref{sec:redundancy}, which here becomes
+cross-database disagreement of Section~\ref{sec:inherits}, which here becomes
 an operational quantity rather than an observation: across the 176 training sets,
 5{,}856{,}861 crystals carry labels from two or more databases and 522{,}739 of
 them disagree by more than a quarter of the target's standard deviation. Those
@@ -518,10 +510,9 @@ Searching the known set for a material that already has the property wanted does
 not require that the property have been computed, because a surrogate model can
 rank crystals nobody has evaluated, and that is how such campaigns are run. What
 is bounded is the pool over which the ranking is taken. A campaign screens the
-repository it loaded, and the coverage of Section~\ref{sec:coverage} sets what
-any single repository can offer as training signal, while
-Section~\ref{sec:redundancy} sets how far its labels can be trusted where a
-second source exists. Running the completion over the whole corpus, within the
+repository it loaded, and Section~\ref{sec:inherits} sets both what any single
+repository can offer as training signal and how far its labels can be trusted
+where a second source exists. Running the completion over the whole corpus, within the
 domains of Fig.~\ref{fig:completion}c,d, changes both terms at once: the pool
 becomes the deduplicated record rather than one provider's slice of it, and every
 label carries the spread of the sources that reported it. That is what measures a

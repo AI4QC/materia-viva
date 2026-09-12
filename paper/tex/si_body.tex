@@ -293,6 +293,27 @@ for magnetisation, 5~GPa for the moduli and 2\% for density. Source pairs sharin
 fewer than 200 materials are not reported. The complete pair table is
 Table~\ref{tab:pairs}.
 
+A worked case shows what the protocol is for. One source in the corpus
+aggregates calculations deposited by their authors rather than running a campaign
+of its own, so it carries several levels of theory for one crystal. Held against
+the largest computed repository at matching levels, its two band-gap columns
+behave differently. The semilocal column agrees within 50~meV on 84.4\% of the
+1{,}093{,}091 crystals the two share, and correlates at $r=0.85$ over the
+75{,}420 that both call gapped. The meta-GGA column, on 345{,}421 shared
+crystals, correlates at $r=0.09$; it reports a zero gap for 94.7\% of them against
+the partner's 86.8\%, and on 9.2\% it returns exactly zero where the partner
+returns more than 0.5~eV. The discrepancy has a direction. Against each of the six
+large computed repositories this source overlaps, it calls a gapped crystal
+metallic between two and five times more often than the reverse at the semilocal
+level, and up to twelve times more often at the meta-GGA level, whereas two
+curated repositories disagree in this way about equally often in either direction
+and five to ten times less often in absolute terms. One-sidedness of that shape is
+what a gap read off whatever density of states a depositor uploaded would produce,
+since a coarse $k$-mesh with smearing closes a small gap and never opens one. Had
+the two columns been reduced to a single median per crystal, as the protocol did
+before it was made level-consistent, neither would have been separable from the
+other and the source would have been measured against its own mixture.
+
 Two cautions apply to its interpretation. Agreement between two databases is not
 evidence of independence: pairs whose median absolute difference is exactly zero
 are carrying the same underlying calculation, and the table separates them from

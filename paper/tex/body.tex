@@ -130,34 +130,58 @@ the corpus would have to be rebuilt from the beginning to connect them.
 \label{sec:inherits}
 
 A forward screen inherits two things from whichever database it loads: the labels
-it trains on and the pool it ranks. Neither is a property of the method, and
-neither can be measured from inside a single database, because each is a property
-of the record as a whole. Measured on the resolved union, both are worse than the
-database a campaign loads is able to report. Where two independent sources
-describe the same crystal they disagree by more than the margin conventionally
-used to decide whether a compound is stable; and almost a quarter of the labelled
-record is unavailable from any single provider. This section establishes the two
-in that order.
+it trains on and the pool it ranks. Neither can be measured from inside that
+database, because each is a property of the record as a whole, and measured on the
+resolved union both turn out to be worse than the loaded database is able to
+report. Where two independent sources describe the same crystal they disagree by
+more than the margin conventionally used to decide whether a compound is stable,
+and almost a quarter of the labelled record is unavailable from any single
+provider. This section establishes the two, and they are the reason the
+completion of Section~\ref{sec:completion} has to be run over the whole record
+rather than over a slice of it.
 
-Measuring the labels begins with how much of the record is one crystal counted
-several times, which no member source can answer and a formula-level join would
-answer wrongly in both directions. Of the 13{,}902{,}836 structures carrying at
-least one reference, 3{,}233{,}769 carry two or more
-(Fig.~\ref{fig:redundancy}a), and the distribution falls steeply while reaching
-far: 2{,}395{,}350 crystals are described by exactly two databases, 568{,}507 by
-three, 2{,}416 by thirteen and two by 25. Redundancy is concentrated where the
-field has concentrated its effort. The largest single overlap holds
-1{,}672{,}167 shared crystals, and the eight largest are all between
-general-purpose density functional theory repositories
-(Fig.~\ref{fig:redundancy}b); the enumerated framework libraries sit outside this
-entirely, sharing almost nothing with the general-purpose repositories or with
-one another, so the blank rows of the overlap matrix record where effort has gone
-rather than a gap in the corpus. These are the numbers a federated query cannot
-report and a formula-level join would misstate in both directions, and they bound
-what any cross-database evaluation can claim: for the largest overlapping pairs,
-a model trained on one repository and tested on another is tested on hundreds of
-thousands of crystals it has already seen, unless the split is taken over
-structures.
+The labels first. Of the 13{,}902{,}836 structures carrying at least one
+reference, 3{,}233{,}769 carry two or more, the largest single overlap holding
+1{,}672{,}167 shared crystals (Fig.~\ref{fig:redundancy}a,b). That redundancy is
+what makes a comparison possible at all, and it also bounds what any
+cross-database evaluation can claim, since for the largest overlapping pairs a
+model trained on one repository and tested on another is tested on hundreds of
+thousands of crystals it has already seen unless the split is taken over
+structures. The distribution of that redundancy over databases and over degree is
+Supplementary Note~\ref{si-note:agreement}.
+
+Comparing the redundant copies is possible only because every value kept the
+method that produced it. Each method string is collapsed to a level of theory and
+two databases are held against one another only where they answer the same
+question, so that a pair meeting only across that boundary is not compared at all
+(Fig.~\ref{fig:redundancy}d--f; Supplementary Note~\ref{si-note:agreement}).
+On that basis 846{,}303 crystals carry a formation energy from two or more
+databases at one level of theory and 1{,}360{,}573 carry a band gap. Concordance
+falls as the quantity becomes harder to compute: within 50~meV\,atom$^{-1}$,
+65.3\% of formation energies and 64.2\% of hull distances agree, within 50~meV
+82.1\% of band gaps do, and within 5~GPa 44.3\% of bulk moduli do. The tail
+matters more than these medians. The tenth of shared formation energies that
+agree least differ by more than 205~meV\,atom$^{-1}$
+(Fig.~\ref{fig:redundancy}e), several times the hull-distance margins
+conventionally used to call a compound stable
+\cite{sun2016thermodynamic,bartel2020critical}. Whether a candidate passes such a
+filter can therefore depend on which database supplied its energy, and in a
+corpus without structural identity that dependence is not merely unquantified but
+unobservable.
+
+Three features of the comparison sharpen that result rather than softening it,
+and each is established in Supplementary Note~\ref{si-note:agreement}. Agreement
+between two databases is not evidence of independence: the pairs that agree most
+closely are those carrying one underlying calculation twice, so the concordant
+fractions above overstate the true level of corroboration. The disagreement is
+not a failure of the underlying theory, which independent implementations
+reproduce far more closely than this \cite{lejaeghere2016reproducibility}, but of
+the choices each provider makes around the solver, so it will not be removed by
+better software; for the major pairs it appears as an offset of up to
+177~meV\,atom$^{-1}$ carrying one sign, with correlations above 0.85. And it is
+not an artefact of comparing different quantities, since pairs that meet only
+across a boundary of theory are excluded, which lowers the measured disagreement
+rather than raising it.
 
 \begin{figure}[p]
   \centering
@@ -187,101 +211,35 @@ structures.
   \label{fig:redundancy}
 \end{figure}
 
-Redundancy is only interesting if the redundant copies can be compared, and they
-can be compared here only because every value kept the method that produced it.
-Every method string is collapsed to a level of theory, and two databases are held
-against one another only where they answer the same question: a semilocal value
-is compared with a semilocal value, a measurement with a measurement, and a pair
-that meets only across that boundary is not compared at all
-(Fig.~\ref{fig:redundancy}d--f; Supplementary Note~\ref{si-note:agreement}).
-The comparison is possible on a large sample: 1{,}360{,}573 crystals carry a band
-gap from two or more databases at one level of theory, 846{,}303 a formation
-energy, 376{,}794 a hull distance, 145{,}346 a magnetisation and 15{,}303 a bulk
-modulus. Concordance falls as the quantity becomes harder to compute. Within
-50~meV, 82.1\% of shared band gaps agree. Within 50~meV\,atom$^{-1}$, 65.3\% of
-formation energies and 64.2\% of hull distances do, and within 5~GPa, 44.3\% of
-bulk moduli and 49.3\% of shear moduli do.
-
-The tail matters more than the median. The tenth of shared formation energies
-that agree least differ by more than 205~meV\,atom$^{-1}$
-(Fig.~\ref{fig:redundancy}e), which is several times the hull-distance margins
-conventionally used to call a compound stable
-\cite{sun2016thermodynamic,bartel2020critical}. Whether a candidate passes such a
-filter can therefore depend on which database supplied its energy, and in a
-corpus without structural identity that dependence is not merely unquantified but
-unobservable. This is the first of the section's two results.
-
-It survives three checks, and each sharpens it rather than softening it. The
-first is that agreement between two databases is not evidence of independence, so
-the concordant fraction quoted above overstates it. Resolving the comparison by
-pair separates two regimes that a single agreement figure would merge
-(Fig.~\ref{fig:redundancy}f). Some pairs agree almost exactly.
-Two of the largest repositories share 138{,}959 crystals whose band gaps have a
-median absolute difference of exactly zero and agree within tolerance for 92.3\%
-of them. That is not independent confirmation but the signature of shared
-provenance, two datasets carrying one underlying calculation, and reading it as
-corroboration would invert its meaning. Other pairs disagree systematically. For
-formation energy the median signed difference between the Materials Project and
-JARVIS-DFT is $+70.7$~meV\,atom$^{-1}$ against a median absolute difference of
-92.7~meV\,atom$^{-1}$, so nearly all of the disagreement carries one sign. The
-corresponding figures are $+171$ against 177~meV\,atom$^{-1}$ for the Materials
-Project against AFLOW. Pearson correlations across these pairs remain between
-0.85 and 0.99, so what separates the databases is an offset and a scale rather
-than noise. This is precisely the structure that merging columns by name would
-absorb without trace, and precisely the structure a model trained on the merged
-column would learn as if it were physics.
-
-The second check is that the offsets are not a failure of the underlying theory,
-so they will not be removed by better software. Forty independent
-implementations of density
-functional theory, run on the same systems with the same functional, agree on the
-equation of state to well within the differences reported here
-\cite{lejaeghere2016reproducibility}. What separates two databases is therefore
-not the solver but the accumulation of choices each provider makes around it, the
-pseudopotentials, the functional, the convergence criteria and the elemental or
-anionic corrections applied afterwards, none of which is visible in a column of
-numbers labelled formation energy. The reproducibility of the theory bounds what
-a careful user could hope for; the disagreement measured here is what a user
-actually receives.
-
-The third check is that the disagreement is not an artefact of comparing
-different quantities, and the method strings are what make it checkable. A
-further 24{,}380 crystals carry a formation energy from two databases that worked
-at different levels of theory; they are deliberately left uncompared, because the
-difference between a tight-binding and a semilocal energy is not a disagreement.
-For density the excluded overlap is the larger part of it, 37{,}770 crystals
-against 4{,}651 compared, since the experimental catalogues and the computed
-repositories are not reporting the same quantity. Excluding these pairs lowers the
-measured disagreement rather than raising it, so the figures above are what
-remains after the comparison has been made fair. A union that merged the columns
-by name would have reported every excluded pair as a discrepancy instead.
-
-Measuring the disagreement is not all the comparison is good for. It also
-identifies what no single-source check would question, at two scales. At the scale of the value,
-1{,}161 of the shared elastic moduli lie outside any physically plausible range,
-being negative or above 1000~GPa, the largest reaching
-$1.4\times10^{13}$~GPa. These are unconverged elastic-tensor fits published as
-they stand, and in isolation each is simply a number in a column; set against a
-partner value on the same crystal, each is immediately identifiable. At the scale
-of the column, one source that carries several levels of theory for the same
-crystal turns out to supply one band-gap column that tracks an independent
-repository closely and another, at a different level, that correlates with it at
-$r=0.09$ because it reports almost every crystal as a metal
-(Supplementary Note~\ref{si-note:agreement}). From inside that column the result
-reads as a list of metals and nothing marks it as wrong. It is legible here only
-because the same crystals carry an independent value, and separable from the
-usable column beside it only because the level of theory travelled with every
-number.
-
 The pool is the second inheritance, and the question it raises is how much of it
-carries any label at all. The answer is: very little, and what there is was not
-distributed by importance, nor even by cost. Of the 166 properties in the registry, 151 carry at least one value. Treating the pool and
-those 151 properties as a matrix gives 2{,}203{,}163{,}235 cells, of which
-99{,}493{,}466 are occupied, so the matrix is 4.52\% full
-(Fig.~\ref{fig:landscape}a). Occupancy is extremely uneven: nine properties cover
-more than 40\% of the pool, while 97 of the 151 cover less than 1\% and 58 cover
-less than 0.1\% (Supplementary Table~\ref{si-tab:properties}). Half of all
-crystals carry at most seven of the 151 properties (Fig.~\ref{fig:landscape}c).
+carries any label at all. The answer is: very little, and what there is was
+distributed neither by importance nor by cost. Of the 166 properties in the
+registry 151 carry at least one value, and treating the pool and those 151 as a
+matrix gives 2{,}203{,}163{,}235 cells of which 99{,}493{,}466 are occupied, so
+the matrix is 4.52\% full (Fig.~\ref{fig:landscape}a). Occupancy is extremely
+uneven: nine properties cover more than 40\% of the pool while 97 of the 151
+cover less than 1\%, and half of all crystals carry at most seven properties
+(Fig.~\ref{fig:landscape}c). Only 66 of the 151 are reported by two or more
+databases; the other 85 have a single supplier and therefore no independent check
+of any kind.
+
+The gradient follows price, and then departs from it in a way that identifies
+what it really follows (Fig.~\ref{fig:landscape}b). Of 69 general-purpose
+properties, the 19 that are read off a self-consistent calculation a database
+performs anyway have a median coverage of 4.56\% of the pool, while the 50 that
+require a calculation of their own have a median of 0.107\%, lower by a factor of
+43, and \emph{not one of the fifty reaches 10\%}. Within that second group,
+however, the linear-response properties are the more expensive and reach a higher
+median coverage (1.06\%) than those obtainable from a few extra self-consistent
+runs (0.029\%), a thirty-six-fold inversion of what price predicts. The elastic
+and dielectric tensors were the target of dedicated high-throughput campaigns
+\cite{dejong2015charting,petousis2017high}; quantities such as the work function,
+cheaper to obtain, were the target of none. What the coverage gradient records is
+therefore not the difficulty of a calculation but whether somebody once organised
+a campaign to perform it, and an expensive property that no campaign addressed is
+not evidence that the property is unimportant, only that its turn has not come.
+That map is legible only once the databases sit on one structure pool, because no
+single repository can report on effort it did not spend.
 
 \begin{figure}[p]
   \centering
@@ -315,72 +273,23 @@ crystals carry at most seven of the 151 properties (Fig.~\ref{fig:landscape}c).
   \label{fig:landscape}
 \end{figure}
 
-The gradient does not follow scientific importance. It follows price
-(Fig.~\ref{fig:landscape}b). Grouping 69 general-purpose properties, excluding
-those whose domain is one material family, by the calculation each requires
-(Supplementary Note~\ref{si-note:tiers}), 19 are read off a single
-self-consistent calculation a database performs anyway. Their median coverage is
-4.56\% of the pool and eight exceed 10\%. The remaining 50 require a calculation
-of their own, from an extra slab or strained cell through linear response to
-anharmonic phonons, transport integrals and hybrid functionals. Their median
-coverage is 0.107\%, lower by a factor of 43, and \emph{not one of the fifty
-reaches 10\%}.
-
-Cost is not the whole ordering, and the exception identifies what the ordering
-really is. Within the second group, linear-response properties are the more
-expensive to compute yet reach a higher median coverage (1.06\%) than the
-properties obtainable from a few extra self-consistent runs (0.029\%), a
-thirty-six-fold inversion of what price alone predicts. The elastic and
-dielectric tensors were the explicit target of dedicated high-throughput
-campaigns \cite{dejong2015charting,petousis2017high}, while quantities such as the
-work function, cheaper to obtain, were not the target of any. What the coverage
-gradient records is therefore not the difficulty of a calculation but whether
-somebody once organised a campaign to perform it, and coverage is a map of the
-field's attention rather than of physical cost. The distinction matters for what
-can be inferred from a gap: an expensive property that no campaign ever addressed
-is not evidence that the property is unimportant, only that its turn has not come.
-This map is legible only once the databases sit on one structure pool, because
-no single repository can report on effort it did not spend.
-
-The same stratification governs non-scalar data and provenance. The curve store
-holds 1{,}198{,}897 spectra across ten types but reaches only 298{,}662 crystals,
-2.0\% of the pool (Fig.~\ref{fig:landscape}e). X-ray absorption spectra are the
-most numerous of the ten and among the least widely spread, because one crystal
-carries a separate spectrum for every absorbing element and edge, so the count of
-spectra held says little about the number of crystals reached. And only 66 of the 151 populated
-properties are reported by two or more databases, and the other 85 have a single
-supplier and therefore no independent check of any kind. Of the 99{,}493{,}466
-occupied cells, 6.3\% carry values from two or more sources, which is the exact
-extent of the corpus on which the comparison of the labels above is possible.
-
-Sparse as the matrix is, part of it was filled by the integration itself, and
-measuring that part gives the section's second result
-(Fig.~\ref{fig:landscape}f). Every structure has exactly one contributor, the
-database that introduced it, and we ask how much of its property record came from
-somewhere else. Of the 6{,}266{,}517 structures admitted during assembly that
-carry any value at all, 1{,}637{,}460, or 26.1\%, carry at least one their own
-contributor never reported; 3{,}204{,}768 of their 40{,}798{,}399 filled cells,
-7.9\%, were supplied by another database. The effect is largest where the
-chemistry is crowded. Two thirds of the structures AFLOW contributed gained a
-value it never published, as did half of those from the Matbench Discovery set
-and 45\% of the crystallographic entries from COD, which arrive carrying little
-beyond their measured geometry and leave with a computed value attached to nearly
-half of them. It is
-smallest, close to zero, for the enumerated libraries of hypothetical zeolites
-and metal--organic frameworks, whose structures nobody else has computed: they
-give to the record without receiving from it.
-
-This figure depends on ingestion order, since a database's own structures are by
-construction those no earlier source held, and only later arrivals can annotate
-them; the source ingested last is therefore necessarily at zero. The
-order-independent statement is that 3{,}153{,}748 crystals, 22.9\% of all that
-carry any value, draw their property record from more than one database. Either
-way the same conclusion follows. Almost a quarter of the labelled record is not
-available from any single provider, so a campaign that loads one database ranks a
-smaller pool than the one that exists and has no indication of what it is
-missing. The two inheritances therefore bound a screen from opposite directions:
-the pool fixes what it can be asked about, and the labels fix how far its answer
-can be trusted.
+Sparse as the matrix is, part of it was filled by the integration itself, which
+is the section's second result (Fig.~\ref{fig:landscape}f). Every structure has
+exactly one contributor, the database that introduced it, and of the 6{,}266{,}517
+structures admitted during assembly that carry any value, 1{,}637{,}460, or
+26.1\%, carry at least one value their own contributor never reported. The effect
+is largest where the chemistry is crowded, two thirds of the structures AFLOW
+contributed having gained a value it never published, and close to zero for the
+enumerated libraries of hypothetical frameworks, whose structures nobody else has
+computed. Because a database's own structures are by construction those no
+earlier source held, this figure depends on ingestion order; the order-independent
+statement is that 3{,}153{,}748 crystals, 22.9\% of all that carry any value,
+draw their property record from more than one database. Either way, almost a
+quarter of the labelled record is not available from any single provider, so a
+campaign that loads one database ranks a smaller pool than the one that exists
+and has no indication of what it is missing. The two inheritances bound a screen
+from opposite directions: the pool fixes what it can be asked about, and the
+labels fix how far its answer can be trusted.
 
 \subsection{Probing the limit of forward screening}
 \label{sec:completion}
@@ -423,8 +332,9 @@ group can supply.
   \label{fig:completion}
 \end{figure}
 
-A census of the database establishes how much is actually trainable
-(Fig.~\ref{fig:completion}a). The unit that matters is not the property but the
+A census establishes the first half of that claim, which is that there is enough
+to train on (Fig.~\ref{fig:completion}a). The unit that matters is not the
+property but the
 property at one level of theory, because a name such as band gap covers several
 different physical quantities that a model cannot distinguish from structure
 alone. Split that way, the 151 populated properties yield 513 candidate tasks,
@@ -436,8 +346,9 @@ default policy that keeps the largest level of theory per property produced 176
 sets covering 116 properties and 93{,}864{,}594 labels, each with a
 chemistry-aware train, validation and test split.
 
-The four constraints are each a direct consequence of the integration reported
-above. The first is that a property name is not a label definition
+The four constraints are the second half, and each is a direct consequence of
+the integration reported above. The first is that a property name is not a label
+definition
 (Fig.~\ref{fig:completion}b).
 Band gap carries 15 distinct levels of theory, of which the semilocal group holds
 83\% and no other reaches 5\%. The systematic offsets between them
@@ -494,28 +405,23 @@ enlarged the substrate against which the next database was matched.
 What such a completion would settle is worth stating before it is attempted,
 because it is the reason the corpus was assembled rather than merely enlarged.
 Searching the known set for a material that already has the property wanted does
-not require that the property have been computed, because a surrogate model can
+not require that the property have been computed, since a surrogate model can
 rank crystals nobody has evaluated, and that is how such campaigns are run. What
-is bounded is the pool over which the ranking is taken. A campaign screens the
-repository it loaded, and Section~\ref{sec:inherits} sets both what any single
-repository can offer as training signal and how far its labels can be trusted
-where a second source exists. Running the completion over the whole corpus, within the
-domains of Fig.~\ref{fig:completion}c,d, changes both terms at once: the pool
-becomes the deduplicated record rather than one provider's slice of it, and every
-label carries the spread of the sources that reported it.
+is bounded is the pool the ranking is taken over and the labels the ranking was
+learned from, and Section~\ref{sec:inherits} measured both. Running the
+completion over the whole corpus, within the domains of
+Fig.~\ref{fig:completion}c,d, moves them together: the pool becomes the
+deduplicated record rather than one provider's slice of it, and every prediction
+carries the spread of the sources that trained it.
 
-That is what measures a quantity the field has never had: how much of the known
-record has been passed over for want of a calculation rather than for want of
-merit. A large yield would mean that forward screening has been
-operating far inside its own reach. A small one would mean the reach is nearly
-exhausted and that further progress has to come from designing structures rather
-than finding them. The same corpus serves that second route as well, since a
-generative model needs exactly what it holds: structures deduplicated across the
-whole known record, so that novelty is judged against everything published rather
-than against one repository, and property labels that name the quantity they
-denote, so that a model can be conditioned on a defined target. Which of the two
-answers the completed layer gives is an empirical question, and it is the one the
-next stage is built to decide.
+That is what measures a quantity the field has not had a way to ask about: how
+much of the known record has been passed over for want of a calculation rather
+than for want of merit. The answer is consequential in either direction. A large
+yield would mean that forward screening has been operating far inside its own
+reach, with materials that can already be made waiting to be recognised. A small
+one would mean the reach is nearly exhausted, and that further progress has to
+come from designing structures rather than from finding them \textemdash{} which
+is the route the next section turns to.
 
 \PENDINGGNN
 
@@ -544,10 +450,16 @@ over-merging in the enumerated framework libraries, where a bonding-graph
 fingerprint collapses more than $10^5$ distinct hypothetical frameworks onto a
 few hundred pool materials, and Supplementary Note~\ref{si-note:fingerprint}
 states the domain within which that fingerprint is valid. Both are failures of the criterion rather than of the generator, and no published
-novelty figure states which criterion produced it. What this record offers the
-route is therefore not a better score but a reference that can be named: the
-resolved corpus rather than a few of its largest members, and a matching rule
-whose domain of validity is stated rather than assumed.
+novelty figure states which criterion produced it.
+
+What this record offers the route is therefore not a better score but a reference
+that can be named, and a criterion that travels with the number. Two groups
+auditing the same generator against the resolved corpus, under the same matching
+rule and the same stated domain of validity, obtain the same novelty fraction;
+against a reference assembled from a few of the largest repositories under an
+unstated rule, they need not. That is the condition under which a novelty claim
+becomes a measurement rather than a report, and it is what the audit reported
+below is built to supply.
 
 \PENDINGNOVELTY
 

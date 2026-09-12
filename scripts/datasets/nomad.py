@@ -15,7 +15,11 @@ workstation.  This downloader therefore separates the export into four stages:
     material and property-bearing entry sets for selective Archive downloads.
 ``archive``
     Download only the requested Archive branches (structures, all properties,
-    electronic bands/DOS, phonons, or spectra) in bounded gzip pages.
+    electronic bands/DOS, phonons, or spectra) in bounded gzip pages.  The
+    selection can be split into deterministic ``entry_id`` shards
+    (``--shards N --shard K`` for one process per shard, or ``--workers N`` to
+    run every shard concurrently inside one process); each shard keeps its own
+    resumable manifest under ``archive/<kind>/shard-KK-of-NN/``.
 
 Every network phase is independently resumable.  Pages are written through a
 ``.building`` file and committed to an atomic manifest only after validation
@@ -29,14 +33,19 @@ import argparse
 import gzip
 import hashlib
 import json
+import random
 import shutil
 import sqlite3
 import sys
+import threading
 import time
+import zlib
 from collections.abc import Callable, Iterator, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from http.client import HTTPException
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -52,6 +61,11 @@ except ModuleNotFoundError as error:
 API_BASE = "https://nomad-lab.eu/prod/v1/api/v1"
 USER_AGENT = "MateriaViva-NOMAD-export/1.0"
 MANIFEST_SCHEMA_VERSION = 2
+# Archive pages are addressed by entry_id, so the batch size only sets how many
+# entries one request carries; fewer, larger requests suit NOMAD's per-request
+# token bucket.  Responses for resolved properties weigh ~270 KB of JSON per
+# entry, so 1000 already means ~2 GB of Python objects per worker.
+MAX_ARCHIVE_BATCH = 5000
 DEFAULT_RESERVE_BYTES = 50 * 1024**3
 SNAPSHOT_TIME_FIELD = "entry_create_time"
 
@@ -253,6 +267,232 @@ def _check_capacity(path: Path, reserve_bytes: int) -> None:
         )
 
 
+RETRYABLE_HTTP = {429, 500, 502, 503, 504}
+
+
+def _retry_after_seconds(header: str | None) -> float:
+    if not header:
+        return 0.0
+    try:
+        return max(0.0, float(header))
+    except ValueError:
+        return 0.0
+
+
+def retry_delay(
+    attempt: int, *, status: int | None = None, retry_after: str | None = None
+) -> float:
+    """Seconds to wait before retry number ``attempt`` (0-based).
+
+    A ``Retry-After`` header always wins.  HTTP 429 means NOMAD is throttling
+    this client, and our Archive requests take 30-60 s each, so a short
+    exponential backoff (1, 2, 4 s...) would only collide with the requests
+    still in flight; 429 therefore starts at 15 s and grows to five minutes,
+    with jitter so concurrent shards do not retry in lockstep.  Other errors
+    keep the original 1 s doubling capped at two minutes.
+    """
+    if retry_after:
+        try:
+            return max(0.0, float(retry_after))
+        except ValueError:
+            pass
+    if status == 429:
+        base = min(300.0, 15.0 * 2**attempt)
+        return base + random.uniform(0.0, 0.25 * base)
+    return float(min(120, 2**attempt))
+
+
+class AdaptiveLimiter:
+    """Bound the requests in flight across shard threads, adapting to HTTP 429.
+
+    NOMAD throttles a client that keeps too many heavy Archive queries in
+    flight (measured 2026-09-05: four concurrent 100-entry queries passed,
+    eight did not, and four 500-entry queries were refused after a burst of
+    earlier requests).  The limit is not documented, so instead of guessing a
+    constant this limiter starts at ``capacity`` slots, gives one slot back
+    every time a request is throttled, and re-adds a slot after ``recovery``
+    consecutive successes, never exceeding the initial capacity.
+    """
+
+    def __init__(
+        self,
+        capacity: int,
+        *,
+        floor: int = 1,
+        recovery: int = 20,
+        min_interval: float = 2.0,
+        initial: int | None = None,
+    ) -> None:
+        """``capacity`` is the ceiling; ``initial`` (default: the ceiling) is where the
+        in-flight cap starts, so a run can begin cautiously and still discover
+        headroom later, one slot per ``recovery`` consecutive successes."""
+        if capacity < 1 or floor < 1 or floor > capacity or recovery < 1:
+            raise ValueError("invalid limiter parameters")
+        if min_interval < 0:
+            raise ValueError("min_interval must not be negative")
+        start = capacity if initial is None else initial
+        if not floor <= start <= capacity:
+            raise ValueError("initial must lie between floor and capacity")
+        self.ceiling = capacity
+        self.floor = floor
+        self.recovery = recovery
+        # NOMAD answers a burst of simultaneous requests with 429 even when the
+        # steady-state concurrency is fine, so request starts are spaced out.
+        self.min_interval = min_interval
+        self._capacity = start
+        self._inflight = 0
+        self._successes = 0
+        self._throttles = 0
+        self._resume_at = 0.0
+        self._last_start = float("-inf")
+        self._urgent_waiting = 0
+        self._reserved = 0
+        self._probing = False
+        self._condition = threading.Condition()
+
+    def probe_due(self) -> bool:
+        """Claim the right to run one cheap concurrency probe, if one is due.
+
+        Growing the cap by simply admitting a second full request proved
+        expensive (2026-09-06): the newcomer took NOMAD's single service slot
+        and the request already queued was rejected five minutes later.  A
+        probe is instead a tiny request sent while a real one is in flight;
+        only a 200 on that probe grows the cap.
+        """
+        with self._condition:
+            if (
+                self._probing
+                or self._capacity >= self.ceiling
+                or self._successes < self.recovery
+            ):
+                return False
+            self._probing = True
+            return True
+
+    def probe_result(self, accepted: bool, *, cooldown: float = 0.0) -> None:
+        with self._condition:
+            self._probing = False
+            self._successes = 0
+            if accepted and self._capacity < self.ceiling:
+                self._capacity += 1
+            elif not accepted and cooldown > 0:
+                self._resume_at = max(self._resume_at, time.monotonic() + cooldown)
+            self._condition.notify_all()
+
+    def reserve(self, delta: int) -> None:
+        """Reserve (delta > 0) or free (delta < 0) slots for urgent callers.
+
+        While ``reserved`` urgent streams exist, non-urgent callers may only
+        use the capacity above that number, so with a cap of 1 the urgent
+        stream runs back-to-back and non-urgent work waits for spare capacity.
+        """
+        with self._condition:
+            self._reserved = max(0, self._reserved + delta)
+            self._condition.notify_all()
+
+    @property
+    def capacity(self) -> int:
+        with self._condition:
+            return self._capacity
+
+    @property
+    def inflight(self) -> int:
+        with self._condition:
+            return self._inflight
+
+    @property
+    def consecutive_throttles(self) -> int:
+        with self._condition:
+            return self._throttles
+
+    def _pause(self, now: float) -> float:
+        return max(
+            0.0, self._resume_at - now, self._last_start + self.min_interval - now
+        )
+
+    def wait_seconds(self, now: float | None = None) -> float:
+        """Seconds a request starting now would wait for the cooldown/spacing."""
+        now = time.monotonic() if now is None else now
+        with self._condition:
+            return self._pause(now)
+
+    def acquire(self, priority: int = 0) -> None:
+        """Block until a request may start.
+
+        ``priority`` 0 is urgent: while any urgent caller is waiting, callers
+        with a lower priority (larger number) keep waiting even if a slot is
+        free, so a scarce concurrency budget goes to the phase that matters
+        most (structures before properties) instead of being shared evenly.
+        """
+        urgent = priority <= 0
+        with self._condition:
+            if urgent:
+                self._urgent_waiting += 1
+            try:
+                while True:
+                    pause = self._pause(time.monotonic())
+                    if urgent:
+                        free = self._inflight < self._capacity
+                    else:
+                        free = (
+                            self._inflight < self._capacity - self._reserved
+                            and self._urgent_waiting == 0
+                        )
+                    if pause <= 0 and free:
+                        break
+                    self._condition.wait(timeout=pause if pause > 0 else None)
+                self._inflight += 1
+                self._last_start = time.monotonic()
+            finally:
+                if urgent:
+                    self._urgent_waiting -= 1
+
+    def release(self) -> None:
+        with self._condition:
+            self._inflight -= 1
+            self._condition.notify_all()
+
+    def slot(self, priority: int = 0) -> "_LimiterSlot":
+        return _LimiterSlot(self, priority)
+
+    def __enter__(self) -> "AdaptiveLimiter":
+        self.acquire(0)
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        self.release()
+
+    def throttled(self, cooldown: float = 0.0) -> None:
+        """Record an HTTP 429: shrink concurrency and pause every thread.
+
+        ``cooldown`` seconds pass before any thread may start a request again,
+        so several shards cannot keep re-triggering the limit in turn.
+        """
+        with self._condition:
+            self._capacity = max(self.floor, self._capacity - 1)
+            self._successes = 0
+            self._throttles += 1
+            self._resume_at = max(self._resume_at, time.monotonic() + max(0.0, cooldown))
+
+    def succeeded(self) -> None:
+        with self._condition:
+            self._throttles = 0
+            self._successes += 1
+
+
+class _LimiterSlot:
+    def __init__(self, limiter: AdaptiveLimiter, priority: int) -> None:
+        self._limiter = limiter
+        self._priority = priority
+
+    def __enter__(self) -> "_LimiterSlot":
+        self._limiter.acquire(self._priority)
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        self._limiter.release()
+
+
 class NomadClient:
     """Small retrying client for NOMAD's public JSON API."""
 
@@ -263,16 +503,106 @@ class NomadClient:
         attempts: int = 6,
         timeout: int = 600,
         request_delay: float = 0.0,
+        limiter: AdaptiveLimiter | None = None,
+        throttle_patience: float = 3600.0,
+        throttle_base: float = 60.0,
+        throttle_cap: float = 600.0,
+        network_patience: float = 1800.0,
     ) -> None:
         if attempts < 1:
             raise ValueError("attempts must be positive")
+        if throttle_patience < 0 or throttle_base <= 0 or throttle_cap < throttle_base:
+            raise ValueError("invalid throttle parameters")
+        if network_patience < 0:
+            raise ValueError("network_patience must not be negative")
+        # NOMAD's Archive endpoint is metered per client as a small token bucket
+        # of *requests* (measured 2026-09-06: roughly 2-3 per minute with a
+        # burst of about 4, independent of request size).  A rejected request
+        # still spends a token, so after a 429 the client must stay silent for
+        # at least one refill period; the wait doubles with every consecutive
+        # 429 seen by this process, up to ``throttle_cap``.
+        self.throttle_base = throttle_base
+        self.throttle_cap = throttle_cap
+        # Seconds after a real request starts before its concurrency probe fires;
+        # long enough that the real request is certainly still being served.
+        self.probe_delay = 5.0
+        self.probe_timeout = 60
+        self.probe_reject_cooldown = 10.0
         self.base_url = base_url.rstrip("/")
         self.attempts = attempts
         self.timeout = timeout
         self.request_delay = request_delay
+        self.limiter = limiter
+        # Being throttled is not a failed request: keep waiting for up to this
+        # many cumulative seconds per request before giving up on it.
+        self.throttle_patience = throttle_patience
+        # A dropped connection, a 5xx or a DNS failure is usually an outage on
+        # one side of the wire, not a permanent error.  A fixed attempt count
+        # covered only ~4 minutes and lost a 23-day run to a cluster network
+        # outage (2026-09-11), so transient failures are bounded by time too:
+        # keep retrying (with the same 1..120 s backoff) for this many
+        # cumulative seconds before giving up on the request.
+        self.network_patience = network_patience
+
+    PROBE_PAYLOAD: dict[str, Any] = {
+        "owner": "public",
+        "query": {},
+        "pagination": {"page_size": 1},
+        "required": {"metadata": {"entry_id": "*"}},
+    }
+
+    def _schedule_probe(self) -> None:
+        timer = threading.Timer(self.probe_delay, self._run_probe)
+        timer.daemon = True
+        timer.start()
+
+    def _run_probe(self) -> None:
+        """Send one tiny Archive request outside the limiter and report the verdict."""
+        assert self.limiter is not None
+        request = Request(
+            f"{self.base_url}/entries/archive/query",
+            data=_compact_json(self.PROBE_PAYLOAD).encode("utf-8"),
+            method="POST",
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": USER_AGENT,
+            },
+        )
+        try:
+            with urlopen(request, timeout=self.probe_timeout) as response:
+                response.read()
+            self.limiter.probe_result(True)
+            print(
+                f"NOMAD accepted a concurrent probe; in-flight limit now "
+                f"{self.limiter.capacity}",
+                flush=True,
+            )
+        except HTTPError as error:
+            error.close()
+            self.limiter.probe_result(
+                False, cooldown=self.probe_reject_cooldown if error.code == 429 else 0.0
+            )
+            print(
+                f"NOMAD rejected the concurrent probe (HTTP {error.code}); "
+                f"in-flight limit stays {self.limiter.capacity}",
+                flush=True,
+            )
+        except Exception:  # noqa: BLE001 - a failed probe must never hurt the export
+            self.limiter.probe_result(False)
+
+    def throttle_cooldown(self, consecutive: int, retry_after: str | None) -> float:
+        """Seconds to stay silent after the ``consecutive``-th 429 in a row."""
+        escalated = min(self.throttle_cap, self.throttle_base * 2 ** max(0, consecutive))
+        jitter = random.uniform(0.0, 0.1 * escalated)
+        return max(_retry_after_seconds(retry_after), escalated + jitter)
 
     def request_json(
-        self, path: str, payload: dict[str, Any] | None = None
+        self,
+        path: str,
+        payload: dict[str, Any] | None = None,
+        *,
+        priority: int = 0,
     ) -> JsonValue:
         if self.request_delay:
             time.sleep(self.request_delay)
@@ -289,30 +619,91 @@ class NomadClient:
             },
         )
         last_error: Exception | None = None
-        for attempt in range(self.attempts):
+        attempt = 0  # real failures (5xx, network); throttling is counted apart
+        network_waited = 0.0
+        throttles = 0
+        throttled_for = 0.0
+        while True:
             try:
-                with urlopen(request, timeout=self.timeout) as response:
-                    raw = response.read()
-                    if response.headers.get("Content-Encoding", "").lower() == "gzip":
-                        raw = gzip.decompress(raw)
-                    return json.loads(raw)
+                with self.limiter.slot(priority) if self.limiter else _NO_LIMIT:
+                    if self.limiter is not None and self.limiter.probe_due():
+                        self._schedule_probe()
+                    with urlopen(request, timeout=self.timeout) as response:
+                        raw = response.read()
+                        if response.headers.get("Content-Encoding", "").lower() == "gzip":
+                            raw = gzip.decompress(raw)
+                if self.limiter is not None:
+                    self.limiter.succeeded()
+                return json.loads(raw)
             except HTTPError as error:
                 last_error = error
-                if error.code not in {429, 500, 502, 503, 504}:
+                if error.code == 429:
+                    error.close()  # drop the socket now instead of at GC (CLOSE-WAIT pile-up)
+                    # NOMAD's Retry-After is only a few seconds; obeying it
+                    # literally from several threads kept the limit tripped
+                    # (2026-09-06), so the wait escalates from ``throttle_base``
+                    # and pauses every thread of this process, not just this one.
+                    consecutive = (
+                        self.limiter.consecutive_throttles
+                        if self.limiter is not None
+                        else throttles
+                    )
+                    cooldown = self.throttle_cooldown(
+                        consecutive, error.headers.get("Retry-After")
+                    )
+                    throttles += 1
+                    throttled_for += cooldown
+                    if self.limiter is not None:
+                        self.limiter.throttled(cooldown)
+                    print(
+                        f"NOMAD throttled us (429); pausing {cooldown:.0f} s"
+                        + (
+                            f", in-flight limit now {self.limiter.capacity}"
+                            if self.limiter is not None
+                            else ""
+                        ),
+                        flush=True,
+                    )
+                    if throttled_for > self.throttle_patience:
+                        raise RuntimeError(
+                            f"NOMAD kept throttling for {throttled_for:.0f} s: "
+                            f"{request.full_url}"
+                        ) from error
+                    time.sleep(cooldown)
+                    continue
+                if error.code not in RETRYABLE_HTTP:
                     detail = error.read().decode("utf-8", errors="replace")
                     raise RuntimeError(
                         f"NOMAD HTTP {error.code} for {request.full_url}: {detail[:1000]}"
                     ) from error
-                retry_after = error.headers.get("Retry-After")
-                delay = float(retry_after) if retry_after else min(120, 2**attempt)
-            except (URLError, TimeoutError, ConnectionError) as error:
+                delay = retry_delay(
+                    attempt,
+                    status=error.code,
+                    retry_after=error.headers.get("Retry-After"),
+                )
+            except (HTTPException, OSError, EOFError, json.JSONDecodeError) as error:
+                # URLError, timeouts and connection resets are OSErrors; a
+                # response cut off mid-stream (NOMAD's 600 s server timeout
+                # while a slow query trickles, seen 2026-09-07) surfaces as
+                # http.client.IncompleteRead, and a truncated body as EOFError
+                # from gzip or a JSON decode error.  All of them mean "try again".
                 last_error = error
-                delay = min(120, 2**attempt)
-            if attempt + 1 < self.attempts:
-                time.sleep(delay)
+                delay = retry_delay(attempt)
+            attempt += 1
+            network_waited += delay
+            if attempt >= self.attempts and network_waited >= self.network_patience:
+                break
+            if attempt % 10 == 0:
+                print(
+                    f"NOMAD request still failing after {attempt} attempts "
+                    f"({network_waited:.0f} s): {type(last_error).__name__}",
+                    flush=True,
+                )
+            time.sleep(delay)
         assert last_error is not None
         raise RuntimeError(
-            f"NOMAD request failed after {self.attempts} attempts: {request.full_url}"
+            f"NOMAD request failed after {attempt} attempts over "
+            f"{network_waited:.0f} s: {request.full_url}"
         ) from last_error
 
 
@@ -855,41 +1246,111 @@ def build_archive_request(
     }
 
 
+def shard_of(entry_id: str, shards: int) -> int:
+    """Deterministic shard index of an entry id; stable across runs and hosts."""
+    return zlib.crc32(entry_id.encode("utf-8")) % shards
+
+
+def _validate_shard(shards: int, shard: int) -> None:
+    if shards < 1:
+        raise ValueError("shards must be positive")
+    if not 0 <= shard < shards:
+        raise ValueError(f"shard must be in [0, {shards}), got {shard}")
+
+
+def _register_shard_function(db: sqlite3.Connection) -> None:
+    db.create_function("nomad_shard", 2, shard_of, deterministic=True)
+
+
+def _selection_where(
+    kind: str, *, shards: int, shard: int
+) -> tuple[str, str, str, list[Any]]:
+    """Return (table, id column, extra WHERE clauses, their parameters)."""
+    if kind == "structures":
+        table, column, clauses, params = "materials", "representative_entry_id", "", []
+    else:
+        table, column = "entries", "entry_id"
+        clauses, params = " AND (property_mask & ?) != 0", [PROPERTY_BITS[kind]]
+    if shards > 1:
+        clauses += f" AND nomad_shard({column}, ?) = ?"
+        params += [shards, shard]
+    return table, column, clauses, params
+
+
 def _selection_batch(
     db: sqlite3.Connection,
     *,
     kind: str,
     last_entry_id: str | None,
     batch_size: int,
+    shards: int = 1,
+    shard: int = 0,
 ) -> list[str]:
     after = last_entry_id or ""
-    if kind == "structures":
-        rows = db.execute(
-            "SELECT representative_entry_id FROM materials "
-            "WHERE representative_entry_id > ? "
-            "ORDER BY representative_entry_id LIMIT ?",
-            (after, batch_size),
-        )
-    else:
-        bit = PROPERTY_BITS[kind]
-        rows = db.execute(
-            "SELECT entry_id FROM entries "
-            "WHERE entry_id > ? AND (property_mask & ?) != 0 "
-            "ORDER BY entry_id LIMIT ?",
-            (after, bit, batch_size),
-        )
+    table, column, clauses, params = _selection_where(kind, shards=shards, shard=shard)
+    rows = db.execute(
+        f"SELECT {column} FROM {table} WHERE {column} > ?{clauses} "
+        f"ORDER BY {column} LIMIT ?",
+        (after, *params, batch_size),
+    )
     return [str(row[0]) for row in rows]
 
 
-def _selection_total(db: sqlite3.Connection, kind: str) -> int:
-    if kind == "structures":
-        return int(db.execute("SELECT COUNT(*) FROM materials").fetchone()[0])
-    bit = PROPERTY_BITS[kind]
-    return int(
-        db.execute(
-            "SELECT COUNT(*) FROM entries WHERE (property_mask & ?) != 0", (bit,)
-        ).fetchone()[0]
-    )
+def _selection_total(
+    db: sqlite3.Connection, kind: str, *, shards: int = 1, shard: int = 0
+) -> int:
+    table, column, clauses, params = _selection_where(kind, shards=shards, shard=shard)
+    where = f" WHERE 1=1{clauses}" if clauses else ""
+    return int(db.execute(f"SELECT COUNT(*) FROM {table}{where}", params).fetchone()[0])
+
+
+def _archive_rows(response: JsonValue, expected: Sequence[str]) -> tuple[list[dict[str, Any]], set[str]]:
+    """Validate one Archive response; return its rows and the ids it lacks.
+
+    Duplicated or unrequested entries mean the protocol went wrong and raise;
+    a *subset* of the requested ids is returned as "missing" for the caller.
+    """
+    if not isinstance(response, dict):
+        raise RuntimeError("NOMAD Archive response was not an object")
+    rows = response.get("data")
+    if not isinstance(rows, list):
+        raise RuntimeError("NOMAD Archive response lacked a data list")
+    returned_id_list = [row.get("entry_id") for row in rows if isinstance(row, dict)]
+    returned_ids = set(returned_id_list)
+    expected_ids = set(expected)
+    extra = sorted(returned_ids - expected_ids)[:10]
+    if extra or len(returned_id_list) != len(returned_ids):
+        raise RuntimeError(
+            f"NOMAD Archive batch mismatch: extra={extra}, "
+            f"duplicates={len(returned_id_list) - len(returned_ids)}"
+        )
+    return [row for row in rows if isinstance(row, dict)], expected_ids - returned_ids
+
+
+def _fetch_archive_batch(
+    ids: Sequence[str], kind: str, fetch_json: FetchJson
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[str]]:
+    """Fetch one Archive batch, retrying missing ids once; return response, rows, missing."""
+    response = fetch_json("/entries/archive/query", build_archive_request(entry_ids=ids, kind=kind))
+    rows, missing = _archive_rows(response, ids)
+    if missing:
+        retry_ids = sorted(missing)
+        retry = fetch_json(
+            "/entries/archive/query", build_archive_request(entry_ids=retry_ids, kind=kind)
+        )
+        retry_rows, missing = _archive_rows(retry, retry_ids)
+        rows.extend(retry_rows)
+        assert isinstance(response, dict)
+        response["data"] = rows
+    still_missing = sorted(missing)
+    tolerated = max(10, len(ids) // 10)
+    if len(still_missing) > tolerated:
+        raise RuntimeError(
+            f"NOMAD Archive batch mismatch: {len(still_missing)} of {len(ids)} entries "
+            f"missing after retry (first: {still_missing[:5]})"
+        )
+    assert isinstance(response, dict)
+    return response, rows, still_missing
 
 
 def export_archives(
@@ -901,12 +1362,24 @@ def export_archives(
     reserve_bytes: int = DEFAULT_RESERVE_BYTES,
     allow_partial_selection: bool = False,
     fetch_json: FetchJson,
+    shards: int = 1,
+    shard: int = 0,
+    stop: threading.Event | None = None,
 ) -> Path:
+    """Export one Archive kind for the whole selection, or for one entry_id shard.
+
+    With ``shards > 1`` only entries whose :func:`shard_of` equals ``shard`` are
+    exported, into ``archive/<kind>/shard-KK-of-NN/`` with its own manifest, so
+    N processes or threads can run side by side and each remains resumable.
+    ``stop`` lets a coordinating caller ask this export to stop after the page
+    in flight; the manifest stays consistent and the export can be resumed.
+    """
     required = archive_required(kind)
-    if not 1 <= batch_size <= 1000:
-        raise ValueError("Archive batch_size must be between 1 and 1000")
+    if not 1 <= batch_size <= MAX_ARCHIVE_BATCH:
+        raise ValueError(f"Archive batch_size must be between 1 and {MAX_ARCHIVE_BATCH}")
     if max_pages is not None and max_pages < 1:
         raise ValueError("max_pages must be positive when provided")
+    _validate_shard(shards, shard)
     selection_manifest_path = output_dir / "selection-manifest.json"
     selection_db_path = output_dir / "selection.sqlite"
     if not selection_manifest_path.exists() or not selection_db_path.exists():
@@ -919,19 +1392,37 @@ def export_archives(
         )
     snapshot = _read_json(output_dir / "snapshot.json")
     phase_dir = output_dir / "archive" / kind
+    if shards > 1:
+        phase_dir = phase_dir / f"shard-{shard:02d}-of-{shards:02d}"
     phase_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = phase_dir / "manifest.json"
     phase_name = f"archive:{kind}"
+    label = kind if shards == 1 else f"{kind} shard {shard:02d}/{shards:02d}"
     if manifest_path.exists():
         manifest = _read_json(manifest_path)
+        previous_batch = int(manifest.get("page_size", batch_size))
         _validate_resume_manifest(
             manifest,
             output_dir=output_dir,
             phase=phase_name,
             cutoff=str(snapshot["cutoff"]),
-            page_size=batch_size,
+            page_size=previous_batch,
             required=required,
         )
+        if previous_batch != batch_size:
+            # Archive resumption keys on last_entry_id, not on page geometry, so
+            # the batch size may change between runs; each page records its rows.
+            print(
+                f"{label}: batch size {previous_batch} -> {batch_size} on resume",
+                flush=True,
+            )
+            manifest["page_size"] = batch_size
+        found = (int(manifest.get("shards", 1)), int(manifest.get("shard", 0)))
+        if found != (shards, shard):
+            raise RuntimeError(
+                f"cannot resume {phase_name}: manifest is shard {found[1]} of "
+                f"{found[0]}, requested {shard} of {shards}"
+            )
     else:
         manifest = _new_paged_manifest(
             phase=phase_name,
@@ -939,13 +1430,19 @@ def export_archives(
             page_size=batch_size,
             required=required,
         )
+        manifest["shards"] = shards
+        manifest["shard"] = shard
         manifest["last_entry_id"] = None
+    manifest.setdefault("missing_documents", 0)
+    missing_log = phase_dir / "missing-entry-ids.txt"
     if manifest["complete"]:
         return manifest_path
 
     db = sqlite3.connect(f"file:{selection_db_path}?mode=ro", uri=True)
     try:
-        total = _selection_total(db, kind)
+        if shards > 1:
+            _register_shard_function(db)
+        total = _selection_total(db, kind, shards=shards, shard=shard)
         if manifest["total_documents"] is None:
             manifest["total_documents"] = total
         elif int(manifest["total_documents"]) != total:
@@ -955,65 +1452,65 @@ def export_archives(
             )
         completed_this_run = 0
         while max_pages is None or completed_this_run < max_pages:
+            if stop is not None and stop.is_set():
+                break
             ids = _selection_batch(
                 db,
                 kind=kind,
                 last_entry_id=manifest.get("last_entry_id"),
                 batch_size=batch_size,
+                shards=shards,
+                shard=shard,
             )
+            accounted = manifest["downloaded_documents"] + manifest["missing_documents"]
             if not ids:
-                manifest["complete"] = manifest["downloaded_documents"] == total
+                manifest["complete"] = accounted == total
                 manifest["updated_at"] = utc_now()
                 _write_json_atomic(manifest_path, manifest)
                 if not manifest["complete"]:
                     raise RuntimeError(
-                        f"Archive selection ended at {manifest['downloaded_documents']}, "
+                        f"Archive selection ended at {accounted} accounted entries, "
                         f"expected {total}"
                     )
                 break
             _check_capacity(output_dir, reserve_bytes)
-            response = fetch_json(
-                "/entries/archive/query",
-                build_archive_request(entry_ids=ids, kind=kind),
-            )
-            if not isinstance(response, dict):
-                raise RuntimeError("NOMAD Archive response was not an object")
-            rows = response.get("data")
-            if not isinstance(rows, list):
-                raise RuntimeError("NOMAD Archive response lacked a data list")
-            returned_id_list = [
-                row.get("entry_id") for row in rows if isinstance(row, dict)
-            ]
-            returned_ids = set(returned_id_list)
-            expected_ids = set(ids)
-            if len(returned_id_list) != len(ids) or returned_ids != expected_ids:
-                missing = sorted(expected_ids - returned_ids)[:10]
-                extra = sorted(returned_ids - expected_ids)[:10]
-                raise RuntimeError(
-                    f"NOMAD Archive batch mismatch: missing={missing}, extra={extra}"
-                )
+            response, rows, still_missing = _fetch_archive_batch(ids, kind, fetch_json)
             page_index = len(manifest["pages"])
             page_path = phase_dir / f"page-{page_index:07d}.json.gz"
             _write_gzip_json_atomic(page_path, response)
-            manifest["pages"].append(
-                {
-                    "index": page_index,
-                    "path": str(page_path.relative_to(output_dir)),
-                    "rows": len(rows),
-                    "bytes": page_path.stat().st_size,
-                    "sha256": _sha256(page_path),
-                    "first_entry_id": ids[0],
-                    "last_entry_id": ids[-1],
-                }
-            )
+            page_record = {
+                "index": page_index,
+                "path": str(page_path.relative_to(output_dir)),
+                "rows": len(rows),
+                "bytes": page_path.stat().st_size,
+                "sha256": _sha256(page_path),
+                "first_entry_id": ids[0],
+                "last_entry_id": ids[-1],
+            }
+            if still_missing:
+                # NOMAD lists these entries but serves no Archive for them (the
+                # /entries/<id>/archive endpoint answers 404; seen 2026-09-06).
+                # Record them and move on rather than aborting the whole export.
+                page_record["missing_entry_ids"] = still_missing
+                with missing_log.open("a", encoding="utf-8") as handle:
+                    handle.write("".join(f"{entry_id}\n" for entry_id in still_missing))
+                manifest["missing_documents"] += len(still_missing)
+                print(
+                    f"{label} page {page_index}: {len(still_missing)} entries have no "
+                    f"Archive on NOMAD; recorded in {missing_log.name}",
+                    flush=True,
+                )
+            manifest["pages"].append(page_record)
             manifest["downloaded_documents"] += len(rows)
             manifest["last_entry_id"] = ids[-1]
-            manifest["complete"] = manifest["downloaded_documents"] == total
+            manifest["complete"] = (
+                manifest["downloaded_documents"] + manifest["missing_documents"] == total
+            )
             manifest["updated_at"] = utc_now()
             _write_json_atomic(manifest_path, manifest)
             completed_this_run += 1
             print(
-                f"{kind} page {page_index}: {len(rows):,} entries; "
+                f"{label} page {page_index}: {len(rows):,} entries; "
                 f"{manifest['downloaded_documents']:,}/{total:,}",
                 flush=True,
             )
@@ -1022,6 +1519,163 @@ def export_archives(
     finally:
         db.close()
     return manifest_path
+
+
+def export_archives_parallel(
+    output_dir: Path,
+    *,
+    kind: str,
+    batch_size: int,
+    workers: int,
+    max_pages: int | None = None,
+    reserve_bytes: int = DEFAULT_RESERVE_BYTES,
+    allow_partial_selection: bool = False,
+    fetch_json: FetchJson,
+) -> list[Path]:
+    """Export every shard of one Archive kind concurrently with ``workers`` threads.
+
+    Shard ``k`` of ``workers`` runs :func:`export_archives` in its own thread.
+    The work is network-bound (NOMAD spends several seconds per request), so
+    threads are enough; the first failing shard asks the others to stop after
+    their current page and its error is re-raised once all threads have exited.
+    """
+    if workers < 1:
+        raise ValueError("workers must be positive")
+    common = dict(
+        kind=kind,
+        batch_size=batch_size,
+        max_pages=max_pages,
+        reserve_bytes=reserve_bytes,
+        allow_partial_selection=allow_partial_selection,
+        fetch_json=fetch_json,
+    )
+    if workers == 1:
+        return [export_archives(output_dir, **common)]
+    stop = threading.Event()
+
+    def run(shard: int) -> Path:
+        try:
+            return export_archives(
+                output_dir, shards=workers, shard=shard, stop=stop, **common
+            )
+        except BaseException:
+            stop.set()
+            raise
+
+    results: list[Path] = []
+    errors: list[BaseException] = []
+    with ThreadPoolExecutor(
+        max_workers=workers, thread_name_prefix=f"nomad-{kind}"
+    ) as pool:
+        futures = [pool.submit(run, shard) for shard in range(workers)]
+        for future in futures:
+            try:
+                results.append(future.result())
+            except Exception as error:  # noqa: BLE001 - re-raised below
+                errors.append(error)
+    if errors:
+        raise errors[0]
+    return results
+
+
+class ArchivePlan:
+    """One Archive kind to export inside :func:`export_archives_multi`."""
+
+    def __init__(self, kind: str, batch_size: int, workers: int = 1, priority: int = 0) -> None:
+        archive_required(kind)
+        if workers < 1:
+            raise ValueError("workers must be positive")
+        self.kind = kind
+        self.batch_size = batch_size
+        self.workers = workers
+        self.priority = priority
+
+    @classmethod
+    def parse(cls, spec: str) -> "ArchivePlan":
+        """Parse ``kind:batch[:workers[:priority]]`` (e.g. ``properties:500:4:1``)."""
+        parts = spec.split(":")
+        if not 2 <= len(parts) <= 4:
+            raise ValueError(f"plan must look like kind:batch[:workers[:priority]], got {spec!r}")
+        kind = parts[0]
+        numbers = [int(part) for part in parts[1:]]
+        return cls(kind, numbers[0], *(numbers[1:]))
+
+    def __repr__(self) -> str:
+        return f"{self.kind}:{self.batch_size}:{self.workers}:{self.priority}"
+
+
+PrioritisedFetch = Callable[[str, dict[str, Any] | None, int], JsonValue]
+
+
+def export_archives_multi(
+    output_dir: Path,
+    plans: Sequence[ArchivePlan],
+    *,
+    request: PrioritisedFetch,
+    max_pages: int | None = None,
+    reserve_bytes: int = DEFAULT_RESERVE_BYTES,
+    allow_partial_selection: bool = False,
+    limiter: AdaptiveLimiter | None = None,
+) -> dict[str, list[Path]]:
+    """Export several Archive kinds at once through one shared request budget.
+
+    Every shard of every plan runs in its own thread, but all of them send
+    their requests through ``request(path, payload, priority)``: with the
+    client's :class:`AdaptiveLimiter` that means one process-wide in-flight
+    cap, one cooldown after a 429, and priority for the plan that matters most.
+    Measured 2026-09-06: NOMAD admitted one Archive request per IP at a time,
+    so two independent processes only starved each other.
+    """
+    if not plans:
+        raise ValueError("at least one plan is required")
+    if len({plan.kind for plan in plans}) != len(plans):
+        raise ValueError("each Archive kind may appear in one plan only")
+    stop = threading.Event()
+
+    def run(plan: ArchivePlan, shard: int) -> Path:
+        def fetch(path: str, payload: dict[str, Any] | None = None) -> JsonValue:
+            return request(path, payload, plan.priority)
+
+        urgent = limiter is not None and plan.priority <= 0
+        if urgent:
+            limiter.reserve(+1)
+        try:
+            return export_archives(
+                output_dir,
+                kind=plan.kind,
+                batch_size=plan.batch_size,
+                max_pages=max_pages,
+                reserve_bytes=reserve_bytes,
+                allow_partial_selection=allow_partial_selection,
+                fetch_json=fetch,
+                shards=plan.workers,
+                shard=shard,
+                stop=stop,
+            )
+        except BaseException:
+            stop.set()
+            raise
+        finally:
+            if urgent:
+                limiter.reserve(-1)
+
+    total_threads = sum(plan.workers for plan in plans)
+    results: dict[str, list[Path]] = {plan.kind: [] for plan in plans}
+    errors: list[BaseException] = []
+    with ThreadPoolExecutor(max_workers=total_threads, thread_name_prefix="nomad-multi") as pool:
+        futures = [
+            (plan.kind, pool.submit(run, plan, shard))
+            for plan in plans
+            for shard in range(plan.workers)
+        ]
+        for kind, future in futures:
+            try:
+                results[kind].append(future.result())
+            except Exception as error:  # noqa: BLE001 - re-raised below
+                errors.append(error)
+    if errors:
+        raise errors[0]
+    return results
 
 
 def download_all(
@@ -1034,16 +1688,23 @@ def download_all(
     pilot_pages: int | None = None,
     reserve_bytes: int = DEFAULT_RESERVE_BYTES,
     fetch_json: FetchJson,
-) -> dict[str, Path]:
+    structure_workers: int = 1,
+    property_workers: int = 1,
+) -> dict[str, Path | list[Path]]:
     """Download the requested material structures and all NOMAD properties.
 
     This is the user-facing workflow.  The lower-level commands remain
     available for recovery and diagnostics, but a normal full export only
     needs this one call.  ``pilot_pages`` intentionally creates a bounded,
     partial export for validating storage and API access before a full run.
+    ``structure_workers`` / ``property_workers`` above 1 shard that Archive
+    phase by entry_id and run the shards concurrently; the result then holds
+    one manifest path per shard instead of a single path.
     """
     if pilot_pages is not None and pilot_pages < 1:
         raise ValueError("pilot_pages must be positive when provided")
+    if structure_workers < 1 or property_workers < 1:
+        raise ValueError("worker counts must be positive")
     ensure_snapshot(output_dir, cutoff=cutoff, fetch_json=fetch_json)
     catalog_manifest = export_catalog(
         output_dir,
@@ -1061,28 +1722,26 @@ def download_all(
             "catalog did not complete; refusing to start Archive export without "
             "pilot_pages"
         )
+
+    def archive(kind: str, batch_size: int, workers: int) -> Path | list[Path]:
+        paths = export_archives_parallel(
+            output_dir,
+            kind=kind,
+            batch_size=batch_size,
+            workers=workers,
+            max_pages=pilot_pages,
+            reserve_bytes=reserve_bytes,
+            allow_partial_selection=partial,
+            fetch_json=fetch_json,
+        )
+        return paths[0] if workers == 1 else paths
+
     return {
         "snapshot": output_dir / "snapshot.json",
         "catalog": catalog_manifest,
         "selection": selection_manifest,
-        "structures": export_archives(
-            output_dir,
-            kind="structures",
-            batch_size=structure_batch_size,
-            max_pages=pilot_pages,
-            reserve_bytes=reserve_bytes,
-            allow_partial_selection=partial,
-            fetch_json=fetch_json,
-        ),
-        "properties": export_archives(
-            output_dir,
-            kind="properties",
-            batch_size=property_batch_size,
-            max_pages=pilot_pages,
-            reserve_bytes=reserve_bytes,
-            allow_partial_selection=partial,
-            fetch_json=fetch_json,
-        ),
+        "structures": archive("structures", structure_batch_size, structure_workers),
+        "properties": archive("properties", property_batch_size, property_workers),
     }
 
 
@@ -1098,6 +1757,7 @@ def status(output_dir: Path, *, verify: bool = False) -> dict[str, Any]:
         }
     manifests = [output_dir / "catalog" / "manifest.json"]
     manifests.extend(sorted((output_dir / "archive").glob("*/manifest.json")))
+    manifests.extend(sorted((output_dir / "archive").glob("*/shard-*/manifest.json")))
     phases: dict[str, Any] = {}
     for path in manifests:
         if not path.exists():
@@ -1106,10 +1766,40 @@ def status(output_dir: Path, *, verify: bool = False) -> dict[str, Any]:
         phase = str(manifest.get("phase"))
         item = {
             "downloaded": manifest.get("downloaded_documents"),
+            "missing": manifest.get("missing_documents", 0),
             "total": manifest.get("total_documents"),
             "pages": len(manifest.get("pages", [])),
             "complete": manifest.get("complete"),
         }
+        shards = int(manifest.get("shards", 1))
+        if shards > 1:
+            # Sharded exports are reported as one aggregate per phase, with the
+            # per-shard rows nested, so a partially finished parallel run reads
+            # the same way as a sequential one.
+            key = f"{phase}:sharded"
+            aggregate = phases.setdefault(
+                key,
+                {
+                    "shards": shards,
+                    "shards_seen": 0,
+                    "downloaded": 0,
+                    "missing": 0,
+                    "total": 0,
+                    "pages": 0,
+                    "complete": False,
+                    "per_shard": {},
+                },
+            )
+            item["path"] = str(path.relative_to(output_dir))
+            aggregate["per_shard"][f"{int(manifest.get('shard', 0)):02d}"] = item
+            aggregate["shards_seen"] = len(aggregate["per_shard"])
+            aggregate["downloaded"] += int(item["downloaded"] or 0)
+            aggregate["missing"] += int(item["missing"] or 0)
+            aggregate["total"] += int(item["total"] or 0)
+            aggregate["pages"] += item["pages"]
+            aggregate["complete"] = aggregate["shards_seen"] == shards and all(
+                row["complete"] for row in aggregate["per_shard"].values()
+            )
         if verify:
             errors = []
             for page in manifest.get("pages", []):
@@ -1119,6 +1809,8 @@ def status(output_dir: Path, *, verify: bool = False) -> dict[str, Any]:
                 elif _sha256(page_path) != page["sha256"]:
                     errors.append(f"sha256:{page['path']}")
             item["verification_errors"] = errors
+        if shards > 1:
+            continue
         phases[phase] = item
     result["phases"] = phases
     selection_path = output_dir / "selection-manifest.json"
@@ -1148,12 +1840,43 @@ def _reserve_bytes(value: str | float) -> int:
     return int(gib * 1024**3)
 
 
+class _NoLimit:
+    def __enter__(self) -> "_NoLimit":
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        return None
+
+
+_NO_LIMIT = _NoLimit()
+
+
 def _client_from_args(args: argparse.Namespace) -> NomadClient:
+    workers = max(
+        getattr(args, "workers", 1),
+        getattr(args, "structure_workers", 1),
+        getattr(args, "property_workers", 1),
+    )
+    initial = None
+    if getattr(args, "plan", None):
+        # The cap may start below the thread count (threads then take turns)
+        # and grow towards it while NOMAD keeps accepting requests.
+        workers = sum(plan.workers for plan in args.plan)
+        initial = max(1, min(workers, args.capacity))
+    limiter = AdaptiveLimiter(
+        workers,
+        min_interval=getattr(args, "min_interval", 0.0),
+        recovery=getattr(args, "recovery", 20),
+        initial=initial,
+    )
     return NomadClient(
         base_url=args.api_base,
         attempts=args.attempts,
         timeout=args.timeout,
         request_delay=args.request_delay,
+        limiter=limiter,
+        throttle_base=getattr(args, "throttle_base", 60.0),
+        network_patience=getattr(args, "network_patience", 1800.0),
     )
 
 
@@ -1164,6 +1887,24 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--attempts", type=int, default=6)
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--request-delay", type=float, default=0.1)
+    parser.add_argument(
+        "--min-interval",
+        type=float,
+        default=0.0,
+        help="minimum seconds between request starts across all threads",
+    )
+    parser.add_argument(
+        "--throttle-base",
+        type=float,
+        default=60.0,
+        help="seconds to stay silent after the first HTTP 429; doubles per consecutive 429",
+    )
+    parser.add_argument(
+        "--network-patience",
+        type=float,
+        default=1800.0,
+        help="seconds to keep retrying a request through connection errors and 5xx",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     probe = subparsers.add_parser("probe", help="freeze counts and property schema")
@@ -1185,7 +1926,25 @@ def build_parser() -> argparse.ArgumentParser:
     archive = subparsers.add_parser("archive", help="download selected Archive branches")
     archive.add_argument("--kind", choices=sorted(ARCHIVE_REQUIRED), required=True)
     archive.add_argument("--batch-size", type=int)
-    archive.add_argument("--max-pages", type=int)
+    archive.add_argument("--max-pages", type=int, help="pages per shard for a bounded run")
+    archive.add_argument(
+        "--shards",
+        type=int,
+        default=1,
+        help="split the selection into N deterministic entry_id shards",
+    )
+    archive.add_argument(
+        "--shard",
+        type=int,
+        default=0,
+        help="which shard (0-based) this process exports; use with --shards",
+    )
+    archive.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="export all N shards concurrently in this process (implies --shards N)",
+    )
     archive.add_argument(
         "--reserve-gib",
         dest="reserve_bytes",
@@ -1193,6 +1952,38 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_RESERVE_BYTES,
     )
     archive.add_argument("--allow-partial-selection", action="store_true")
+
+    multi = subparsers.add_parser(
+        "archive-multi",
+        help="export several Archive kinds concurrently through one request budget",
+    )
+    multi.add_argument(
+        "--plan",
+        action="append",
+        required=True,
+        type=ArchivePlan.parse,
+        help="kind:batch[:workers[:priority]]; lower priority number wins the slot",
+    )
+    multi.add_argument("--max-pages", type=int, help="pages per shard for a bounded run")
+    multi.add_argument(
+        "--reserve-gib",
+        dest="reserve_bytes",
+        type=_reserve_bytes,
+        default=DEFAULT_RESERVE_BYTES,
+    )
+    multi.add_argument("--allow-partial-selection", action="store_true")
+    multi.add_argument(
+        "--capacity",
+        type=int,
+        default=1,
+        help="initial in-flight cap shared by all plans (grows towards the thread count)",
+    )
+    multi.add_argument(
+        "--recovery",
+        type=int,
+        default=20,
+        help="consecutive successes needed before the in-flight cap grows by one",
+    )
 
     download = subparsers.add_parser(
         "download",
@@ -1202,6 +1993,18 @@ def build_parser() -> argparse.ArgumentParser:
     download.add_argument("--page-size", type=int, default=5000)
     download.add_argument("--structure-batch-size", type=int, default=500)
     download.add_argument("--property-batch-size", type=int, default=100)
+    download.add_argument(
+        "--structure-workers",
+        type=int,
+        default=1,
+        help="shard the structures phase by entry_id and run N shards concurrently",
+    )
+    download.add_argument(
+        "--property-workers",
+        type=int,
+        default=1,
+        help="shard the properties phase by entry_id and run N shards concurrently",
+    )
     download.add_argument(
         "--pilot-pages",
         type=int,
@@ -1252,6 +2055,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if args.command == "archive":
         default_batch = 500 if args.kind == "structures" else 100
+        if args.workers < 1 or args.shards < 1 or not 0 <= args.shard < args.shards:
+            parser.error("--workers and --shards must be positive; 0 <= --shard < --shards")
+        if args.workers > 1 and (args.shards != 1 or args.shard != 0):
+            parser.error("--workers runs every shard itself; do not combine with --shards/--shard")
+        if args.workers > 1:
+            paths = export_archives_parallel(
+                output_dir,
+                kind=args.kind,
+                batch_size=args.batch_size or default_batch,
+                workers=args.workers,
+                max_pages=args.max_pages,
+                reserve_bytes=args.reserve_bytes,
+                allow_partial_selection=args.allow_partial_selection,
+                fetch_json=fetch,
+            )
+            print(json.dumps([str(path) for path in paths], indent=2))
+            return 0
         print(
             export_archives(
                 output_dir,
@@ -1261,6 +2081,28 @@ def main(argv: Sequence[str] | None = None) -> int:
                 reserve_bytes=args.reserve_bytes,
                 allow_partial_selection=args.allow_partial_selection,
                 fetch_json=fetch,
+                shards=args.shards,
+                shard=args.shard,
+            )
+        )
+        return 0
+    if args.command == "archive-multi":
+        result = export_archives_multi(
+            output_dir,
+            args.plan,
+            request=lambda path, payload, priority: client.request_json(
+                path, payload, priority=priority
+            ),
+            max_pages=args.max_pages,
+            reserve_bytes=args.reserve_bytes,
+            allow_partial_selection=args.allow_partial_selection,
+            limiter=client.limiter,
+        )
+        print(
+            json.dumps(
+                {kind: [str(p) for p in paths] for kind, paths in result.items()},
+                indent=2,
+                sort_keys=True,
             )
         )
         return 0
@@ -1274,10 +2116,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             pilot_pages=args.pilot_pages,
             reserve_bytes=args.reserve_bytes,
             fetch_json=fetch,
+            structure_workers=args.structure_workers,
+            property_workers=args.property_workers,
         )
         print(
             json.dumps(
-                {name: str(path) for name, path in result.items()},
+                {
+                    name: [str(p) for p in path] if isinstance(path, list) else str(path)
+                    for name, path in result.items()
+                },
                 indent=2,
                 sort_keys=True,
             )

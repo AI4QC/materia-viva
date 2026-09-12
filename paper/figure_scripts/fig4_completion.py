@@ -43,41 +43,48 @@ gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.02], width_ratios=[1.0, 1.0],
                       hspace=0.50, wspace=0.34,
                       left=0.075, right=0.975, top=0.955, bottom=0.135)
 
-# ------------------------------------------------------------- a task ladder
+# --------------------------------------------------------------- a cascade
+# Deliberately NOT another rank-decay curve: Fig. 3a already carries that shape
+# for coverage. What matters here is the counting chain, and in particular the
+# one stage where the number goes up, because splitting a property name by level
+# of theory is what turns 151 quantities into 513 separable learning problems.
 ax = fig.add_subplot(gs[0, 0])
-n = np.array([int(r["n_materials"]) for r in T])
-is_reg = np.array([r["kind"] == "num" for r in T])
-x = np.arange(len(n)) + 1
-TIERS = [(1_000_000, "T1", "#0A3D62"), (100_000, "T2", BLU), (10_000, "T3", CYA),
-         (2_000, "T4", "#9BC9E0"), (300, "T5", LGY)]
-lo = 100
-for thr, name, col in TIERS:
-    ax.axhspan(thr, ax.get_ylim()[1] if False else 3e7, facecolor="none")
-prev = 3e7
-for thr, name, col in TIERS:
-    ax.axhspan(thr, prev, facecolor=(*to_rgb(col), 0.10), edgecolor="none", zorder=0)
-    ax.text(len(n) * 1.02, np.sqrt(thr * prev), name, fontsize=6.4, color=col,
-            ha="right", va="center", fontweight="bold")
-    prev = thr
-ax.plot(x, n, color=LGY, lw=0.5, zorder=1)
-ax.scatter(x[is_reg], n[is_reg], s=4.5, color=BLU, edgecolor="none", zorder=3,
-           label="regression")
-ax.scatter(x[~is_reg], n[~is_reg], s=8, color=RED, edgecolor="none", marker="^",
-           zorder=3, label="classification")
-ax.set_yscale("log")
-ax.set_ylim(0.7, 3e7)
-ax.set_xlim(-6, len(n) + 12)
-ax.set_xlabel("Trainable tasks, ranked")
-ax.set_ylabel("Structures available to train")
-ax.legend(frameon=False, loc="upper right", bbox_to_anchor=(0.90, 1.02),
-          handlelength=0.8, labelspacing=0.28, borderpad=0.0, fontsize=6.2,
-          markerscale=1.6)
-ax.text(0.02, 0.035, f"{C['n_census_tasks']} tasks over "
-                     f"{C['n_properties_with_data']} properties;\n"
-                     f"{C['tiers']['T3']['regression_tasks']} regression tasks have "
-                     f"$\\geq$10$^4$ structures",
-        transform=ax.transAxes, ha="left", va="bottom", fontsize=6.0,
-        linespacing=1.5, color=SOFT)
+T = C["tiers"]
+stages = [
+    ("properties in the registry", 166, GRY, False),
+    ("carrying at least one value", C["n_properties_with_data"], GRY, False),
+    ("split by level of theory", C["n_census_tasks"], ORA, True),
+    ("$\\geq$300 crystals to train on",
+     T["T5"]["regression_tasks"] + T["T5"]["classification_tasks"], CYA, False),
+    ("$\\geq$10$^4$ crystals",
+     T["T3"]["regression_tasks"] + T["T3"]["classification_tasks"], BLU, False),
+    ("$\\geq$10$^6$ crystals",
+     T["T1"]["regression_tasks"] + T["T1"]["classification_tasks"], "#0A3D62", False),
+    ("built as training sets", C["n_training_sets"], GRN, False),
+]
+y = np.arange(len(stages))[::-1]
+vals = np.array([v for _, v, _, _ in stages])
+cols = [c for _, _, c, _ in stages]
+bars(ax.barh(y, vals, height=0.66), cols, face_alpha=0.55, edge=0.7)
+for yi, (label, v, col, up) in zip(y, stages):
+    ax.text(v + 12, yi, f"{v}", va="center", ha="left", fontsize=6.6, color=col,
+            fontweight="bold" if up else "normal")
+ax.set_yticks(y)
+ax.set_yticklabels([lab for lab, _, _, _ in stages], fontsize=6.0)
+ax.tick_params(axis="y", length=0, pad=1.5)
+ax.set_xlim(0, 620)
+ax.set_xlabel("Count")
+# the one stage that multiplies rather than filters
+ax.annotate("", xy=(C["n_census_tasks"] - 8, y[2] + 0.36), xytext=(176, y[1] - 0.30),
+            arrowprops=dict(arrowstyle="-|>", color=ORA, lw=0.9,
+                            connectionstyle="arc3,rad=-0.32", mutation_scale=7))
+ax.text(322, y[1] + 0.16,
+        f"$\\times${C['n_census_tasks'] / C['n_properties_with_data']:.1f}",
+        fontsize=7.6, color=ORA, fontweight="bold", ha="center", va="bottom")
+ax.text(0.985, 0.055, "one property name is several quantities;\n"
+                      "separating them is what makes them learnable",
+        transform=ax.transAxes, ha="right", va="bottom", fontsize=5.9,
+        color=SOFT, linespacing=1.5, style="italic")
 stamp(fig, ax, "a")
 
 # ------------------------------------------------------- b theory-level split

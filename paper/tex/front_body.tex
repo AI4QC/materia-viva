@@ -1,112 +1,68 @@
 % ======================================================================
-% Introduction.
-% Funnel taken from the project's own problem statement: the record is large,
-% the usable space is missing -> what that costs in practice -> why it has not
-% been built (no key at the level of the object; the sources move) -> what
-% prior work solved and what it left -> what we built and what it shows.
-% Implementation detail belongs to Methods and the SI, not here.
+% Introduction, four paragraphs, built around the two halves of the title.
+%   1 the two routes and the one question they share
+%   2 why no public database can answer it
+%   3 what that does to each route: where the limit really is
+%   4 what we built and what follows
 % ======================================================================
 \section{Introduction}
 
-Materials discovery has become an exercise in reusing the collective published
-record. Public repositories now hold millions of computed crystals
-\cite{jain2013commentary,saal2013materials,curtarolo2012aflow,schmidt2022dataset},
-generative models propose new ones directly
-\cite{xie2022crystal,zeni2025generative,merchant2023scaling}, and the universal
-interatomic potentials used to filter those proposals are trained on whatever the
-community has already published
-\cite{chen2022universal,deng2023chgnet,batatia2023foundation,yang2024mattersim,wood2025uma}.
-Crystal structures, in other words, are not scarce.
+Materials discovery follows two routes. Forward screening searches the crystals
+already known for one that has the property wanted. Inverse design generates a
+crystal to order, and reports as its main figure of merit how many of its
+products are new. Each route is usually described as bounded by something of its
+own: forward screening by how many crystals are known, inverse design by how good
+the generator is. Neither bound is where it is placed. Both routes rest on one
+question, asked of every crystal they touch: is this structure already known,
+and is this property already known for it? No public database can answer that
+question on its own.
 
-What is scarce is a materials space that can be searched, compared and traced
-back to its source in one place. In current practice a screening campaign begins
-by requesting accounts one repository at a time, calling bulk interfaces,
-downloading archives in incompatible formats, and then working out which of the
-resulting records are genuinely distinct crystals rather than duplicates of one
-another, intermediate relaxation frames or frames of a molecular-dynamics
-trajectory. Property tables arrive detached from the structures they describe,
-units and conventions differ between providers, and the licence position of each
-source has to be established again before anything can be redistributed. The data
-already exists; a large share of the effort goes into acquiring and tidying it
-before any candidate is screened.
+The reason is that the databases share no key at the level of the crystal. Public
+repositories hold millions of computed structures
+\cite{jain2013commentary,saal2013materials,curtarolo2012aflow,schmidt2022dataset,%
+kirklin2015oqmd,choudhary2020jarvis,draxl2019nomad,talirz2020materials}, and
+generative models and universal interatomic potentials are trained on them
+\cite{xie2022crystal,zeni2025generative,merchant2023scaling,chen2022universal,%
+deng2023chgnet,batatia2023foundation,yang2024mattersim,wood2025uma}. But the
+same arrangement of atoms carries a different accession number in every database
+that holds it, and the chemical formula cannot serve as a key because polymorphs
+share one. So the union cannot be deduplicated, values from different providers
+cannot be placed on the same object, and three things stay unmeasured: how much
+of the record is one crystal counted several times, whether two sources that
+computed the same quantity agree, and which properties are known for which
+crystals. OPTIMADE gave the databases a common query interface
+\cite{andersen2021optimade,evans2024developments} and LeMaterial published a
+deduplicated union of several large ones \cite{ramlaoui2025lemat}. Neither
+delivers the property layer, because two databases publishing a column called
+band gap are often not reporting the same physical quantity, and a union that
+merges by column name averages a semilocal, a hybrid and a measured value into
+one number.
 
-The reason this preparation cannot be done once and shared is that the
-repositories agree on no key at the level of the object they describe. The same
-arrangement of atoms carries a different accession number in every database that
-holds it, and the one property they genuinely share, the chemical formula, cannot
-serve as a key, because polymorphs share a formula and differ in almost
-everything a screening campaign cares about. Without a key at the level of the
-crystal, the union cannot be deduplicated, values from different providers cannot
-be brought onto the same object, and three quantities that bear directly on how
-materials data is used stay unmeasured: how much of the corpus is the same
-crystal counted repeatedly, whether two groups that computed the same quantity
-for the same crystal obtained the same answer, and how the properties a discovery
-campaign actually needs are distributed over the structures that exist.
+That absence bounds each route in a specific way. A forward screen can rank
+crystals that nobody has computed, since that is what a surrogate model is for.
+What it cannot do is reach beyond the pool it was given or trust its labels more
+than the sources that produced them. A campaign screens whichever database it
+loaded and trains on that database's values, so the limit of forward screening
+is set by the size of the pool and the consistency of the labels, and both come
+from the record. Inverse design reports novelty against a reference assembled
+from a few of the largest repositories
+\cite{ramlaoui2025lemat,betala2025lematgenbench}, so the limit of what it may
+call new is set by the reference and by the criterion used to match against it,
+and both again come from the record. Three recent assessments make the point. A
+survey of one campaign's 384{,}870 stable predictions found them to be
+modifications of known materials \cite{cheetham2024artificial}. The flagship
+compound of a generative model was later identified as a disordered phase
+reported in 1972 and present in the model's own training set
+\cite{juelsholt2026continued}. And an ion-exchange baseline built from known
+compounds outperformed four generative techniques \cite{szymanski2025baselines}.
+In each case the record already contained what was reported as new.
 
-Assembling such a union once would in any case not be enough. Every repository
-publishes new releases, and new repositories appear faster than any is retired,
-so a union built in a single pass is out of date before it is finished and has to
-be rebuilt from nothing to absorb what arrived while it was being made. A corpus
-that is to stay current has to do something a merge does not: recognise material
-it has never seen, and fold it in without discarding the ability to recognise
-that it has already acquired.
-
-Substantial progress has been made on the parts of this problem that can be
-solved one layer at a time. The OPTIMADE specification gave more than twenty
-providers a common query interface, removing the burden of a separate account and
-format for each \cite{andersen2021optimade,evans2024developments}. Structural
-fingerprints made deduplication tractable at scale, and the LeMaterial initiative
-used one to publish a deduplicated union of several large repositories
-\cite{ramlaoui2025lemat}. What neither delivers is the property layer, which is
-where the remaining difficulty sits. Knowing that two records describe the same
-crystal does not attach what each source says about it, and attaching those
-statements is useless unless they stay apart afterwards. Two repositories
-publishing a column labelled band gap are frequently not reporting the same
-physical quantity: a semilocal, a hybrid and a measured value differ by more than
-the differences a screening campaign is trying to resolve, so a union built by
-matching column names would average them and destroy exactly the information that
-makes the corpus worth consulting.
-
-Here we build that space. Identity is resolved across 54 databases at the level
-of the crystal structure, and every resulting property value retains the source,
-the native record and the calculation or measurement that produced it, so that
-several sources speaking about one crystal remain separately audible. Licence
-boundaries are enforced in the pipeline rather than by convention, so that the
-publishable corpus and the locally buildable one are distinct by construction.
-And admission and recognition are made the same operation: a record that matches
-nothing is not an error to be logged but the corpus's next member, and the moment
-it is admitted its structural fingerprint joins the criterion against which every
-subsequent record is judged. The database therefore evolves as it ingests, and a
-newly released version or an entirely new repository is folded into a substrate
-that has grown since the last one rather than matched against a frozen reference.
-
-The space so built answers the three questions its absence had left open, and the
-answers are not what a user of any single repository would assume. Redundancy is
-large and strongly concentrated. Independent sources reporting the same quantity
-for the same crystal disagree by margins exceeding the thresholds on which
-materials selection routinely turns, and a substantial part of their apparent
-agreement is shared provenance rather than independent confirmation. Coverage of
-the property space is governed by what a property costs to compute rather than by
-what it is worth knowing, which turns the remaining gap into a learning problem
-the corpus is itself equipped to pose.
-
-That last point decides what the space is ultimately for. Materials discovery
-proceeds along two routes: forward screening, which searches the known set for a
-material that already has the property wanted, and inverse design, which
-generates a structure to order. Forward screening is usually described as bounded
-by the size of the known set, but that is not what bounds it now. The known set
-holds 13.5 million distinct crystals, and the best-covered property that requires
-a calculation of its own reaches fewer than one in fifty of them, so nearly every
-known material has never been evaluated for nearly every property and a screen
-returns not the best material but the best characterised one. Completing the property layer over the whole
-corpus therefore does something that merely enlarging the corpus would not: it
-establishes what forward screening can actually deliver from the record as it
-stands, and how much of that record has been passed over for want of a
-calculation rather than for want of merit. Whatever the completed screen fails to
-find is what inverse design has to supply, and the same corpus is what a
-generative model needs in order to try, since it provides deduplicated structures
-against which novelty can be judged across the whole known record rather than one
-repository, and property labels that name the quantity they denote. The
-instrument and the corpus it produces are described in Methods and in the
-Supplementary Information; what follows is what the corpus turns out to
-contain.
+Here we build the record that both routes need. Identity is resolved across 55
+databases at the level of the crystal structure. Every value keeps the source,
+the native record and the method that produced it, so that several sources
+speaking about one crystal stay separately audible. Licence boundaries are
+enforced in the pipeline. Admission and recognition are one operation: a record
+that matches nothing becomes the corpus's next member, and its fingerprint joins
+the criterion applied to every record after it, so the corpus grows as it
+ingests rather than being rebuilt. The Results first describe the record, then
+what it shows for forward screening, then what it shows for inverse design.

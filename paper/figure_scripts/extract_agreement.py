@@ -14,6 +14,7 @@ from __future__ import annotations
 import csv
 import json
 import sqlite3
+import sys
 import time
 from array import array
 from collections import Counter, defaultdict
@@ -22,10 +23,20 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts" / "ml"))
+from method_groups import comparable_set, theory_level  # noqa: E402
 DB = ROOT / "data" / "index" / "materials.sqlite"
 OUT = ROOT / "paper" / "data"
 OUT.mkdir(parents=True, exist_ok=True)
 
+#: Two databases are only compared where they answer the same question. Every
+#: `method` string is collapsed to a theory level and then to a comparable set
+#: (GGA family, meta-GGA family, hybrid family, experiment); a value is compared
+#: only against values from the same set, and a source contributing several sets
+#: for one crystal contributes one median to each rather than one median overall.
+#: Without this, NOMAD -- the only source that carries several functionals for
+#: the same crystal at scale -- is compared against its own mixture.
+#:
 #: Properties whose values are directly comparable between databases once the
 #: method string is held fixed. Extensive or convention-dependent quantities
 #: (total energies, prototype labels) are deliberately excluded: two databases
@@ -78,9 +89,13 @@ bitmap = np.zeros((MAXPK + 1, NBYTE), dtype=np.uint8)
 buf_pk = {p: array("i") for p in watch}
 buf_src = {p: array("h") for p in watch}
 buf_val = {p: array("d") for p in watch}
-buf_meth = {p: array("i") for p in watch}
+buf_set = {p: array("h") for p in watch}
 methods: dict[int, dict[str, int]] = {p: {} for p in watch}
 method_names: dict[int, list[str]] = {p: [] for p in watch}
+#: method string -> comparable set, memoised across the whole scan
+set_of_method: dict[str, str] = {}
+set_code: dict[str, int] = {}
+set_names: list[str] = []
 
 n = 0
 cur = db.execute(
@@ -98,10 +113,19 @@ for pk, pid, sid, val, meth in cur:
             code = len(method_names[pid])
             table[key] = code
             method_names[pid].append(key)
+        cset = set_of_method.get(key)
+        if cset is None:
+            cset = comparable_set(theory_level(key))
+            set_of_method[key] = cset
+        cc = set_code.get(cset)
+        if cc is None:
+            cc = len(set_names)
+            set_code[cset] = cc
+            set_names.append(cset)
         buf_pk[pid].append(pk)
         buf_src[pid].append(sid)
         buf_val[pid].append(val)
-        buf_meth[pid].append(code)
+        buf_set[pid].append(cc)
     if n % 20_000_000 == 0:
         log(f"  {n/1e6:.0f}M rows")
 log(f"scan done: {n} rows")
@@ -131,48 +155,57 @@ for pid, name in watch.items():
     pk = np.frombuffer(buf_pk[pid], dtype=np.int32)
     sid = np.frombuffer(buf_src[pid], dtype=np.int16)
     val = np.frombuffer(buf_val[pid], dtype=np.float64)
-    mth = np.frombuffer(buf_meth[pid], dtype=np.int32)
+    cst = np.frombuffer(buf_set[pid], dtype=np.int16)
     if pk.size == 0:
         continue
     order = np.argsort(pk, kind="stable")
-    pk, sid, val, mth = pk[order], sid[order], val[order], mth[order]
+    pk, sid, val, cst = pk[order], sid[order], val[order], cst[order]
     # group boundaries
     starts = np.flatnonzero(np.r_[True, pk[1:] != pk[:-1]])
     ends = np.r_[starts[1:], pk.size]
     rel = name in RELATIVE
     tol = COMPARABLE[name]
 
-    pair_stat: dict[tuple[int, int], list] = defaultdict(list)
+    pair_stat: dict[tuple[int, int, int], list] = defaultdict(list)
     spreads = []
     n_multi = 0
+    n_cross_level = 0
     for s, e in zip(starts, ends):
         if e - s < 2:
             continue
-        gs, gv = sid[s:e], val[s:e]
-        uniq = np.unique(gs)
-        if uniq.size < 2:
+        gs, gv, gc = sid[s:e], val[s:e], cst[s:e]
+        if np.unique(gs).size < 2:
             continue
-        n_multi += 1
-        # one value per source: median within source, so a source reporting the
-        # same quantity under several methods is not counted twice
-        vals = np.array([np.median(gv[gs == u]) for u in uniq])
-        lo, hi = vals.min(), vals.max()
-        spreads.append((hi - lo) / max(abs(hi), abs(lo), 1e-9) if rel else hi - lo)
-        for i in range(uniq.size):
-            for j in range(i + 1, uniq.size):
-                a, b = int(uniq[i]), int(uniq[j])
-                d = vals[j] - vals[i]
-                if rel:
-                    d = d / max(abs(vals[i]), 1e-9)
-                pair_stat[(a, b)].append((vals[i], vals[j], d))
+        compared = False
+        for c in np.unique(gc):
+            m = gc == c
+            uniq = np.unique(gs[m])
+            if uniq.size < 2:
+                continue
+            compared = True
+            # one value per source per level: median within source, so a source
+            # reporting the same quantity under several method strings of the
+            # same theory level is not counted twice
+            vals = np.array([np.median(gv[m & (gs == u)]) for u in uniq])
+            lo, hi = vals.min(), vals.max()
+            spreads.append((hi - lo) / max(abs(hi), abs(lo), 1e-9) if rel else hi - lo)
+            for i in range(uniq.size):
+                for j in range(i + 1, uniq.size):
+                    a, b = int(uniq[i]), int(uniq[j])
+                    d = vals[j] - vals[i]
+                    if rel:
+                        d = d / max(abs(vals[i]), 1e-9)
+                    pair_stat[(a, b, int(c))].append((vals[i], vals[j], d))
+        n_multi += compared
+        n_cross_level += not compared
     spreads = np.array(spreads) if spreads else np.zeros(0)
-    for (a, b), triples in pair_stat.items():
+    for (a, b, c), triples in pair_stat.items():
         if len(triples) < 200:
             continue
         arr = np.array(triples)
         d = arr[:, 2]
         pair_rows.append((
-            name, sources[a], sources[b], len(triples),
+            name, sources[a], sources[b], set_names[c], len(triples),
             float(np.median(d)), float(np.median(np.abs(d))),
             float(np.mean(np.abs(d) <= tol)),
             float(np.corrcoef(arr[:, 0], arr[:, 1])[0, 1])
@@ -182,20 +215,22 @@ for pid, name in watch.items():
         qs = np.percentile(spreads, [50, 75, 90, 95, 99])
         per_prop.append((
             name, int(pk.size), int(n_multi), len(method_names[pid]),
-            float(np.mean(spreads <= tol)), *[float(q) for q in qs],
-            float(spreads.max())))
+            int(n_cross_level), float(np.mean(spreads <= tol)),
+            *[float(q) for q in qs], float(spreads.max())))
         # store the full spread distribution, thinned for plotting
         step = max(1, spreads.size // 20000)
         for v in np.sort(spreads)[::step]:
             spread_rows.append((name, float(v)))
-    log(f"  {name}: {pk.size} values, {n_multi} multi-source materials")
+    log(f"  {name}: {pk.size} values, {n_multi} multi-source materials "
+        f"compared within a level, {n_cross_level} shared only across levels")
 
 write_csv("agreement_pairs.csv",
-          ["property", "source_a", "source_b", "n_shared", "median_signed_diff",
-           "median_abs_diff", "frac_within_tol", "pearson_r"],
-          sorted(pair_rows, key=lambda r: (r[0], -r[3])))
+          ["property", "source_a", "source_b", "level_set", "n_shared",
+           "median_signed_diff", "median_abs_diff", "frac_within_tol", "pearson_r"],
+          sorted(pair_rows, key=lambda r: (r[0], -r[4])))
 write_csv("agreement_per_property.csv",
           ["property", "n_values", "n_multi_source_materials", "n_methods",
+           "n_materials_shared_across_levels_only",
            "frac_within_tol", "p50_spread", "p75_spread", "p90_spread",
            "p95_spread", "p99_spread", "max_spread"], per_prop)
 write_csv("agreement_spread_samples.csv", ["property", "spread"], spread_rows)

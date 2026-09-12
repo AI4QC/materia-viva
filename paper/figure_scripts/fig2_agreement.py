@@ -93,8 +93,14 @@ def draw(fig, gs, pairs, perp, spread):
                      key=lambda p: sum(int(r["n_shared"]) for r in pairs
                                        if r["property"] == p))
         rows = [r for r in pairs if r["property"] == target]
-    rows.sort(key=lambda r: -int(r["n_shared"]))
-    rows = rows[:12][::-1]
+    # one row per database pair: the pair table is now resolved by level of
+    # theory, so a pair meeting at two levels appears twice. Keep the larger.
+    best = {}
+    for r in rows:
+        key = (r["source_a"], r["source_b"])
+        if key not in best or int(r["n_shared"]) > int(best[key]["n_shared"]):
+            best[key] = r
+    rows = sorted(best.values(), key=lambda r: -int(r["n_shared"]))[:12][::-1]
     y = np.arange(len(rows))
     med = np.array([float(r["median_abs_diff"]) for r in rows])
     within = np.array([float(r["frac_within_tol"]) for r in rows]) * 100

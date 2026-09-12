@@ -30,6 +30,11 @@ RESTRICTED = {
     "aflow": "AFLOW academic non-commercial terms",
     "elementa": "CC BY-NC 4.0 — non-commercial only",
     "gnome": "CC BY-NC 4.0 — non-commercial only",
+    # NOMAD carries no single licence: each upload keeps the terms its depositor
+    # chose. The default for published data is CC BY 4.0, but it is not uniform
+    # and the export does not record the per-entry choice, so the whole source is
+    # withheld from redistribution until that is resolved per upload.
+    "nomad": "per-upload licence — not uniform, resolve per entry before release",
 }
 
 

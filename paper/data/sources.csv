@@ -1,6 +1,7 @@
 key,name,license,property_rows,n_properties,n_materials,refs_id,refs_hash,refs_origin,new_structures,matched_refs,loaded_at
 alexandria,Alexandria Materials Database,Alexandria dataset terms,60588138,10,5894222,3646950,1553835,1514488,1514488,4836267,2026-08-17T18:15:48
 aflow,AFLOW,AFLOW academic non-commercial terms,18464119,14,2275947,34849,1367046,1650288,1650288,985855,2026-08-17T19:49:08
+nomad,NOMAD Repository and Archive,per-upload licence and NOMAD terms,10204105,9,3835327,0,3168530,1047208,1047208,3058659,2026-09-11T10:20:47
 elementa,ELEMENTA and ELEMENTA Spin,CC BY-NC 4.0,8023344,4,2005836,2005836,0,0,0,2005836,2026-08-19T02:36:17
 oqmd,Open Quantum Materials Database,CC BY 4.0,6086500,5,1229047,516869,505285,255085,255085,1022154,2026-08-17T14:37:27
 mof-carbon-capture,Hypothetical MOFs for wet flue-gas carbon capture,CC BY 4.0,5454666,13,287610,0,0,287610,0,0,2026-08-19T02:27:32

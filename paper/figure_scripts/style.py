@@ -61,7 +61,7 @@ SOURCE_GROUP = {
     "oqmd": "general", "gnome": "general", "materials-project": "general",
     "jarvis-qetb": "general", "matbench-discovery": "general",
     "jarvis-dft": "general", "carolina": "general", "odbx": "general",
-    "mc3d": "general",
+    "mc3d": "general", "nomad": "general",
     "cod": "experimental", "icsd": "experimental",
     "hmof": "framework", "mof-carbon-capture": "framework",
     "deem-zeolites": "framework", "qmof": "framework", "mofx-db": "framework",

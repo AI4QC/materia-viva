@@ -292,7 +292,9 @@ def main() -> int:
     ap.add_argument("--db", type=Path, default=Path("data/index/materials.sqlite"))
     ap.add_argument("--blob", type=Path, default=Path("data/index/structures.blob"))
     ap.add_argument("--out", type=Path, required=True)
-    ap.add_argument("--pks-from", type=Path, help="parquet with material_pk, or a text list")
+    ap.add_argument("--pks-from", type=Path, action="append",
+                    help="可重复。每次调用都要扫全部 13.5M 行 materials，"
+                         "所以多个任务合并成一次调用，而不是循环调用")
     ap.add_argument("--dataset", choices=["experimental", "candidate"])
     ap.add_argument("--shard-size", type=int, default=100_000)
     ap.add_argument("--workers", type=int, default=8)
@@ -317,7 +319,9 @@ def main() -> int:
     rows = con.execute(sql, params).fetchall()
 
     if args.pks_from:
-        keep = load_pks(args.pks_from)
+        keep: set[int] = set()
+        for source in args.pks_from:
+            keep |= load_pks(source)
         rows = [r for r in rows if r[0] in keep]
     print(f"{len(rows):,} structures to export", file=sys.stderr)
 

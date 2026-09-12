@@ -50,8 +50,8 @@
       "access": "federated",
       "official_url": "https://nomad-lab.eu/prod/v1/docs/howto/manage/program/download.html",
       "license": "per-upload licence and NOMAD terms",
-      "data_path": "raw/acquired/nomad",
-      "status": "too-large-for-full-mirror",
+      "data_path": "raw/acquired/nomad/2026-09-05",
+      "status": "acquired-2026-09-05 (catalog + structures; properties archive pending)",
       "downloads": []
     },
     {

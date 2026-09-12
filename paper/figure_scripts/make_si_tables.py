@@ -33,7 +33,7 @@ SOURCE_GROUP = {
     "curated-cof": "framework", "iza-zeolite": "framework", "pcod": "framework",
     "open-framework-aluminophosphate": "framework",
 }
-RESTRICTED = {"aflow", "elementa", "gnome", "icsd"}
+RESTRICTED = {"aflow", "elementa", "gnome", "icsd", "nomad"}
 
 
 #: pdflatex under this class drops a bare mu; the rest of the unit glyphs
@@ -61,12 +61,12 @@ S = list(csv.DictReader((DATA / "sources.csv").open()))
 SUB = {r["source"]: r for r in csv.DictReader((DATA / "substrate_growth.csv").open())}
 add(r"\begin{table}[htbp]")
 add(r"\centering\footnotesize")
-add(r"\caption{\textbf{The 54 integrated source databases.} Property values, "
+add(rf"\caption{{\textbf{{The {len(S)} integrated source databases.}} Property values, "
     r"distinct properties and annotated structures are counted in the completed "
     r"database. \emph{Matched} references were resolved by identifier or "
     r"fingerprint; \emph{own} references record that the database contains the "
-    r"structure as its own entry. A dagger marks the four databases whose terms "
-    r"prohibit redistribution.}")
+    rf"structure as its own entry. A dagger marks the {len(RESTRICTED)} databases whose "
+    r"terms prohibit redistribution or leave it unresolved.}")
 add(r"\label{tab:sources}")
 add(r"\begin{tabular}{llrrrrr}")
 add(r"\toprule")
@@ -94,11 +94,13 @@ P = [r for r in csv.DictReader((DATA / "properties.csv").open())
      if int(r["n_materials"]) > 0]
 P.sort(key=lambda r: -int(r["n_materials"]))
 add(r"\begin{longtable}{lrrrr}")
-add(r"\caption{\textbf{The 151 properties carrying at least one value.} Ranked "
+add(rf"\caption{{\textbf{{The {len(P)} properties carrying at least one value.}} Ranked "
     r"by the number of structures they cover. \emph{Sources} is the number of "
     r"databases supplying the property; \emph{shared} is the number of structures "
-    r"for which two or more databases supply it, and is the subset on which "
-    r"cross-database comparison is possible.}"
+    r"for which two or more databases supply it, counted without regard to the "
+    r"level of theory each used. The agreement figures in the main text are "
+    r"smaller, because a comparison is only made where two databases worked at "
+    r"the same level (Supplementary Note~\ref{note:agreement}).}"
     r"\label{tab:properties}\\")
 add(r"\toprule")
 add(r"Property & Unit & Structures & Sources & Shared \\ \midrule \endfirsthead")

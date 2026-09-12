@@ -304,6 +304,7 @@ SCALAR_BACKFILL_PRIORITY: tuple[str, ...] = (
     "snumat",
     "atomly",
     "elementa",
+    "nomad",
 )
 
 # canonical property -> materials-table column it may backfill

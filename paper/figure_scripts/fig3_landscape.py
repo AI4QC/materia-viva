@@ -6,6 +6,7 @@ b  coverage grouped by the calculation the property requires
 c  how many properties a single structure carries
 d  which database supplies which property
 e  the spectrum store
+f  what each database's own structures gained from the others
 """
 from __future__ import annotations
 
@@ -31,6 +32,8 @@ P = [r for r in csv.DictReader((DATA / "properties.csv").open())
 PS = list(csv.DictReader((DATA / "property_source_matrix.csv").open()))
 CV = list(csv.DictReader((DATA / "curves_by_type.csv").open()))
 TIER = list(csv.DictReader((DATA / "cost_tiers.csv").open()))
+XF = list(csv.DictReader((DATA / "crossfill_sources.csv").open()))
+XFS = json.loads((DATA / "crossfill.json").read_text())
 TJSON = json.loads((DATA / "cost_tiers.json").read_text())
 SUM = json.loads((DATA / "summary.json").read_text())
 NMAT = SUM["n_materials"]
@@ -44,10 +47,11 @@ TIER_SHORT = {1: "one self-consistent\nrun", 2: "a few extra\nruns",
               4: "anharmonic, transport,\nbeyond-semilocal"}
 tier_of = {r["property"]: int(r["tier"]) for r in TIER}
 
-fig = plt.figure(figsize=(W2, 14.4 * CM))
-gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 1.12], width_ratios=[1.10, 0.92, 0.98],
-                      hspace=0.46, wspace=0.40,
-                      left=0.070, right=0.980, top=0.955, bottom=0.085)
+fig = plt.figure(figsize=(W2, 20.2 * CM))
+gs = fig.add_gridspec(3, 3, height_ratios=[1.0, 1.12, 0.80],
+                      width_ratios=[1.10, 0.92, 0.98],
+                      hspace=0.82, wspace=0.40,
+                      left=0.070, right=0.980, top=0.966, bottom=0.075)
 
 # ------------------------------------------------------- a coverage ranking
 ax = fig.add_subplot(gs[0, 0])
@@ -68,8 +72,8 @@ for frac, style in ((0.10, (0, (4, 2))), (0.01, (0, (1.5, 1.8)))):
             color=GRY, ha="right")
 label = {"total_energy_per_atom": (12, 1.9), "band_gap": (28, 1.15),
          "energy_above_hull": (42, 0.55), "density": (54, 1.05),
-         "bulk_modulus_vrh": (34, 1.9), "dielectric_constant_electronic": (18, 5.5),
-         "co2_uptake": (44, 1.5), "lattice_thermal_conductivity": (18, 2.2),
+         "bulk_modulus_vrh": (34, 2.6), "dielectric_constant_electronic": (20, 3.4),
+         "co2_uptake": (50, 0.40), "lattice_thermal_conductivity": (18, 2.2),
          "tc_superconducting": (18, 3.4), "shg_coefficient": (14, 1.5)}
 for i, r in enumerate(rows):
     if r["property"] in label:
@@ -214,5 +218,65 @@ ax.text(0.5, -0.215, f"{SUM['n_curves']:,} spectra reach {SUM['n_materials_with_
         transform=ax.transAxes, ha="center", va="top", fontsize=6.0, style="italic",
         linespacing=1.4)
 stamp(fig, ax, "e", dx=-0.055)
+
+# ------------------------------------------------- f what the merge redistributed
+# Every structure has exactly one contributing database. The lower marker is the
+# property record that database supplied; the upper marker is what the structure
+# carries once the others are merged onto it. The distance between them is the
+# part of the record no single database could have produced.
+ax = fig.add_subplot(gs[2, :])
+xf = [r for r in XF if int(r["structures_contributed"]) >= 2000]
+xf.sort(key=lambda r: -int(r["structures_contributed"]))
+xf = xf[:24]
+x = np.arange(len(xf))
+own = np.array([int(r["cells_from_contributor"]) / int(r["structures_contributed"])
+                for r in xf])
+tot = np.array([int(r["cells_occupied"]) / int(r["structures_contributed"]) for r in xf])
+fmat = np.array([float(r["frac_structures_with_external"]) for r in xf])
+cols = [GROUP_COLOUR[group_of(r["source"])] for r in xf]
+
+for i, (o, t, c) in enumerate(zip(own, tot, cols)):
+    if t - o > 0.02:
+        ax.annotate("", xy=(i, t), xytext=(i, o),
+                    arrowprops=dict(arrowstyle="-|>", color=c, lw=0.9,
+                                    shrinkA=1.6, shrinkB=0.6,
+                                    mutation_scale=5.5))
+ax.scatter(x, own, s=14, facecolor="white", edgecolor=GRY, linewidth=0.7, zorder=4)
+ax.scatter(x, tot, s=16, c=cols, edgecolor="none", zorder=5)
+for i, (t, f, c) in enumerate(zip(tot, fmat, cols)):
+    ax.text(i, t + 0.52, f"{f*100:.0f}" if f >= 0.005 else "0", ha="center", va="bottom",
+            fontsize=5.4, color=c if f >= 0.005 else LGY)
+ax.set_xticks(x)
+ax.set_xticklabels([r["source"] for r in xf], rotation=90, fontsize=5.6)
+ax.tick_params(axis="x", length=0, pad=1.5)
+ax.set_xlim(-0.8, len(xf) - 0.2)
+ax.set_ylim(0, 18.4)
+ax.set_ylabel("Property values per structure")
+ax.grid(axis="y", lw=0.3, color="#EEEEEE", zorder=0)
+ax.set_axisbelow(True)
+ax.text(0.005, 0.985, "numbers above each database: % of its structures that gained "
+                      "a value it never reported itself",
+        transform=ax.transAxes, ha="left", va="top", fontsize=6.0, color=GRY)
+ax.legend([plt.Line2D([], [], marker="o", ls="none", mfc="white", mec=GRY, mew=0.7, ms=3.4),
+           plt.Line2D([], [], marker="o", ls="none", color=GRY, ms=3.6)],
+          ["supplied by the contributing database",
+           "carried after the other 54 are merged on"],
+          frameon=False, loc="upper right", bbox_to_anchor=(1.005, 0.90),
+          handletextpad=0.4, labelspacing=0.35, borderpad=0.0, fontsize=6.0)
+ax.text(0.5, -0.62, f"{XFS['admitted_materials_with_external_property']:,} of "
+                    f"{XFS['admitted_materials_with_any_property']:,} structures "
+                    f"({XFS['frac_admitted_materials_with_external']*100:.1f}%) carry at "
+                    f"least one value their own database never reported, and "
+                    f"{XFS['cells_from_other_databases_admitted']:,} of "
+                    f"{XFS['cells_occupied_admitted']:,} filled cells "
+                    f"({XFS['frac_cells_external_admitted']*100:.1f}%) come from elsewhere.\n"
+                    f"Independently of who arrived first, "
+                    f"{XFS['materials_with_two_or_more_property_sources']:,} crystals "
+                    f"({XFS['frac_materials_with_two_or_more_property_sources']*100:.1f}% "
+                    f"of all that carry a value) draw their property record from two or "
+                    f"more databases",
+        transform=ax.transAxes, ha="center", va="top", fontsize=6.0, style="italic",
+        linespacing=1.5)
+stamp(fig, ax, "f")
 
 save(fig, "fig3_landscape")

@@ -29,6 +29,7 @@ DEG = list(csv.DictReader((DATA / "source_degree.csv").open()))
 OVL = list(csv.DictReader((DATA / "source_overlap.csv").open()))
 SRC = {r["key"]: r for r in csv.DictReader((DATA / "sources.csv").open())}
 SUBR = list(csv.DictReader((DATA / "substrate_growth.csv").open()))
+SUBJ = json.loads((DATA / "substrate_growth.json").read_text())
 SUM = json.loads((DATA / "summary.json").read_text())
 
 HAVE_AGREE = (DATA / "agreement_per_property.csv").exists()
@@ -106,11 +107,13 @@ size = np.array([int(r["matched_onto_base"]) + int(r["matched_onto_admitted"]) f
 sc = ax.scatter(x, frac, s=8 + 26 * np.log10(size) - 26 * 3, c=frac, cmap="YlOrBr",
                 vmin=-25, vmax=110, edgecolor=ORA, linewidth=0.5, zorder=3)
 ax.plot(x, frac, color=LGY, lw=0.5, zorder=1)
-ax.axhline(15.94, color=GRY, lw=0.6, ls=(0, (3, 2)), zorder=2)
-ax.text(len(rows) + 3.4, 15.94, "15.9%\npooled", fontsize=6.0, color=GRY,
+pooled = SUBJ["frac_matches_onto_admitted"] * 100
+ax.axhline(pooled, color=GRY, lw=0.6, ls=(0, (3, 2)), zorder=2)
+ax.text(len(rows) + 3.4, pooled, f"{pooled:.1f}%\npooled", fontsize=6.0, color=GRY,
         ha="right", va="center", linespacing=1.35)
-for key, dy, dx in (("aflow", 9, -1.6), ("jarvis-qetb", 8, -3.2), ("qmof", -12, 0.4),
-                    ("core-mof", 5, -1.0), ("cmr-static", 8, -3.4), ("oqmd", 7, -0.4)):
+for key, dy, dx in (("aflow", 9, -1.6), ("jarvis-qetb", 8, -3.2), ("qmof", -13, 0.4),
+                    ("core-mof", 6, -2.6), ("cmr-static", 11, -6.0), ("oqmd", 7, -0.4),
+                    ("nomad", -15, 0.5)):
     for i, r in enumerate(rows):
         if r["source"] == key:
             ax.annotate(key, xy=(i, frac[i]), xytext=(i + dx, frac[i] + dy),

@@ -22,10 +22,10 @@
   "3": {
     "label": "linear response or finite differences",
     "n_properties": 22,
-    "median_coverage": 0.010627339306432261,
+    "median_coverage": 0.010628705297838919,
     "max_coverage": 0.01670865921150398,
     "min_coverage": 3.7066361413120325e-05,
-    "median_materials": 143929,
+    "median_materials": 143947,
     "max_property": "dielectric_constant_electronic",
     "max_materials": 226290
   },

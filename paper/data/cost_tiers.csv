@@ -2,7 +2,7 @@ tier,tier_label,property,n_materials,coverage,n_sources
 1,single self-consistent run,total_energy_per_atom,11576328,0.854765652360208,14
 1,single self-consistent run,formation_energy_per_atom,9872344,0.7289479495989043,14
 1,single self-consistent run,energy_above_hull,7309591,0.5397209995778718,11
-1,single self-consistent run,band_gap,7817982,0.5772592556439626,23
+1,single self-consistent run,band_gap,8260382,0.6099249096064416,24
 1,single self-consistent run,total_magnetization,8071469,0.5959760698980018,8
 1,single self-consistent run,magnetization_per_atom,938459,0.06929334754062846,1
 1,single self-consistent run,is_metal,211753,0.015635285315363484,2
@@ -28,15 +28,15 @@ tier,tier_label,property,n_materials,coverage,n_sources
 2,a few extra self-consistent runs,spillage,19113,0.00141125371651189,2
 2,a few extra self-consistent runs,grain_boundary_energy,106,7.826761573288356e-06,1
 2,a few extra self-consistent runs,work_of_separation,106,7.826761573288356e-06,1
-3,linear response or finite differences,bulk_modulus_vrh,196615,0.014517535157849907,6
-3,linear response or finite differences,shear_modulus_vrh,192267,0.014196490258598418,5
+3,linear response or finite differences,bulk_modulus_vrh,196629,0.014518568881076567,7
+3,linear response or finite differences,shear_modulus_vrh,192281,0.014197523981825078,6
 3,linear response or finite differences,youngs_modulus,136108,0.01004985720959558,2
 3,linear response or finite differences,poisson_ratio,195059,0.0144026442049439,5
 3,linear response or finite differences,elastic_anisotropy,24430,0.0018038470305229673,1
-3,linear response or finite differences,bulk_modulus_voigt,156720,0.011571793148733502,2
-3,linear response or finite differences,bulk_modulus_reuss,156660,0.011567362906333527,2
-3,linear response or finite differences,shear_modulus_voigt,155061,0.011449296946374204,2
-3,linear response or finite differences,shear_modulus_reuss,151750,0.011204821403268943,2
+3,linear response or finite differences,bulk_modulus_voigt,156757,0.011574525131546819,3
+3,linear response or finite differences,bulk_modulus_reuss,156697,0.011570094889146844,3
+3,linear response or finite differences,shear_modulus_voigt,155098,0.011452028929187522,3
+3,linear response or finite differences,shear_modulus_reuss,151787,0.01120755338608226,3
 3,linear response or finite differences,sound_velocity_transverse,153763,0.011353456035788089,2
 3,linear response or finite differences,sound_velocity_longitudinal,156645,0.011566255345733533,2
 3,linear response or finite differences,debye_temperature,25997,0.0019195501945356355,2

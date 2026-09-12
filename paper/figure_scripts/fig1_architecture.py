@@ -29,6 +29,7 @@ S = list(csv.DictReader((DATA / "sources.csv").open()))
 SUM = json.loads((DATA / "summary.json").read_text())
 EVO = json.loads((DATA / "evolution.json").read_text())
 SUB = json.loads((DATA / "substrate_growth.json").read_text())
+CURVE = list(csv.DictReader((DATA / "substrate_curve.csv").open()))
 
 INK = "#1A1A1A"
 SOFT = "#5C5C5C"
@@ -67,9 +68,37 @@ def heading(x, y, text, colour=INK):
     ax.text(x, y, text, fontsize=7.2, fontweight="bold", ha="left", color=colour)
 
 
+# ---- shared vertical band -------------------------------------------------
+# All three columns start and end on the same two lines. Card heights and gaps
+# are derived from the band rather than chosen by eye, so the columns cannot
+# drift out of alignment when text is edited.
+BAND_TOP, BAND_BOT = 35.0, 5.0
+BAND_H = BAND_TOP - BAND_BOT
+HEAD_Y, SUB_Y = 39.6, 37.4
+
+
+def stack(n, heights=None, top=BAND_TOP, bottom=BAND_BOT):
+    """Return (y_bottom, height) per card, filling the band with equal gaps."""
+    span = top - bottom
+    if heights is None:
+        h = None
+    else:
+        h = list(heights)
+    if h is None:
+        gap = 1.8 if n > 4 else 1.6
+        card_h = (span - gap * (n - 1)) / n
+        h = [card_h] * n
+    gap = (span - sum(h)) / (n - 1) if n > 1 else 0.0
+    out, y = [], top
+    for card_h in h:
+        out.append((y - card_h, card_h))
+        y -= card_h + gap
+    return out
+
+
 # ---- column 1: the obstacle -------------------------------------------------
-heading(1.0, 40.4, "The obstacle")
-ax.text(1.0, 38.2, "one crystal, many catalogues, no shared key",
+heading(1.0, HEAD_Y, "The obstacle")
+ax.text(1.0, SUB_Y, "one crystal, many catalogues, no shared key",
         fontsize=6.2, ha="left", color=SOFT, style="italic")
 
 cards = [("Materials Project", "mp-149", "general"),
@@ -78,109 +107,119 @@ cards = [("Materials Project", "mp-149", "general"),
          ("COD", "cod-1010064", "experimental"),
          ("ICSD", "icsd-44265", "experimental"),
          ("hMOF", "hMOF-31782", "framework")]
-CARD_H, CARD_GAP = 3.5, 1.15
-top = 32.9
-for i, (name, nid, grp) in enumerate(cards):
+COL1, COL1W = 1.0, 22.4
+slots1 = stack(len(cards))
+for (name, nid, grp), (y, h) in zip(cards, slots1):
     col = GROUP_COLOUR[grp]
-    y = top - i * (CARD_H + CARD_GAP)
-    card(1.0, y, 22.4, CARD_H, col)
-    icon_database(ax, 3.4, y + CARD_H / 2, 2.3, col, lw=0.55)
-    ax.text(5.5, y + CARD_H / 2 + 0.72, name, ha="left", va="center",
+    card(COL1, y, COL1W, h, col)
+    icon_database(ax, COL1 + 2.4, y + h / 2, 2.3, col, lw=0.55)
+    ax.text(COL1 + 4.5, y + h / 2 + 0.70, name, ha="left", va="center",
             fontsize=6.0, color=INK, zorder=3)
-    ax.text(5.5, y + CARD_H / 2 - 0.78, nid, ha="left", va="center", fontsize=5.9,
+    ax.text(COL1 + 4.5, y + h / 2 - 0.76, nid, ha="left", va="center", fontsize=5.9,
             color=col, family="monospace", zorder=3)
 
-icon_crystal(ax, 27.4, 21.4, 4.2, SOFT, lw=0.6)
-ax.text(27.4, 18.3, "one\narrangement\nof atoms", ha="center", va="top",
-        fontsize=5.9, color=SOFT, linespacing=1.45)
-for i in range(len(cards)):
-    y = top - i * (CARD_H + CARD_GAP) + CARD_H / 2
-    arrow(23.7, y, 25.6, 22.6 + (2.5 - i) * 0.30, LGY, 0.5,
+icon_crystal(ax, 27.6, 21.4, 4.2, SOFT, lw=0.6)
+ax.text(27.6, 18.3, "the same\ncrystal", ha="center", va="top",
+        fontsize=6.0, color=SOFT, linespacing=1.45)
+for i, (y, h) in enumerate(slots1):
+    arrow(COL1 + COL1W + 0.3, y + h / 2, 25.6, 22.6 + (2.5 - i) * 0.30, LGY, 0.5,
           rad=0.09 * (2.5 - i) / 3, scale=4.5)
 
 # ---- column 2: the resolution ----------------------------------------------
-heading(31.6, 40.4, "The resolution")
-ax.text(31.6, 38.2, "identity settled on the structure, provenance kept per value",
+heading(31.6, HEAD_Y, "The resolution")
+ax.text(31.6, SUB_Y, "identity settled on the structure, provenance kept per value",
         fontsize=6.2, ha="left", color=SOFT, style="italic")
 
-CARD_X, CARD_W, TEXT_X = 31.6, 32.9, 37.6
+CARD_X, CARD_W, TEXT_X = 31.6, 29.4, 37.6
 SPINE = 34.3
-ax.plot([SPINE, SPINE], [6.6, 34.6], color=LGY, lw=0.7, zorder=1,
-        solid_capstyle="round")
-
 stages = [
-    (30.4, icon_funnel, BLU, "Adapt",
+    (icon_funnel, BLU, "Adapt",
      "one record per entry, with its unit,\nits method and its owned identifiers"),
-    (22.6, icon_fingerprint, CYA, "Fingerprint",
+    (icon_fingerprint, CYA, "Fingerprint",
      "the primitive cell reduced to one\ninvariant string, never the formula"),
-    (14.8, icon_key, GRN, "Match",
+    (icon_key, GRN, "Match",
      "an owned identifier first,\nthe fingerprint second, nothing else"),
-    (7.0, icon_merge, ORA, "Resolve",
+    (icon_merge, ORA, "Resolve",
      "a hit annotates the crystal,\na miss joins the pool"),
 ]
-for y, glyph, col, title, body in stages:
-    card(CARD_X, y - 1.9, CARD_W, 6.3, col, alpha=0.055)
-    glyph(ax, SPINE, y + 1.25, 3.3, col)
-    ax.text(TEXT_X, y + 2.90, title, ha="left", va="center", fontsize=6.6,
+slots2 = stack(len(stages))
+ax.plot([SPINE, SPINE], [slots2[-1][0], BAND_TOP], color=LGY, lw=0.7, zorder=1,
+        solid_capstyle="round")
+for (glyph, col, title, text), (y, h) in zip(stages, slots2):
+    card(CARD_X, y, CARD_W, h, col, alpha=0.055)
+    glyph(ax, SPINE, y + h / 2 - 0.55, 3.3, col)
+    ax.text(TEXT_X, y + h - 1.55, title, ha="left", va="center", fontsize=6.6,
             color=INK, fontweight="bold", zorder=3)
-    ax.text(TEXT_X, y + 0.45, body, ha="left", va="center", fontsize=5.9,
+    ax.text(TEXT_X, y + h / 2 - 1.05, text, ha="left", va="center", fontsize=5.9,
             color=SOFT, linespacing=1.5, zorder=3)
-
-for y0, y1 in ((30.4 - 1.9, 22.6 + 4.4), (22.6 - 1.9, 14.8 + 4.4),
-               (14.8 - 1.9, 7.0 + 4.4)):
-    arrow(SPINE, y0, SPINE, y1, LGY, 0.8, scale=6.0)
+for (ytop, _), (ybot, hbot) in zip(slots2[:-1], slots2[1:]):
+    arrow(SPINE, ytop, SPINE, ybot + hbot, LGY, 0.8, scale=6.0)
 
 # the feedback loop, the one warm element in the panel
-LOOP = CARD_X + CARD_W + 2.2
-loop = MPath([(CARD_X + CARD_W, 8.3), (LOOP, 8.3), (LOOP, 25.1),
-              (CARD_X + CARD_W, 25.1)],
+LOOP = 70.0
+BADGE_X = 67.6
+loop = MPath([(CARD_X + CARD_W, slots2[3][0] + slots2[3][1] / 2), (LOOP, 8.3),
+              (LOOP, 25.1), (CARD_X + CARD_W, slots2[1][0] + slots2[1][1] / 2)],
              [MPath.MOVETO, MPath.CURVE4, MPath.CURVE4, MPath.CURVE4])
 ax.add_patch(mpatches.FancyArrowPatch(path=loop, arrowstyle="-|>", color=ORA,
-                                      linewidth=0.9, linestyle=(0, (2.6, 2.0)),
-                                      mutation_scale=6.5, zorder=3))
-icon_cycle(ax, LOOP, 16.7, 4.2, ORA, lw=0.8)
-ax.text(CARD_X, 3.9, "every admitted crystal joins the substrate the next source",
-        fontsize=6.0, color=ORA, ha="left", va="center")
-ax.text(CARD_X, 1.8, f"is matched against: "
-                     f"{SUB['frac_matches_onto_admitted']*100:.0f}% of "
+                                      linewidth=1.6, linestyle=(0, (3.4, 1.9)),
+                                      mutation_scale=10, zorder=3))
+# the number the loop is worth, set on the loop itself rather than in a caption
+badge_y = 18.4
+ax.add_patch(mpatches.FancyBboxPatch(
+    (BADGE_X - 3.2, badge_y - 1.8), 6.4, 3.6,
+    boxstyle="round,pad=0,rounding_size=1.5", facecolor="white",
+    edgecolor=ORA, linewidth=1.1, zorder=5))
+ax.text(BADGE_X, badge_y + 0.05,
+        f"{SUB['frac_matches_onto_admitted']*100:.0f}%", ha="center", va="center",
+        fontsize=8.6, color=ORA, fontweight="bold", zorder=6)
+
+ax.text(CARD_X, 2.6, "every admitted crystal joins the substrate the next source",
+        fontsize=6.1, color=ORA, ha="left", va="center")
+ax.text(CARD_X, 0.7, f"is matched against: "
+                     f"{SUB['frac_matches_onto_admitted']*100:.0f}% of all "
                      f"{(SUB['matched_onto_base']+SUB['matched_onto_admitted'])/1e6:.1f}M "
                      "matches land there",
-        fontsize=6.0, color=ORA, ha="left", va="center", style="italic")
+        fontsize=6.1, color=ORA, ha="left", va="center", style="italic")
 
 # ---- column 3: the corpus ---------------------------------------------------
 COL3, COL3W = 71.6, 27.4
-NUM_R, LAB_L = 80.2, 81.2
-heading(COL3, 40.4, "The corpus")
-arrow(CARD_X + CARD_W, 32.4, COL3 - 0.2, 32.4, LGY, 0.8)
+heading(COL3, HEAD_Y, "The corpus")
+ax.text(COL3, SUB_Y, "one row per crystal, every value traceable",
+        fontsize=6.2, ha="left", color=SOFT, style="italic")
 
-card(COL3, 19.6, COL3W, 15.4, PUR, alpha=0.05)
-icon_database(ax, COL3 + 3.0, 32.4, 3.4, PUR, lw=0.6)
-ax.text(COL3 + 5.6, 32.4, "one deduplicated database", ha="left", va="center",
-        fontsize=6.4, color=PUR, fontweight="bold", zorder=3)
+slots3 = stack(3, heights=[15.4, 6.4, 4.2])
+(py, ph), (ry, rh), (gy, gh) = slots3
+arrow(CARD_X + CARD_W, py + ph - 1.2, COL3 - 0.2, py + ph - 1.2, LGY, 0.8)
+
+card(COL3, py, COL3W, ph, PUR, alpha=0.05)
+icon_database(ax, COL3 + 3.0, py + ph - 2.6, 3.4, PUR, lw=0.6)
+ax.text(COL3 + 5.6, py + ph - 2.6, "one deduplicated database", ha="left",
+        va="center", fontsize=6.4, color=PUR, fontweight="bold", zorder=3)
 figures = [(f"{SUM['n_materials']/1e6:.2f}M", "unique crystal structures"),
            (f"{SUM['n_property_rows']/1e6:.1f}M", "property values"),
            (f"{SUM['n_properties']}", f"properties, {SUM['n_sources']} sources"),
            (f"{SUM['n_curves']/1e6:.2f}M", "stored spectra")]
 for i, (big, small) in enumerate(figures):
-    y = 28.6 - i * 2.45
-    ax.text(NUM_R, y, big, ha="right", va="center", fontsize=8.0, color=PUR,
+    y = py + ph - 6.4 - i * 2.45
+    ax.text(80.2, y, big, ha="right", va="center", fontsize=8.0, color=PUR,
             fontweight="bold", zorder=3)
-    ax.text(LAB_L, y, small, ha="left", va="center", fontsize=6.0, color=INK,
+    ax.text(81.2, y, small, ha="left", va="center", fontsize=6.0, color=INK,
             zorder=3)
 
-arrow(COL3 + COL3W / 2, 19.6, COL3 + COL3W / 2, 17.2, LGY, 0.8)
-card(COL3, 10.8, COL3W, 6.4, RED, alpha=0.05)
-icon_merge(ax, COL3 + 3.0, 14.0, 3.2, RED)
-ax.text(COL3 + COL3W / 2 + 2.4, 15.3, f"{SUM['n_multi_source_materials']:,}",
-        ha="center", va="center", fontsize=8.0, color=RED, fontweight="bold",
-        zorder=3)
-ax.text(COL3 + COL3W / 2 + 2.4, 12.9, "crystals described by\ntwo or more sources",
-        ha="center", va="center", fontsize=6.0, color=INK, linespacing=1.45,
-        zorder=3)
+arrow(COL3 + COL3W / 2, py, COL3 + COL3W / 2, ry + rh, LGY, 0.8)
+card(COL3, ry, COL3W, rh, RED, alpha=0.05)
+icon_merge(ax, COL3 + 3.0, ry + rh / 2, 3.2, RED)
+ax.text(COL3 + COL3W / 2 + 2.4, ry + rh / 2 + 1.2,
+        f"{SUM['n_multi_source_materials']:,}", ha="center", va="center",
+        fontsize=8.0, color=RED, fontweight="bold", zorder=3)
+ax.text(COL3 + COL3W / 2 + 2.4, ry + rh / 2 - 1.2,
+        "crystals described by\ntwo or more sources", ha="center", va="center",
+        fontsize=6.0, color=INK, linespacing=1.45, zorder=3)
 
-arrow(COL3 + COL3W / 2, 10.8, COL3 + COL3W / 2, 8.4, LGY, 0.8)
-card(COL3, 4.2, COL3W, 4.2, GRY, alpha=0.05)
-ax.text(COL3 + COL3W / 2, 6.3, "every value keeps its source,\nrecord and method",
+arrow(COL3 + COL3W / 2, ry, COL3 + COL3W / 2, gy + gh, LGY, 0.8)
+card(COL3, gy, COL3W, gh, GRY, alpha=0.05)
+ax.text(COL3 + COL3W / 2, gy + gh / 2, "every value keeps its source,\nrecord and method",
         ha="center", va="center", fontsize=6.1, color=INK, linespacing=1.45,
         zorder=3)
 
@@ -213,43 +252,45 @@ ax.text(0.985, 0.03, f"{len(rows)} databases,\n"
         linespacing=1.5, color=SOFT)
 stamp(fig, ax, "b", dx=-0.064)
 
-# --------------------------------------------------------------- c pool origin
+# --------------------------------------------------- c the growing substrate
+# The mechanism drawn in panel a, measured: every step is one source's
+# admissions re-entering the match map, so the pool that the next source is
+# matched against is the one this step just enlarged.
 ax = fig.add_subplot(gs[1, 1])
-base, added = EVO["base_merge_total"], EVO["admitted_during_integration"]
-total = base + added
-left = 0.0
-for label, v, col in (("Deduplicated\nstarting pool", base, GRY),
-                      ("Admitted during\nassembly", added, ORA)):
-    ax.barh([1], [v / 1e6], left=left / 1e6, height=0.44,
-            color=(*to_rgb(col), 0.50), edgecolor=col, linewidth=0.65)
-    ax.text((left + v / 2) / 1e6, 1, f"{v/1e6:.2f}M", ha="center", va="center",
-            fontsize=6.4, color=INK)
-    ax.text((left + v / 2) / 1e6, 1.34, label, ha="center", va="bottom", fontsize=6.0,
-            linespacing=1.35, color=SOFT)
-    left += v
-exp, cand = SUM["pool_dataset"]["experimental"], SUM["pool_dataset"]["candidate"]
-left = 0.0
-for v, col in ((exp, RED), (cand, BLU)):
-    ax.barh([0], [v / 1e6], left=left / 1e6, height=0.44,
-            color=(*to_rgb(col), 0.50), edgecolor=col, linewidth=0.65)
-    left += v
-ax.text(total / 1e6 * 0.60, 0, f"{cand/1e6:.2f}M", ha="center", va="center",
-        fontsize=6.4, color=INK)
-ax.annotate(f"Experimental\n{exp:,}", xy=(exp / 2e6, -0.24), xytext=(2.3, -0.94),
-            fontsize=6.0, color=RED, ha="center", va="center", linespacing=1.35,
-            arrowprops=dict(arrowstyle="-", color=RED, lw=0.45,
-                            connectionstyle="arc3,rad=0.28"))
-ax.text(total / 1e6 * 0.68, -0.94, "Computational\ncandidates", ha="center",
-        va="center", fontsize=6.0, color=BLU, linespacing=1.35)
-ax.set_yticks([])
-ax.set_ylim(-1.62, 2.10)
-ax.set_xlim(0, total / 1e6 * 1.02)
-ax.set_xlabel("Unique structures (millions)")
-ax.spines["left"].set_visible(False)
-ax.text(0.5, -0.225, f"assembly enlarged the deduplicated\npool by {added/base*100:.0f}%",
+base = EVO["base_merge_total"]
+x = np.arange(len(CURVE) + 1)
+y = np.array([base] + [int(r["substrate_after"]) for r in CURVE]) / 1e6
+ax.fill_between(x, base / 1e6, y, step="post", color=(*to_rgb(ORA), 0.30),
+                linewidth=0, zorder=2)
+ax.step(x, y, where="post", color=ORA, lw=1.0, zorder=3)
+ax.axhline(base / 1e6, color=GRY, lw=0.6, ls=(0, (3, 2)), zorder=1)
+ax.set_xlim(-1.2, len(CURVE) + 1.2)
+ax.set_ylim(base / 1e6 - 0.7, y[-1] / 1 * 1.0 + 0.5)
+ax.set_xticks([0, len(CURVE)])
+ax.set_xticklabels(["first", "last"], fontsize=6.2)
+ax.set_xlabel("Sources in ingestion order")
+ax.set_ylabel("Structures the next source\ncan be matched against (millions)")
+
+ax.text(0.6, base / 1e6 - 0.30, f"{base/1e6:.2f}M at the start", fontsize=6.0,
+        color=GRY, ha="left", va="top")
+ax.annotate(f"{y[-1]:.2f}M", xy=(len(CURVE), y[-1]), xytext=(len(CURVE) + 0.6,
+            y[-1] + 0.30), fontsize=6.8, color=ORA, fontweight="bold", ha="right")
+for key, dx, dy in (("alexandria", 1.4, -0.55), ("aflow", 1.4, 0.58),
+                    ("gnome", 1.6, -0.30), ("cod", -2.6, -0.95),
+                    ("nomad", -1.4, -0.62)):
+    for i, r in enumerate(CURVE):
+        if r["source"] == key and int(r["admitted"]) > 0:
+            ax.annotate(f"{key}\n$+${int(r['admitted'])/1e3:.0f}k",
+                        xy=(i + 1, int(r["substrate_after"]) / 1e6),
+                        xytext=(i + 1 + dx, int(r["substrate_after"]) / 1e6 + dy),
+                        fontsize=5.7, color="#5A3A10", linespacing=1.35,
+                        ha="left" if dx > 0 else "right", va="center",
+                        arrowprops=dict(arrowstyle="-", color=GRY, lw=0.4))
+ax.text(0.5, -0.235, f"the pool grew {(y[-1]*1e6 - base)/base*100:.0f}% while it was "
+                     "being assembled,\nand every gain was matchable by the sources after it",
         transform=ax.transAxes, ha="center", va="top", fontsize=6.1, style="italic",
         linespacing=1.4, color=SOFT)
-stamp(fig, ax, "c", dx=-0.048)
+stamp(fig, ax, "c", dx=-0.062)
 
 # ------------------------------------------------------------ d match routes
 ax = fig.add_subplot(gs[1, 2])

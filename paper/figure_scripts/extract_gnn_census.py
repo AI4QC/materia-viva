@@ -13,7 +13,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "paper" / "data"
-POOL = 13_543_277
+# the pool the completion is defined over; read from the corpus summary rather
+# than pinned, so the figure cannot describe a corpus that has since grown
+POOL = json.loads((DATA / "summary.json").read_text())["n_materials"]
 
 census = json.loads((ROOT / "data" / "ml" / "census" / "task_census.json").read_text())
 predict = json.loads(

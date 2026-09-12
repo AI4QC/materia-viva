@@ -1,13 +1,19 @@
 source_a,source_b,n_shared
+aflow,nomad,1672167
+alexandria,nomad,1310420
 alexandria,aflow,451178
+oqmd,nomad,305594
 matbench-discovery,alexandria,229383
+matbench-discovery,nomad,220850
 oqmd,aflow,169345
 matbench-discovery,materials-project,154708
 cmr-static,cod,117942
 oqmd,alexandria,114078
 materials-project,alexandria,94904
+materials-project,nomad,86673
 materials-project,jarvis-dft,72608
 matbench-discovery,oqmd,70336
+jarvis-dft,nomad,63298
 matbench-discovery,jarvis-dft,62535
 materials-project,icsd,61051
 materials-project,aflow,59096
@@ -18,8 +24,10 @@ matbench-discovery,aflow,55149
 materials-project,oqmd,54622
 jarvis-dft,aflow,52231
 materials-cloud-archive-static,materials-project,49697
+jarvis-qetb,nomad,49132
 aflow,jarvis-qetb,47422
 materiae,materials-cloud-archive-static,47057
+csllm-negatives,nomad,46263
 materials-project,mc3d,45874
 oqmd,icsd,44167
 materials-project,cmr-static,38436
@@ -34,6 +42,7 @@ matbench-discovery,materiae,32901
 materials-cloud-archive-static,aflow,32336
 icsd,mc3d,32261
 cmr-static,icsd,32078
+odbx,nomad,31629
 materials-cloud-archive-static,mc3d,30927
 materiae,mc3d,30274
 materials-cloud-archive-static,alexandria,29851
@@ -45,6 +54,7 @@ jarvis-dft,mc3d,28486
 cmr-static,oqmd,26753
 materiae,oqmd,26526
 oqmd,mc3d,26521
+materials-cloud-archive-static,nomad,26323
 jarvis-dft,icsd,26193
 materials-cloud-archive-static,icsd,25564
 materiae,alexandria,25361
@@ -55,16 +65,20 @@ matbench-discovery,odbx,23685
 oqmd,jarvis-qetb,23088
 odbx,materials-project,22920
 alexandria,mc3d,22911
+materiae,nomad,22834
 materials-cloud-archive-static,cmr-static,22709
 odbx,aflow,22584
 matbench-discovery,mc3d,22457
 aflow,csllm-negatives,22376
+mc3d,nomad,21538
 cmr-static,jarvis-dft,21032
+elementa,nomad,20635
 jarvis-dft,jarvis-qetb,20578
 odbx,jarvis-dft,19847
 matbench-discovery,phonix,19661
 elementa,aflow,19631
 alexandria,csllm-negatives,18347
+cmr-static,nomad,17585
 phonix,materials-project,17273
 materiae,odbx,17097
 matbench-discovery,cmr-static,16561
@@ -82,6 +96,7 @@ snumat,aflow,14025
 phonix,alexandria,13868
 matbench-discovery,jarvis-qetb,13467
 phonix,materials-cloud-archive-static,13431
+phonix,nomad,12899
 snumat,materials-cloud-archive-static,12704
 csllm-negatives,carolina,12285
 materials-project,csllm-negatives,12258
@@ -100,11 +115,13 @@ materiae,cod,10356
 snumat,icsd,10242
 matbench-discovery,phonondb,9866
 snumat,cmr-static,9799
+cod,nomad,9759
 materials-cloud-archive-static,cod,9670
 alexandria,cod,9594
 jarvis-dft,cod,9479
 snumat,oqmd,9416
 alexandria,icsd,9302
+icsd,nomad,9256
 jarvis-dft,csllm-negatives,9175
 materials-project,jarvis-qetb,8766
 materials-project,phonondb,8733
@@ -117,6 +134,8 @@ snumat,alexandria,7574
 matbench-discovery,snumat,7531
 odbx,cod,7521
 phonix,aflow,7243
+phonondb,nomad,7214
+snumat,nomad,7065
 fair-mofs,qmof,6917
 odbx,icsd,6901
 oqmd,cod,6680
@@ -136,6 +155,7 @@ cmr-static,phonondb,4477
 gnome,oqmd,4265
 snumat,phonix,4169
 materials-cloud-archive-static,jarvis-qetb,4071
+qmof,nomad,4067
 cmr-static,jarvis-qetb,3878
 csllm-negatives,jarvis-qetb,3760
 spse,icsd,3599
@@ -152,21 +172,25 @@ amcsd,cmr-static,3104
 cod,qmof,3025
 cod,phonondb,2991
 superband,materials-project,2986
+gnome,nomad,2973
 icsd,jarvis-qetb,2915
 fair-mofs,cod,2884
 3dsc,materials-project,2864
 amcsd,alexandria,2851
 amcsd,aflow,2828
 phonix,oqmd,2788
+amcsd,nomad,2751
 superband,alexandria,2746
 fair-mofs,core-mof,2738
 snumat,phonondb,2721
 amcsd,materials-cloud-archive-static,2618
 amcsd,jarvis-dft,2581
 superband,jarvis-dft,2566
+superband,nomad,2560
 materiae,amcsd,2558
 amcsd,odbx,2469
 spse,oqmd,2454
+novomag,nomad,2448
 novomag,alexandria,2440
 spse,mc3d,2414
 novomag,jarvis-dft,2305
@@ -182,6 +206,7 @@ materiae,superband,2085
 core-mof,qmof,2028
 spse,aflow,2023
 oqmd,phonondb,1966
+jarvis-specialized-structures,nomad,1912
 elementa,jarvis-qetb,1869
 matbench-discovery,3dsc,1840
 3dsc,mc3d,1793
@@ -194,6 +219,7 @@ novomag,aflow,1680
 novomag,mc3d,1592
 3dsc,alexandria,1586
 2dmatpedia,alexandria,1543
+3dsc,nomad,1542
 amcsd,icsd,1541
 3dsc,oqmd,1540
 mofx-db,qmof,1540
@@ -217,6 +243,7 @@ aflow-prototypes,aflow,1237
 phonix,jarvis-qetb,1236
 aflow-prototypes,mc3d,1219
 superband,cmr-static,1218
+2dmatpedia,nomad,1214
 phonix,amcsd,1212
 matbench-discovery,2dmatpedia,1192
 novomag,oqmd,1191
@@ -244,6 +271,7 @@ superband,cod,933
 jarvis-specialized-structures,odbx,912
 materiae,novomag,910
 cmr-static,aflow-prototypes,886
+fair-mofs,nomad,883
 2dmatpedia,jarvis-dft,879
 materiae,jarvis-specialized-structures,879
 mc2d,alexandria,878
@@ -259,6 +287,7 @@ materials-cloud-archive-static,csllm-negatives,846
 novomag,odbx,841
 novomag,jarvis-qetb,839
 2dmatpedia,aflow,819
+tcod,nomad,805
 matbench-discovery,gnome,802
 jarvis-specialized-structures,oqmd,791
 icsd,phonondb,787
@@ -271,6 +300,7 @@ jarvis-specialized-structures,cmr-static,721
 c2db,jarvis-qetb,721
 mc3d,webmineral,719
 materiae,csllm-negatives,711
+mc2d,nomad,708
 mof-carbon-capture,qmof,704
 matbench-discovery,mc2d,690
 jarvis-specialized-structures,materials-cloud-archive-static,675
@@ -279,6 +309,7 @@ amcsd,rruff,672
 jarvis-specialized-structures,cod,667
 aflow,webmineral,663
 2dmatpedia,jarvis-qetb,658
+c2db,nomad,651
 2dmatpedia,odbx,643
 aflow-prototypes,cod,632
 rruff,cod,626
@@ -299,6 +330,7 @@ mc2d,aflow,493
 novomag,cod,490
 matbench-discovery,aflow-prototypes,488
 2dmatpedia,mc3d,485
+aflow-prototypes,nomad,482
 jarvis-specialized-structures,mc2d,475
 mc2d,materials-cloud-archive-static,472
 mc2d,odbx,469
@@ -320,6 +352,7 @@ elementa,materials-project,362
 materials-cloud-archive-static,webmineral,355
 icsd,csllm-negatives,355
 rruff,mc3d,352
+bidb,nomad,345
 csllm-negatives,phonondb,341
 matbench-discovery,rruff,336
 materials-project,rruff,333
@@ -345,6 +378,7 @@ tcod,aflow,266
 materiae,rruff,264
 matbench-discovery,tcod,264
 snumat,mc2d,260
+rruff,nomad,259
 tcod,materials-project,258
 tcod,mc3d,258
 jarvis-dft,rruff,253
@@ -353,6 +387,7 @@ superband,jarvis-specialized-structures,251
 mc2d,jarvis-qetb,249
 novomag,amcsd,247
 bidb,aflow,245
+omdb-organic,nomad,243
 c2db,jarvis-dft,239
 bidb,jarvis-qetb,238
 snumat,webmineral,235
@@ -375,6 +410,7 @@ aflow-prototypes,phonondb,194
 materiae,elementa,194
 bidb,jarvis-dft,192
 elementa,materials-cloud-archive-static,191
+hex-high-pressure,nomad,187
 amcsd,csllm-negatives,187
 c2db,materials-project,186
 hex-high-pressure,aflow,184
@@ -425,6 +461,7 @@ matbench-discovery,webmineral,134
 odbx,webmineral,134
 3dsc,jarvis-specialized-structures,134
 snumat,rruff,133
+webmineral,nomad,132
 materiae,c2db,132
 jarvis-qetb,openmx-2d-ab2,132
 alexandria,carolina,130
@@ -449,8 +486,10 @@ matbench-discovery,qmof,101
 novomag,3dsc,100
 materials-project,qmof,100
 aflow-prototypes,webmineral,98
+carolina,nomad,98
 elementa,amcsd,97
 materials-project,amdb,95
+mof-carbon-capture,nomad,95
 aflow,openmx-2d-ab2,93
 2dmatpedia,csllm-negatives,92
 superband,phonondb,91
@@ -458,9 +497,11 @@ omdb-organic,qmof,91
 spse,odbx,89
 alexandria,qmof,89
 snumat,novomag,88
+openmx-2d-ab2,nomad,88
 hex-high-pressure,tcod,87
 omdb-organic,alexandria,87
 jarvis-qetb,webmineral,86
+core-mof,nomad,86
 phonix,3dsc,84
 c2db,cod,84
 phonix,c2db,84
@@ -489,6 +530,7 @@ materials-project,mofx-db,69
 omdb-organic,materials-cloud-archive-static,68
 materials-project,fair-mofs,68
 spse,aflow-prototypes,66
+mofx-db,nomad,64
 materials-project,iza-zeolite,63
 obelix,icsd,60
 aflow,amdb,58
@@ -630,6 +672,7 @@ csllm-negatives,webmineral,16
 superband,bidb,16
 omdb-organic,amcsd,16
 2dmatpedia,aflow-prototypes,16
+iza-zeolite,nomad,16
 hadb,icsd,15
 phonix,open-framework-aluminophosphate,15
 materials-cloud-archive-static,mofx-db,15
@@ -672,6 +715,7 @@ matbench-discovery,hadb,11
 hadb,alexandria,11
 phonix,sacada,11
 sacada,oqmd,11
+sacada,nomad,11
 fair-mofs,icsd,11
 snumat,omdb-organic,11
 gnome,csllm-negatives,11
@@ -680,6 +724,7 @@ mc2d,fair-mofs,11
 elementa,hex-high-pressure,11
 hex-high-pressure,rruff,10
 hadb,odbx,10
+hadb,nomad,10
 3dsc,c2db,10
 snumat,openmx-2d-ab2,10
 bidb,aflow-prototypes,10
@@ -689,6 +734,7 @@ jarvis-dft,carolina,10
 elementa,tcod,10
 hadb,cod,9
 c2db,aflow-prototypes,9
+open-framework-aluminophosphate,nomad,9
 snumat,fair-mofs,9
 novomag,c2db,9
 materiae,iza-zeolite,9
@@ -725,6 +771,7 @@ amdb,webmineral,5
 obelix,cod,5
 matbench-discovery,amdb,5
 odbx,amdb,5
+amdb,nomad,5
 3dsc,spse,5
 hadb,amcsd,5
 sacada,amcsd,5
@@ -743,6 +790,7 @@ sacada,tcod,4
 sacada,jarvis-qetb,4
 spse,alexandria,4
 spse,phonondb,4
+spse,nomad,4
 icsd,openmx-2d-ab2,4
 spse,amdb,4
 hadb,phonondb,4

@@ -105,6 +105,18 @@ HARD_BOUNDS: dict[str, tuple[float, float]] = {
 # Used by --resolve priority.  Ranked by how tightly the upstream workflow is
 # controlled, not by size: a curated experimental measurement outranks a
 # high-throughput screen.
+#: Theory levels that are not a first-principles calculation.  When one of
+#: these is the LARGEST group for a property, `--theory-policy majority` would
+#: hand the whole property to it and discard the DFT labels underneath -- which
+#: is how elastic moduli ended up with only the GULP force-field zeolite set
+#: (121,704 rows) as their single task, burying 42,019 OptB88vdW and 31,517 PBE
+#: values that are the ones anyone would actually want pool-wide.
+NON_FIRST_PRINCIPLES = {
+    "forcefield", "gcmc", "geometric", "transport-postproc", "ml-predicted",
+    "other", "unspecified",
+}
+
+
 SOURCE_PRIORITY = [
     "materials-project", "jarvis-dft", "alexandria", "oqmd", "aflow",
     "mc3d", "c2db", "mc2d", "qmof", "matbench-discovery", "gnome", "elementa",
@@ -256,7 +268,18 @@ def build_one(name: str, path: Path, mats: dict, args) -> dict | None:
     if task_key == "condition" or args.theory_policy == "split":
         keep = unique_keys.tolist()
     elif args.theory_policy == "majority":
-        keep = [unique_keys[int(np.argmax(key_counts))]]
+        winner = unique_keys[int(np.argmax(key_counts))]
+        keep = [winner]
+        # A force-field or geometric corpus can outnumber the DFT one and still
+        # not be the target anyone wants pool-wide.  When the majority group is
+        # not a first-principles calculation, keep the DFT levels alongside it
+        # rather than letting size alone decide.
+        if str(winner) in NON_FIRST_PRINCIPLES and args.keep_dft_levels:
+            keep += [
+                key for key, count in zip(unique_keys.tolist(), key_counts.tolist())
+                if key != winner and key not in NON_FIRST_PRINCIPLES
+                and count >= args.keep_dft_levels
+            ]
     else:  # 'pool' -- explicitly asked for, and recorded as such
         keep = [None]
 
@@ -413,6 +436,9 @@ def main() -> int:
                     help="what defines a separate task. 'auto' keys the "
                          "condition-split properties on their measurement "
                          "condition and everything else on theory level")
+    ap.add_argument("--keep-dft-levels", type=int, default=10_000,
+                    help="主导层级不是第一性原理时，额外保留达到这个规模的 DFT "
+                         "层级；0 = 只留主导层级")
     ap.add_argument("--theory-policy", choices=["majority", "split", "pool"],
                     default="majority",
                     help="with --task-key theory: keep only the largest level, "

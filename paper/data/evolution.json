@@ -2,8 +2,8 @@
   "base_merge_total": 8225138,
   "base_merge_candidate": 8125976,
   "base_merge_experimental": 99162,
-  "admitted_during_integration": 5318139,
-  "growth_fraction": 0.6465714009904758,
-  "refs_to_base_merge": 10111481,
-  "refs_to_admitted": 7216414
+  "admitted_during_integration": 6365347,
+  "growth_fraction": 0.773889386415158,
+  "refs_to_base_merge": 11501579,
+  "refs_to_admitted": 10042054
 }

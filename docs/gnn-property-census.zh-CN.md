@@ -1,11 +1,13 @@
 # GNN 性质预测：索引普查与分性质数据提取报告
 
+> **2026-09-11 更新**：NOMAD 并入后（55 个来源、14,590,485 个结构、131,824,881 条性质）重跑了 `property_census.py` / `task_census.py` / `make_training_sets.py` / `prediction_sets.py`。汇总数字（513 个任务、176 个训练集、适用域统计）已按本次运行更新；下文各节的**逐任务明细表**仍是上一次运行的输出，行数会略有出入，以 `data/ml/` 下的 JSON 为准。
+
 **日期** 2026-08-30 · **索引** `data/index/materials.sqlite`（schema v3）·
 **普查方式** 全表扫描 ·
-**配套脚本** [`scripts/ml/`](../scripts/ml/README.md)
+**配套脚本** [`scripts/ml/`](../scripts/ml/README.md)（数据提取）· [`scripts/train/`](../scripts/train/README.md)（批量训练）
 
 目标：用已有数据规模化训练 GNN 模型，补全所有结构缺失的性质（含矩阵性质）。
-本文回答三件事 —— 有多少性质够训、每个任务多大、数据怎么取出来。
+本文汇总性质任务的数据规模、适用域和提取方法。
 
 ---
 
@@ -23,8 +25,8 @@
 
 另有 7 组本地就能取出的张量目标，和 6 类已在索引里的曲线目标。
 
-**流水线已跑通并验证过一遍**，不是纸面方案。默认参数下产出 **162 个训练集**、
-覆盖 **116 个性质**、共 **93,462,873 条标签**，全部带 train/val/test 划分，磁盘 1.9 GB。
+**流水线已跑通并验证过一遍**，不是纸面方案。默认参数下产出 **176 个训练集**、
+覆盖 **116 个性质**、共 **93,864,594 条标签**，全部带 train/val/test 划分，磁盘 1.9 GB。
 
 **每个材料都有结构。** `materials` 表里 `blob_offset` / `blob_length` 非空是硬约束，
 不存在"有标签没结构"的行。候选结构平均 15.1 个原子、上限 500 个，
@@ -33,15 +35,15 @@
 **真正的风险在标签口径，不在数据量。** 普查扫出 **190,428** 个不同的
 (性质, 来源, method) 组合 —— 这个字段是 54 个 adapter 各写各的自由文本。
 不做归一化直接按性质名训练，有几个任务学到的会是"这条数据来自哪个库"而不是物理。
-第 08 节的四个坑已在脚本里处理；第 09 节是我自己在构建过程中踩的两个边界错误；
-第 10 节是索引自带的一个既有缺陷。
+第 09 节的四个坑已在脚本里处理；第 10 节是我自己在构建过程中踩的两个边界错误；
+第 11 节是索引自带的一个既有缺陷。
 
 **"补全所有结构"这句话本身需要限定。** 很多性质只对特定材料有意义 ——
 `co2_uptake` 是多孔骨架的 GCMC 吸附量，对致密金属间化合物没有定义。
-162 个任务里 **63 个**的训练集 >90% 属于同一个 `material_family`。
+176 个任务里 **63 个**的训练集 >90% 属于同一个 `material_family`。
 第 06 节给每个任务标了适用域，并算出它到底允许对哪些结构打分：
-**105 / 162 个任务的可预测范围不到池的一半**，
-总预测量 871,097,089 而不是 162 × 13,543,277 = 2,194,010,874，相差 2.5 倍。
+**109 / 176 个任务的可预测范围不到池的一半**，
+总预测量 1,105,593,143 而不是 176 × 14,590,485 = 2,567,925,360，相差 2.32 倍。
 
 ---
 
@@ -49,7 +51,7 @@
 
 | 维度 | 实验 | 候选 | 合计 |
 |---|--:|--:|--:|
-| 结构数 | 357,127 | 13,186,150 | **13,543,277** |
+| 结构数 | 357,127 | 14,233,358 | **14,590,485** |
 | 平均原子数 | 136.6 | 15.1 | — |
 | ≤ 50 原子 | 81,908 | 12,490,337 | 12,572,245 |
 | ≤ 200 原子 | 270,424 | 13,123,429 | 13,393,853 |
@@ -96,9 +98,9 @@
 ## 04 普查全表（≥10,000 材料的回归任务，共 161 个）
 
 `⚠` 标记的是**条件依赖**性质：同一个材料有多个都正确的值，
-每个条件是独立任务，不能取中位数合并（见第 08 节坑 2）。
+每个条件是独立任务，不能取中位数合并（见第 09 节坑 2）。
 
-完整数据（含 ≥300 的全部 497 个任务、分类任务、每个来源的行数）在
+完整数据（含 ≥300 的全部 513 个任务、分类任务、每个来源的行数）在
 `data/ml/census/task_census.json`。
 
 | # | 性质 | 分组（泛函 / 条件） | 单位 | 材料数 | 该性质的主要来源 |
@@ -267,26 +269,26 @@
 
 ---
 
-## 05 已产出的 162 个训练集
+## 05 已产出的 176 个训练集
 
 默认参数：`--theory-policy majority --resolve median --split chemsys --min-materials 300`。
 产物在 `data/ml/datasets/`，1.9 GB。
 
 | 指标 | 值 | 说明 |
 |---|--:|---|
-| 训练集数 | 162 | 覆盖 116 个性质 |
-| 标签总数 | 93,462,873 | 去重、消解冲突之后 |
-| 多源标注的材料 | 5,831,192 | ≥2 个数据库给过值 |
-| 源间分歧 | 519,599 | 极差 > 0.25 σ，已标注未丢弃 |
-| 越界丢弃 | 1,577 | 修正边界后（修正前 2,238,299，见第 09 节） |
+| 训练集数 | 176 | 覆盖 116 个性质 |
+| 标签总数 | 93,864,594 | 去重、消解冲突之后 |
+| 多源标注的材料 | 5,856,861 | ≥2 个数据库给过值 |
+| 源间分歧 | 522,739 | 极差 > 0.25 σ，已标注未丢弃 |
+| 越界丢弃 | 6,502 | 修正边界后（修正前 2,238,299，见第 10 节） |
 | 空折叠的任务 | 0 | 级联降级修复了 23 个 |
-| 划分方式 | 139 / 23 | chemsys / 降级到 formula |
-| 含实验标签的任务 | 115 | 可做实验-计算校准 |
-| 分层 | T1 13 · T2 60 · T3 38 · T4 32 · T5 19 | |
+| 划分方式 | 153 / 23 | chemsys / 降级到 formula |
+| 含实验标签的任务 | 129 | 可做实验-计算校准 |
+| 分层 | T1 13 · T2 60 · T3 52 · T4 32 · T5 19 | |
 
 **多源** = 被 ≥2 个数据库标注过的材料数；**分歧** = 其中源间极差超过 0.25 个标准差的部分。
 这些行的 `value_spread` 都写在输出里，可以拿来给标签加权。
-`⚠` = 划分从 chemsys 降级到 formula（见第 08 节坑 4）。
+`⚠` = 划分从 chemsys 降级到 formula（见第 09 节坑 4）。
 
 | 训练集 | 声明域 | 材料数 | train | val | test | 多源 | 分歧 | 实验 | 目标 mean ± std | 划分 |
 |---|---|--:|--:|--:|--:|--:|--:|--:|---|---|
@@ -364,13 +366,19 @@
 | `decomposition_energy__r2SCAN_GNoME_vs_MP_hull` | pool-wide | 116,927 | 93,542 | 11,693 | 11,692 | 0 | 0 | 5 | -0.04 ± 0.059 | chemsys |
 | `decomposition_energy__r2SCAN_GNoME_vs_MP_OQMD_hull` | pool-wide | 116,927 | 93,542 | 11,693 | 11,692 | 0 | 0 | 5 | -0.03 ± 0.05 | chemsys |
 | `predicted_synthesizable__other` | pool-wide | 94,797 | 75,838 | 9,480 | 9,479 | 3,181 | 0 | 376 | 0.0 ± 0.0 | chemsys |
+| `dielectric_constant_electronic__gga-vdw` | gapped | 79,555 | 63,646 | 7,955 | 7,954 | 6,189 | 1,238 | 19,795 | 54.959 ± 65.238 | chemsys |
 | `decomposition_energy__PBE__U__MP2026_equilibrium_reaction_energy` | pool-wide | 58,921 | 47,137 | 5,893 | 5,891 | 57 | 6 | 28,327 | -0.079 ± 0.247 | chemsys |
+| `bulk_modulus_vrh__gga-vdw` | pool-wide | 42,841 | 34,273 | 4,284 | 4,284 | 3,002 | 261 | 11,792 | 89.742 ± 67.184 | chemsys |
 | `poisson_ratio__OptB88vdW_ElaStic` | pool-wide | 42,792 | 34,234 | 4,279 | 4,279 | 3,000 | 289 | 11,774 | 0.332 ± 0.403 | chemsys |
+| `shear_modulus_vrh__gga-vdw` | pool-wide | 40,625 | 32,504 | 4,059 | 4,062 | 2,875 | 323 | 11,629 | 42.218 ± 37.26 | chemsys |
 | `power_factor__BoltzTraP_p-type` | pool-wide | 40,342 | 32,274 | 4,038 | 4,030 | 2,591 | 35 | 16,459 | 869.426 ± 923.911 | chemsys |
 | `seebeck_coefficient__BoltzTraP_n-type` | pool-wide | 40,339 | 32,275 | 4,031 | 4,033 | 2,591 | 362 | 16,455 | -104.39 ± 135.116 | chemsys |
 | `power_factor__BoltzTraP_n-type` | pool-wide | 40,337 | 32,270 | 4,035 | 4,032 | 2,591 | 101 | 16,460 | 902.243 ± 938.449 | chemsys |
 | `seebeck_coefficient__BoltzTraP_p-type` | pool-wide | 40,336 | 32,270 | 4,034 | 4,032 | 2,587 | 329 | 16,459 | 160.263 ± 183.27 | chemsys |
 | `largest_free_path_diameter__geometric` | pool-wide-biased-labels | 36,565 | 29,751 | 3,161 | 3,653 | 19,754 | 5,144 | 36,434 | 5.072 ± 3.452 | chemsys |
+| `dielectric_constant_electronic__mbj` | gapped | 29,102 | 23,283 | 2,909 | 2,910 | 1,905 | 195 | 9,325 | 49.701 ± 74.076 | chemsys |
+| `bulk_modulus_vrh__gga` | pool-wide | 28,988 | 23,200 | 2,891 | 2,897 | 5,651 | 393 | 14,442 | 102.793 ± 72.932 | chemsys |
+| `shear_modulus_vrh__gga` | pool-wide | 28,046 | 22,437 | 2,805 | 2,804 | 5,561 | 589 | 14,099 | 50.86 ± 46.262 | chemsys |
 | `pore_channel_count__geometric` | framework | 27,087 | 21,712 | 2,671 | 2,704 | 14,689 | 3,351 | 26,969 | 0.412 ± 0.698 | chemsys |
 | `lattice_thermal_conductivity__gga` | pool-wide | 26,470 | 21,187 | 2,636 | 2,647 | 21,250 | 541 | 11,119 | 2.105 ± 11.554 | chemsys |
 | `debye_temperature__gga` | pool-wide | 25,972 | 20,778 | 2,597 | 2,597 | 5,396 | 790 | 13,086 | 356.331 ± 203.495 | chemsys |
@@ -379,6 +387,12 @@
 | `has_imaginary_phonon__gga` | pool-wide | 22,699 | 18,160 | 2,273 | 2,266 | 7,073 | 1,244 | 2,926 | 0.672 ± 0.456 | chemsys |
 | `phonon_min_frequency__gga` | pool-wide | 22,685 | 18,148 | 2,272 | 2,265 | 7,067 | 13 | 2,924 | -1.822 ± 8.605 | chemsys |
 | `phonon_max_frequency__gga` | pool-wide | 22,675 | 18,143 | 2,266 | 2,266 | 7,066 | 9 | 2,919 | 31.119 ± 27.135 | chemsys |
+| `bulk_modulus_reuss__gga` | pool-wide | 20,745 | 16,598 | 2,073 | 2,074 | 53 | 21 | 10,309 | 100.828 ± 73.833 | chemsys |
+| `bulk_modulus_voigt__gga` | pool-wide | 20,744 | 16,597 | 2,073 | 2,074 | 53 | 15 | 10,308 | 104.292 ± 73.441 | chemsys |
+| `shear_modulus_reuss__gga` | pool-wide | 20,744 | 16,596 | 2,075 | 2,073 | 53 | 27 | 10,307 | 47.417 ± 43.322 | chemsys |
+| `shear_modulus_voigt__gga` | pool-wide | 20,744 | 16,596 | 2,075 | 2,073 | 53 | 24 | 10,308 | 54.755 ± 44.9 | chemsys |
+| `sound_velocity_longitudinal__gga` | pool-wide | 20,744 | 16,596 | 2,075 | 2,073 | 53 | 26 | 10,308 | 4904.27 ± 1902.122 | chemsys |
+| `sound_velocity_transverse__gga` | pool-wide | 20,743 | 16,595 | 2,075 | 2,073 | 53 | 26 | 10,309 | 2678.099 ± 1203.576 | chemsys |
 | `framework_bond_dissociation_energy__other` | framework | 20,172 | 16,365 | 1,797 | 2,010 | 17 | 3 | 20,086 | -0.795 ± 1.646 | chemsys |
 | `nmr_efg_max__gga-vdw` | pool-wide | 19,731 | 15,785 | 1,981 | 1,965 | 1,463 | 175 | 7,940 | 6.624126592671431e+22 ± 5.235820551084939e+22 | chemsys |
 | `num_voltage_steps__gga` | ion-conducting | 19,280 | 15,424 | 1,930 | 1,926 | 2,089 | 395 | 2,630 | 1.306 ± 0.749 | chemsys |
@@ -396,6 +410,8 @@
 | `slme__gga-vdw` | gapped | 16,809 | 13,448 | 1,681 | 1,680 | 1,174 | 187 | 6,612 | 11.218 ± 12.18 | chemsys |
 | `refractive_index__gga` | gapped | 16,652 | 13,323 | 1,666 | 1,663 | 103 | 2 | 7,266 | 2.373 ± 1.272 | chemsys |
 | `dielectric_constant_ionic__gga` | gapped | 14,069 | 11,257 | 1,411 | 1,401 | 85 | 0 | 7,094 | 12.819 ± 42.52 | chemsys |
+| `dielectric_constant_total__gga` | gapped | 14,052 | 11,242 | 1,409 | 1,401 | 84 | 2 | 7,085 | 20.078 ± 51.087 | chemsys |
+| `dielectric_constant_electronic__gga` | gapped | 14,048 | 11,239 | 1,408 | 1,401 | 84 | 0 | 7,083 | 6.81 ± 17.553 | chemsys |
 | `heat_capacity__pbesol` | pool-wide | 13,531 | 10,827 | 1,351 | 1,353 | 177 | 0 | 2,809 | 189.453 ± 134.738 | chemsys |
 | `structure_prediction_r_factor__geometric` | pool-wide | 12,401 | 10,009 | 1,413 | 979 | 0 | 0 | 0 | 0.012 ± 0.004 | chemsys |
 | `thermal_conductivity__gga` | pool-wide | 10,554 | 8,445 | 1,056 | 1,053 | 120 | 18 | 5,811 | 7.824 ± 14.115 | chemsys |
@@ -466,7 +482,7 @@
 拿它全池打分会产出约 1300 万个看起来像数据的数字。
 
 同样的问题以不同边界覆盖了三分之一的语料：
-**162 个任务里 63 个的训练集 >90% 属于同一个 `material_family`**，
+**176 个任务里 63 个的训练集 >90% 属于同一个 `material_family`**，
 `bulk_modulus_vrh__forcefield` 只覆盖 **2 个化学体系**。
 
 ### 两个独立来源描述每个任务的域
@@ -511,16 +527,16 @@ $PY scripts/ml/prediction_sets.py --export data/ml/export \
 
 | 可预测范围 | 任务数 |
 |---|--:|
-| ≥ 90% 池 | 35 |
+| ≥ 90% 池 | 45 |
 | 50–90% | 22 |
-| 10–50% | 36 |
+| 10–50% | 40 |
 | 1–10% | 39 |
 | < 1% | 30 |
 
-**105 / 162 个任务的可预测范围不到池的一半。**
+**109 / 176 个任务的可预测范围不到池的一半。**
 
-总预测量 **871,097,089**，而不是无视适用域时的 162 × 13,543,277 = 2,194,010,874
-—— **相差 2.5 倍**，差掉的那部分基本都是物理上无意义的输出。
+总预测量 **1,105,593,143**，而不是无视适用域时的 176 × 14,590,485 = 2,567,925,360
+—— **相差 2.35 倍**，差掉的那部分基本都是物理上无意义的输出。
 
 几个代表：
 
@@ -553,7 +569,7 @@ CO₂ 3.3 Å、H₂ 2.9 Å），本流水线**没有**做；`--gate wide` 的存
 
 `gapped` 和 `magnetic` 不是"无法门控"：索引里有 `pbes_gap` 和 `total_magnetization`
 （第二版 `export_targets.py` 才把这两列导出来），所以**已知值的部分直接筛**，
-只有值未知的部分待定 —— 17 个任务、累计 75,674,942 个结构，
+只有值未知的部分待定 —— 21 个任务、累计 95,583,739 个结构，
 需要先把带隙/磁矩预测出来再筛。这是个自然的两阶段流程。
 
 剩下 7 个任务索引里确实没有列可以收窄，它们的"可预测数"是**上界**而不是可信范围，
@@ -569,7 +585,7 @@ CO₂ 3.3 Å、H₂ 2.9 Å），本流水线**没有**做；`--gate wide` 的存
 所以这里退回到"含至少一种工作离子（Li/Na/K/Mg/Ca/Zn/Al…）"的门控，
 而不是把整个池放行。
 
-### 逐任务适用域（全部 162 个，按可预测数升序）
+### 逐任务适用域（全部 176 个，按可预测数升序）
 
 `⚠` = 声明域受限但索引里没有能收窄它的列，该数字是上界。
 
@@ -647,7 +663,9 @@ CO₂ 3.3 Å、H₂ 2.9 Å），本流水线**没有**做；`--gate wide` 的存
 | `total_energy_per_atom__gga` | pool-wide | 11,375,665 | **1,439,238** | 10.63% | — | — |
 | `formation_energy_per_atom__gga` | pool-wide | 9,672,505 | **3,122,521** | 23.06% | — | — |
 | `piezoelectric_modulus__dfpt-phonon` | gapped | 8,734 | **4,514,212** | 33.33% | — | — |
+| `dielectric_constant_electronic__mbj` | gapped | 29,102 | **4,611,638** | 34.05% | — | — |
 | `band_gap_direct__gga` | gapped | 5,828,018 | **4,667,096** | 34.46% | — | — |
+| `dielectric_constant_electronic__gga-vdw` | gapped | 79,555 | **4,740,095** | 35.00% | — | — |
 | `slme__gga-vdw` | gapped | 16,809 | **4,742,934** | 35.02% | — | — |
 | `effective_mass_electron__transport-postproc` | gapped | 6,515 | **4,744,185** | 35.03% | — | — |
 | `effective_mass_hole__transport-postproc` | gapped | 6,502 | **4,744,194** | 35.03% | — | — |
@@ -656,6 +674,8 @@ CO₂ 3.3 Å、H₂ 2.9 Å），本流水线**没有**做；`--gate wide` 的存
 | `gllbsc_derivative_discontinuity__gllbsc` | gapped | 8,226 | **4,813,991** | 35.55% | — | — |
 | `total_magnetization__gga` | pool-wide | 7,972,636 | **4,855,604** | 35.85% | — | — |
 | `dielectric_constant_ionic__gga` | gapped | 14,069 | **4,899,290** | 36.18% | — | — |
+| `dielectric_constant_total__gga` | gapped | 14,052 | **4,899,291** | 36.18% | — | — |
+| `dielectric_constant_electronic__gga` | gapped | 14,048 | **4,899,293** | 36.18% | — | — |
 | `num_voltage_steps__gga` | ion-conducting | 19,280 | **4,943,290** | 36.50% | — | — |
 | `max_voltage_step__gga` | ion-conducting | 19,277 | **4,943,293** | 36.50% | — | — |
 | `electrode_stability_discharged__gga` | ion-conducting | 19,271 | **4,943,296** | 36.50% | — | — |
@@ -696,7 +716,9 @@ CO₂ 3.3 Å、H₂ 2.9 Å），本流水线**没有**做；`--gate wide` 的存
 | `decomposition_energy__PBE_GNoME_vs_MP_OQMD_hull` | pool-wide | 553,778 | **11,888,603** | 87.78% | — | — |
 | `decomposition_energy__PBE_GNoME_vs_MP_hull` | pool-wide | 553,680 | **11,888,692** | 87.78% | — | — |
 | `decomposition_energy__PBE_GNoME` | pool-wide | 553,500 | **11,888,874** | 87.78% | — | — |
+| `bulk_modulus_vrh__gga-vdw` | pool-wide | 42,841 | **12,018,322** | 88.74% | — | — |
 | `poisson_ratio__OptB88vdW_ElaStic` | pool-wide | 42,792 | **12,018,369** | 88.74% | — | — |
+| `shear_modulus_vrh__gga-vdw` | pool-wide | 40,625 | **12,020,532** | 88.76% | — | — |
 | `spillage__gga-vdw` | pool-wide | 19,104 | **12,041,772** | 88.91% | — | — |
 | `bulk_modulus_eos__gga` | pool-wide | 502 | **12,083,509** | 89.22% | — | — |
 | `bulk_modulus_pressure_derivative__gga` | pool-wide | 501 | **12,083,510** | 89.22% | — | — |
@@ -713,7 +735,15 @@ CO₂ 3.3 Å、H₂ 2.9 Å），本流水线**没有**做；`--gate wide` 的存
 | `thermal_conductivity__gga` | pool-wide | 10,554 | **12,465,976** | 92.05% | — | — |
 | `thermal_expansion__gga` | pool-wide | 10,552 | **12,465,978** | 92.05% | — | — |
 | `poisson_ratio__PBE_AEL__AFLOW` | pool-wide | 10,521 | **12,466,009** | 92.05% | — | — |
+| `bulk_modulus_reuss__gga` | pool-wide | 20,745 | **12,472,760** | 92.10% | — | — |
+| `bulk_modulus_voigt__gga` | pool-wide | 20,744 | **12,472,761** | 92.10% | — | — |
+| `shear_modulus_reuss__gga` | pool-wide | 20,744 | **12,472,761** | 92.10% | — | — |
+| `shear_modulus_voigt__gga` | pool-wide | 20,744 | **12,472,761** | 92.10% | — | — |
+| `sound_velocity_longitudinal__gga` | pool-wide | 20,744 | **12,472,761** | 92.10% | — | — |
+| `sound_velocity_transverse__gga` | pool-wide | 20,743 | **12,472,762** | 92.10% | — | — |
 | `debye_temperature__gga` | pool-wide | 25,972 | **12,488,255** | 92.21% | — | — |
+| `bulk_modulus_vrh__gga` | pool-wide | 28,988 | **12,530,661** | 92.52% | — | — |
+| `shear_modulus_vrh__gga` | pool-wide | 28,046 | **12,533,542** | 92.54% | — | — |
 | `elastic_anisotropy__gga` | pool-wide | 24,405 | **12,564,468** | 92.77% | — | — |
 | `poisson_ratio__PBE__U__MP2026` | pool-wide | 24,381 | **12,564,493** | 92.77% | — | — |
 | `tc_superconducting__experiment` | synthesized-only ⚠ | 3,119 | **12,757,326** | 94.20% | — | — |
@@ -738,10 +768,9 @@ CO₂ 3.3 Å、H₂ 2.9 Å），本流水线**没有**做；`--gate wide` 的存
 | `structure_prediction_r_factor__geometric` | pool-wide | 12,401 | **13,484,794** | 99.57% | — | — |
 | `measurement_pressure__experiment` | synthesized-only ⚠ | 1,092 | **13,533,489** | 99.93% | — | — |
 
-
 ---
 
-## 07 矩阵性质
+## 08 矩阵性质
 
 索引本身是标量存储 —— `value_num` 只有一个 float。入库时张量全被压成了标量：
 6×6 弹性张量变成 `bulk_modulus_vrh`，3×3 介电张量变成 trace/3，
@@ -793,7 +822,7 @@ EFG 那一栏值得单独说一句：JARVIS 每行是 `[元素, Wyckoff字母, 9
 
 ---
 
-## 08 四个必须处理的坑
+## 09 四个必须处理的坑
 
 都是普查过程中在真实数据里撞到的，不是理论担忧。脚本已全部处理，改参数前先读这一节。
 
@@ -829,7 +858,7 @@ EFG 那一栏值得单独说一句：JARVIS 每行是 `[元素, Wyckoff字母, 9
 ### 坑 3 · 跨库分歧：1,190,447 个结构由 ≥2 个库贡献，数值真的不一样
 
 不是重复记录，是同一个结构在不同数据库里算出了不同的值。
-实际产出的 162 个训练集里，**5,831,192** 个材料被多源标注过，
+实际产出的 176 个训练集里，**5,831,192** 个材料被多源标注过，
 其中 **519,599** 个的源间极差超过 0.25 个标准差。
 
 > **处理**：`--resolve median | priority | drop-conflicts`。默认取中位数，
@@ -844,7 +873,7 @@ EFG 那一栏值得单独说一句：JARVIS 每行是 `[元素, Wyckoff字母, 9
 
 但按化学体系整体留出对**单一化学的枚举库**会退化：13.6 万个 Deem 沸石全是 SiO₂、
 SACADA 全是碳，整个任务只有一个化学体系，留出之后 val 和 test 直接是空的 ——
-首轮构建里 162 个任务有 **23 个**撞上这个（train 135,887 / val 0 / test 0）。
+首轮构建里 176 个任务有 **23 个**撞上这个（train 135,887 / val 0 / test 0）。
 
 > **处理**：级联降级 `chemsys → formula → random`，取仍能产出三个非空折叠的最强划分，
 > 并把实际用的那一级写进 `split_mode` / `split_fallback`，**绝不静默**。
@@ -859,7 +888,7 @@ SACADA 全是碳，整个任务只有一个化学体系，留出之后 val 和 t
 
 ---
 
-## 09 我自己踩的两个错
+## 10 我自己踩的两个错
 
 写在这里是因为它们是可复现的教训，也因为它们改变了 200 万条标签的去留。
 两个都是我给的"物理边界"写错了，而不是数据有问题 —— 是**丢弃计数**暴露出来的。
@@ -898,7 +927,7 @@ total_magnetization (n=9,101,588)
 
 ---
 
-## 10 索引自带的一个缺陷：61,717 行是半个胞
+## 11 索引自带的一个缺陷：61,717 行是半个胞
 
 这个是普查过程中撞出来的**既有**问题，不是本套脚本引入的，
 但它直接影响 23 个已产出的沸石训练集。
@@ -950,7 +979,7 @@ GROUP BY sd.key;
 - 原子数请用 npz 分片里的 `np.diff(atom_ptr)`，**不要**用 `datasets/*.parquet` 的 `n_atoms` 列
 - 任何 per-atom 归一化在这 61,717 行上会差 2 倍
 - 受影响的正好是 23 个 `*__forcefield` / `*__GULP_SLC_forcefield__*` 沸石训练集
-  —— 也正是第 08 节里划分降级的那 23 个
+  —— 也正是第 09 节里划分降级的那 23 个
 - 性质值本身不受影响：`material_properties` 里 deem-zeolites 发布的 density 是对的（2.724），
   错的是 `materials.density`（1.362）
 
@@ -959,7 +988,7 @@ GROUP BY sd.key;
 
 ---
 
-## 11 提取流水线
+## 12 提取流水线
 
 五个脚本在 `scripts/ml/`，全部只读，不动 `data/index/`。
 
@@ -968,7 +997,7 @@ GROUP BY sd.key;
 | 1 | `property_census.py` | `census_groups / census_property.json` |
 | 2 | `export_targets.py` | `materials.parquet` + `targets/*.parquet` ×151 |
 | 3 | `extract_tensors.py` | `tensors/*.parquet` ×7 |
-| 4 | `make_training_sets.py` | `datasets/*.parquet` ×162 |
+| 4 | `make_training_sets.py` | `datasets/*.parquet` ×176 |
 | 5 | `export_structures.py` | `structures/shard-*.npz` |
 
 ```bash
@@ -1030,11 +1059,11 @@ $PY scripts/ml/export_structures.py  --out /scratch/bg/structures \
 | candidate | 1,500 | 1,442 | 58 | 0 | 12 † |
 | experimental | 1,500 | 220 | 1,280 | 0 | 0 |
 
-† 这 12 个正是第 10 节的半胞问题 —— 解析器是对的，库里的 `n_atoms` 是错的。
+† 这 12 个正是第 11 节的半胞问题 —— 解析器是对的，库里的 `n_atoms` 是错的。
 
 ---
 
-## 12 输出格式
+## 13 输出格式
 
 四类产物，都是 zstd 压缩的 Parquet / npz，join 键统一是 `material_pk`。
 
@@ -1061,7 +1090,7 @@ $PY scripts/ml/export_structures.py  --out /scratch/bg/structures \
 | `value_spread` | float32 | 源间极差，可用作标签权重 |
 | `split` | string | `train` / `val` / `test` |
 | `formula`, `chemical_system` | string | 划分键，也便于分层评估 |
-| `is_experimental`, `n_atoms` | int8, int16 | 筛选与分桶（`n_atoms` 见第 10 节警告） |
+| `is_experimental`, `n_atoms` | int8, int16 | 筛选与分桶（`n_atoms` 见第 11 节警告） |
 | `blob_offset`, `blob_length` | int64, int32 | 直接去 `structures.blob` 取 CIF |
 
 ### `structures/shard-*.npz` —— 变长数组按 `atom_ptr` 拼接
@@ -1097,7 +1126,7 @@ disordered     (S,)       bool      部分占据取了多数元素的标记
    正解是对全池跑一遍 zeo++ 拿 PLD，然后按吸附质动力学直径卡。
    顺带这也会把 `pool-wide-biased-labels` 那 7 个几何描述符任务的标签偏置问题解决掉。
 
-- **61,717 行的半胞元数据没修。** 见第 10 节。绕开的办法有了，
+- **61,717 行的半胞元数据没修。** 见第 11 节。绕开的办法有了，
    但要真正修好需要重跑索引器对这批 CIF 的结构解析，
    顺带重算 `n_atoms` / `formula` / `density` / `volume`。
 
@@ -1109,11 +1138,11 @@ disordered     (S,)       bool      部分占据取了多数元素的标记
 |---|---|
 | `data/ml/census/census_groups.json` | 190,428 个 (性质, 来源, method) 组的原始统计 |
 | `data/ml/census/census_property.json` | 每个性质的汇总、去重材料数、分层判定 |
-| `data/ml/census/task_census.json` | 拆分后 497 个任务的清单（本文第 04 节的完整版） |
-| `data/ml/export/materials.parquet` | 13,543,277 行共享结构索引 |
+| `data/ml/census/task_census.json` | 拆分后 513 个任务的清单（本文第 04 节的完整版） |
+| `data/ml/export/materials.parquet` | 14,590,485 行共享结构索引 |
 | `data/ml/export/targets/*.parquet` | 151 个性质的长表 |
 | `data/ml/export/tensors/*.parquet` | 7 组张量 |
-| `data/ml/datasets/*.parquet` | 162 个模型可直接用的训练集 |
+| `data/ml/datasets/*.parquet` | 176 个模型可直接用的训练集 |
 | `data/ml/datasets/DATASETS.json` | 每个训练集的完整统计（含丢弃计数、划分降级记录） |
 | `data/ml/datasets/task_summary.json` | 本文第 05 节表格的数据源 |
 | `data/ml/predict/PREDICTION_SETS.strict.json` | 每个任务允许打分的结构数、门控理由、警告 |

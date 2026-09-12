@@ -43,7 +43,7 @@ order. The state of the public record has kept them apart, and MateriaViva is bu
 both.
 
 Forward screening is usually described as limited by how many materials are known. It is not.
-It is limited by how few of them have been characterised. The unified pool holds 13.5 million
+It is limited by how few of them have been characterised. The unified pool holds 14.6 million
 distinct crystals, and **no property that requires a calculation of its own reaches a fiftieth
 of them** — elastic moduli cover 1.45%, lattice thermal conductivity 0.20%. A screen run over
 the public record today therefore ranks the materials somebody chose to compute, not the
@@ -60,7 +60,7 @@ finding them.
 
 That second route needs exactly what this database holds. A generative model has to judge
 novelty against everything published rather than against one repository, which requires
-structures deduplicated across all 54 sources; and it has to be conditioned on a defined
+structures deduplicated across all 55 sources; and it has to be conditioned on a defined
 quantity rather than a column heading, which requires property labels that name the method
 behind them. Standardised structure and property data at this scale is what makes the two
 routes comparable rather than separate literatures.
@@ -86,14 +86,16 @@ The unified index currently contains:
 
 | Experimental structures | Computational candidates | Unified search records |
 |---:|---:|---:|
-| 357,127 | 13,186,150 | 13,543,277 |
+| 357,127 | 14,233,358 | 14,590,485 |
 
-On top of the structure pool sits a cross-database property layer: **121,620,776 property
-rows** covering **166 distinct properties** from **54 integrated source databases**, with
+On top of the structure pool sits a cross-database property layer: **131,824,881 property
+rows** covering **166 distinct properties** from **55 integrated source databases**, with
 every value keeping its source database, native record id and calculation / measurement
-method; 12,812,918 materials carry at least one cross-database property, and **1,190,447
+method; 13,792,960 materials carry at least one cross-database property, and **3,233,769
 structures are contributed by two or more source databases** — that overlap is what
-deduplication buys you. Non-scalar data — **1,198,897 stored spectra** (band structures,
+deduplication buys you. 3,153,748 of them draw their property record from more than one
+database, so nearly a quarter of the labelled pool is not obtainable from any single
+provider. Non-scalar data — **1,198,897 stored spectra** (band structures,
 phonon / electronic DOS, powder XRD, XAS, Raman, IR, thermal conductivity) plus on-demand
 simulated XRD for every structure — lives in a parallel curve store. Space groups cover
 99.996% of the pool. Non-conventional crystal classes (MOF, COF, zeolite, molecular
@@ -112,24 +114,26 @@ structures of their own. The pool starts from the deduplicated base merge —
 [LeMat-BulkUnique](https://huggingface.co/datasets/LeMaterial/LeMat-BulkUnique) and the ELEMENTA
 relaxed endpoints among them, every record keeping its own `immutable_id` and fingerprint — and
 each database below then attaches to it by authoritative record id or by fingerprint, with
-fingerprint misses admitted as new structures. **1,190,447 structures are contributed by two or
+fingerprint misses admitted as new structures. **3,233,769 structures are contributed by two or
 more source databases** — each of them one row here carrying every contributor's numbers and
 provenance, instead of a handful of near-duplicate entries to reconcile by hand.
 
-**54 source databases, 121,620,776 property rows:**
+**55 source databases, 131,824,881 property rows:**
 
 | Group | Databases | Property rows | Largest members |
 |---|---:|---:|---|
-| Large general-purpose DFT databases | 12 | 108,966,009 | Alexandria, AFLOW, ELEMENTA, OQMD, GNoME, Materials Project |
+| Large general-purpose DFT databases | 13 | 119,170,114 | Alexandria, AFLOW, NOMAD, ELEMENTA, OQMD, GNoME, Materials Project |
 | Experimental structure catalogues | 2 | 611,908 | COD, ICSD |
 | Specialised property libraries | 28 | 1,823,909 | Materiae, CMR, SNUMAT, phonix, Materials Cloud Archive |
 | Porous and framework materials | 12 | 10,218,950 | Boyd–Woo carbon capture, Deem zeolites, hMOF, QMOF |
 
-> ⚠️ **Four sources restrict redistribution: AFLOW, ELEMENTA, GNoME and ICSD.** They are
-> searchable in an index you build locally, but they are filtered out before any public release —
-> AFLOW's academic terms and the CC BY-NC licences of ELEMENTA and GNoME would make a combined
-> snapshot non-commercial, and ICSD data may only be held by someone with their own FIZ Karlsruhe
-> licence.
+> ⚠️ **Five sources are withheld from any public release: AFLOW, ELEMENTA, GNoME, ICSD and
+> NOMAD.** They are searchable in an index you build locally, but they are filtered out before
+> any public release — AFLOW's academic terms and the CC BY-NC licences of ELEMENTA and GNoME
+> would make a combined snapshot non-commercial, ICSD data may only be held by someone with
+> their own FIZ Karlsruhe licence, and NOMAD carries no single licence at all: it holds
+> author-deposited calculations whose terms are set per upload, so its values stay local until
+> each can be resolved.
 >
 > **ICSD contributes no structures at all.** Its adapter is properties-only: it annotates pool
 > materials with chemical and mineral names and calculated densities, and its 73,823 `origin`
@@ -137,16 +141,17 @@ provenance, instead of a handful of near-duplicate entries to reconcile by hand.
 > — not structures admitted from FIZ Karlsruhe. No FIZ structure is stored or published here.
 
 <details>
-<summary><b>All 54 databases in detail</b> — what each one contributes, its property rows and its licence</summary>
+<summary><b>All 55 databases in detail</b> — what each one contributes, its property rows and its licence</summary>
 
 <br>
 
-#### Large general-purpose DFT databases — 12 sources, 108,966,009 property rows
+#### Large general-purpose DFT databases — 13 sources, 119,170,114 property rows
 
 | Database | Contributes | Property rows | Licence |
 |---|---|---:|---|
 | [Alexandria](https://alexandria.icams.rub.de/datasets.html) | PBE / PBEsol / SCAN 3D, 2D and 1D crystals: formation and hull energies, indirect and direct gaps, magnetization | 60,588,138 | Alexandria dataset terms |
 | [AFLOW](https://aflow.org/documentation/) ⚠️ | high-throughput formation enthalpies, gaps, total energies, prototype labels, density | 18,464,119 | AFLOW academic non-commercial terms |
+| [NOMAD](https://nomad-lab.eu/prod/v1/gui/search/entries) ⚠️ | 19.4M author-deposited calculations reduced to one value per (material, property, method): band gaps by exchange–correlation family and spin channel, residual forces, VRH / Voigt / Reuss moduli, volume per site; contributed 1,047,208 structures no other source held | 10,204,105 | per-upload licence and NOMAD terms |
 | [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) ⚠️ | per-endpoint total energies over the 2,005,836 relaxed endpoints it brought to the base merge; the spin runs add magnetization | 8,023,344 | CC BY-NC 4.0 |
 | [OQMD](https://oqmd.org/download/) | one converged calculation per entry: formation energy, hull distance, gap, magnetization | 6,086,500 | CC BY 4.0 |
 | [GNoME](https://github.com/google-deepmind/materials_discovery/blob/main/DATASET.md) ⚠️ | formation and decomposition energies, gaps, plus an r2SCAN re-computed subset | 4,897,901 | CC BY-NC 4.0 |
@@ -353,7 +358,7 @@ only. The integrated data carries the terms of its sources, which are stricter.
 ## Current coverage
 
 The machine-readable catalog registers **106** crystal structure or property sources, of which
-**54 are integrated** into the index and contribute the property rows counted above. "Registered"
+**55 are integrated** into the index and contribute the property rows counted above. "Registered"
 is not the same as "acquired", and "acquired" is not the same as "integrated": a source can be
 downloaded and still be waiting for an adapter, or be evaluated and deliberately rejected —
 Catalysis-Hub is in the catalog with a status recording that its crawl omitted the

@@ -23,8 +23,11 @@ EXTRACT = [
     "extract_stats.py",       # pool shape, sources, properties, curves, overlaps
     "extract_evolution.py",   # base merge vs admitted, per source
     "extract_substrate.py",   # matches onto admitted structures
+    "extract_substrate_growth.py",  # the substrate as it grew, source by source
     "extract_agreement.py",   # per-material completeness + cross-source agreement
     "cost_tiers.py",          # coverage grouped by required calculation
+    "extract_crossfill.py",   # property values a structure's own contributor did not supply
+    "extract_cell_sources.py",  # how many databases stand behind each filled cell
     "extract_gnn_census.py",  # task census + gated prediction sets (reads data/ml)
 ]
 FIGURES = [

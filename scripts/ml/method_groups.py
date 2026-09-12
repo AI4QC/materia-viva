@@ -36,9 +36,18 @@ _RULES: tuple[tuple[re.Pattern[str], str], ...] = tuple(
         # hybrids
         (r"\bhse\s*06|\bhse\b", "hse06"),
         (r"\bpbe0\b|\bb3lyp\b|\bhsesol\b", "hybrid-other"),
+        # NOMAD names the family rather than the functional: its metadata
+        # records `xc_functional_type`, which is "hybrid" or "meta-GGA" with no
+        # further detail.  No other adapter writes either word.
+        (r"\bhybrid\b", "hybrid-other"),
         (r"\bgw\b|\bbse\b", "gw-bse"),
         # meta-GGA / modified potentials
         (r"\bmbj\b|\btbmbj\b|\bmodified becke", "mbj"),
+        # must precede the bare-GGA fallback: `\bgga\b` matches inside
+        # "meta-GGA" (the hyphen is a word boundary), which silently filed
+        # 866,509 NOMAD rows -- SCAN- and r2SCAN-class band gaps among them --
+        # at the GGA level and made them disagree with every GGA database.
+        (r"\bmeta[-_ ]?gga\b", "meta-gga"),
         (r"\br2scan\b", "r2scan"),
         (r"\bscan\b", "scan"),
         (r"\bgllb", "gllbsc"),
@@ -89,7 +98,7 @@ def theory_level(method: str | None) -> str:
 COMPARABLE_SETS = {
     "gga-family": {"gga", "gga+u", "pbesol", "gga-vdw"},
     "hybrid-family": {"hse06", "hybrid-other"},
-    "meta-gga-family": {"scan", "r2scan", "mbj"},
+    "meta-gga-family": {"scan", "r2scan", "mbj", "meta-gga"},
     "experiment": {"experiment"},
 }
 
@@ -158,7 +167,8 @@ if __name__ == "__main__":  # tiny smoke check
         "TBmBJ", "experiment", "zeo++ (QMOF)", "BoltzTraP p-type",
         "SuperCon-matched; doped formula Ta0.05V2Zr0.95", "", None, "GGA+U",
         "GCMC 0.15bar 298K", "GULP SLC forcefield (nu_zy)", "BVSE 1D Na",
-        "PBE GNoME vs MP hull",
+        "PBE GNoME vs MP hull", "DFT / meta-GGA / VASP / dos",
+        "DFT / hybrid / FHI-aims / band_structure", "DFT / GGA / VASP / dos / spin 1",
     ]
     for s in samples:
         print(f"{str(s)!r:<50} -> {theory_level(s):<16} | {condition_key(s)}")

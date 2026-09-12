@@ -1,0 +1,17 @@
+{
+  "materials_total": 14590485,
+  "materials_base_merge": 8225138,
+  "materials_admitted_single_contributor": 6365347,
+  "cells_occupied_all": 99493466,
+  "cells_occupied_base_merge": 58695067,
+  "cells_occupied_admitted": 40798399,
+  "cells_from_contributor_admitted": 37593631,
+  "cells_from_other_databases_admitted": 3204768,
+  "frac_cells_external_admitted": 0.07855131766322497,
+  "admitted_materials_with_any_property": 6266517,
+  "admitted_materials_with_external_property": 1637460,
+  "frac_admitted_materials_with_external": 0.26130304920580283,
+  "materials_with_any_property": 13792960,
+  "materials_with_two_or_more_property_sources": 3153748,
+  "frac_materials_with_two_or_more_property_sources": 0.22864910795072269
+}

@@ -7,14 +7,14 @@
 
 \subsection{Sources and their ingestion}
 
-Each of the 54 databases is reached through one adapter emitting a stream of
+Each of the 55 databases is reached through one adapter emitting a stream of
 records, each carrying the source's native identifier, its property values with
 units and methods, its structure where the licence permits redistribution, and
 any cross-database identifiers the source is authoritative for. Sources that may
 not redistribute structures are marked properties-only in code, so no structure
 of theirs can enter the pool. The complete inventory, with each database's
 licence, contribution and reference routes, is Supplementary
-Table~\ref{si-tab:sources}; the adapter protocol and staging pipeline are
+Table~\ref{si-tab:sources}. The adapter protocol and staging pipeline are
 Supplementary Note~\ref{si-note:pipeline}.
 
 Property names are mapped onto a canonical registry of 166 entries, each with a
@@ -51,28 +51,32 @@ property for one material coexist as separate rows.
 \subsection{Audit}
 
 Completeness is verified by three checks applied to each source independently:
-the row count the loader reported must equal the row count the database holds; every
+the row count the loader reported must equal the row count the database holds, every
 staged row must be either loaded or accounted for as an identifier no pool
-material corresponds to; and every property name present in the staged data must
+material corresponds to, and every property name present in the staged data must
 be present in the database for that source. The third catches a field the adapter
 maps but the loader never lands, which leaves row totals plausible while an
-entire quantity goes missing. The completed database passes all three for all 54
+entire quantity goes missing. The completed database passes all three for all 55
 sources (Supplementary Note~\ref{si-note:audit}).
 
 Every aggregate statistic reported here is computed with a single grouped scan
 over the property table. The natural alternative, a correlated subquery per
-source, rescans 121 million rows 54 times and evaluates each source against a
+source, rescans 132 million rows 55 times and evaluates each source against a
 different snapshot.
 
 \subsection{Cross-database comparison}
 
 Agreement was computed for eight properties whose values are comparable between
-databases once the method is fixed; extensive and convention-dependent quantities
-were excluded, because two databases disagreeing on a total energy reflects a
-different reference state rather than a different answer. Within each material,
-each source was reduced to the median of its own values, so a source reporting
-several methods is counted once, and the spread was taken as the range across
-sources. Tolerances, the excluded quantities and the full pair table are
+databases once the level of theory is fixed, whereas extensive and
+convention-dependent quantities were excluded, because two databases disagreeing
+on a total energy reflects a different reference state rather than a different
+answer. Each method string is collapsed to a theory level and then to one of four
+comparable sets, and values are compared only within a set, so that a source
+holding several levels for one crystal is not measured against its own mixture
+and a crystal whose only overlap crosses a set boundary is not compared at all.
+Within each material and set, each source was reduced to the median of its own
+values, so a source reporting several method strings of one level is counted
+once, and the spread was taken as the range across sources. Tolerances, the excluded quantities and the full pair table are
 Supplementary Note~\ref{si-note:agreement} and Table~\ref{si-tab:pairs}.
 
 The 69 general-purpose properties of Fig.~\ref{fig:landscape}b were assigned by
@@ -84,11 +88,11 @@ Table~\ref{si-tab:tiers} so that it can be disputed item by item.
 
 A task is defined as one property at one level of theory, since method strings
 collapsed onto a single name denote different physical quantities. Under that
-definition the populated properties yield 497 candidate tasks, and a default
-policy keeping the largest level of theory per property realises 162 of them as
-training sets over 93{,}462{,}873 labels. Condition-dependent properties are
-split by condition rather than reduced to a median; cross-database spread is
-retained beside the resolved label; and splits are taken over chemical systems,
+definition the populated properties yield 513 candidate tasks, and a default
+policy keeping the largest level of theory per property realises 176 of them as
+training sets over 93{,}864{,}594 labels. Condition-dependent properties are
+split by condition rather than reduced to a median, cross-database spread is
+retained beside the resolved label, and splits are taken over chemical systems,
 falling back through formula to random where a task occupies too few systems to
 yield non-empty folds. Each task carries a declared applicability domain and an
 empirical one measured from its training set, and predictions are admitted only
@@ -97,7 +101,7 @@ assignments are Supplementary Note~\ref{si-note:census}.
 
 \subsection{Software and reproducibility}
 
-The pipeline is implemented in Python; structure handling uses pymatgen
+The pipeline is implemented in Python. Structure handling uses pymatgen
 \cite{ong2013python} and symmetry analysis uses spglib \cite{togo2024spglib}. The
 database is one SQLite file with two side-car binary blobs holding structures
 and spectra. Every figure is produced by a script reading

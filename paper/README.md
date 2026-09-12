@@ -56,8 +56,11 @@ paper/figs/*.pdf                       (the figures)
 | `extract_stats.py` | `sources.csv`, `properties.csv`, `property_source_matrix.csv`, `source_degree.csv`, `source_overlap.csv`, `curves.csv`, `pool_*.csv`, `summary.json` | one grouped scan, ~9 min |
 | `extract_evolution.py` | `evolution_sources.csv`, `evolution.json` | ~1 min |
 | `extract_substrate.py` | `substrate_growth.csv`, `substrate_growth.json` | ~1 min |
+| `extract_substrate_growth.py` | `substrate_curve.csv`, `substrate_curve.json` | ~1 min; attributes every admitted structure to the source that admitted it |
 | `extract_agreement.py` | `material_property_count.csv`, `agreement_*.csv`, `completeness.json` | one full table scan, ~30 min |
 | `cost_tiers.py` | `cost_tiers.csv`, `cost_tiers.json` | instant, reads `properties.csv` |
+| `extract_crossfill.py` | `crossfill.json`, `crossfill_sources.csv`, `crossfill_properties.csv` | one full table scan, ~10 min; what each structure gained from databases other than its own contributor |
+| `extract_cell_sources.py` | `cell_sources.json`, `cell_sources.csv` | one full table scan plus a sort, ~5 min; how many databases stand behind each filled cell |
 | `extract_gnn_census.py` | `gnn_tasks.csv`, `gnn_theory_levels.csv`, `gnn_prediction_sets.csv`, `gnn_census.json` | instant, reads `data/ml/census` and `data/ml/predict` |
 | `make_si_tables.py` | `tex/si_tables.tex` (Tables S1-S4) | instant, reads `paper/data` |
 

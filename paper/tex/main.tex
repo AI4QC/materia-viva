@@ -31,16 +31,43 @@
   agreement}{The cross-source value scan is still running; this subsection and
   Fig.~\ref{fig:redundancy}d--f are written from its output.}}
 
-\newcommand{\PENDINGGNN}{\PENDINGBLOCK{In progress: the trained models}{%
-  The models themselves are still training. This block becomes the closing
-  passage of Section~\ref{sec:completion} and adds panels to
-  Fig.~\ref{fig:completion}: the multi-task backbone over the thirteen tier-1
-  tasks and the fine-tuned heads over the smaller ones, held-out accuracy per
-  task set against the multi-source noise floor of
-  Section~\ref{sec:redundancy}, the coverage the completed layer reaches for
-  the properties of Fig.~\ref{fig:landscape}b, and the boundary within which a
-  predicted entry may be used. It is written when the held-out numbers exist,
-  so that no claim precedes its evidence.}}
+\newcommand{\PENDINGGNN}{\PENDINGBLOCK{Pending: the trained models}{%
+  The models are still training; no number below is in hand. This block becomes
+  the closing passage of Section~\ref{sec:completion} and adds panels to
+  Fig.~\ref{fig:completion}: the multi-task backbone over the tier-1 tasks and
+  the fine-tuned heads over the smaller ones, held-out accuracy per task set
+  against the multi-source noise floor of Section~\ref{sec:redundancy}, the
+  coverage the completed layer reaches for the properties of
+  Fig.~\ref{fig:landscape}b, and the boundary within which a predicted entry may
+  be used. It is written when the held-out numbers exist, so that no claim
+  precedes its evidence.}}
+
+% Pending block for the candidate list the completion is built to produce.
+\newcommand{\PENDINGCANDIDATES}{\PENDINGBLOCK{Pending: what the completion
+  nominates}{The candidate list does not exist yet. When the models of
+  Section~\ref{sec:completion} have run, this block reports, for the properties
+  whose held-out error falls below the multi-source spread of
+  Section~\ref{sec:redundancy}, how many crystals already in the record are
+  nominated for a property no source has ever reported for them, how many of the
+  highest-ranked survive recomputation, and how many survive a search of the
+  literature the databases do not index. Selecting the extreme of a ranked
+  prediction selects on prediction error as well as on the property, so the
+  ranking is taken on predicted value gated by ensemble spread, and the
+  selection effect is reported rather than assumed away.}}
+
+% Pending block for the novelty audit of published generated structures.
+\newcommand{\PENDINGNOVELTY}{\PENDINGBLOCK{Pending: novelty under a stated
+  identity criterion}{Not yet run. The audit applies the matcher of
+  Section~\ref{sec:index} to the structure sets released by published generative
+  campaigns, and reports the fraction the resolved record already contains under
+  each of four identity criteria in turn: exact structure match, the structural
+  fingerprint used here, that fingerprint extended to admit an ordered
+  approximant of a disordered parent, and a prototype-level key. The point of
+  the ladder is that a novelty fraction is a property of the criterion as much as
+  of the model, and no published figure states which criterion produced it. The
+  disorder-tolerant path is not implemented yet, and Supplementary
+  Note~\ref{si-note:fingerprint} states why the present fingerprint would not
+  recognise such a case.}}
 
 \raggedbottom
 
@@ -48,7 +75,9 @@
 
 \input{front_meta.tex}
 
-\author[1,2]{\fnm{Zhilong}\sur{Song}}
+\author[1,2]{\fnm{Zhilong}\sur{Song}}\equalcont{These authors contributed equally to this work.}
+
+\author[4]{\fnm{Zijun}\sur{Pang}}\equalcont{These authors contributed equally to this work.}
 
 \author*[1,2,3]{\fnm{Lixue}\sur{Cheng}}\email{lixuecheng@ust.hk}
 
@@ -63,6 +92,10 @@ University of Science and Technology}, \orgaddress{\city{Kowloon},
 \affil[3]{\orgdiv{Department of Chemical and Biological Engineering}, \orgname{Hong
 Kong University of Science and Technology}, \orgaddress{\city{Kowloon},
 \state{Hong Kong 999077}, \country{China}}}
+
+\affil[4]{\orgdiv{School of Computer Science and Engineering}, \orgname{University
+of Electronic Science and Technology of China}, \orgaddress{\city{Chengdu},
+\state{Sichuan 611731}, \country{China}}}
 
 \keywords{materials databases, data integration, crystal structure deduplication,
 provenance, cross-database benchmarking, machine learning for materials}
@@ -80,7 +113,7 @@ provenance, cross-database benchmarking, machine learning for materials}
 \backmatter
 
 \bmhead{Acknowledgements}
-We thank the maintainers of the 54 source databases integrated here. This work
+We thank the maintainers of the 55 source databases integrated here. This work
 redistributes none of their data beyond what their licences permit, and depends
 entirely on their decision to publish in the first place.
 
@@ -90,12 +123,14 @@ entirely on their decision to publish in the first place.
 
 \bmhead{Data availability}
 The unified database is published as a versioned dataset on the Hugging Face Hub
-together with a development slice sized for interactive work. Four of the 54
-sources restrict redistribution: AFLOW's terms are academic and
-non-commercial, ELEMENTA and GNoME are CC BY-NC 4.0, and Inorganic Crystal
-Structure Database records may be held only by a subscriber to the FIZ Karlsruhe
-licence. Those sources are searchable in a database built locally from the
-published pipeline and are filtered out before any public release. The database
+together with a development slice sized for interactive work. Five of the 55
+sources are withheld from it: AFLOW's terms are academic and non-commercial,
+ELEMENTA and GNoME are CC BY-NC 4.0, Inorganic Crystal Structure Database records
+may be held only by a subscriber to the FIZ Karlsruhe licence, and NOMAD holds
+author-deposited calculations whose licence is set per upload rather than for the
+repository, so its values are withheld until the terms of each can be resolved.
+All five are searchable in a database built locally from the published pipeline
+and are filtered out before any public release. The database
 contains no ICSD structure. The comma-separated data files behind every figure
 are provided as source data.
 

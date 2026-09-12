@@ -2,7 +2,7 @@
 
 \subsection{Adapters}
 
-Each of the 54 source databases is reached through one adapter module
+Each of the 55 source databases is reached through one adapter module
 implementing a common protocol. An adapter yields a stream of records, each
 carrying the source's native identifier, a list of property values, an optional
 structure, a list of cross-database identifiers the source is authoritative for,
@@ -21,6 +21,41 @@ so that a stage can be re-run without repeating the ones before it: adapt, which
 writes the staged property rows and the structures needing fingerprints; hash,
 which computes fingerprints in parallel; and match, which resolves records
 against the match map and separates hits from records to be admitted.
+
+\subsection{The NOMAD adapter}
+
+One source needed decisions the others did not, and they are recorded here
+because they shape what the main text reports about it. NOMAD is a repository of
+author-deposited calculations rather than a campaign of its own, and its export
+is organised by entry rather than by crystal: 19{,}400{,}649 catalogued entries
+reduce to 10{,}760{,}720 (material, property, method) groups over 4{,}323{,}542
+materials, so one such group holds 2.9 separate calculations on average and 5{,}043
+at most. Three consequences follow.
+
+First, the unit of a property value is the material, not the entry, so entries
+have to be reduced. Each (material, property, method) group is resolved to the
+\emph{median} of its values. An earlier reduction that kept the first value
+encountered was arbitrary and measurably wrong: 2{,}352{,}852 of 10{,}760{,}720
+groups, 21.9\%, shift when the median replaces it, by 81~meV on average and by
+more than 0.43~eV in the worst five per cent, which is eight times the tolerance
+within which two databases are called concordant.
+
+Second, the method string has to carry the exchange--correlation family, the
+program and the quantity the value was read from, because NOMAD holds several
+levels of theory for one crystal and states only the family rather than the
+functional. Its band-gap strings therefore take the form \texttt{DFT / meta-GGA /
+VASP / dos}, and a classifier that matched a bare \texttt{GGA} would file the
+meta-GGA rows at the semilocal level, since the hyphen is a word boundary.
+
+Third, only the scalar layer was ingested. NOMAD's per-entry property archive,
+which holds band structures, densities of states and other curves, was still
+downloading when this work was assembled and contributes nothing here; the
+structures come from the archive's structure stage and the scalars from the
+catalogue. The optoelectronic solar-cell family was also left out, for a
+different reason: on a 780-page sample not one of 5{,}115 solar-cell entries
+carries a material identifier, because they are device measurements rather than
+crystal calculations, and attaching them would require a match on composition,
+which is the one join this work never makes.
 
 \subsection{Structural fingerprints}
 
@@ -129,16 +164,20 @@ Method strings are required to be distinguishing. Where one source reports the
 same property for the same material under several settings, each value carries a
 method string that separates them, and the loader treats (native identifier,
 property, method) as the uniqueness key. How far this has to go is set by the
-source rather than by the property. Band gap carries 12{,}275 distinct method
+source rather than by the property. Band gap carries 12{,}313 distinct method
 strings across the database, but 12{,}226 of them belong to the JARVIS tight-binding
 dataset and take the form \texttt{QETB (tight-binding) @ 13.22 \AA$^{3}$/atom}:
 its fitting set contains many deliberately non-equilibrium geometries of the same
 compound, so the cell volume per atom is what separates one value from another
-and the method string has to carry it. The remaining 49 strings are the
-functional and setting labels of every other source combined. Without the volume
-in the string those 12{,}226 values would collapse onto one per material, and the
-fidelity gap between tight-binding and density functional theory visible in
-Fig.~2f of the main text would be unrecoverable.
+and the method string has to carry it. Of the remaining 87, thirty-one are
+NOMAD's, which name the exchange--correlation family, the code and the quantity
+the gap was read from rather than a functional, because NOMAD aggregates
+calculations it did not run and reports what its depositors declared; the other
+fifty-six are the functional and setting labels of every other source combined.
+Without the volume in the string those 12{,}226 values would collapse onto one
+per material; without the family in NOMAD's, its semilocal and meta-GGA band gaps
+would merge into a single column, and the difference between them reported in
+Section~2.2 of the main text would be unrecoverable.
 
 \section{Completeness audit}\label{note:audit}
 
@@ -163,11 +202,11 @@ lands, which leaves row totals plausible while an entire quantity goes missing.
 Sources staged on disk but absent from the source table are reported as never
 loaded, and sources in the registry with no staging directory are reported as not
 staged, so nothing can escape scrutiny by not being mentioned. Applied to the
-completed database, the audit reports 54 sources and no discrepancies.
+completed database, the audit reports 55 sources and no discrepancies.
 
 Each check is computed with a single grouped scan over the property table. This
 is not a stylistic preference. The natural formulation, a correlated subquery
-counting rows per source, rescans 121 million rows once per source, takes about
+counting rows per source, rescans 132 million rows once per source, takes about
 an hour, and evaluates each source against a different snapshot of a database
 other processes may be writing. Every aggregate statistic reported in this work
 uses grouped scans for the same reason.
@@ -190,9 +229,15 @@ count of admitted structures is zero, its staged structure file is empty, and no
 pool material lists it among its contributing sources. No FIZ Karlsruhe structure is
 stored or redistributed by this work.
 
-Four sources restrict redistribution in total, contributing 31{,}642{,}922
-values, or 26.0\% of the database. They are searchable in a database built locally
-from the published pipeline and are filtered out before public release. Any
+Five sources restrict redistribution in total, contributing 41{,}847{,}027
+values, or 31.7\% of the database. Four of them state terms that prohibit or
+restrict it. The fifth, NOMAD, has no single licence at all: it is a repository
+of author-deposited calculations and each upload keeps the terms its depositor
+chose, so although the published default is CC BY 4.0 the export carries no
+per-entry record of the choice. Its values are therefore treated as restricted
+until that is resolved upload by upload. All five are searchable in a database
+built locally from the published pipeline and are filtered out before public
+release. Any
 statistic quoted from this work therefore has to state whether it describes the
 locally built database or the public snapshot; every number in the main text
 describes the former.
@@ -217,18 +262,31 @@ been ingested before the structures it describes had arrived.
 \section{Cross-database agreement protocol}\label{note:agreement}
 
 Agreement was computed for eight properties whose values are directly comparable
-between databases once the method is held fixed. Seven have at least one
-structure described by two databases and are reported; volume per atom is
-supplied by a single source and drops out. Extensive and convention-dependent
-quantities were excluded by construction, in particular total energies and
-prototype labels: two databases disagreeing on a total energy reflects a
-different reference state rather than a different answer.
+between databases once the level of theory is held fixed, and all eight now have
+structures described by two or more databases. Extensive and
+convention-dependent quantities were excluded by construction, in particular
+total energies and prototype labels: two databases disagreeing on a total energy
+reflects a different reference state rather than a different answer.
+
+Comparison is restricted to a common level of theory. Each method string is
+collapsed to a theory level and then to one of four comparable sets, the GGA
+family, the meta-GGA family, the hybrid family and experiment, and values are
+compared only within a set. This matters once a source carries more than one
+level for the same crystal, which among the databases integrated here NOMAD does
+at scale: reducing such a source to a single median per crystal mixes semilocal
+and meta-GGA values and measures the source against its own mixture rather than
+against its partner. A crystal whose only overlap crosses a set boundary is not
+compared at all, and the count of such crystals is reported alongside each
+property: 24{,}380 for formation energy and 37{,}770 for density, where the
+experimental catalogues and the computed repositories are not answering the same
+question.
 
 For each property, all values were read in one sequential pass and grouped by
-material. Within a material each source was reduced to the median of its own
-values, so that a source reporting a quantity under several methods is not
-counted more than once, and the spread was taken as the range across sources,
-absolute for energies, magnetisation and moduli and relative for density. The
+material. Within a material and comparable set each source was reduced to the
+median of its own values, so that a source reporting a quantity under several
+method strings of one level is not counted more than once, and the spread was
+taken as the range across sources, absolute for energies, magnetisation and
+moduli and relative for density. The
 tolerance within which two values are called concordant is 50~meV for band gap,
 50~meV\,atom$^{-1}$ for formation energy and hull distance, 0.05~$\mu_{\rm B}$
 for magnetisation, 5~GPa for the moduli and 2\% for density. Source pairs sharing
@@ -268,18 +326,18 @@ A task is one property at one level of theory, not one property. Method strings
 are collapsed onto a level of theory by a fixed mapping, so that semilocal,
 PBEsol, SCAN, r$^2$SCAN, hybrid, meta-GGA, tight-binding and experimental values
 filed under a single property name become separate targets. Under that definition
-the 151 populated properties yield 497 candidate tasks. Counting the tasks with
+the 151 populated properties yield 513 candidate tasks. Counting the tasks with
 at least $10^6$, $10^5$, $10^4$, $2\times10^3$ and $3\times10^2$ trainable
-crystals gives 13, 97, 161, 210 and 249 regression tasks respectively, over 13,
-47, 77, 97 and 110 distinct properties, and 1, 15, 31, 37 and 40 classification
+crystals gives 13, 100, 165, 212 and 258 regression tasks respectively, over 13,
+47, 77, 98 and 110 distinct properties, and 1, 15, 32, 37 and 41 classification
 tasks. Every structure in the pool has a stored geometry, so no task has labels
 without inputs; candidate structures average 15.1 sites and are capped at 500.
 
 \subsection{Four constraints the corpus imposes on the labels}
 
-\textbf{Mixed levels of theory.} Of the 7.82 million crystals carrying a band
-gap, 81\% are semilocal, 8\% tight-binding and 4\% each PBEsol and SCAN, with
-HSE06, meta-GGA, GLLB-SC and measured values making up 13 levels in total.
+\textbf{Mixed levels of theory.} Of the 9.76 million crystals carrying a band
+gap, 83\% are semilocal, 4\% each meta-GGA, PBEsol and SCAN and 2\% tight-binding, with
+HSE06, meta-GGA, GLLB-SC and measured values making up 15 levels in total.
 Offsets between levels are of order 1~eV and cannot be inferred from structure,
 so a model trained on the pooled column learns which database supplied the row.
 The default policy keeps the largest level per property; a split policy trains
@@ -296,8 +354,8 @@ Young's modulus rather than an isotropic average. Taking a median over these
 yields a number that is not any physical quantity, so each condition becomes its
 own task.
 
-\textbf{Cross-database disagreement.} Across the 162 constructed sets,
-5{,}831{,}192 crystals carry labels from two or more databases and 519{,}599 of
+\textbf{Cross-database disagreement.} Across the 176 constructed sets,
+5{,}856{,}861 crystals carry labels from two or more databases and 522{,}739 of
 them disagree by more than a quarter of the target's standard deviation. The
 resolved label is the median, but the spread and the number of contributing
 sources are written alongside it, so that the disagreement can weight the loss
@@ -309,7 +367,7 @@ the reported score in exactly the regime a completion is wanted for. Holding out
 whole chemical systems is the default, but it degenerates where a task occupies a
 single system: 135{,}887 hypothetical zeolites are all SiO$_2$ and the carbon
 allotrope library is all carbon, so a chemistry-level holdout leaves both the
-validation and the test fold empty. This happened for 23 of the 162 sets before
+validation and the test fold empty. This happened for 23 of the 176 sets before
 the rule was made to fall back through formula to random and to record the level
 actually used. Splits are cut by material count rather than by group, because
 hashing groups directly sends 29\% of the zeolites into a fold targeted at 10\%.
@@ -337,13 +395,13 @@ lithium-free one. Disagreement between the declared and the empirical domain is
 itself informative: a property declared pool-wide whose labels sit in one family
 is biased rather than restricted.
 
-Enforcing the domains, 35 tasks may be asked about at least 90\% of the pool, 22
-about 50 to 90\%, 36 about 10 to 50\%, 39 about 1 to 10\% and 30 about less than
-1\%. The total number of admissible predictions is 871{,}097{,}089 against
-2{,}194{,}010{,}874 for 162 tasks over the whole pool. One case is worth
+Enforcing the domains, 45 tasks may be asked about at least 90\% of the pool, 22
+about 50 to 90\%, 40 about 10 to 50\%, 39 about 1 to 10\% and 30 about less than
+1\%. The total number of admissible predictions is 1{,}105{,}593{,}143 against
+2{,}567{,}925{,}360 for 176 tasks over the whole pool. One case is worth
 recording: a force-field bulk modulus trained on 135{,}817 of the pool's
 136{,}305 zeolites has 474 structures left to predict inside its validated
-domain, and its 13.4 million apparent gaps are all outside it.
+domain, and its 14.5 million apparent gaps are all outside it.
 
 The gate is structural rather than geometric. Porosity is enforced through family
 labels rather than through a computed pore-limiting diameter compared against the
@@ -353,5 +411,53 @@ that admits unlabelled structures whose density falls in the training band is
 available for candidate generation only, and has a known failure direction, since
 lithium metal passes a porosity density gate without having pores. Seventeen
 tasks are gated on a gap or a magnetic moment that the database does not hold for
-75{,}674{,}942 structure-task pairs; those decisions are deferred until the
+108{,}246{,}933 structure-task pairs; those decisions are deferred until the
 corresponding tier-1 models have run.
+
+\section{Limitations and open boundaries}\label{note:limits}
+
+\textbf{The fingerprint has a domain of validity.} Enumerated framework libraries
+fall outside it, for the reasons set out in Note~\ref{note:fingerprint}. The
+composite key rescues the two families encountered here, but it is a remedy for a
+detected failure rather than a general solution: any future source built by
+decorating a fixed topology will need the same detection and the same treatment,
+and the detection is currently a judgement made per source rather than an
+automatic test.
+
+\textbf{Agreement is measurable on a favourable subset.} Two providers can be
+compared only where they report the same quantity under comparable methods. That
+holds for 6.3\% of the occupied matrix, and those are the entries most likely to
+be well behaved, since they are concentrated in the properties that the largest
+and most standardised campaigns produced. The disagreement reported in the main
+text is therefore a lower bound on what a complete comparison would show, not an
+upper one.
+
+\textbf{Licence fragmentation persists downstream.} Four sources contributing
+41{,}847{,}027 values, 31.7\% of the total, are restricted or unresolved. The public
+artifact and the locally buildable one are therefore different objects, and any
+statistic quoted from this work has to say which it describes; every figure in
+the main text describes the locally built corpus. A model trained on the full
+corpus inherits those terms, so releasing weights requires a licence-filtered
+training subset that has not yet been cut.
+
+\textbf{The applicability gate is structural, not geometric.} A porous domain is
+enforced through material-family labels rather than through a computed
+pore-limiting diameter compared against the kinetic diameter of the adsorbate,
+which is the correct test. Running it requires a geometry analysis over the whole
+corpus that has not been performed. The permissive alternative, admitting
+unlabelled structures whose density falls in the training band, has a known
+failure direction: lithium metal passes a porosity density gate without having
+pores. It is therefore available for candidate generation only.
+
+\textbf{Seventeen tasks are gated on properties the corpus does not hold.}
+Whether a crystal has a gap or is magnetically ordered is unknown for
+108{,}246{,}933 structure-task pairs, so those admissibility decisions are
+deferred until the corresponding tier-1 models have run. This is a dependency
+between stages rather than a defect, but it means the completion is not a single
+pass.
+
+\textbf{Nothing was recomputed.} Every value is as its source reported it. The
+union inherits whatever errors those sources contain, including the unconverged
+elastic-tensor fits identified in the main text. What integration
+adds is not correctness but visibility: an implausible value that stands alone in
+one repository stands beside a partner value here.

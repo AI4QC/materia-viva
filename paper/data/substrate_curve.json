@@ -1,0 +1,33 @@
+{
+  "base_total": 8225138,
+  "final_total": 14590485,
+  "attributed_admissions": 6365347,
+  "ambiguous_admissions": 0,
+  "unattributed_admissions": 0,
+  "largest_admitters": [
+    [
+      "aflow",
+      1650288
+    ],
+    [
+      "alexandria",
+      1514488
+    ],
+    [
+      "nomad",
+      1047208
+    ],
+    [
+      "gnome",
+      547603
+    ],
+    [
+      "mof-carbon-capture",
+      287610
+    ],
+    [
+      "oqmd",
+      255085
+    ]
+  ]
+}

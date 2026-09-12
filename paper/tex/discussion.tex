@@ -1,115 +1,85 @@
 % ======================================================================
-% Discussion.
-% Leads with what the space changes in practice, then treats the three
-% findings as evidence that it was worth building, then the construction
-% principle, then the limits.
+% Discussion: four paragraphs, mirroring the title.
+%   what the record changes and what it turned out to show
+%   forward screening: where the limit really is
+%   inverse design: what a claim of novelty needs
+%   the construction principle, and where the claims stop
+% Detailed limitations live in Supplementary Note S10; the analysis that
+% supports each claim stays in Results.
 % ======================================================================
 \section{Discussion}
 
-What changes when the public record is held as one structurally resolved space is
-first of all practical. A screening campaign that used to begin with account
-requests, bulk downloads and format conversion begins instead with a query, and
-the answer carries with it the source of every number in it. A crystal is one row
-rather than six, so counting is possible; a property value names the calculation
-behind it, so comparison is possible; and the licence position of every value is
-a column rather than a matter to be re-established. This is infrastructure rather
-than discovery, and its value is measured by what it removes from everyone else's
-work.
+Holding the public record as one structurally resolved space changes what can be
+asked of it. A campaign that used to begin with account requests, bulk downloads
+and format conversion begins with a query. A crystal is one row rather than six,
+so counting is possible, and every value names the calculation behind it, so
+comparison is possible. More consequentially, a repository can report only on its
+own contents, whereas a resolved union reports on the field, and two of the things
+it reports were not what a user of any single source would assume. Independent
+sources computing the same formation energy for the same crystal at the same
+level of theory agree within 50~meV\,atom$^{-1}$ barely two times in three, and
+because the discrepancy is a
+systematic offset rather than scatter it does not average away with sample size:
+a corpus that merged the contributing columns would hand a model the offset to
+learn as though it were physics. In the other direction, sources that agree to
+the last decimal are usually carrying one calculation twice, so agreement between
+repositories should be read as shared provenance until shown otherwise. Neither
+observation requires new computation. Both require only that the record be held
+in a form where the same crystal is the same row and every number remembers where
+it came from.
 
-It also makes a class of question answerable that was not. A repository can
-report on its own contents; only a resolved union can report on the field. How
-many distinct crystals are actually known, as opposed to how many records exist.
-Which groups have already computed a given compound, and whether they agreed.
-Whether a training set and a test set drawn from two providers share the same
-crystals. None of these is a property of any member, and none can be recovered
-afterwards from a corpus assembled by concatenation.
-
-Two of the answers were not what we expected, and both bear on how the corpus
-should be used. Independent sources reporting the same formation energy for the
-same crystal agree within 50~meV\,atom$^{-1}$ only 60.5\% of the time, and the
-least concordant tenth differ by margins several times the thresholds on which
-stability screening turns. Because the discrepancy is a systematic offset rather
-than scatter, it does not average away with sample size, and a corpus that merged
-the contributing columns would hand a model the offset to learn as though it were
-physics. The remedy is not to choose a preferred provider but to keep the
-provenance, which costs one column per value and turns the disagreement into an
-observable. The complementary caution is equally practical: a pair of sources
-agreeing to the last decimal is usually carrying one calculation twice, so
-agreement between repositories should be read as evidence of shared provenance
-until shown otherwise. The second answer concerns what the corpus does not
-contain. Coverage of the property space follows the price of the calculation, not
-the value of the answer, and within the expensive tier it tracks whether a
-dedicated high-throughput campaign happened to exist. The resulting landscape is a
-record of where the community spent computer time, which is a different thing
-from a record of what is worth knowing.
-
-That landscape is also a well-posed learning problem, and the space supplies what
-such a problem needs: 497 candidate tasks once each property name is split by
-level of theory, 162 of them realised as training sets over 93 million labels,
-deduplicated structures to split on, labels that retain the quantity they denote
-and, on the entries with two independent sources, a measurement of the floor
-below which a prediction cannot be distinguished from the disagreement of its own
-training data. Section~\ref{sec:completion} also shows how easily that problem is
-posed wrongly. Roughly two thirds of the tasks are defined on less than half the
-corpus, and asking each of them about every crystal would generate 2.19 billion
-numbers of which more than half would be undefined rather than merely uncertain.
-Enforcing the domains is not a loss of coverage; it is the difference between a
-completed property layer and a plausible-looking one.
-
-The reason to complete it goes beyond adding numbers to a table. Materials
-discovery runs on two routes, and the state of the public record has kept them
-apart. Forward screening searches the known set for a material that already has
-the property wanted; inverse design generates a structure to order. Forward
-screening is habitually treated as bounded by how many materials are known, but
-the corpus shows that it is bounded instead by how few of them have been
-characterised: no property requiring a calculation of its own reaches a fiftieth
-of the 13.5 million crystals, so a screen conducted over the public record ranks
-the materials somebody chose to compute rather than the materials that exist, and
-its apparent frontier is an artefact of where computer time was spent. Predicting
-the missing entries across the whole corpus, inside the domains where each
-property is defined, replaces that artefact with something closer to the real
-frontier and answers a question the field has not been able to pose: how much of
+For forward screening, the record moves the limit from where it is usually
+placed. The route is not confined to materials somebody has already computed,
+because a surrogate model ranks the uncalculated as readily as the calculated.
+It is confined by the pool it is asked about and by the labels it was taught
+from. A campaign screens one repository's holdings and trains on labels whose
+providers disagree by the margins reported above, and both of those are
+properties of the record rather than of the method. Running the completion over
+the whole corpus, inside the domains where each property is defined, moves both
+at once, and answers a question the field has not been able to pose: how much of
 the known record has been passed over for want of a calculation rather than for
-want of merit. The two possible answers are both consequential. If the yield is
-large, forward screening has been operating far inside its own reach and a
-substantial number of already-synthesisable materials are waiting to be
-recognised. If it is small, the reach of the known set is close to exhausted, and
-further progress has to come from designing structures rather than finding them.
-The same corpus serves that second route, because a generative model needs what
-it holds: structures deduplicated across the whole published record, so that a
-claim of novelty is tested against everything known rather than against one
-repository, and property labels that name the quantity they denote, so that
-generation can be conditioned on a defined target rather than on a column heading.
-Standardising structure and property data at this scale is what makes the two
-routes comparable, and eventually complementary, rather than separate literatures.
+want of merit. Both answers are consequential. A large yield would mean forward
+screening has been operating far inside its reach, with already-synthesisable
+materials waiting to be recognised. A small one would mean the known set is close
+to exhausted and progress has to come from designing structures rather than
+finding them.
 
-One property of the construction is worth separating from the results it
-produced. Admission and matching are the same mechanism seen from two sides: a
-record that matches nothing is not an error to be logged but the corpus's next
-member, and once admitted it becomes part of the criterion by which the next
-record is judged. Over the full assembly, 15.9\% of matches resolved onto
-crystals that assembly itself had added, approaching unity for chemistries the
-starting pool did not cover. The same relation reappears one level up in the
-completion stage, where seventeen tasks can only be gated once earlier models
-have supplied the property their domain is defined by. A space built this way has
-no final state: each round of ingestion enlarges what the next round can
-recognise, and each round of prediction enlarges the domain over which the next
-round is defined. That is what makes it maintainable as its sources keep moving,
-which a merged snapshot is not.
+For inverse design, the record is the reference a claim of novelty needs, and
+the same record serves the route in two ways that are easy to conflate. It
+supplies what a generative model needs in order to work: deduplicated structures,
+and labels that name the quantity they denote, so that generation can be
+conditioned on a defined target rather than on a column heading. It also supplies
+what such a model needs in order to be believed. The failures reported against
+recent campaigns
+\cite{cheetham2024artificial,juelsholt2026continued,szymanski2025baselines} were
+not failures to generate but failures to recognise what the record already
+contained, and a claim of novelty is only as strong as the reference set and the
+identity criterion behind it. On this reading the two routes are not competitors
+to be ranked. Forward screening is bounded by how much of the known set it is
+asked about, inverse design by how much of the known set its novelty is measured
+against, and both bounds are the same missing thing seen twice. Supplying that
+record is what makes the two routes comparable, and eventually complementary,
+rather than separate literatures.
 
-Several limitations bound these conclusions. Structural fingerprinting has a
-domain of validity, and enumerated framework libraries fall outside it; the
-composite key rescues the two families we encountered but is a remedy for a known
-failure rather than a general solution. Agreement can be measured only where two
-providers report the same quantity under comparable methods, which the method
-strings make checkable but which holds for a minority of the occupied matrix, so
-the disagreement reported here is measured on the part of the corpus most likely
-to be well behaved. The applicability gate is structural rather than geometric: a
-porous domain is enforced through family labels rather than a computed
-pore-limiting diameter, which is the stricter test and remains to be run over the
-whole corpus. Licence fragmentation persists downstream, since four sources
-contributing 26.0\% of all values cannot be redistributed, so the public artifact
-and the locally built one are not the same object and any published statistic has
-to say which it describes. And no value here was recomputed. Every number is as
-its source reported it, and the union inherits whatever errors those sources
-contain; what it adds is the ability to see when two of them disagree.
+What makes this maintainable is that admission and matching are the same
+mechanism seen from two sides. A record that matches nothing is not an error to
+be logged but the corpus's next member, and once admitted it becomes part of the
+criterion by which the next record is judged. In this corpus 24.4\% of all matches
+resolved onto crystals that assembly itself had added, approaching unity for
+chemistries the starting pool did not cover, and the most recent source added,
+three weeks after the rest were in place, found more than half of what it
+recognised among them. The same relation reappears in the completion stage,
+where twenty-one tasks can be gated only once earlier models have supplied the
+property their domain is defined by. A space built this way has no final state,
+which is what a merged snapshot cannot offer as its sources keep moving. Three
+boundaries should be read with the results. Structural fingerprinting has a
+domain of validity that enumerated framework libraries fall outside, and the
+composite key that rescues them is a remedy for a known failure rather than a
+general solution. Agreement is measurable only where two providers report the
+same quantity under comparable methods, so the disagreement reported here is
+measured on the part of the corpus most likely to be well behaved. And no value
+was recomputed: every number is as its source reported it, and the union inherits
+whatever errors those sources contain. What it adds is the ability to see when
+two of them disagree. The full set of limitations, including the licence boundary
+and the structural rather than geometric applicability gate, is
+Supplementary Note~\ref{si-note:limits}.

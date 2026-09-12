@@ -12274,6 +12274,44 @@ band_gap,GGA OQMD (CMR),12271
 band_gap,TB09 direct,12272
 band_gap,TB09 indirect,12273
 band_gap,source DB,12274
+band_gap,DFT / GGA / VASP / dos,12275
+band_gap,DFT / GGA / VASP / dos / spin 1,12276
+band_gap,DFT / meta-GGA / VASP / dos,12277
+band_gap,DFT / meta-GGA / VASP / dos / spin 1,12278
+band_gap,AMS,12279
+band_gap,DFT / unavailable / VASP / dos,12280
+band_gap,DFT / hybrid / VASP / dos,12281
+band_gap,DFT / hybrid / VASP / dos / spin 1,12282
+band_gap,DFT / GGA / FHI-aims / band_structure,12283
+band_gap,DFT / GGA / FHI-aims / dos,12284
+band_gap,DFT / hybrid / FHI-aims / band_structure,12285
+band_gap,DFT / hybrid / FHI-aims / dos,12286
+band_gap,DFT / unavailable / VASP / dos / spin 1,12287
+band_gap,DFT / not processed / VASP / dos,12288
+band_gap,DFT / not processed / VASP / dos / spin 1,12289
+band_gap,DFT / GGA / VASP / band_structure,12290
+band_gap,DFT / GGA / VASP / band_structure / spin 1,12291
+band_gap,DFT / GGA / FHI-aims / dos / spin 1,12292
+band_gap,DFT / GGA / FHI-aims / band_structure / spin 1,12293
+band_gap,DFT / hybrid / FHI-aims / band_structure / spin 1,12294
+band_gap,DFT / hybrid / FHI-aims / dos / spin 1,12295
+band_gap,DFT / unavailable / FHI-aims / band_structure,12296
+band_gap,DFT / unavailable / FHI-aims / dos,12297
+band_gap,DFT / GGA / exciting / band_structure,12298
+band_gap,DFT / GGA / exciting / dos,12299
+band_gap,DFT / unavailable / exciting / band_structure,12300
+band_gap,DFT / LDA / exciting / band_structure,12301
+band_gap,DFT / LDA / exciting / dos,12302
+band_gap,GW / FHI-aims / band_structure,12303
+band_gap,GW / exciting / band_structure,12304
+band_gap,GW / exciting / dos,12305
+band_gap,GW / exciting / parser,12306
+band_gap,dos,12307
+band_gap,dos / spin 1,12308
+band_gap,TB / Wannier90 / band_structure,12309
+band_gap,DFT / LDA / FHI-aims / band_structure,12310
+band_gap,DFT / GGA / WIEN2k / dos,12311
+band_gap,DFT / GGA / exciting / dos / spin 1,12312
 formation_energy_per_atom,PBE (CAMD),0
 formation_energy_per_atom,GGA(+U) OQMD v1.8,1
 formation_energy_per_atom,PBE,2
@@ -24562,11 +24600,71 @@ bulk_modulus_vrh,PBE(+U) MP2026,6
 bulk_modulus_vrh,OptB88vdW ElaStic,7
 bulk_modulus_vrh,DFT (SACADA),8
 bulk_modulus_vrh,GULP SLC forcefield,9
+bulk_modulus_vrh,elastic,10
+bulk_modulus_vrh,DFT / GGA / MaterialsProject,11
+bulk_modulus_vrh,custom elastic calculator,12
 volume_per_atom,PBE (AFLOW),0
 volume_per_atom,PBE (AFLOW LIB2),1
 volume_per_atom,PBE (AFLOW LIB3),2
 volume_per_atom,PBE (AFLOW ICSD),3
 volume_per_atom,PBE (AFLOW LIB1),4
+volume_per_atom,DFT / GGA / VASP / conventional cell,5
+volume_per_atom,DFT / GGA / FHI-aims / conventional cell,6
+volume_per_atom,DFT / LDA / FHI-aims / conventional cell,7
+volume_per_atom,DFT / GGA / Quantum Espresso / conventional cell,8
+volume_per_atom,DFT / hybrid / VASP / conventional cell,9
+volume_per_atom,DFT / meta-GGA / VASP / conventional cell,10
+volume_per_atom,DFT / GGA / exciting / conventional cell,11
+volume_per_atom,DFT / unavailable / FHI-aims / conventional cell,12
+volume_per_atom,DFT / hybrid / Crystal / conventional cell,13
+volume_per_atom,DFT / hybrid / FHI-aims / conventional cell,14
+volume_per_atom,DFT / GGA / MaterialsProject / conventional cell,15
+volume_per_atom,DFT / LDA / exciting / conventional cell,16
+volume_per_atom,DFT / GGA / GPAW / conventional cell,17
+volume_per_atom,DFT / LDA / Quantum Espresso / conventional cell,18
+volume_per_atom,DFT / meta-GGA / FHI-aims / conventional cell,19
+volume_per_atom,WIEN2k / conventional cell,20
+volume_per_atom,DFT / unavailable / VASP / conventional cell,21
+volume_per_atom,fplo / conventional cell,22
+volume_per_atom,DFT / GGA / ABINIT / conventional cell,23
+volume_per_atom,DFT / unavailable / Phonopy / conventional cell,24
+volume_per_atom,DFT / vdW / VASP / conventional cell,25
+volume_per_atom,DFT / unavailable / Crystal / conventional cell,26
+volume_per_atom,DFT / GGA / Crystal / conventional cell,27
+volume_per_atom,ABINIT / conventional cell,28
+volume_per_atom,DFT / LDA / CASTEP / conventional cell,29
+volume_per_atom,DFT / LDA / GPAW / conventional cell,30
+volume_per_atom,DFT / LDA / Octopus / conventional cell,31
+volume_per_atom,DFT / unavailable / exciting / conventional cell,32
+volume_per_atom,LOBSTER / conventional cell,33
+volume_per_atom,Siesta / conventional cell,34
+volume_per_atom,DFT / not processed / Phonopy / conventional cell,35
+volume_per_atom,FHI-vibes / conventional cell,36
+volume_per_atom,Quantum Espresso Phonon / conventional cell,37
+volume_per_atom,elastic / conventional cell,38
+volume_per_atom,DFT / hybrid / exciting / conventional cell,39
+volume_per_atom,GW / exciting / conventional cell,40
+volume_per_atom,exciting / conventional cell,41
+volume_per_atom,ATK / conventional cell,42
+volume_per_atom,DFT / GGA / CASTEP / conventional cell,43
+volume_per_atom,DFT / HF / Crystal / conventional cell,44
+volume_per_atom,DFT / GGA / Phonopy / conventional cell,45
+volume_per_atom,DFT / LDA / Phonopy / conventional cell,46
+volume_per_atom,fleur / conventional cell,47
+volume_per_atom,DFT / GGA / CP2K / conventional cell,48
+volume_per_atom,DFT / HF / FHI-aims / conventional cell,49
+volume_per_atom,DFT / LDA / CP2K / conventional cell,50
+volume_per_atom,DFT / LDA / Crystal / conventional cell,51
+volume_per_atom,DFT / hybrid / CASTEP / conventional cell,52
+volume_per_atom,DFT / hybrid / Quantum Espresso / conventional cell,53
+volume_per_atom,DFT / unavailable / CASTEP / conventional cell,54
+volume_per_atom,DFT / unavailable / CP2K / conventional cell,55
+volume_per_atom,elk / conventional cell,56
+volume_per_atom,ASAP / conventional cell,57
+volume_per_atom,OpenKIM / conventional cell,58
+volume_per_atom,BSE / exciting / conventional cell,59
+volume_per_atom,DFT / meta-GGA / Quantum Espresso / conventional cell,60
+volume_per_atom,NWChem / conventional cell,61
 shear_modulus_vrh,DFT 0K,0
 shear_modulus_vrh,MLIP 1100K,1
 shear_modulus_vrh,MLIP 700K,2
@@ -24576,3 +24674,6 @@ shear_modulus_vrh,PBE AEL (AFLOW),5
 shear_modulus_vrh,PBE(+U) MP2026,6
 shear_modulus_vrh,OptB88vdW ElaStic,7
 shear_modulus_vrh,GULP SLC forcefield,8
+shear_modulus_vrh,elastic,9
+shear_modulus_vrh,DFT / GGA / MaterialsProject,10
+shear_modulus_vrh,custom elastic calculator,11

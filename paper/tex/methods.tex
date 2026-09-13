@@ -79,7 +79,7 @@ values, so a source reporting several method strings of one level is counted
 once, and the spread was taken as the range across sources. Tolerances, the excluded quantities and the full pair table are
 Supplementary Note~\ref{si-note:agreement} and Table~\ref{si-tab:pairs}.
 
-The 69 general-purpose properties of Fig.~\ref{fig:landscape}b were assigned by
+The 69 general-purpose properties of Fig.~\ref{fig:problem}f were assigned by
 hand to four tiers by the calculation each requires, excluding properties whose
 domain is one material family. The assignment is listed in full in Supplementary
 Table~\ref{si-tab:tiers} so that it can be disputed item by item.
@@ -98,6 +98,31 @@ yield non-empty folds. Each task carries a declared applicability domain and an
 empirical one measured from its training set, and predictions are admitted only
 inside both. The full protocol, the four constraints it addresses and the domain
 assignments are Supplementary Note~\ref{si-note:census}.
+
+\subsection{Novelty audit of generated structures}
+
+Released structure sets are read as deposited and fingerprinted under the
+protocol of the identity resolution above, so that a generated crystal is tested
+against the record by the same rule the record is deduplicated with. Structures
+that fail to parse, that exceed the site cap or that are partially occupied
+cannot be fingerprinted and are excluded from the set they belong to; the
+fractions reported are over the structures that could be. A set is then put to
+four criteria in turn, and each structure is filed under the strictest one that
+finds it: the fingerprint; the reduced composition together with the space group
+read from the fingerprint; the reduced composition alone; and the stoichiometry
+pattern together with the space group. The first three are identity tests on the
+crystal or on the compound. The fourth is a necessary condition for two crystals
+to be the same prototype under a different decoration and screens for prototype
+redundancy without deciding it, so it enters the audit as an upper bound;
+Supplementary Note~\ref{si-note:fingerprint} states what deciding it would
+require. Every match records which databases hold the matched crystal, so the
+same audit yields the fraction still unmatched against any subset of the
+sources. GNoME is itself one of the audited sets and also one of the 55 sources,
+so its own exclusive structures are withheld from the reference when it is
+audited, and each other set is reported both against the whole record and
+against the record with GNoME removed. MatterGen structures generated for this
+work were drawn from the released checkpoints under the sampling defaults, with
+the seed, batch size and checkpoint digest recorded beside the output.
 
 \subsection{Software and reproducibility}
 

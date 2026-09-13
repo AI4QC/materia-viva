@@ -144,7 +144,45 @@ ambiguous fingerprints that an earlier load had already registered.
 The remedy is specific, not general. Any future source built by decorating a
 fixed topology will need the same detection and the same treatment.
 
+A second boundary belongs in the same place, because the novelty audit of the
+main text runs against it. The fingerprint decides whether two
+records are the same crystal. It does not decide whether they are the same
+structural prototype carrying a different decoration. Two crystals of one
+prototype must share a stoichiometry pattern and a space group, so that pair of
+keys screens for prototype identity; it does not establish it, and unrelated
+compounds meet it routinely. Deciding prototype identity requires a
+structure-to-structure comparison over the candidates the screen returns,
+matching lattice and site geometry with species labels ignored, at a stated
+tolerance. That comparison is not performed here. The prototype column of the
+novelty audit is therefore reported as the upper bound the screen supplies and
+not as a measurement, and the same applies to the disorder-tolerant path: an
+ordered approximant generated for a parent phase that is disordered on one site
+has a different bonding graph from that parent and the fingerprint will not
+recognise the pair.
+
 \section{Provenance and the canonical property registry}\label{note:provenance}
+
+The shape of the layer these decisions produce is Supplementary
+Fig.~\ref{fig:contents}: how many properties one structure carries
+(Fig.~\ref{fig:contents}a), what the spectrum store holds
+(Fig.~\ref{fig:contents}b), and which database supplies which property
+(Fig.~\ref{fig:contents}c).
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=0.99\textwidth]{figs/sifig_contents.pdf}
+  \caption{\textbf{What the property layer holds.}
+  \textbf{a},~How many populated properties a single structure carries. Grey
+  marks the structures carrying none.
+  \textbf{b},~The spectrum store by curve type: spectra held, and the number of
+  distinct structures they reach.
+  \textbf{c},~Which database supplies which property, for the most widely covered
+  properties and the databases annotating the most structures. Marker area scales
+  with the number of structures carrying that value and colour marks the database
+  family.}
+  \label{fig:contents}
+\end{figure}
+
 
 Property names are mapped onto a canonical registry, each entry with a fixed unit
 and value kind. Mapping is not automatic: a source field enters the registry
@@ -254,7 +292,7 @@ describes the former.
 Because each admitted structure enlarges the match map, a source ingested early
 is matched against a smaller substrate than the same source ingested late. Ingestion
 order is therefore not neutral, and Table~\ref{tab:sources} should be read with
-the load order of Fig.~2c in mind.
+the load order of Fig.~1e in mind.
 
 The pipeline is built to be re-entrant so that this is recoverable: re-running a
 source after the pool has grown is additive rather than destructive, because the
@@ -265,6 +303,24 @@ Re-running an early source will attach references that the first pass could not
 resolve, and the absolute figures will therefore rise rather than change
 character. And a database that appears to contribute nothing new may simply have
 been ingested before the structures it describes had arrived.
+
+\subsection{How far the substrate had grown when each source arrived}
+
+The share of a source's matches that land on crystals admitted during assembly,
+rather than present in the starting pool, records how much the substrate had
+grown by the time that source was ingested, and how far its chemistry sits from
+what the pool already held. AFLOW, ingested about ninety minutes after Alexandria
+contributed 1{,}514{,}488 structures, resolved 47.7\% of its 1{,}401{,}895
+matches this way. The JARVIS tight-binding set, whose fitting geometries are
+deliberately non-equilibrium and largely absent from the starting pool, reached
+67.6\%. The enumerated framework libraries show the effect in its purest form:
+CoRE MOF, ingested last among them, resolved 99.5\% of its matches onto
+frameworks contributed by four earlier libraries. NOMAD, the last source ingested
+of the 55 and so the one matched against the largest substrate, resolved 56.1\%
+of its 3{,}168{,}530 matches onto crystals the starting pool did not contain, and
+contributed 1{,}047{,}208 structures of its own that now form part of the
+criterion applied to whatever is ingested next. Databases whose chemistry the
+starting pool already covered show the converse, at or near zero.
 
 \subsection{What the merge added, by source}
 
@@ -417,6 +473,21 @@ boundaries: it depends only on the separation between properties that fall out o
 a calculation already being performed and properties that do not.
 
 \section{Census and construction of the training sets}\label{note:census}
+
+A property name is not a learning target. Splitting the registered names by level
+of theory is the first step of the census, and the mixture it separates is
+Supplementary Fig.~\ref{fig:theory}.
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=0.80\textwidth]{figs/sifig_theory.pdf}
+  \caption{\textbf{One property name, several levels of theory.} For the most
+  widely covered property names, the share of labels filed under each level of
+  theory. The figure at the right is the number of distinct levels the name
+  carries.}
+  \label{fig:theory}
+\end{figure}
+
 
 \subsection{What counts as one task}
 

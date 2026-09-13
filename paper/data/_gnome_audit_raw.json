@@ -1,0 +1,33 @@
+{
+ "gnome_total": 554056,
+ "shared": 18234,
+ "by_source": {
+  "cmr-static": 6,
+  "cod": 8,
+  "mc3d": 52,
+  "nomad": 2973,
+  "oqmd": 4265,
+  "alexandria": 14709,
+  "aflow": 183,
+  "matbench-discovery": 802,
+  "csllm-negatives": 11,
+  "jarvis-dft": 74,
+  "materials-cloud-archive-static": 23,
+  "odbx": 38,
+  "jarvis-qetb": 6,
+  "materials-project": 1,
+  "carolina": 3,
+  "elementa": 121,
+  "bidb": 2,
+  "c2db": 2
+ },
+ "degree": {
+  "5": 50,
+  "3": 833,
+  "1": 14656,
+  "2": 2459,
+  "4": 231,
+  "6": 3,
+  "7": 2
+ }
+}

@@ -13,29 +13,30 @@ forward materials screening and the novelty claimed by inverse design with 14.6
 million crystals resolved across 55 databases}
 
 % ------------------------------------------------------------- ABSTRACT
-\abstract{Materials discovery follows two routes. Forward screening searches
-the crystals already known for one with the property wanted. Inverse design
-generates a crystal to order and reports how many of its products are new. Both
-depend on a question no public database can answer alone: is this crystal
-already known, and is this property already known for it? The databases share no
-key at the level of the crystal, so the same structure carries a different
-identifier in each. Here we resolve that identity across 55 public databases and
-keep, for every value, the source and the method behind it. The result holds
-14{,}590{,}485 distinct crystals and 131.8 million values over 166 properties,
-and it grows as it ingests, because a record matching nothing becomes the next
-member of the reference. For forward screening, the record locates the limit.
-It is not the number of known crystals but two things a campaign inherits from
-whichever database it loads. Of 846{,}303 crystals carrying a formation energy from
-more than one source at one level of theory, only 65.3\% agree within
-50~meV\,atom$^{-1}$, and the disagreement is a systematic offset rather than noise. Of fifty properties
-needing a calculation of their own, none has been computed for a tenth of the
-pool. For inverse design, the record is the reference against which novelty has
-to be judged, and recent campaigns have reported as new what such a reference
-already held. The corpus supplies 513 bounded learning tasks to complete the
-property layer over the whole record, and one identity criterion under which
-novelty can be stated.}
+\abstract{Materials discovery follows two routes. Forward screening searches known
+crystals for one with the property wanted; inverse design generates a crystal to
+order and reports how many of its products are new. Both are measured against
+public databases that cannot be measured against one another:
+the same crystal carries a different identifier in each, and the formula cannot
+serve as a key because polymorphs share one. We resolve identity at the level of
+the crystal structure across 55 public databases, keeping the source and the
+method behind every value. The record holds 14{,}590{,}485 distinct crystals and 131.8
+million property values, and it grows as it ingests: a structure matching nothing
+becomes the reference the next source is matched against. What a
+forward screen inherits from the database it loads is then worse than that
+database can report. Independent sources computing one formation energy at one
+level of theory agree within 50~meV\,atom$^{-1}$ only 65.3\% of the time, as
+a systematic offset rather than noise; and of fifty properties needing a
+calculation of their own, none has been computed for a tenth of the pool. The
+same record is the reference a novelty claim needs. Auditing nine released
+sets of generated crystals against it, the databases holding the few matches are
+not the repository such claims are checked against, and the reported metric hides
+the behaviour it is meant to rank: a generator 71\% unrecognised proposed a
+composition nobody had computed once in 500, where random enumeration, 89\%
+unrecognised, did so 82 times in 492. A novelty fraction measures the reference
+and the criterion as much as the generator. This record supplies both, and 513
+bounded learning tasks besides.}
 % PENDING (data not yet in hand): when the completion has run, the closing moves
 % from capability to result -- the number of already-known crystals the completed
-% layer nominates and the fraction confirmed, and the fraction of published
-% generated structures that the resolved record already contains under each
-% identity criterion. Neither number exists yet; nothing above asserts one.
+% layer nominates and the fraction confirmed. The novelty audit is done and its
+% numbers are above; the completion is not.

@@ -158,3 +158,8 @@ token-usage*.json
 
 # Recovered CGTNet working tree: 177 MB of checkpoints, kept out of the repo
 /cgtnet_recovered/
+
+# Superseded figure drafts and locally rendered README
+/paper/figs/draft/
+/paper/figs/draft_fig*
+/README.zh-CN.pdf

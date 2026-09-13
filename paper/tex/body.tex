@@ -9,7 +9,7 @@
 % ======================================================================
 \section{Results}
 
-\subsection{One record from 55 databases}
+\subsection{One crystal, one row, across 55 databases}
 \label{sec:index}
 
 Making 55 databases comparable comes down to one decision, taken once per
@@ -17,7 +17,9 @@ incoming record: is this crystal already in the corpus? We settle it on the
 structure rather than on the label. Each record is matched first on a
 cross-database identifier the source is entitled to assert, then on a structural
 fingerprint, and never on the chemical formula, which polymorphs share
-(Fig.~\ref{fig:architecture}a; Methods). A record that matches nothing is
+(Fig.~\ref{fig:record}a; Methods). CaMg$_2$Sb$_2$, the crystal drawn there,
+ends the process as one row carrying 21 references from 17 of the 55 databases,
+no two of which name it the same way. A record that matches nothing is
 admitted rather than discarded, and every value it carries keeps the source, the
 native record and the method behind it. That second choice has a consequence this
 section measures: because an admitted record joins the criterion applied to the
@@ -32,7 +34,7 @@ database contains which crystal.
 
 The contributors are extremely unequal, spanning 5.7 orders of magnitude, with
 the largest supplying 46.0\% of all values and 30 of the 55 supplying fewer than
-$10^5$ each (Fig.~\ref{fig:architecture}b). The two ends of that distribution do
+$10^5$ each (Fig.~\ref{fig:record}b). The two ends of that distribution do
 different work: the large general-purpose databases determine how much of the
 pool carries any property at all, while the small specialised libraries determine
 how many distinct properties exist to carry
@@ -41,12 +43,25 @@ most property-diverse contributor supplies 61 of the 166 properties, the largest
 supplies 10.
 
 The corpus is considerably larger than the pool it started from, and the
-difference is exactly the records that matched nothing
-(Fig.~\ref{fig:architecture}c). The deduplicated starting pool held 8{,}225{,}138
-structures, and admission added 6{,}365{,}347 more, a growth of 77.4\%. Of the
+difference is exactly the records that matched nothing. The deduplicated starting
+pool held 8{,}225{,}138 structures, and admission added 6{,}365{,}347 more, a
+growth of 77.4\%.
+
+What that union is made of differs completely from one database to the next, and
+the difference is invisible from inside any of them
+(Fig.~\ref{fig:record}c). Of the 5{,}894{,}222 crystals Alexandria annotates,
+75.4\% are annotated by no other database; of the 211{,}854 the Materials Project
+annotates, 1.3\% are. The enumerated framework libraries sit at 100\%,
+describing crystals nobody else has computed, while several specialised libraries
+sit below 1\%, reporting only on crystals everybody already holds. A campaign
+that loads one database is therefore not working with a smaller copy of the
+record but with a differently shaped piece of it, and no query inside that
+database can reveal which.
+
+Of the
 21{,}543{,}633 references, 6{,}784{,}564 were resolved by record identifier,
 8{,}294{,}560 by structural fingerprint alone, and the remainder record a
-database's own entry (Fig.~\ref{fig:architecture}d). The two matched routes are
+database's own entry (Fig.~\ref{fig:record}d). The two matched routes are
 not interchangeable: identifier matching is exact but available only where a
 database publishes a cross-reference it owns, while fingerprint matching is
 available everywhere but has a domain of validity.
@@ -62,14 +77,16 @@ Supplementary Note~\ref{si-note:fingerprint}.
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=0.99\textwidth]{figs/fig1_architecture.pdf}
+  \includegraphics[width=0.99\textwidth]{figs/fig_record.pdf}
   \caption{\textbf{Making the source databases comparable at the level of the
   crystal.}
   \textbf{a},~The obstacle and the resolution. Each database labels the same
   arrangement of atoms with its own accession number, and no key relates them.
   Every incoming record is reduced to a structural fingerprint and matched first
   on a cross-database identifier the source is entitled to assert, second on that
-  fingerprint, never on the chemical formula. The dashed loop is the mechanism
+  fingerprint, never on the chemical formula. The identifiers shown are the ones
+  those databases publish for the crystal drawn, CaMg$_2$Sb$_2$. The dashed loop
+  is the mechanism
   that makes the corpus self-evolving: a record matching nothing is admitted, and
   its fingerprint re-enters the matcher, so each source is matched against a
   larger pool than the one before it. The figure on the loop is the percentage of
@@ -77,14 +94,18 @@ Supplementary Note~\ref{si-note:fingerprint}.
   what the assembled corpus holds.
   \textbf{b},~Property values contributed by each database on a logarithmic axis,
   coloured by family, with labels at regular intervals through the ranking.
-  \textbf{c},~The loop of \textbf{a}, measured. Each step is one source's
-  admissions entering the match map, so the height at any point is the number of
-  crystals the next source could be matched against. The largest single
-  contributions are labelled.
+  \textbf{c},~For each database, the crystals it annotates against the share of
+  them that no other database annotates. Colour marks the database family.
   \textbf{d},~How the references were resolved, grouped by database family: by an
   identifier the source owns, by structural fingerprint, or as a record that the
-  database contains the structure itself.}
-  \label{fig:architecture}
+  database contains the structure itself.
+  \textbf{e},~For each database, the share of its matches that landed on a
+  crystal admitted during assembly rather than present in the starting pool, in
+  ingestion order. Marker area scales with the number of matches and the dashed
+  line marks the pooled share.
+  \textbf{f},~Number of databases describing one crystal. Grey marks the crystals
+  held by a single database, blue those held by two or more.}
+  \label{fig:record}
 \end{figure}
 
 A structure admitted from one database becomes recognisable to every database
@@ -95,7 +116,7 @@ ingested, and it is by this mechanism that the database keeps itself current as
 sources publish new versions and new sources appear. The effect is measurable. Of
 the 15{,}079{,}124 references resolved by matching, 3{,}676{,}707, or 24.4\%,
 land on a crystal that was absent from the starting pool and was admitted during
-assembly (Fig.~\ref{fig:redundancy}c). Those links do not exist in a construction
+assembly (Fig.~\ref{fig:record}e). Those links do not exist in a construction
 that matches every database against a fixed reference. The figure is a property
 of the assembly rather than of the sources, since a different ingestion order
 would distribute it differently between them, and it is a lower bound on what a
@@ -104,27 +125,29 @@ establishes is that such links exist at all, and how much of the record they
 reach.
 
 The effect is ordered by ingestion time and by chemical distance from the
-starting pool. AFLOW, ingested about ninety minutes after Alexandria contributed
+starting pool. AFLOW, ingested shortly after Alexandria had contributed
 1{,}514{,}488 structures, resolved 47.7\% of its 1{,}401{,}895 matches onto
-crystals admitted during assembly. The JARVIS tight-binding set, whose fitting
-geometries are deliberately non-equilibrium and largely absent from the starting
-pool, reached 67.6\%. The framework libraries show the effect in its purest form:
-CoRE MOF, ingested last among them, resolved 99.5\% of its matches onto
-frameworks contributed by four earlier libraries. NOMAD
-\cite{draxl2019nomad}, the last source ingested of the 55 and so the one matched
-against the largest substrate, resolved 56.1\% of its 3{,}168{,}530 matches onto
-crystals the starting pool did not contain, and contributed 1{,}047{,}208
-structures of its own that now form part of the criterion applied to whatever is
-ingested next. Databases whose chemistry the starting pool already covered show
-the converse, at or near zero.
+crystals admitted during assembly; the enumerated framework libraries show it in
+its purest form, CoRE MOF resolving 99.5\% of its matches onto frameworks four
+earlier libraries had placed in the pool; and databases whose chemistry the
+starting pool already covered sit at or near zero. The per-source figures are
+Supplementary Note~\ref{si-note:order}. The practical consequence is that the
+marginal value of adding a database is not confined to the values it brings. CoRE
+MOF contributed 155{,}488 experimental porosity measurements, and the reason they
+landed on existing crystals rather than forming an isolated set of new ones is
+that earlier libraries had already put those frameworks in the pool. Assembled
+against a frozen reference the same measurements would have arrived as an
+unconnected island, and the corpus would have to be rebuilt from the beginning to
+connect them.
 
-The practical consequence is that the marginal value of adding a database is not
-confined to the values it brings. CoRE MOF contributed 155{,}488 experimental
-porosity measurements, and the reason 99.5\% of them landed on an existing
-crystal rather than forming an isolated set of new ones is that earlier libraries
-had already put those frameworks in the pool. Assembled against a frozen
-reference, the same measurements would have arrived as an unconnected island, and
-the corpus would have to be rebuilt from the beginning to connect them.
+What the assembled record holds is therefore not a uniform gain but a long tail.
+Of the 13{,}902{,}836 structures carrying at least one reference, 3{,}233{,}769
+carry two or more and a few hundred carry the account of twenty databases or
+more, while the single largest group is described by one database and no other
+(Fig.~\ref{fig:record}f). That distribution is what the next section measures
+against: it is both the only thing that makes a cross-database comparison
+possible and the reason a screen loading one database cannot see what it is
+missing.
 
 \subsection{What a forward screen inherits}
 \label{sec:inherits}
@@ -140,10 +163,10 @@ provider. This section establishes the two, and they are the reason the
 completion of Section~\ref{sec:completion} has to be run over the whole record
 rather than over a slice of it.
 
-The labels first. Of the 13{,}902{,}836 structures carrying at least one
-reference, 3{,}233{,}769 carry two or more, the largest single overlap holding
-1{,}672{,}167 shared crystals (Fig.~\ref{fig:redundancy}a,b). That redundancy is
-what makes a comparison possible at all, and it also bounds what any
+The labels first. The redundancy just described is what makes a comparison
+possible at all, and it is concentrated: the largest single overlap between two
+databases holds 1{,}672{,}167 shared crystals (Fig.~\ref{fig:problem}a). That
+redundancy and it also bounds what any
 cross-database evaluation can claim, since for the largest overlapping pairs a
 model trained on one repository and tested on another is tested on hundreds of
 thousands of crystals it has already seen unless the split is taken over
@@ -154,7 +177,7 @@ Comparing the redundant copies is possible only because every value kept the
 method that produced it. Each method string is collapsed to a level of theory and
 two databases are held against one another only where they answer the same
 question, so that a pair meeting only across that boundary is not compared at all
-(Fig.~\ref{fig:redundancy}d--f; Supplementary Note~\ref{si-note:agreement}).
+(Fig.~\ref{fig:problem}b--d; Supplementary Note~\ref{si-note:agreement}).
 On that basis 846{,}303 crystals carry a formation energy from two or more
 databases at one level of theory and 1{,}360{,}573 carry a band gap. Concordance
 falls as the quantity becomes harder to compute: within 50~meV\,atom$^{-1}$,
@@ -162,7 +185,7 @@ falls as the quantity becomes harder to compute: within 50~meV\,atom$^{-1}$,
 82.1\% of band gaps do, and within 5~GPa 44.3\% of bulk moduli do. The tail
 matters more than these medians. The tenth of shared formation energies that
 agree least differ by more than 205~meV\,atom$^{-1}$
-(Fig.~\ref{fig:redundancy}e), several times the hull-distance margins
+(Fig.~\ref{fig:problem}c), several times the hull-distance margins
 conventionally used to call a compound stable
 \cite{sun2016thermodynamic,bartel2020critical}. Whether a candidate passes such a
 filter can therefore depend on which database supplied its energy, and in a
@@ -185,30 +208,41 @@ rather than raising it.
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=0.99\textwidth]{figs/fig2_redundancy.pdf}
-  \caption{\textbf{Redundancy between databases, and whether the duplicates
-  agree.}
-  \textbf{a},~Number of databases describing one crystal. Grey marks the crystals
-  held by a single database, blue those held by two or more.
-  \textbf{b},~Shared crystals between the databases annotating the most
+  \includegraphics[width=0.99\textwidth]{figs/fig_problem.pdf}
+  \caption{\textbf{What a forward screen inherits from the database it loads.}
+  \textbf{a},~Shared crystals between the databases annotating the most
   structures, on a logarithmic colour scale. An empty cell marks a pair with no
   crystal in common rather than missing data.
-  \textbf{c},~The growing recognition substrate. For each database, in ingestion
-  order, the fraction of its matches landing on a crystal absent from the
-  starting pool and admitted during assembly. Marker area scales with the number
-  of matches, and the dashed line is the value pooled over all databases.
-  \textbf{d},~For each comparable property, the fraction of multi-source crystals
+  \textbf{b},~For each comparable property, the fraction of multi-source crystals
   whose independent values fall within the tolerance stated in
   Supplementary Note~\ref{si-note:agreement}. The figure beside each bar is the
   number of crystals carrying that property from two or more databases at one
   level of theory.
-  \textbf{e},~Cumulative distribution of the spread between databases, in the
+  \textbf{c},~Cumulative distribution of the spread between databases, in the
   property's own unit for energies, magnetisation and moduli and as a relative
   difference for density and volume per atom.
-  \textbf{f},~Median absolute difference in formation energy for the database
+  \textbf{d},~Median absolute difference in formation energy for the database
   pairs sharing the most crystals, coloured by the fraction agreeing within the
-  tolerance marked by the dashed line.}
-  \label{fig:redundancy}
+  tolerance marked by the dashed line.
+  \textbf{e},~Every property carrying at least one value, ranked by the number of
+  crystals that carry it. Colour marks the calculation tier assigned in
+  \textbf{b}. Grey marks properties outside that classification, whose domain is
+  a single material family. The horizontal lines mark the stated fractions of the
+  pool.
+  \textbf{f},~Coverage of the general-purpose properties grouped by the
+  calculation each requires: tier~1, readable from a single self-consistent run;
+  tier~2, a few extra self-consistent runs such as a slab or a strained cell;
+  tier~3, linear response or finite differences over many displacements; tier~4,
+  anharmonic, transport or beyond-semilocal treatment. Each point is one property,
+  horizontal bars are group medians and the figures above them give those medians.
+  \textbf{g},~What each database's own structures gained from the others. Every
+  structure has one contributing database, the one that introduced it; the open
+  marker is the property record that database supplied and the filled marker what
+  the structure carries once the others are merged onto it, averaged over the
+  structures each contributed. The figure above each database is the percentage
+  of its structures that gained at least one value it never reported. The
+  databases contributing the most structures are shown.}
+  \label{fig:problem}
 \end{figure}
 
 The pool is the second inheritance, and the question it raises is how much of it
@@ -216,15 +250,15 @@ carries any label at all. The answer is: very little, and what there is was
 distributed neither by importance nor by cost. Of the 166 properties in the
 registry 151 carry at least one value, and treating the pool and those 151 as a
 matrix gives 2{,}203{,}163{,}235 cells of which 99{,}493{,}466 are occupied, so
-the matrix is 4.52\% full (Fig.~\ref{fig:landscape}a). Occupancy is extremely
+the matrix is 4.52\% full (Fig.~\ref{fig:problem}e). Occupancy is extremely
 uneven: nine properties cover more than 40\% of the pool while 97 of the 151
 cover less than 1\%, and half of all crystals carry at most seven properties
-(Fig.~\ref{fig:landscape}c). Only 66 of the 151 are reported by two or more
+(Supplementary Fig.~\ref{si-fig:contents}a). Only 66 of the 151 are reported by two or more
 databases; the other 85 have a single supplier and therefore no independent check
 of any kind.
 
 The gradient follows price, and then departs from it in a way that identifies
-what it really follows (Fig.~\ref{fig:landscape}b). Of 69 general-purpose
+what it really follows (Fig.~\ref{fig:problem}f). Of 69 general-purpose
 properties, the 19 that are read off a self-consistent calculation a database
 performs anyway have a median coverage of 4.56\% of the pool, while the 50 that
 require a calculation of their own have a median of 0.107\%, lower by a factor of
@@ -241,40 +275,8 @@ not evidence that the property is unimportant, only that its turn has not come.
 That map is legible only once the databases sit on one structure pool, because no
 single repository can report on effort it did not spend.
 
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.99\textwidth]{figs/fig3_landscape.pdf}
-  \caption{\textbf{What the corpus contains, and what it does not.}
-  \textbf{a},~Every property carrying at least one value, ranked by the number of
-  crystals that carry it. Colour marks the calculation tier assigned in
-  \textbf{b}. Grey marks properties outside that classification, whose domain is
-  a single material family. The horizontal lines mark the stated fractions of the
-  pool.
-  \textbf{b},~Coverage of the general-purpose properties grouped by the
-  calculation each requires: tier~1, readable from a single self-consistent run;
-  tier~2, a few extra self-consistent runs such as a slab or a strained cell;
-  tier~3, linear response or finite differences over many displacements; tier~4,
-  anharmonic, transport or beyond-semilocal treatment. Each point is one property,
-  horizontal bars are group medians and the figures above them give those medians.
-  \textbf{c},~How many populated properties a single crystal carries.
-  \textbf{d},~Which database supplies which property, for the most widely covered
-  properties and the databases annotating the most crystals. Marker area scales
-  with the number of crystals carrying that value, and colour marks the database
-  family.
-  \textbf{e},~The spectrum store by curve type: spectra held, and the number of
-  distinct crystals they reach.
-  \textbf{f},~What each database's own structures gained from the others. Every
-  structure has one contributing database, the one that introduced it; the open
-  marker is the property record that database supplied and the filled marker what
-  the structure carries once the others are merged onto it, averaged over the
-  structures each contributed. The figure above each database is the percentage
-  of its structures that gained at least one value it never reported. The
-  databases contributing the most structures are shown.}
-  \label{fig:landscape}
-\end{figure}
-
 Sparse as the matrix is, part of it was filled by the integration itself, which
-is the section's second result (Fig.~\ref{fig:landscape}f). Every structure has
+is the section's second result (Fig.~\ref{fig:problem}g). Every structure has
 exactly one contributor, the database that introduced it, and of the 6{,}266{,}517
 structures admitted during assembly that carry any value, 1{,}637{,}460, or
 26.1\%, carry at least one value their own contributor never reported. The effect
@@ -301,6 +303,23 @@ models, and it is answered when their held-out numbers exist. What can be
 established now is that the problem is well posed on this corpus and is not well
 posed on any single database, and that is what this section does.
 
+The model that consumes it is built for that record rather than for a benchmark
+(Fig.~\ref{fig:model}a). Each crystal enters as a periodic radius graph with
+lattice self-edges, and every interaction block does three things in turn: an
+attention over each edge taken in the frame of that edge, so that rotations are
+handled by construction rather than by augmentation; a tensor square of the node
+state, which lets one pass build the angular products a message-passing layer
+would otherwise need several passes to reach; and a reciprocal-space term, in
+which every atom emits a learned form factor and receives the origin-free Fourier
+sum of the others over a fixed set of Miller indices, coupling every pair in the
+cell and every periodic image at once rather than only the neighbours inside the
+cutoff. The crystal is read out twice, once as the diffraction intensities those
+form factors imply and once by attention over the atoms, and the head emits a
+value, an uncertainty and the domain the value is valid on. The reciprocal terms
+and the diffraction readout enter through zero-initialised gates, so the model at
+initialisation is the real-space model and the extra machinery has to earn its
+weight.
+
 A completion needs three things no single database provides: structures
 deduplicated, so that a train--test split falls on distinct crystals rather than
 on records; labels that keep the quantity they denote rather than the column they
@@ -311,24 +330,49 @@ to be so. The corpus supplies all three, and imposes four constraints on how the
 may be used. Filling the same gap by calculation would take an effort no single
 group can supply.
 
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.99\textwidth]{figs/fig_model.pdf}
+  \caption{\textbf{The model trained on the record.}
+  \textbf{a},~One interaction block and the readout. A crystal enters as a
+  periodic radius graph with lattice self-edges; the block applies an attention
+  in the frame of each edge, a tensor square of the node state, and a
+  reciprocal-space term in which each atom receives the origin-free Fourier sum
+  of learned form factors over a fixed Miller set. The crystal is read out as
+  diffraction intensities and by attention over atoms, and the head emits a
+  value, an uncertainty and the domain the value is valid on. Grey rails are
+  residual paths and the two lower terms enter through zero-initialised gates.
+  \textbf{b},~Test error on the JARVIS-DFT tasks, as a ratio to the best
+  published value for each task.
+  \textbf{c},~Test error on the Matbench tasks, as a ratio to the leaderboard
+  entry, with the spread over folds.
+  \textbf{d},~Test error over every task of the corpus against the number of
+  crystals available to train it, each error divided by the spread of its own
+  target, coloured by the calculation tier of Fig.~\ref{fig:problem}f. The line
+  marks a model that predicts the mean.}
+  \label{fig:model}
+\end{figure}
+
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=0.99\textwidth]{figs/fig4_completion.pdf}
+  \includegraphics[width=0.99\textwidth]{figs/fig_completion.pdf}
   \caption{\textbf{What the corpus offers a learned completion of the property
   layer.}
   \textbf{a},~How the registered properties become separable learning tasks and
   then realised training sets. The arrow marks the one stage that multiplies
   rather than filters, splitting a property name by level of theory.
-  \textbf{b},~Composition of the most widely covered properties by level of
-  theory, as a fraction of the labels filed under each property name. The figure
-  at the right gives the number of distinct levels.
-  \textbf{c},~The constructed training sets by declared applicability domain, the
+  \textbf{b},~The constructed training sets by declared applicability domain, the
   set of structures for which the property is defined at all.
-  \textbf{d},~For each training set, the crystals already labelled against the
+  \textbf{c},~For each training set, the crystals already labelled against the
   crystals the task may legitimately be asked about once its domain is enforced.
   The dotted line marks the whole pool and the dashed diagonal marks parity.
-  Panels reporting the trained models are added when their held-out numbers
-  exist.}
+  \textbf{d},~Held-out error of each completed task against the spread between
+  the sources that supplied its labels, coloured by calculation tier. The shaded
+  region lies below the spread the sources themselves carry.
+  \textbf{e},~Coverage of the pool for the most widely covered properties, as
+  supplied by the sources and after the completion.
+  \textbf{f},~What the completed layer nominates, and what survives each
+  successive filter.}
   \label{fig:completion}
 \end{figure}
 
@@ -349,7 +393,7 @@ chemistry-aware train, validation and test split.
 The four constraints are the second half, and each is a direct consequence of
 the integration reported above. The first is that a property name is not a label
 definition
-(Fig.~\ref{fig:completion}b).
+(Supplementary Fig.~\ref{si-fig:theory}).
 Band gap carries 15 distinct levels of theory, of which the semilocal group holds
 83\% and no other reaches 5\%. The systematic offsets between them
 are of order 1~eV, which a model cannot infer from the structure and would
@@ -375,11 +419,11 @@ chemistry-level holdout leaves the validation and test folds empty. The split
 rule falls back for those tasks and records which level it used
 (Supplementary Note~\ref{si-note:census}).
 
-The fourth is that the completion has a domain (Fig.~\ref{fig:completion}c,d).
+The fourth is that the completion has a domain (Fig.~\ref{fig:completion}b,c).
 Carbon dioxide uptake is a grand-canonical adsorption quantity: it is not zero for a
 dense intermetallic, it is undefined, because the simulation cell has nowhere to
 insert a molecule. Of the 176 training sets, 63 draw more than 90\% of their
-labels from a single material family (Fig.~\ref{fig:completion}c). Enforcing
+labels from a single material family (Fig.~\ref{fig:completion}b). Enforcing
 their declared domains changes the size of the completion problem substantially: 109 of
 the 176 tasks are defined on less than half the pool, and the number of
 predictions that lie inside a declared domain is 1{,}105{,}593{,}143 rather than
@@ -387,7 +431,7 @@ the 2.57 billion that asking every task about every crystal would produce, a
 factor of 2.3. The difference is not a loss of coverage. It is the removal of numbers
 that would have looked like data. Plotting what a task may be asked about against
 what it already knows separates the two situations that matter
-(Fig.~\ref{fig:completion}d): a task lying far above the diagonal has the most to
+(Fig.~\ref{fig:completion}c): a task lying far above the diagonal has the most to
 gain, because its domain is large and its labels are few, while a task lying to
 the right and low is one whose domain is already nearly labelled and where a
 model has little left to add.
@@ -410,7 +454,7 @@ rank crystals nobody has evaluated, and that is how such campaigns are run. What
 is bounded is the pool the ranking is taken over and the labels the ranking was
 learned from, and Section~\ref{sec:inherits} measured both. Running the
 completion over the whole corpus, within the domains of
-Fig.~\ref{fig:completion}c,d, moves them together: the pool becomes the
+Fig.~\ref{fig:completion}b,c, moves them together: the pool becomes the
 deduplicated record rather than one provider's slice of it, and every prediction
 carries the spread of the sources that trained it.
 
@@ -432,7 +476,17 @@ is the route the next section turns to.
 
 The record that bounds forward screening is also the reference inverse design
 needs, and the point of this section is that a reported novelty fraction measures
-that reference at least as much as it measures the model. A generative model
+that reference at least as much as it measures the model. A generative model can
+only be shown to have produced something new against a reference that is both
+large enough to contain what else has been computed and complete enough to
+include the databases nobody thinks to check; short of that, the fraction
+reported as new is a statement about the omission. How much that matters is
+easiest to see in two released sample sets matched in everything but the
+generator, both ternary throughout. Under the test the field reports, a language
+model trained on a repository snapshot and a random enumeration of compositions
+differ by eighteen points. Under the test of whether anybody had computed the
+composition before, they differ by a factor of eighty, and in the direction that
+says the language model never left the space it was shown. A generative model
 counts as new whatever is absent from the reference set it was given, so a
 structure missing from one repository but held by another is counted as new; the
 reference sets in current use are drawn from a handful of the largest
@@ -461,6 +515,113 @@ unstated rule, they need not. That is the condition under which a novelty claim
 becomes a measurement rather than a report, and it is what the audit reported
 below is built to supply.
 
-\PENDINGNOVELTY
+The audit fixes the reference and varies the criterion. Nine released structure
+sets were put through it (Fig.~\ref{fig:novelty}; Methods): the 554{,}056
+crystals GNoME contributes to this corpus \cite{merchant2023scaling}; the 770
+structures MatterGen publishes with its paper \cite{zeni2025generative}, together
+with 256 crystals generated here from its released unconditional checkpoint and
+1{,}081 from the checkpoint conditioned on bulk modulus; and the 500-structure
+samples released under a common relaxation protocol for CDVAE
+\cite{xie2022crystal}, CrystaLLM \cite{antunes2024crystal}, FTCP, ion exchange
+and random enumeration \cite{szymanski2025baselines}. The reference is all 55
+sources. Four criteria are applied in turn, from strict to permissive: the
+crystal itself, under the structural fingerprint of Section~\ref{sec:index}; the
+reduced composition together with the space group; the reduced composition alone;
+and the stoichiometry pattern together with the space group
+(Fig.~\ref{fig:novelty}a). The three MatterGen
+sets agree to within 1.8 points under every criterion, so the unconditional run
+stands for them below and in the figure.
+
+At the strict end the sets are largely new, and widening the reference does not
+change that as much as one would expect. Against Materials Project alone every
+set is 98--100\% new; against all 55 sources the figures are 96.7\% for GNoME,
+95.0\% for CDVAE, 89.4\% for random enumeration, 86.8\% for FTCP, 82.0\% for
+MatterGen, 72.0\% for ion exchange and 70.8\% for CrystaLLM
+(Fig.~\ref{fig:novelty}b). Where the few matches sit is more informative than how
+many there are. Pooled over the six sample sets, the databases holding the
+structures a strict test still recognises are NOMAD (323), Alexandria (321),
+AFLOW (276) and OQMD (165); Materials Project, the reference such claims are most
+often taken against, holds 19 (Fig.~\ref{fig:novelty}c). For GNoME the asymmetry
+is sharper: of its 18{,}234 exact matches, Alexandria alone accounts for 14{,}709
+and Materials Project for one, which is what deduplicating against one repository
+and not against another looks like from the other side.
+
+Loosening the criterion moves the number far more than widening the reference
+does, and it is tempting to conclude that a structure should count as new only if
+it clears all four tests, on which reading almost nothing does: 0.0--8.2\% of the
+sample sets and 45.1\% of GNoME (Fig.~\ref{fig:novelty}d). That conclusion should
+be resisted, because the four criteria are not of one kind. The first three are
+decidable identity tests: a hit establishes that the record holds this crystal,
+or a crystal of this composition in this space group, or a crystal of this
+composition. The fourth is not. Sharing a stoichiometry pattern and a space group
+is a necessary condition for two crystals to be the same prototype under a
+different decoration, not a sufficient one, so a hit establishes only that
+prototype identity cannot be excluded cheaply. Requiring a structure to clear it
+would call a genuinely new prototype known because some unrelated compound
+happens to share its anonymous formula and space group, and among 14.59 million
+crystals over 230 space groups almost nothing escapes that. The fourth column is
+therefore an upper bound on prototype redundancy rather than a test a claim must
+pass; settling it needs a structural comparison the fingerprint does not perform,
+and Supplementary Note~\ref{si-note:fingerprint} states what that would involve.
+
+The strictest criterion that can be both decided and defended is the third, and
+it is the one a claim should carry: the fraction of a set whose reduced
+composition appears nowhere in the record. That fraction is 91.1\% for GNoME,
+60.0\% for CDVAE, 34.0\% for MatterGen, 25.8\% for ion exchange, 16.7\% for
+random enumeration, 3.0\% for FTCP and 0.2\% for CrystaLLM. Removing GNoME from
+the reference, so that one generated set is not used to judge another, moves none
+of these by more than 0.4 points. GNoME's 91.1\% is not a discovery rate:
+87.4\% of its released set carries four or five elements against 29.2\% of the
+record as a whole, and in that part of composition space a composition being
+absent carries little information about whether the crystal is distinct from what
+is known.
+
+Two of these figures should be read together, because the sets behind them are
+matched: the CrystaLLM and random-enumeration samples are ternary throughout.
+Under the fingerprint the two look like a matter of degree, 70.8\% against
+89.4\% absent from the record. At the composition level they are two orders of
+magnitude apart: 499 of CrystaLLM's 500 structures have a composition the record
+already holds, against 410 of random enumeration's 492. A language model trained
+on a repository snapshot rearranges compositions it was shown; random enumeration
+leaves that space. Neither behaviour is visible in the number that is usually
+reported, and a leaderboard ordered by that number places the two within twenty
+points of each other.
+
+What the audit supports is therefore not a ranking of generators but a reporting
+convention. A novelty fraction is a property of three things, and only one of
+them is the model: the structures, the reference they were checked against, and
+the criterion that decided a match. Both of the other two are cheap to state and
+neither is usually stated. The resolved record supplies a reference that can be
+named and held fixed; the ladder supplies criteria that can be named and applied
+in turn; and reporting the fraction under each, rather than one figure under an
+unstated rule, is what turns a novelty claim into a measurement that a second
+group can reproduce. The requirement this places on the reference is the one this
+work was built to meet. It is not that the reference be a repository of record,
+but that it be large enough that the relevant prior computation is in it at all,
+and complete enough that the aggregating and specialised databases which turn out
+to hold most of the matches are not the ones left out.
+
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.99\textwidth]{figs/fig_novelty.pdf}
+  \caption{\textbf{What a claim of novelty is measured against.}
+  \textbf{a},~One generated crystal put to four identity criteria in turn,
+  numbered as they are applied: whether the record holds this crystal, a crystal
+  of this composition in this space group, any crystal of this composition, or
+  any crystal sharing this stoichiometry pattern in this space group. Beneath
+  each is the verdict that criterion returns for the crystal drawn.
+  \textbf{b},~The share of each set that no match has yet been found for. Left of
+  the rule the criterion is held at the first and the reference widens from one
+  repository to every source; right of it the reference is held at every source
+  and the criterion loosens to any of the four. Each position adds a test to the
+  ones before it.
+  \textbf{c},~The databases holding the crystals the first criterion recognises,
+  pooled over the sample sets and the runs generated here.
+  \textbf{d},~The strictest criterion under which each set is already in the
+  record, as a share of the set. Colours are the criteria of \textbf{a};
+  \textsl{new} is the share that no criterion finds.}
+  \label{fig:novelty}
+\end{figure}
 
 \FloatBarrier

@@ -1,0 +1,14 @@
+{
+ "total": 554056,
+ "exact_structure": 18234,
+ "composition_and_spacegroup": 16519,
+ "composition_only": 15062,
+ "prototype_only": 254823,
+ "not_found": 249914,
+ "cumulative": {
+  "exact_structure": 18234,
+  "plus_composition_and_spacegroup": 34753,
+  "plus_composition": 49815,
+  "plus_prototype": 304142
+ }
+}

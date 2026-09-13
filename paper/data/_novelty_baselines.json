@@ -1,0 +1,2026 @@
+{
+ "MatterGen": {
+  "n_cifs": 500,
+  "n_hashed": 500,
+  "fail": {},
+  "ladder": {
+   "all": {
+    "n": 500,
+    "exact": 51,
+    "comp_sg": 63,
+    "comp": 136,
+    "proto_sg": 236,
+    "none": 14
+   },
+   "no_gnome": {
+    "n": 500,
+    "exact": 51,
+    "comp_sg": 63,
+    "comp": 136,
+    "proto_sg": 230,
+    "none": 20
+   }
+  },
+  "sources_of_exact_matches": {
+   "nomad": 32,
+   "alexandria": 21,
+   "aflow": 20,
+   "oqmd": 13,
+   "matbench-discovery": 10,
+   "jarvis-qetb": 4,
+   "elementa": 4,
+   "csllm-negatives": 2,
+   "odbx": 1,
+   "jarvis-dft": 1,
+   "mc3d": 1
+  },
+  "exact_match_holders": {
+   "Ag2IBr_1.cif": [],
+   "AlO2_12.cif": [
+    "jarvis-qetb"
+   ],
+   "Ba2GeBi_1.cif": [],
+   "BaNdO2_166.cif": [],
+   "BaSrAs2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "BiI3_1.cif": [
+    "alexandria"
+   ],
+   "C_2.cif": [
+    "alexandria"
+   ],
+   "CaGa3_1.cif": [
+    "jarvis-qetb"
+   ],
+   "CaPbAu2_12.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "CuCl3_2.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "EuInS2_6.cif": [
+    "elementa"
+   ],
+   "GaSe2_1.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "GeBRu3_221.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "H2O2_1.cif": [
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "HoLuS2_160.cif": [
+    "elementa"
+   ],
+   "HoPt3_139.cif": [
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "In2Rh_140.cif": [
+    "aflow",
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "La2Sn3Rh_8.cif": [
+    "alexandria"
+   ],
+   "La2ZnGa3_44.cif": [
+    "alexandria"
+   ],
+   "LaSbO_2.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "LiAl2Cu_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "LiAlPdRh_216.cif": [
+    "nomad"
+   ],
+   "LiErPt2_225.cif": [
+    "alexandria",
+    "csllm-negatives",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "LuCuHg_216.cif": [
+    "oqmd"
+   ],
+   "LuFe3Si2_191.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "Mg2InHg_12.cif": [],
+   "MgZnO2_59.cif": [
+    "odbx"
+   ],
+   "MgZrCo2_12.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "MnAl2Ru_225.cif": [
+    "aflow",
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "NbOs_221.cif": [
+    "aflow",
+    "jarvis-dft",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "NbRu2W_139.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "NdNiP_187.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "NiBi_63.cif": [
+    "aflow",
+    "mc3d",
+    "nomad"
+   ],
+   "Pd3Ru_139.cif": [
+    "aflow",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "PrAl4_123.cif": [
+    "elementa"
+   ],
+   "Ru2PtW_225.cif": [
+    "aflow",
+    "nomad",
+    "oqmd"
+   ],
+   "SbPt3_123.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "Sc2NO_123.cif": [
+    "alexandria"
+   ],
+   "ScCu2Pd_225.cif": [
+    "aflow",
+    "alexandria",
+    "csllm-negatives",
+    "nomad",
+    "oqmd"
+   ],
+   "ScTiAlAu_216.cif": [
+    "nomad"
+   ],
+   "SmErIr2_123.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "SrHg2_63.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "TbI2_12.cif": [
+    "elementa"
+   ],
+   "Ti3Tl_123.cif": [
+    "aflow"
+   ],
+   "TiCo2Ge_119.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "Tl2Au_12.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "TmAlCu2_225.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "V2IrRh_139.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "YSi2_63.cif": [
+    "aflow",
+    "oqmd"
+   ],
+   "Zr2CuPd_225.cif": [
+    "aflow",
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "ZrTaCrMo_216.cif": [
+    "nomad"
+   ]
+  }
+ },
+ "CDVAE": {
+  "n_cifs": 478,
+  "n_hashed": 478,
+  "fail": {},
+  "ladder": {
+   "all": {
+    "n": 478,
+    "exact": 24,
+    "comp_sg": 53,
+    "comp": 114,
+    "proto_sg": 248,
+    "none": 39
+   },
+   "no_gnome": {
+    "n": 478,
+    "exact": 24,
+    "comp_sg": 53,
+    "comp": 113,
+    "proto_sg": 240,
+    "none": 48
+   }
+  },
+  "sources_of_exact_matches": {
+   "elementa": 8,
+   "jarvis-qetb": 7,
+   "alexandria": 6,
+   "oqmd": 3,
+   "nomad": 3,
+   "matbench-discovery": 2,
+   "aflow": 1,
+   "odbx": 1,
+   "materials-cloud-archive-static": 1
+  },
+  "exact_match_holders": {
+   "AgSe2_2.cif": [
+    "elementa"
+   ],
+   "Al2CoIr_123.cif": [
+    "aflow",
+    "alexandria",
+    "oqmd"
+   ],
+   "BaTl_8.cif": [
+    "jarvis-qetb"
+   ],
+   "BiSbS2_1.cif": [
+    "elementa"
+   ],
+   "CaRhO2_6.cif": [
+    "elementa"
+   ],
+   "CdGa3_1.cif": [
+    "jarvis-qetb"
+   ],
+   "Er4Ni3_6.cif": [
+    "elementa"
+   ],
+   "FeSe_1.cif": [
+    "jarvis-qetb"
+   ],
+   "FeTc2_1.cif": [
+    "jarvis-qetb"
+   ],
+   "HoSe_221.cif": [
+    "nomad",
+    "odbx",
+    "oqmd"
+   ],
+   "InAu_12.cif": [
+    "alexandria",
+    "jarvis-qetb"
+   ],
+   "InF3_1.cif": [],
+   "KMgTlF4_1.cif": [],
+   "LiAg2SBr_1.cif": [],
+   "LiPbSe2_1.cif": [],
+   "LiScS2_1.cif": [],
+   "LiTe_2.cif": [
+    "alexandria",
+    "jarvis-qetb"
+   ],
+   "MgTl2_2.cif": [
+    "elementa"
+   ],
+   "Na4Ga3_2.cif": [
+    "elementa"
+   ],
+   "NaUTe2_166.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "OF_1.cif": [
+    "alexandria",
+    "materials-cloud-archive-static",
+    "nomad",
+    "oqmd"
+   ],
+   "RbEuBr2_1.cif": [
+    "elementa"
+   ],
+   "SrSn2Rh_11.cif": [
+    "alexandria",
+    "matbench-discovery"
+   ],
+   "Te3Se_1.cif": [
+    "elementa",
+    "jarvis-qetb"
+   ]
+  }
+ },
+ "CrystaLLM": {
+  "n_cifs": 500,
+  "n_hashed": 500,
+  "fail": {},
+  "ladder": {
+   "all": {
+    "n": 500,
+    "exact": 146,
+    "comp_sg": 80,
+    "comp": 273,
+    "proto_sg": 1,
+    "none": 0
+   },
+   "no_gnome": {
+    "n": 500,
+    "exact": 146,
+    "comp_sg": 80,
+    "comp": 273,
+    "proto_sg": 1,
+    "none": 0
+   }
+  },
+  "sources_of_exact_matches": {
+   "nomad": 77,
+   "aflow": 62,
+   "alexandria": 44,
+   "elementa": 22,
+   "jarvis-qetb": 19,
+   "oqmd": 4,
+   "matbench-discovery": 4,
+   "odbx": 2,
+   "materials-cloud-archive-static": 1,
+   "bidb": 1,
+   "c2db": 1,
+   "jarvis-dft": 1
+  },
+  "exact_match_holders": {
+   "BaCuBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "BaHBr_187.cif": [
+    "jarvis-qetb",
+    "nomad"
+   ],
+   "BaNiBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "BaPdCl2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "BeBrCl_156.cif": [
+    "aflow",
+    "alexandria"
+   ],
+   "BeCuCl2_6.cif": [
+    "alexandria"
+   ],
+   "BeSiPd_187.cif": [
+    "jarvis-qetb"
+   ],
+   "Ca2SeO_123.cif": [
+    "jarvis-qetb",
+    "oqmd"
+   ],
+   "CaAgSb_187.cif": [
+    "jarvis-qetb"
+   ],
+   "CaAs2Pt_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "CaCdSe2_38.cif": [
+    "alexandria"
+   ],
+   "CaP2Pd_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "CaPAu_187.cif": [
+    "alexandria",
+    "jarvis-qetb",
+    "nomad"
+   ],
+   "CaSiSb2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "CaSmI2_1.cif": [
+    "elementa"
+   ],
+   "CaSmS2_123.cif": [
+    "alexandria"
+   ],
+   "CdAgSb_156.cif": [
+    "alexandria"
+   ],
+   "CdSnSb2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "CeDyAs2_123.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "CeEuP2_123.cif": [
+    "alexandria"
+   ],
+   "CeHS_187.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "CeHoP2_123.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "CeTeF_187.cif": [
+    "elementa"
+   ],
+   "CeTiO_123.cif": [
+    "elementa"
+   ],
+   "CoNiCl2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "CoPSe2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "CoRhBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "CoSiPt_156.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "CoSnCl2_6.cif": [
+    "aflow"
+   ],
+   "CrBrCl2_6.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "CrCuBr2_6.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "Cs2BrF_123.cif": [
+    "alexandria"
+   ],
+   "CsAgSe_187.cif": [],
+   "CsGaBr2_1.cif": [],
+   "CsTlI2_123.cif": [
+    "alexandria"
+   ],
+   "Er2SbP_123.cif": [
+    "oqmd"
+   ],
+   "EuHBr_187.cif": [
+    "alexandria"
+   ],
+   "EuLuSb2_123.cif": [
+    "elementa"
+   ],
+   "EuTmTe2_123.cif": [
+    "elementa"
+   ],
+   "FeRhBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "Gd2SbP_123.cif": [
+    "elementa"
+   ],
+   "GdTmAs2_123.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "HfMnSb2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "HfReAs2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "HfTiAs2_6.cif": [
+    "nomad"
+   ],
+   "Ho2SiSe_123.cif": [
+    "elementa"
+   ],
+   "HoErAs2_123.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "KBaSb_156.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "KNbCl2_25.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "KSrP_156.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "LaClO_187.cif": [
+    "nomad"
+   ],
+   "LaErAs2_123.cif": [
+    "elementa"
+   ],
+   "LaErSb2_123.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "LaMoAs2_38.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "LaSmAs2_123.cif": [
+    "alexandria"
+   ],
+   "LaVAs2_25.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "LiGaSe2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "LiHS_187.cif": [
+    "jarvis-qetb"
+   ],
+   "LuTlI_1.cif": [
+    "elementa"
+   ],
+   "MgAgAs_156.cif": [
+    "aflow"
+   ],
+   "MgBrCl_156.cif": [
+    "aflow",
+    "alexandria",
+    "materials-cloud-archive-static",
+    "nomad"
+   ],
+   "MgCuBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "MgCuP_187.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "MgIBr_156.cif": [],
+   "MgMnS2_156.cif": [
+    "nomad"
+   ],
+   "MgP2Ir_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "MgPdCl2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "MgReP2_6.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "MgSiPd_187.cif": [],
+   "MgSnSb2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "MgTe2Os_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "MgTiAs2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "MnAuBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "MnSiNi_187.cif": [
+    "jarvis-qetb"
+   ],
+   "MoHCl_187.cif": [
+    "jarvis-qetb"
+   ],
+   "MoSeCl_156.cif": [
+    "aflow",
+    "jarvis-qetb",
+    "nomad"
+   ],
+   "Na2TlAs_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "NaAgO_123.cif": [
+    "alexandria",
+    "nomad",
+    "odbx"
+   ],
+   "NaBeAs_187.cif": [],
+   "NaBiTe2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "NaLiI2_123.cif": [
+    "alexandria"
+   ],
+   "NaRhBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "NaZnAs_187.cif": [
+    "jarvis-qetb"
+   ],
+   "NbClO_187.cif": [
+    "jarvis-qetb"
+   ],
+   "NbCuBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "NbSeBr_187.cif": [
+    "jarvis-qetb"
+   ],
+   "Nd2SbAs_123.cif": [
+    "elementa"
+   ],
+   "NdYSb2_123.cif": [
+    "alexandria"
+   ],
+   "NiSb2Ru_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "PPb2Cl_6.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "PdPbBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "PdRuBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "PrMnP_187.cif": [
+    "elementa"
+   ],
+   "PrSmAs2_123.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "PrTeCl_187.cif": [
+    "alexandria"
+   ],
+   "RbAgTe_187.cif": [
+    "jarvis-qetb"
+   ],
+   "RbCuTe_187.cif": [],
+   "RbHgAs_187.cif": [],
+   "RbLiSe_187.cif": [],
+   "ReNiP2_38.cif": [
+    "nomad"
+   ],
+   "RhSCl_156.cif": [
+    "nomad"
+   ],
+   "SbBr2F_1.cif": [
+    "elementa"
+   ],
+   "SbSBr_156.cif": [
+    "alexandria",
+    "bidb",
+    "c2db",
+    "jarvis-qetb",
+    "nomad"
+   ],
+   "ScTiN2_123.cif": [],
+   "Si2PdPt_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "SiSnPt_187.cif": [
+    "jarvis-dft",
+    "jarvis-qetb"
+   ],
+   "SmCuSb_187.cif": [
+    "odbx"
+   ],
+   "SmErSb2_123.cif": [
+    "alexandria"
+   ],
+   "SmHS_187.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "SmHfAs2_123.cif": [
+    "elementa"
+   ],
+   "SmSb2Pb_123.cif": [
+    "nomad"
+   ],
+   "SmSbH_187.cif": [
+    "nomad"
+   ],
+   "Sn2TeSe_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "SnTeCl2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "SrCeSb2_123.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "SrHgSb_156.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "SrSbAu_187.cif": [
+    "alexandria",
+    "jarvis-qetb",
+    "matbench-discovery"
+   ],
+   "SrTiP2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "SrVSb2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "SrVSe2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "SrZnCl2_6.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "TbAsH_187.cif": [
+    "nomad"
+   ],
+   "TbGdAs2_123.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "TbTmAs2_123.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "Te2MoRh_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "TiBeBr2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "TiCoSi_187.cif": [
+    "jarvis-qetb"
+   ],
+   "TiHSe_187.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "TiReSi_156.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "TiTeO_187.cif": [
+    "jarvis-qetb"
+   ],
+   "TlAgBr2_6.cif": [
+    "alexandria",
+    "elementa"
+   ],
+   "TlCuCl2_6.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "TlCuSe2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "TmSiNi_187.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "TmSiPt_187.cif": [],
+   "VCrCl2_6.cif": [
+    "aflow"
+   ],
+   "VIrSe2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "VSiPt_187.cif": [
+    "aflow",
+    "jarvis-qetb",
+    "nomad"
+   ],
+   "VSiRh_187.cif": [],
+   "YFeAs2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "YMnSb2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "YTmAs2_123.cif": [
+    "alexandria"
+   ],
+   "YVAs2_6.cif": [
+    "aflow"
+   ],
+   "ZnHF_187.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "ZrCoP2_38.cif": [
+    "nomad"
+   ],
+   "ZrTiS4_1.cif": []
+  }
+ },
+ "FTCP": {
+  "n_cifs": 499,
+  "n_hashed": 499,
+  "fail": {},
+  "ladder": {
+   "all": {
+    "n": 499,
+    "exact": 66,
+    "comp_sg": 166,
+    "comp": 252,
+    "proto_sg": 15,
+    "none": 0
+   },
+   "no_gnome": {
+    "n": 499,
+    "exact": 66,
+    "comp_sg": 166,
+    "comp": 252,
+    "proto_sg": 15,
+    "none": 0
+   }
+  },
+  "sources_of_exact_matches": {
+   "aflow": 22,
+   "nomad": 21,
+   "jarvis-qetb": 16,
+   "alexandria": 12,
+   "elementa": 11,
+   "oqmd": 7,
+   "matbench-discovery": 5,
+   "cmr-static": 2,
+   "jarvis-dft": 2,
+   "materials-project": 2,
+   "csllm-negatives": 1,
+   "aflow-prototypes": 1,
+   "cod": 1,
+   "icsd": 1,
+   "materiae": 1,
+   "materials-cloud-archive-static": 1,
+   "mc3d": 1,
+   "odbx": 1,
+   "superband": 1
+  },
+  "exact_match_holders": {
+   "Al3Cr_25.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "AlSiRu2_123.cif": [
+    "aflow",
+    "alexandria",
+    "cmr-static",
+    "jarvis-dft",
+    "nomad",
+    "oqmd"
+   ],
+   "Ba2Mg_1.cif": [
+    "jarvis-qetb"
+   ],
+   "BaHgO2_1.cif": [],
+   "BaPt_8.cif": [
+    "jarvis-qetb"
+   ],
+   "BaTe2_1.cif": [
+    "nomad"
+   ],
+   "Bi2Se3_1.cif": [
+    "elementa"
+   ],
+   "Ca2N_1.cif": [
+    "jarvis-qetb"
+   ],
+   "CdBr2_1.cif": [],
+   "CdPdF6_1.cif": [
+    "alexandria"
+   ],
+   "Cs2Ca_1.cif": [
+    "jarvis-qetb"
+   ],
+   "CsBe_1.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "CsBr_1.cif": [
+    "jarvis-qetb"
+   ],
+   "CsF_1.cif": [
+    "jarvis-qetb"
+   ],
+   "CsMgZn2_1.cif": [
+    "elementa"
+   ],
+   "Cu2PdAu_8.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "ErCu2_1.cif": [],
+   "Fe3Rh_12.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "H2Se_1.cif": [
+    "jarvis-qetb"
+   ],
+   "HCl2_1.cif": [
+    "elementa"
+   ],
+   "HN_1.cif": [
+    "jarvis-qetb"
+   ],
+   "Hf2TcIr_123.cif": [
+    "aflow",
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "HfCd_11.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "InF3_1.cif": [
+    "elementa"
+   ],
+   "InPd2Au_44.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "InPt3_139.cif": [
+    "aflow",
+    "alexandria",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "KNdTe2_1.cif": [],
+   "La2AgHg_1.cif": [],
+   "Li2InH_1.cif": [
+    "elementa"
+   ],
+   "LiGa2_1.cif": [
+    "jarvis-qetb"
+   ],
+   "LiHSe2_1.cif": [
+    "elementa"
+   ],
+   "LuIr2_1.cif": [],
+   "Mg2Fe_8.cif": [
+    "jarvis-qetb"
+   ],
+   "Mg2MnFe_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "Mg3H_1.cif": [
+    "elementa"
+   ],
+   "MgSiOs2_225.cif": [
+    "aflow",
+    "csllm-negatives",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "MnCo_123.cif": [
+    "aflow",
+    "alexandria",
+    "jarvis-qetb",
+    "matbench-discovery"
+   ],
+   "MoPt2_71.cif": [
+    "aflow",
+    "aflow-prototypes",
+    "alexandria",
+    "cmr-static",
+    "cod",
+    "icsd",
+    "jarvis-dft",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "materiae",
+    "materials-cloud-archive-static",
+    "materials-project",
+    "mc3d",
+    "nomad",
+    "odbx",
+    "oqmd",
+    "superband"
+   ],
+   "MoWC2_1.cif": [],
+   "NaLaS2_1.cif": [],
+   "NaTlPd2_6.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "Nb2VIr_225.cif": [
+    "aflow",
+    "nomad",
+    "oqmd"
+   ],
+   "NbAl2Zn_123.cif": [
+    "aflow"
+   ],
+   "Ni3Se2_1.cif": [],
+   "NiCl2_1.cif": [
+    "jarvis-qetb"
+   ],
+   "PH_1.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "PmDyRh2_38.cif": [
+    "alexandria"
+   ],
+   "PrErS2_160.cif": [
+    "alexandria"
+   ],
+   "RbAgBr3_1.cif": [
+    "materials-project",
+    "nomad"
+   ],
+   "RbBr3_1.cif": [
+    "elementa"
+   ],
+   "RbCl2_1.cif": [
+    "elementa"
+   ],
+   "RbYS2_1.cif": [],
+   "SbH_8.cif": [
+    "jarvis-qetb"
+   ],
+   "ScSbRu2_99.cif": [
+    "aflow"
+   ],
+   "Ta3Au_1.cif": [],
+   "TeH_1.cif": [
+    "jarvis-qetb"
+   ],
+   "Ti2MoIr_44.cif": [
+    "aflow"
+   ],
+   "Ti2NiMo_1.cif": [],
+   "TiAl2Zn_10.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "TiRe_65.cif": [
+    "aflow"
+   ],
+   "TiTl2F6_1.cif": [],
+   "V2MoRu_12.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "VRh_12.cif": [
+    "aflow",
+    "elementa",
+    "nomad"
+   ],
+   "VSe2_12.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "oqmd"
+   ],
+   "YPd5_8.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "ZrMo2_2.cif": [
+    "elementa"
+   ]
+  }
+ },
+ "Ion-Exchange": {
+  "n_cifs": 500,
+  "n_hashed": 500,
+  "fail": {},
+  "ladder": {
+   "all": {
+    "n": 500,
+    "exact": 140,
+    "comp_sg": 69,
+    "comp": 162,
+    "proto_sg": 129,
+    "none": 0
+   },
+   "no_gnome": {
+    "n": 500,
+    "exact": 140,
+    "comp_sg": 66,
+    "comp": 164,
+    "proto_sg": 130,
+    "none": 0
+   }
+  },
+  "sources_of_exact_matches": {
+   "oqmd": 89,
+   "alexandria": 63,
+   "nomad": 28,
+   "matbench-discovery": 26,
+   "gnome": 6,
+   "mc3d": 5,
+   "materials-cloud-archive-static": 3,
+   "aflow": 2,
+   "jarvis-dft": 2,
+   "materials-project": 2,
+   "csllm-negatives": 2,
+   "jarvis-qetb": 1,
+   "phonix": 1,
+   "cmr-static": 1,
+   "odbx": 1
+  },
+  "exact_match_holders": {
+   "Ag15P4S16Br3_220.cif": [
+    "alexandria"
+   ],
+   "Ag15P4Se16Cl3_220.cif": [
+    "alexandria"
+   ],
+   "Ag2HgBr4_82.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "Ag2HgCl4_82.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "Ag2HgI2O_36.cif": [
+    "oqmd"
+   ],
+   "Ag2HgSCl2_36.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "oqmd"
+   ],
+   "Ag2SnS3_9.cif": [
+    "oqmd"
+   ],
+   "Ag3AsSe4_31.cif": [
+    "nomad"
+   ],
+   "AgAsO3_227.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "AgAsS3_148.cif": [
+    "oqmd"
+   ],
+   "AgBO2_194.cif": [
+    "oqmd"
+   ],
+   "AgBS2_122.cif": [
+    "alexandria",
+    "materials-cloud-archive-static",
+    "nomad",
+    "oqmd"
+   ],
+   "AgBiSBr2_63.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "AgBiSI2_63.cif": [
+    "alexandria"
+   ],
+   "AgHgSCl_19.cif": [
+    "oqmd"
+   ],
+   "AgHgSeI_19.cif": [
+    "oqmd"
+   ],
+   "AgPO3_148.cif": [
+    "matbench-discovery",
+    "oqmd"
+   ],
+   "AgPbSe2_166.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "AgSb3S5_12.cif": [
+    "oqmd"
+   ],
+   "Al2PbO4_66.cif": [
+    "alexandria",
+    "oqmd"
+   ],
+   "AlAgSnS4_82.cif": [
+    "alexandria"
+   ],
+   "AlAsO4_65.cif": [
+    "alexandria",
+    "jarvis-dft",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "AlCr4AgSe8_216.cif": [
+    "gnome"
+   ],
+   "AlCuGeS4_82.cif": [
+    "alexandria"
+   ],
+   "AlCuSnS4_82.cif": [
+    "alexandria"
+   ],
+   "AlCuSnSe4_82.cif": [
+    "alexandria",
+    "jarvis-dft",
+    "matbench-discovery",
+    "materials-project",
+    "nomad",
+    "phonix"
+   ],
+   "AlHSe2_62.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "AlOF_59.cif": [
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "AlSBr7_7.cif": [
+    "oqmd"
+   ],
+   "AlSBr_29.cif": [
+    "alexandria",
+    "materials-cloud-archive-static"
+   ],
+   "AlTeCl7_1.cif": [
+    "oqmd"
+   ],
+   "As3Pb5BrO9_176.cif": [
+    "alexandria"
+   ],
+   "As3Pb5ClO12_176.cif": [
+    "mc3d"
+   ],
+   "Au2CO3_11.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "oqmd"
+   ],
+   "BBrO_29.cif": [
+    "alexandria"
+   ],
+   "CaAlH2O2F3_2.cif": [
+    "oqmd"
+   ],
+   "CdAg2SI2_36.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "CdAg2SnSe4_31.cif": [
+    "alexandria",
+    "cmr-static",
+    "oqmd"
+   ],
+   "CdAgSBr_51.cif": [
+    "oqmd"
+   ],
+   "CdAgSI_19.cif": [
+    "oqmd"
+   ],
+   "Co2HgS4_82.cif": [
+    "oqmd"
+   ],
+   "Co2HgSe4_82.cif": [
+    "oqmd"
+   ],
+   "Co2PbS4_66.cif": [
+    "oqmd"
+   ],
+   "CoCuS2_122.cif": [
+    "oqmd"
+   ],
+   "CoCuSe2_122.cif": [
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "CoCuSnS4_74.cif": [
+    "alexandria"
+   ],
+   "Cr2CdS4_82.cif": [
+    "oqmd"
+   ],
+   "Cr2PbS4_66.cif": [
+    "oqmd"
+   ],
+   "Cr3In2CuS8_160.cif": [
+    "alexandria"
+   ],
+   "Cr4InCuS8_216.cif": [
+    "alexandria",
+    "mc3d"
+   ],
+   "CrAgS2_122.cif": [
+    "oqmd"
+   ],
+   "CrCuBr4_112.cif": [
+    "oqmd"
+   ],
+   "CrCuCl4_112.cif": [
+    "alexandria",
+    "matbench-discovery"
+   ],
+   "CrCuS2_122.cif": [
+    "oqmd"
+   ],
+   "CrCuSe2_122.cif": [
+    "alexandria",
+    "oqmd"
+   ],
+   "CsAlI4_14.cif": [
+    "odbx",
+    "oqmd"
+   ],
+   "CsAlSi3O8_2.cif": [
+    "alexandria"
+   ],
+   "CsSbO3_227.cif": [
+    "oqmd"
+   ],
+   "Cu2CO3_11.cif": [
+    "alexandria",
+    "matbench-discovery"
+   ],
+   "Cu2SnHgS4_31.cif": [
+    "alexandria",
+    "oqmd"
+   ],
+   "Cu2SnHgSe4_31.cif": [
+    "alexandria"
+   ],
+   "CuBO2_194.cif": [
+    "oqmd"
+   ],
+   "CuClO4_121.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "CuSO4_2.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "CuSbS2_15.cif": [
+    "oqmd"
+   ],
+   "Fe2HgS4_82.cif": [
+    "matbench-discovery",
+    "oqmd"
+   ],
+   "FeCuBr4_112.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "FeCuCl4_112.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "H2CO3_11.cif": [
+    "oqmd"
+   ],
+   "In2PbS4_66.cif": [
+    "oqmd"
+   ],
+   "In2PbSe4_66.cif": [
+    "alexandria"
+   ],
+   "InGaCl4_62.cif": [
+    "mc3d",
+    "oqmd"
+   ],
+   "InH2PbO2F3_2.cif": [
+    "alexandria"
+   ],
+   "K3Al7S12_4.cif": [
+    "alexandria",
+    "gnome"
+   ],
+   "KAsF6_225.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "KAsO3_148.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "KPF6_225.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "Li2AlF5_63.cif": [
+    "oqmd"
+   ],
+   "Li2GeS3_36.cif": [
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "Li2PSe3_19.cif": [
+    "gnome"
+   ],
+   "Li2SO4_70.cif": [],
+   "Li3PS4_31.cif": [
+    "alexandria",
+    "materials-cloud-archive-static",
+    "mc3d",
+    "nomad",
+    "oqmd"
+   ],
+   "LiSbO3_227.cif": [
+    "oqmd"
+   ],
+   "MgAgSI_19.cif": [
+    "oqmd"
+   ],
+   "MgAlAg2F7_74.cif": [
+    "gnome"
+   ],
+   "Mn2CdS4_82.cif": [
+    "oqmd"
+   ],
+   "Mn2HgSe4_82.cif": [
+    "oqmd"
+   ],
+   "Mn2ZnSe4_82.cif": [
+    "oqmd"
+   ],
+   "MnAgS2_122.cif": [
+    "oqmd"
+   ],
+   "MnAgSBr_51.cif": [
+    "oqmd"
+   ],
+   "MnAgSe2_122.cif": [
+    "oqmd"
+   ],
+   "MnCr4CuS8_216.cif": [
+    "alexandria",
+    "gnome"
+   ],
+   "MnCuCl4_112.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "MnCuS2_122.cif": [
+    "oqmd"
+   ],
+   "Na3AsS4_31.cif": [
+    "oqmd"
+   ],
+   "NaBi3S5_12.cif": [
+    "oqmd"
+   ],
+   "Nb2PbO6_162.cif": [
+    "oqmd"
+   ],
+   "NbAg3S4_31.cif": [
+    "alexandria",
+    "oqmd"
+   ],
+   "NbAgO3_227.cif": [
+    "oqmd"
+   ],
+   "PCl2F3_85.cif": [
+    "oqmd"
+   ],
+   "PCl3O_14.cif": [
+    "oqmd"
+   ],
+   "PH3OF6_2.cif": [
+    "alexandria"
+   ],
+   "RbAlI4_14.cif": [
+    "alexandria"
+   ],
+   "RbAlSe2_15.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "RbPF6_225.cif": [
+    "alexandria",
+    "mc3d"
+   ],
+   "SbBrOF8_4.cif": [
+    "alexandria"
+   ],
+   "SbClOF8_33.cif": [
+    "alexandria"
+   ],
+   "SbH3OF6_2.cif": [
+    "alexandria"
+   ],
+   "SbPO5_19.cif": [
+    "oqmd"
+   ],
+   "Sc2CdSe4_82.cif": [
+    "oqmd"
+   ],
+   "Sc2PbS4_66.cif": [
+    "oqmd"
+   ],
+   "Sc2ZnO4_227.cif": [
+    "aflow",
+    "alexandria",
+    "materials-project",
+    "nomad",
+    "oqmd"
+   ],
+   "ScAgSe2_122.cif": [
+    "oqmd"
+   ],
+   "ScCuSe2_122.cif": [
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "SiAg2S3_9.cif": [],
+   "SnPdF6_2.cif": [
+    "matbench-discovery"
+   ],
+   "Sr5As3BrO12_176.cif": [
+    "gnome"
+   ],
+   "TaCl3O_14.cif": [
+    "oqmd"
+   ],
+   "Ti2CdS4_82.cif": [
+    "oqmd"
+   ],
+   "Ti2CdSe4_82.cif": [
+    "oqmd"
+   ],
+   "Ti2PbS4_66.cif": [
+    "oqmd"
+   ],
+   "Ti5CuS8_216.cif": [
+    "alexandria"
+   ],
+   "TiAg2S3_9.cif": [
+    "oqmd"
+   ],
+   "TiAgO2_194.cif": [
+    "matbench-discovery"
+   ],
+   "TiAgS2_122.cif": [
+    "nomad",
+    "oqmd"
+   ],
+   "TiAgSe2_122.cif": [
+    "oqmd"
+   ],
+   "TiCuO2_194.cif": [
+    "csllm-negatives",
+    "matbench-discovery",
+    "oqmd"
+   ],
+   "TiCuSe2_122.cif": [
+    "oqmd"
+   ],
+   "Tl3In7S12_4.cif": [
+    "alexandria"
+   ],
+   "TlInF4_15.cif": [
+    "alexandria",
+    "matbench-discovery",
+    "oqmd"
+   ],
+   "V2CdS4_82.cif": [],
+   "V2HgS4_82.cif": [
+    "oqmd"
+   ],
+   "V2HgSe4_82.cif": [
+    "oqmd"
+   ],
+   "VAg3S4_31.cif": [
+    "alexandria",
+    "oqmd"
+   ],
+   "VAgS2_122.cif": [
+    "oqmd"
+   ],
+   "VAgSe2_122.cif": [
+    "oqmd"
+   ],
+   "VCuSe2_122.cif": [
+    "csllm-negatives",
+    "oqmd"
+   ],
+   "VSeCl7_1.cif": [
+    "oqmd"
+   ],
+   "YCuSe2_122.cif": [
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "ZnAgSI_19.cif": [
+    "oqmd"
+   ]
+  }
+ },
+ "Random": {
+  "n_cifs": 492,
+  "n_hashed": 492,
+  "fail": {},
+  "ladder": {
+   "all": {
+    "n": 492,
+    "exact": 52,
+    "comp_sg": 75,
+    "comp": 283,
+    "proto_sg": 82,
+    "none": 0
+   },
+   "no_gnome": {
+    "n": 492,
+    "exact": 52,
+    "comp_sg": 75,
+    "comp": 283,
+    "proto_sg": 82,
+    "none": 0
+   }
+  },
+  "sources_of_exact_matches": {
+   "nomad": 34,
+   "oqmd": 24,
+   "aflow": 23,
+   "alexandria": 20,
+   "jarvis-qetb": 11,
+   "elementa": 7,
+   "csllm-negatives": 7,
+   "matbench-discovery": 6,
+   "jarvis-dft": 4,
+   "materials-project": 2,
+   "materiae": 1,
+   "materials-cloud-archive-static": 1,
+   "mc3d": 1,
+   "odbx": 1
+  },
+  "exact_match_holders": {
+   "AgAsS2_164.cif": [
+    "nomad"
+   ],
+   "AgAuS_216.cif": [
+    "jarvis-qetb",
+    "nomad"
+   ],
+   "AgPOs_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "AuSBr_216.cif": [
+    "nomad"
+   ],
+   "BaSmTe2_164.cif": [
+    "elementa"
+   ],
+   "BaTiS2_164.cif": [
+    "nomad"
+   ],
+   "BeTlP_216.cif": [
+    "aflow",
+    "alexandria",
+    "jarvis-qetb",
+    "nomad"
+   ],
+   "CoSiRh_216.cif": [
+    "aflow",
+    "alexandria",
+    "csllm-negatives",
+    "nomad",
+    "oqmd"
+   ],
+   "CrAs2Ru_164.cif": [
+    "elementa"
+   ],
+   "CsNiAs_216.cif": [],
+   "CsOsS2_164.cif": [
+    "nomad"
+   ],
+   "CsTe2Os_164.cif": [
+    "nomad"
+   ],
+   "CuOsS2_164.cif": [
+    "nomad"
+   ],
+   "DyHO_216.cif": [
+    "oqmd"
+   ],
+   "GeSbCl_216.cif": [
+    "aflow",
+    "nomad"
+   ],
+   "HgAsW_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "KCaAs_216.cif": [
+    "aflow",
+    "alexandria",
+    "matbench-discovery",
+    "nomad",
+    "oqmd"
+   ],
+   "KFeSi_216.cif": [
+    "aflow",
+    "alexandria",
+    "csllm-negatives",
+    "nomad",
+    "oqmd"
+   ],
+   "Li2BeC_164.cif": [
+    "elementa"
+   ],
+   "LiCoTe2_164.cif": [
+    "alexandria",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "LiSnSb_216.cif": [
+    "aflow",
+    "nomad",
+    "oqmd"
+   ],
+   "MgAgSb_216.cif": [
+    "aflow",
+    "alexandria",
+    "jarvis-dft",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "materiae",
+    "materials-cloud-archive-static",
+    "materials-project",
+    "mc3d",
+    "nomad",
+    "odbx",
+    "oqmd"
+   ],
+   "MgPH_216.cif": [
+    "csllm-negatives",
+    "jarvis-dft",
+    "jarvis-qetb"
+   ],
+   "MnCdS2_164.cif": [
+    "nomad"
+   ],
+   "MnCuAs_216.cif": [
+    "aflow",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "nomad"
+   ],
+   "NaHgSe_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "NaLuSi_216.cif": [
+    "oqmd"
+   ],
+   "NbOF_216.cif": [
+    "alexandria",
+    "jarvis-dft",
+    "jarvis-qetb",
+    "matbench-discovery"
+   ],
+   "NdCrP2_15.cif": [
+    "elementa"
+   ],
+   "NiAs2W_164.cif": [
+    "elementa"
+   ],
+   "RbAgTe_216.cif": [
+    "jarvis-qetb",
+    "oqmd"
+   ],
+   "RbCuS_216.cif": [
+    "jarvis-qetb",
+    "oqmd"
+   ],
+   "RbSrAs_216.cif": [
+    "oqmd"
+   ],
+   "ReSiHg_216.cif": [
+    "aflow",
+    "nomad",
+    "oqmd"
+   ],
+   "SbPIr_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "SiAgOs_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "SiHgPt_216.cif": [
+    "aflow",
+    "alexandria",
+    "csllm-negatives",
+    "nomad",
+    "oqmd"
+   ],
+   "SiIrAu_216.cif": [
+    "aflow",
+    "alexandria",
+    "csllm-negatives",
+    "nomad",
+    "oqmd"
+   ],
+   "SiSnPd_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "SmReO4_13.cif": [
+    "oqmd"
+   ],
+   "SmSiRh_216.cif": [
+    "csllm-negatives",
+    "oqmd"
+   ],
+   "SrCaSi_216.cif": [
+    "aflow",
+    "alexandria",
+    "jarvis-qetb",
+    "nomad",
+    "oqmd"
+   ],
+   "SrHF_216.cif": [
+    "alexandria",
+    "nomad"
+   ],
+   "SrTiSi_216.cif": [
+    "aflow",
+    "nomad",
+    "oqmd"
+   ],
+   "TeAsP_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad"
+   ],
+   "TiWS2_164.cif": [
+    "nomad"
+   ],
+   "TlFeSi_216.cif": [
+    "aflow",
+    "alexandria",
+    "nomad",
+    "oqmd"
+   ],
+   "TmSiGe_216.cif": [
+    "oqmd"
+   ],
+   "VCuSb2_164.cif": [
+    "elementa"
+   ],
+   "VSiPt_216.cif": [
+    "aflow",
+    "jarvis-dft",
+    "jarvis-qetb",
+    "matbench-discovery",
+    "materials-project",
+    "nomad",
+    "oqmd"
+   ],
+   "YTlSi_216.cif": [
+    "aflow",
+    "alexandria",
+    "csllm-negatives",
+    "nomad",
+    "oqmd"
+   ],
+   "ZrZnAs2_164.cif": [
+    "elementa"
+   ]
+  }
+ }
+}

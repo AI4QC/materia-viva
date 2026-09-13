@@ -341,6 +341,7 @@ Regenerate with `scripts/properties/summarize.py` after any load.
 |---|---:|---:|---:|---|
 | Alexandria Materials Database (`alexandria`) | 60,588,138 | 5,894,222 | 1,514,488 | Alexandria dataset terms |
 | AFLOW (`aflow`) | 18,464,119 | 2,275,947 | 1,650,288 | AFLOW academic non-commercial terms |
+| NOMAD Repository and Archive (`nomad`) | 10,204,105 | 3,835,327 | 1,047,208 | per-upload licence and NOMAD terms |
 | ELEMENTA and ELEMENTA Spin (`elementa`) | 8,023,344 | 2,005,836 | 0 | CC BY-NC 4.0 |
 | Open Quantum Materials Database (`oqmd`) | 6,086,500 | 1,229,047 | 255,085 | CC BY 4.0 |
 | Hypothetical MOFs for wet flue-gas carbon capture (`mof-carbon-capture`) | 5,454,666 | 287,610 | 287,610 | CC BY 4.0 |
@@ -393,10 +394,9 @@ Regenerate with `scripts/properties/summarize.py` after any load.
 | Hard-coating Alloys Database (`hadb`) | 492 | 123 | 105 | HADB terms and source-publication provenance |
 | Theoretical Crystallography Open Database (`tcod`) | 357 | 2,803 | 2,227 | CC0 |
 | OBELiX solid-state electrolyte structures and ionic conductivity (`obelix`) | 112 | 60 | 0 | CC BY 4.0 |
-
-Totals: **121,620,776** property rows over **166** distinct properties, **12,812,918**
+Totals: **131,824,881** property rows over **166** distinct properties, **13,792,960**
 materials carrying at least one cross-database property; pool now 357,127 experimental +
-13,186,150 candidate structures (13,543,277 total), 1,190,447 of them contributed by two or
+14,233,358 candidate structures (14,590,485 total), 3,233,769 of them contributed by two or
 more sources.
 
 The "New structures" column counts `match_via = 'origin'` refs. For `icsd` that is
@@ -414,6 +414,6 @@ calculated, AMCSD; 940 measured, RRUFF), 46,421 phonon DOS (28,214 phonix, 13,54
 (Materials Project) — plus on-demand simulated XRD for every structure via
 `/api/materials/{id}/xrd`.
 
-Pool-wide backfill results: space groups **13,542,712 / 13,543,277** materials (99.996%,
+Pool-wide backfill results: space groups **14,589,919 / 14,590,485** materials (99.996%,
 parsed from the BAWL fingerprint token), formation energy 9,531,809, energy above hull
-7,307,427, band gap 8,566,028, magnetism 8,046,563, elasticity 59,155.
+7,307,427, band gap 8,991,573, magnetism 8,042,838, elasticity 59,169.

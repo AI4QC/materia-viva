@@ -81,7 +81,7 @@ directly.
 
 ### 3.2 Second-round expansion sources
 
-The machine-readable catalog now contains 102 sources. The following were added in the second round
+The machine-readable catalog now contains 106 sources. The following were added in the second round
 as specialized structure/property libraries:
 
 | Source | Scale / contents | Automation status | Overlap handling |

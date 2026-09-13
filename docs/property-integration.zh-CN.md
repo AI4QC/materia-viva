@@ -269,7 +269,7 @@ kcal/mol → kJ/mol、凸包距离 meV/atom → eV/atom）；`method` 字符串�
   列表、把已存谱与模拟衍射画在同一条 2θ 轴上的谱图面板，以及链接每个原始记录号的来源数据库区。
 
 
-## 8. 汇总表（2026-08-19 生成）
+## 8. 汇总表（2026-09-13 生成）
 
 任何装载之后用 `scripts/properties/summarize.py` 重新生成。
 
@@ -277,6 +277,7 @@ kcal/mol → kJ/mol、凸包距离 meV/atom → eV/atom）；`method` 字符串�
 |---|---:|---:|---:|---|
 | Alexandria Materials Database (`alexandria`) | 60,588,138 | 5,894,222 | 1,514,488 | Alexandria dataset terms |
 | AFLOW (`aflow`) | 18,464,119 | 2,275,947 | 1,650,288 | AFLOW academic non-commercial terms |
+| NOMAD Repository and Archive (`nomad`) | 10,204,105 | 3,835,327 | 1,047,208 | per-upload licence and NOMAD terms |
 | ELEMENTA and ELEMENTA Spin (`elementa`) | 8,023,344 | 2,005,836 | 0 | CC BY-NC 4.0 |
 | Open Quantum Materials Database (`oqmd`) | 6,086,500 | 1,229,047 | 255,085 | CC BY 4.0 |
 | Hypothetical MOFs for wet flue-gas carbon capture (`mof-carbon-capture`) | 5,454,666 | 287,610 | 287,610 | CC BY 4.0 |
@@ -329,10 +330,9 @@ kcal/mol → kJ/mol、凸包距离 meV/atom → eV/atom）；`method` 字符串�
 | Hard-coating Alloys Database (`hadb`) | 492 | 123 | 105 | HADB terms and source-publication provenance |
 | Theoretical Crystallography Open Database (`tcod`) | 357 | 2,803 | 2,227 | CC0 |
 | OBELiX solid-state electrolyte structures and ionic conductivity (`obelix`) | 112 | 60 | 0 | CC BY 4.0 |
-
-总计：**121,620,776** 条性质行，覆盖 **166** 种性质，**12,812,918** 个材料至少携带一条跨库
-性质；结构池现为 **357,127** 实验结构 + **13,186,150** 候选结构（共 **13,543,277**），其中
-**1,190,447** 个由两个及以上来源共同贡献。
+总计：**131,824,881** 条性质行，覆盖 **166** 种性质，**13,792,960** 个材料至少携带一条跨库
+性质；结构池现为 **357,127** 实验结构 + **14,233,358** 候选结构（共 **14,590,485**），其中
+**3,233,769** 个由两个及以上来源共同贡献。
 
 “新增结构”一列统计的是 `match_via = 'origin'` 引用。对 `icsd` 而言这是溯源而非收录：该来源为
 `properties_only`，其 `new_structs.jsonl.gz` 为空，全部 73,823 条引用指向的都是早于本流水线就
@@ -346,5 +346,5 @@ Materials Project 4,662）、热导谱与累积热导曲线各 7,836（phonix）
 （RRUFF）、光吸收曲线 1,924（Materials Project）——另有全池按需模拟 XRD
 （`/api/materials/{id}/xrd`）。
 
-全池回填结果：空间群 **13,542,712 / 13,543,277**（99.996%，解析自 BAWL 指纹段），形成能
-9,531,809、凸包能 7,307,427、带隙 8,566,028、磁性 8,046,563、弹性 59,155。
+全池回填结果：空间群 **14,589,919 / 14,590,485**（99.996%，解析自 BAWL 指纹段），形成能
+9,531,809、凸包能 7,307,427、带隙 8,991,573、磁性 8,042,838、弹性 59,169。

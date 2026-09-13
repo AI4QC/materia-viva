@@ -52,7 +52,7 @@ from urllib.request import Request, urlopen
 try:
     from scripts.datasets.acquire import CapacityError, default_data_root
 except ModuleNotFoundError as error:
-    if error.name != "scripts":
+    if error.name not in {"scripts", "scripts.datasets"}:
         raise
     # Allow the documented direct invocation: python scripts/datasets/nomad.py
     from acquire import CapacityError, default_data_root

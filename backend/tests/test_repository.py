@@ -113,8 +113,10 @@ def test_search_paginates_with_stable_sorting(tmp_path):
 
     assert first.total == 5
     assert first.pages == 3
-    assert _ids(first) == ["exp-3", "pool-2"]
-    assert _ids(second) == ["exp-1", "pool-5"]
+    # Fe2O3, then LiFePO4 before Li2O: Li1 precedes Li2. Sorting the stored text
+    # put Li2O first, because '2' sorts below 'F'.
+    assert _ids(first) == ["exp-3", "exp-1"]
+    assert _ids(second) == ["pool-2", "pool-5"]
 
 
 def test_search_rejects_unknown_sort_key(tmp_path):
@@ -282,3 +284,79 @@ def test_detail_returns_per_source_properties_and_refs(tmp_path):
     assert other is not None
     assert other["properties"] == []
     assert other["source_refs"] == []
+
+
+def test_a_formula_search_does_not_require_typing_the_ones(tmp_path):
+    """Stored formulas spell every count out: CdS is held as `Cd1S1`.
+
+    Searching for `CdS` matched nothing at all, so formula search was unusable
+    for any compound with a 1 subscript — which is most of them.
+    """
+    from materials_api.repository import explicit_and_implicit_counts
+
+    assert explicit_and_implicit_counts("CdS") == {"CdS", "Cd1S1"}
+    assert explicit_and_implicit_counts("Cd1S1") == {"CdS", "Cd1S1"}
+    assert explicit_and_implicit_counts("Th1O2") == {"ThO2", "Th1O2"}
+
+
+def test_normalising_a_formula_never_reduces_the_cell():
+    """`Ag2I2` is a cell with two formula units and is not the same record as `AgI`."""
+    from materials_api.repository import explicit_and_implicit_counts
+
+    assert explicit_and_implicit_counts("Ag2I2") == {"Ag2I2"}
+    assert "AgI" not in explicit_and_implicit_counts("Ag2I2")
+    assert "Ag2I2" not in explicit_and_implicit_counts("AgI")
+
+
+def test_a_formula_that_is_not_one_is_left_alone():
+    from materials_api.repository import explicit_and_implicit_counts
+
+    # fractional occupancies and unparseable input must not be mangled
+    assert explicit_and_implicit_counts("Fe0.5Ni0.5") == {"Fe0.5Ni0.5"}
+    assert explicit_and_implicit_counts("not a formula") == {"not a formula"}
+
+
+def test_sorting_by_formula_reads_counts_as_numbers(tmp_path):
+    """`Li2O` used to sort before `LiFePO4` because '2' sorts below 'F'."""
+    with _repository(tmp_path) as repo:
+        result = repo.search(SearchQuery(sort="formula", direction="asc", page_size=10))
+        order = [row["formula"] for row in result.items]
+
+    assert order == ["Fe2O3", "LiFePO4", "Li2O", "NaCl", "Si"]
+
+
+def test_an_index_built_before_the_sort_key_still_searches(tmp_path):
+    """The column arrived after some indexes were built; they must not break."""
+    with _repository(tmp_path) as repo:
+        # an index from before this change has neither the column nor its index
+        repo.connection.execute("DROP INDEX idx_materials_formula_sort")
+        repo.connection.execute("ALTER TABLE materials DROP COLUMN formula_sort")
+        result = repo.search(SearchQuery(sort="formula", direction="asc", page_size=10))
+
+    # misordered as it was before, but answering rather than failing
+    assert [row["formula"] for row in result.items] == ["Fe2O3", "Li2O", "LiFePO4", "NaCl", "Si"]
+
+
+def test_the_frontend_offers_exactly_the_sort_keys_the_api_accepts():
+    """Drift between the two is what let `?sort=garbage` reach the API.
+
+    It came back 422 and the page showed a Retry button that could never work,
+    because the key stayed in the query state. The parser validates now, and this
+    keeps its list honest.
+    """
+    import re
+    from pathlib import Path
+
+    from materials_api.repository import SORT_COLUMNS
+
+    source = (Path(__file__).resolve().parents[2] / "frontend" / "src" / "lib" / "query.ts").read_text(
+        encoding="utf-8"
+    )
+    block = re.search(r"SORT_KEYS = \[(.*?)\] as const", source, re.S)
+    assert block, "SORT_KEYS is no longer where this test looks for it"
+    frontend = set(re.findall(r"'([a-z_]+)'", block.group(1)))
+
+    assert frontend == set(SORT_COLUMNS), (
+        f"only in the frontend: {sorted(frontend - set(SORT_COLUMNS))}; "
+        f"only in the API: {sorted(set(SORT_COLUMNS) - frontend)}"
+    )

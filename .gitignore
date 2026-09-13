@@ -1,6 +1,8 @@
 # Large datasets and generated indexes live on the secondary SSD.
 /data
 /runtime
+/hf-dataset/
+/hf-cache*/
 *.part
 *.receipt.json
 materials.sqlite
@@ -19,8 +21,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/

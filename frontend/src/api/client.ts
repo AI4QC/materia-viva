@@ -160,7 +160,9 @@ export class ApiError extends Error {
 }
 
 export async function searchMaterials(query: MaterialQuery, signal?: AbortSignal) {
-  return request<SearchResponse>(`/api/materials?${serializeQuery(query)}`, { signal })
+  const params = serializeQuery(query)
+  params.set('page_size', String(query.pageSize))
+  return request<SearchResponse>(`/api/materials?${params}`, { signal })
 }
 
 export async function getStats(signal?: AbortSignal) {

@@ -13,6 +13,16 @@ export function useMaterials(query: MaterialQuery) {
 
   useEffect(() => {
     const controller = new AbortController()
+    if (hasInvalidRange(query)) {
+      setLoading(false)
+      setError('invalid-range')
+      return () => controller.abort()
+    }
+    if (hasInvalidSpacegroups(query.spacegroups)) {
+      setLoading(false)
+      setError('invalid-spacegroups')
+      return () => controller.abort()
+    }
     const timer = window.setTimeout(async () => {
       setLoading(true)
       setError(null)
@@ -25,7 +35,7 @@ export function useMaterials(query: MaterialQuery) {
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
-    }, 180)
+    }, 350)
     return () => {
       controller.abort()
       window.clearTimeout(timer)
@@ -35,12 +45,33 @@ export function useMaterials(query: MaterialQuery) {
   return { data, error, loading, refresh: useCallback(() => setRevision((value) => value + 1), []) }
 }
 
+function hasInvalidSpacegroups(value: string) {
+  if (!value.trim()) return false
+  return value.split(',').some((item) => {
+    const number = Number(item.trim())
+    return !Number.isInteger(number) || number < 1 || number > 230
+  })
+}
+
+function hasInvalidRange(query: MaterialQuery) {
+  return [
+    [query.gapMin, query.gapMax], [query.densityMin, query.densityMax],
+    [query.nAtomsMin, query.nAtomsMax], [query.nElementsMin, query.nElementsMax],
+    [query.volumeMin, query.volumeMax], [query.formationEnergyMin, query.formationEnergyMax],
+    [query.energyAboveHullMin, query.energyAboveHullMax], [query.magnetizationMin, query.magnetizationMax],
+    [query.bulkModulusMin, query.bulkModulusMax], [query.shearModulusMin, query.shearModulusMax],
+  ].some(([min, max]) => min !== undefined && max !== undefined && min > max)
+}
+
 export function useAtlasStats() {
-  const [stats, setStats] = useState<AtlasStats | null>(null)
+  const [data, setData] = useState<AtlasStats | null>(null)
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   useEffect(() => {
     const controller = new AbortController()
-    getStats(controller.signal).then(setStats).catch(() => undefined)
+    getStats(controller.signal)
+      .then((stats) => { setData(stats); setStatus('ready') })
+      .catch(() => { if (!controller.signal.aborted) setStatus('error') })
     return () => controller.abort()
   }, [])
-  return stats
+  return { data, status }
 }

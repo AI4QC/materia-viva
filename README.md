@@ -1,3 +1,12 @@
+---
+title: MateriaViva
+emoji: 🔬
+colorFrom: red
+colorTo: gray
+sdk: docker
+app_port: 7860
+---
+
 <p align="center">
   <img src="frontend/public/logo.svg" alt="Materia Viva" width="760">
 </p>

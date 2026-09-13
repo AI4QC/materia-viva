@@ -6,23 +6,27 @@ import { AdvancedFilters } from './AdvancedFilters'
 
 
 describe('AdvancedFilters', () => {
-  it('submits formula and dataset filters through the controlled query contract', () => {
+  it('applies formula and dataset filters through the controlled query contract', () => {
     const onChange = vi.fn()
-    const onApply = vi.fn()
     render(
-      <AdvancedFilters query={DEFAULT_QUERY} onChange={onChange} onApply={onApply} />,
+      <AdvancedFilters query={DEFAULT_QUERY} onChange={onChange} />,
     )
 
     fireEvent.change(screen.getByLabelText('Formula, chemical system or material ID'), { target: { value: 'LiFePO4' } })
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ formula: 'LiFePO4', page: 1 }))
 
-    fireEvent.click(screen.getByLabelText('Experimental only'))
+    fireEvent.click(screen.getByRole('button', { name: 'Experimental' }))
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ datasets: ['experimental'], page: 1 }))
 
     fireEvent.change(screen.getByLabelText('Stability'), { target: { value: 'stable' } })
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ stability: 'stable', page: 1 }))
 
-    fireEvent.click(screen.getByRole('button', { name: 'Apply filters' }))
-    expect(onApply).toHaveBeenCalledOnce()
+  })
+
+  it('marks an inverted numeric range before it reaches search', () => {
+    render(<AdvancedFilters query={{ ...DEFAULT_QUERY, gapMin: 5, gapMax: 1 }} onChange={vi.fn()} />)
+
+    expect(screen.getByText('Minimum must not exceed maximum')).toBeVisible()
+    expect(screen.getAllByRole('spinbutton', { name: /Min|Max/ }).slice(0, 2).every((input) => input.getAttribute('aria-invalid') === 'true')).toBe(true)
   })
 })

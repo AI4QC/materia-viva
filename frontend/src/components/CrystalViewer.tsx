@@ -3,23 +3,27 @@ import { Box, Camera, ImageOff, Layers3, Rotate3D } from 'lucide-react'
 
 import type { CrystalStructure } from '../api/client'
 import { useI18n } from '../i18n'
+import { mutedElementColor } from '../lib/crystal'
+import { formulaText } from './Formula'
 
 const InteractiveCrystal = lazy(() => import('./InteractiveCrystal').then((module) => ({ default: module.InteractiveCrystal })))
 
 interface CrystalViewerProps {
   materialId: string
   structure: CrystalStructure
+  /** From /api/stats. When false the server has no OVITO worker, so a render
+   *  request can only fail — do not open on that tab and do not send one. */
+  ovitoAvailable?: boolean
 }
 
 type View = 'isometric' | 'front' | 'top'
 type Representation = 'ball_stick' | 'spacefill'
-
-export function CrystalViewer({ materialId, structure }: CrystalViewerProps) {
+export function CrystalViewer({ materialId, structure, ovitoAvailable = true }: CrystalViewerProps) {
   const { t } = useI18n()
-  const [mode, setMode] = useState<'ovito' | 'interactive'>('ovito')
+  const [mode, setMode] = useState<'ovito' | 'interactive'>('interactive')
   const [view, setView] = useState<View>('isometric')
-  const [representation, setRepresentation] = useState<Representation>('ball_stick')
-  const [supercell, setSupercell] = useState('2,2,2')
+  const [representation, setRepresentation] = useState<Representation>('spacefill')
+  const [supercell, setSupercell] = useState('1,1,1')
   const [showCell, setShowCell] = useState(true)
   const [quality, setQuality] = useState<'preview' | 'high'>('preview')
   const [renderFailed, setRenderFailed] = useState(false)
@@ -28,6 +32,7 @@ export function CrystalViewer({ materialId, structure }: CrystalViewerProps) {
     typeof window.WebGLRenderingContext !== 'undefined' ||
     typeof window.WebGL2RenderingContext !== 'undefined'
   )
+  const elementLegend = useMemo(() => [...new Map(structure.sites.map((site) => [site.element, site])).values()].sort((a, b) => a.element.localeCompare(b.element)), [structure.sites])
 
   const renderUrl = useMemo(() => {
     const params = new URLSearchParams({ view, representation, supercell, show_cell: String(showCell), quality })
@@ -43,11 +48,13 @@ export function CrystalViewer({ materialId, structure }: CrystalViewerProps) {
   return (
     <section className="crystal-viewer" aria-label={t('viewer.label')}>
       <div className="viewer-tabs" role="tablist" aria-label={t('viewer.engines')}>
-        <button role="tab" aria-selected={mode === 'ovito'} onClick={() => setMode('ovito')} type="button">
-          <span className="engine-live" /> OVITO render
-        </button>
+        {ovitoAvailable && (
+          <button role="tab" aria-selected={mode === 'ovito'} onClick={() => setMode('ovito')} type="button">
+            <span className="engine-live" /> OVITO
+          </button>
+        )}
         <button role="tab" aria-selected={mode === 'interactive'} aria-label={t('viewer.interactive')} onClick={() => setMode('interactive')} type="button">
-          <Rotate3D size={14} /> Interactive 3D
+          <Rotate3D size={14} /> {t('viewer.interactive')}
         </button>
       </div>
 
@@ -59,7 +66,7 @@ export function CrystalViewer({ materialId, structure }: CrystalViewerProps) {
               <img
                 key={renderUrl}
                 src={renderUrl}
-                alt={`${t('viewer.ovitoAlt')} ${structure.formula}`}
+                alt={`${t('viewer.ovitoAlt')} ${formulaText(structure.formula)}`}
                 onLoad={() => setRenderLoaded(true)}
                 onError={() => setRenderFailed(true)}
               />
@@ -77,22 +84,30 @@ export function CrystalViewer({ materialId, structure }: CrystalViewerProps) {
         ) : (
           hasWebGL ? (
             <Suspense fallback={<div className="viewer-loading"><i /><span>{t('viewer.sceneLoading')}</span></div>}>
-              <InteractiveCrystal structure={structure} showCell={showCell} representation={representation} />
+              <InteractiveCrystal structure={structure} showCell={showCell} representation={representation}
+                                  view={view} supercell={supercell} />
             </Suspense>
           ) : (
             <div className="viewer-unavailable" role="status">
-              <span>WEBGL OFFLINE</span>
+              <span>{t('viewer.webglOffline')}</span>
               <strong>{t('viewer.webglFailed')}</strong>
               <p>{t('viewer.webglFailedBody')}</p>
             </div>
           )
+        )}
+        {mode === 'interactive' && (
+          <div className="viewer-element-legend" aria-label={t('viewer.elementColors')}>
+            {elementLegend.map((site) => (
+              <span key={site.element}><i style={{ background: mutedElementColor(site.color) }} />{site.element}</span>
+            ))}
+          </div>
         )}
       </div>
 
       <div className="viewer-controls">
         <ControlGroup icon={<Camera size={14} />} label={t('viewer.camera')}>
           {([['isometric', 'viewer.isometric'], ['front', 'viewer.front'], ['top', 'viewer.top']] as const).map(([value, key]) => (
-            <button aria-label={t(key)} data-active={view === value} key={value} onClick={() => updateRender(() => setView(value))} type="button">{t(key).slice(0, 1)}</button>
+            <button aria-label={t(key)} data-active={view === value} key={value} onClick={() => updateRender(() => setView(value))} type="button">{t(key)}</button>
           ))}
         </ControlGroup>
         <ControlGroup icon={<Box size={14} />} label={t('viewer.model')}>
@@ -104,12 +119,17 @@ export function CrystalViewer({ materialId, structure }: CrystalViewerProps) {
         <ControlGroup icon={<Layers3 size={14} />} label={t('viewer.cell')}>
           <select aria-label={t('viewer.supercell')} value={supercell} onChange={(event) => updateRender(() => setSupercell(event.target.value))}>
             <option value="1,1,1">1 × 1 × 1</option>
+            <option value="3,1,3">3 × 1 × 3 · {t('viewer.surface')}</option>
             <option value="2,2,2">2 × 2 × 2</option>
             <option value="3,3,3">3 × 3 × 3</option>
           </select>
         </ControlGroup>
         <label className="viewer-toggle"><input type="checkbox" checked={showCell} onChange={(event) => updateRender(() => setShowCell(event.target.checked))} /><span>{t('viewer.cellEdges')}</span></label>
-        <label className="viewer-quality">{t('viewer.quality')}<select value={quality} onChange={(event) => updateRender(() => setQuality(event.target.value as 'preview' | 'high'))}><option value="preview">PREVIEW</option><option value="high">HIGH</option></select></label>
+        {/* Tachyon's ray-tracing quality. The live WebGL view has no equivalent, and a
+            disabled select frozen on one value reads as broken rather than as inapplicable. */}
+        {mode === 'ovito' && (
+          <label className="viewer-quality">{t('viewer.quality')}<select value={quality} onChange={(event) => updateRender(() => setQuality(event.target.value as 'preview' | 'high'))}><option value="preview">{t('viewer.preview')}</option><option value="high">{t('viewer.high')}</option></select></label>
+        )}
       </div>
     </section>
   )

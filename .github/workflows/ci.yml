@@ -27,16 +27,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # pnpm and Node 22 to match the Dockerfile, so that what CI builds and what
+      # the image builds are the same thing. The version comes from the
+      # packageManager field in frontend/package.json.
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v7
         with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
       - working-directory: frontend
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - working-directory: frontend
-        run: npm test -- --run
+        run: pnpm test --run
       - working-directory: frontend
-        run: npm run typecheck
+        run: pnpm typecheck
       - working-directory: frontend
-        run: npm run build
+        run: pnpm build

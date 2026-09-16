@@ -465,7 +465,8 @@ python -m pip install --upgrade pip
 python -m pip install -r backend/requirements.txt
 
 cd frontend
-npm ci
+corepack enable
+pnpm install --frozen-lockfile
 cd ..
 ```
 
@@ -531,9 +532,9 @@ Run individually:
 ```bash
 PYTHONPATH=backend:. python -m pytest backend/tests -q
 cd frontend
-npm test -- --run
-npm run typecheck
-npm run build
+pnpm test --run
+pnpm typecheck
+pnpm build
 ```
 
 With a real index and OVITO connected, browser acceptance can be run:

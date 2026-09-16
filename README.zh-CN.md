@@ -408,7 +408,8 @@ python -m pip install --upgrade pip
 python -m pip install -r backend/requirements.txt
 
 cd frontend
-npm ci
+corepack enable
+pnpm install --frozen-lockfile
 cd ..
 ```
 
@@ -463,9 +464,9 @@ make build
 ```bash
 PYTHONPATH=backend:. python -m pytest backend/tests -q
 cd frontend
-npm test -- --run
-npm run typecheck
-npm run build
+pnpm test --run
+pnpm typecheck
+pnpm build
 ```
 
 连接真实索引和 OVITO 后，可以执行浏览器验收：

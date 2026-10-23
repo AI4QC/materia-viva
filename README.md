@@ -17,6 +17,7 @@ app_port: 7860
 
 [![CI](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2FMateriaViva-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/MateriaViva)
+[![Open dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2FMateriaViva--Open-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/MateriaViva-Open)
 
 > **Materials discovery should not begin with calling one database API after another and juggling
 > a separate account for each.** MateriaViva delivers a unified, deduplicated, licence-reviewed
@@ -88,7 +89,7 @@ or through OVITO/Tachyon.
 | CIF, JSON, SQL, LMDB and property tables cannot be mixed directly | Structures enter a unified schema; source properties keep their original values, units and provenance |
 | The same structure repeats across databases, and trajectory frames inflate material counts | Only unique periodic structure endpoints are accepted, deduplicated by structural fingerprint |
 | Experimental structures and computational candidates get mixed together | The two record classes stay separately labelled, filtered and counted |
-| The boundary between commercial and open data is unclear | Licence review precedes publication; restricted data never enters the public package |
+| The boundary between commercial and open data is unclear | Licence review precedes publication; the public version admits only structures an open database holds, and labels every value with its source's licence |
 | After downloading, there is still no convenient way to inspect anything | Periodic-table search, combined filters, interactive 3D and high-quality offline rendering in one interface |
 
 The unified index currently contains:
@@ -136,18 +137,21 @@ provenance, instead of a handful of near-duplicate entries to reconcile by hand.
 | Specialised property libraries | 28 | 1,823,909 | Materiae, CMR, SNUMAT, phonix, Materials Cloud Archive |
 | Porous and framework materials | 12 | 10,218,950 | Boyd–Woo carbon capture, Deem zeolites, hMOF, QMOF |
 
-> ⚠️ **Five sources are withheld from any public release: AFLOW, ELEMENTA, GNoME, ICSD and
-> NOMAD.** They are searchable in an index you build locally, but they are filtered out before
-> any public release — AFLOW's academic terms and the CC BY-NC licences of ELEMENTA and GNoME
-> would make a combined snapshot non-commercial, ICSD data may only be held by someone with
-> their own FIZ Karlsruhe licence, and NOMAD carries no single licence at all: it holds
-> author-deposited calculations whose terms are set per upload, so its values stay local until
-> each can be resolved.
+> ⚠️ **Every source's licence was checked against the provider's own terms (2026-10-19;
+> [`scripts/source_licences.json`](scripts/source_licences.json) keeps the evidence for each).**
+> 37 of the 55 sources are openly licensed. **Only ICSD has to be bought**, and even a licence
+> does not permit redistribution. ELEMENTA and GNoME are CC BY-NC 4.0 (non-commercial); ICSD,
+> RRUFF, the IZA zeolite database and AMDB do not permit redistribution; AFLOW and eleven smaller
+> sources have no licence that can be relied on (most state none, which grants nothing). NOMAD,
+> once withheld as "per-upload licence", is CC BY 4.0: its terms make every depositor grant that
+> licence.
 >
-> **ICSD contributes no structures at all.** Its adapter is properties-only: it annotates pool
-> materials with chemical and mineral names and calculated densities, and its 73,823 `origin`
-> refs are provenance pointers marking pool materials that correspond to an ICSD collection code
-> — not structures admitted from FIZ Karlsruhe. No FIZ structure is stored or published here.
+> **ICSD structures are in the private full index, not in the public one.** The original
+> experimental pool already held 73,823 ICSD CIFs, and ICSD also annotates pool materials with
+> chemical and mineral names and calculated densities. The public version keeps an ICSD-origin
+> structure only when an open database holds the same structure (14,629 of them, flagged
+> `origin_open = false`). ICSD's names and densities for structures in the public version are
+> published with them (91,995 values, `licence_class = restricted`).
 
 <details>
 <summary><b>All 55 databases in detail</b> — what each one contributes, its property rows and its licence</summary>
@@ -159,8 +163,8 @@ provenance, instead of a handful of near-duplicate entries to reconcile by hand.
 | Database | Contributes | Property rows | Licence |
 |---|---|---:|---|
 | [Alexandria](https://alexandria.icams.rub.de/datasets.html) | PBE / PBEsol / SCAN 3D, 2D and 1D crystals: formation and hull energies, indirect and direct gaps, magnetization | 60,588,138 | Alexandria dataset terms |
-| [AFLOW](https://aflow.org/documentation/) ⚠️ | high-throughput formation enthalpies, gaps, total energies, prototype labels, density | 18,464,119 | AFLOW academic non-commercial terms |
-| [NOMAD](https://nomad-lab.eu/prod/v1/gui/search/entries) ⚠️ | 19.4M author-deposited calculations reduced to one value per (material, property, method): band gaps by exchange–correlation family and spin channel, residual forces, VRH / Voigt / Reuss moduli, volume per site; contributed 1,047,208 structures no other source held | 10,204,105 | per-upload licence and NOMAD terms |
+| [AFLOW](https://aflow.org/documentation/) ⚠️ | high-throughput formation enthalpies, gaps, total energies, prototype labels, density | 18,464,119 | no licence stated |
+| [NOMAD](https://nomad-lab.eu/prod/v1/gui/search/entries) | 19.4M author-deposited calculations reduced to one value per (material, property, method): band gaps by exchange–correlation family and spin channel, residual forces, VRH / Voigt / Reuss moduli, volume per site; contributed 1,047,208 structures no other source held | 10,204,105 | CC BY 4.0 (NOMAD terms) |
 | [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) ⚠️ | per-endpoint total energies over the 2,005,836 relaxed endpoints it brought to the base merge; the spin runs add magnetization | 8,023,344 | CC BY-NC 4.0 |
 | [OQMD](https://oqmd.org/download/) | one converged calculation per entry: formation energy, hull distance, gap, magnetization | 6,086,500 | CC BY 4.0 |
 | [GNoME](https://github.com/google-deepmind/materials_discovery/blob/main/DATASET.md) ⚠️ | formation and decomposition energies, gaps, plus an r2SCAN re-computed subset | 4,897,901 | CC BY-NC 4.0 |
@@ -177,7 +181,7 @@ provenance, instead of a handful of near-duplicate entries to reconcile by hand.
 | Database | Contributes | Property rows | Licence |
 |---|---|---:|---|
 | [COD](https://wiki.crystallography.net/howtoobtaincod) | as-published experimental CIFs with chemical and mineral names and the temperature and pressure of the measurement | 354,350 | CC0 |
-| [ICSD](https://icsd.products.fiz-karlsruhe.de/) ⚠️ | chemical and mineral names and calculated densities, annotated onto pool materials; properties only, no structures | 257,558 | FIZ Karlsruhe ICSD licence |
+| [ICSD](https://icsd.products.fiz-karlsruhe.de/) ⚠️ | 73,823 experimental structures in the original pool; chemical and mineral names and calculated densities annotated onto pool materials | 257,558 | FIZ Karlsruhe ICSD licence |
 
 #### Specialised property libraries — 28 sources, 1,823,909 property rows
 
@@ -257,8 +261,8 @@ Deduplication and source-priority rules are in section 7 of
 [`docs/dataset-acquisition.md`](docs/dataset-acquisition.md); what each source contributes and how
 it matches onto the pool is in section 2 of
 [`docs/property-integration.md`](docs/property-integration.md). Licence-restricted sources such as
-ICSD follow the copyright and redistribution boundary below: usable locally for unified search,
-while protected original files and fields are not published with the snapshot.
+ICSD follow the copyright and redistribution boundary below: their structures stay in the private
+full version, and the public version admits a structure only when an open database holds it.
 
 [![Play the MateriaViva 2K60 demo video](demo/MateriaViva_demo_preview.gif)](demo/MateriaViva_demo_2K60.mp4)
 
@@ -274,8 +278,9 @@ while protected original files and fields are not published with the snapshot.
   its original ID, version, properties, units, licence and provenance.
 - Raw archives exist for auditing and rebuilding; the site only reads the validated unified index
   rather than mixing source files directly.
-- Data without explicit open redistribution permission never appears in the public Hugging Face
-  release.
+- The public Hugging Face version admits a structure only when a database with an open licence
+  holds it. Every property value and curve published with it names its source database and that
+  database's licence.
 
 ## A self-evolving materials integration database
 
@@ -316,22 +321,58 @@ At the publication layer, MateriaViva removes the pattern where every user separ
 traditional bulk APIs or logs into source accounts. The index is published as a Hugging Face
 dataset with versions, hashes, a source manifest and a licence manifest:
 
-### [Hugging Face Dataset · AI4QC/MateriaViva](https://huggingface.co/datasets/AI4QC/MateriaViva) (private)
+### Two versions on Hugging Face
 
-**This repository is private, and it is not the open-redistribution snapshot.** It carries the
-complete working index, including sources whose terms restrict redistribution — ICSD (FIZ
-Karlsruhe, per-subscriber licence), and the CC BY-NC / academic-terms sources ELEMENTA, GNoME and
-AFLOW. Access is granted per person. A public snapshot would first have to drop those sources;
-every property row records its `source_id`, so that filter is one `WHERE` clause, but it has not
-been applied to what is published here.
+| | [AI4QC/MateriaViva](https://huggingface.co/datasets/AI4QC/MateriaViva) · full | [AI4QC/MateriaViva-Open](https://huggingface.co/datasets/AI4QC/MateriaViva-Open) · open |
+|---|---|---|
+| Access | private, granted per person | public |
+| Structures | all 14,590,485 | 10,903,588 (74.7%): those an open-licence database holds |
+| Property values | all 131,824,881 | 113,459,302 — every value the index holds for those structures |
+| Curves (spectra, DOS, band structures) | all 1,198,897 | 850,417 — likewise |
+| Completion predictions | 729,661,476 values, 95 properties | 521,365,770 values, the same 95 properties |
+| Format | the site's runtime index (`materials.sqlite` + blobs) | Parquet: `data/`, `properties/`, `curves/`, `predictions/` |
+| Size | ~54 GB | ~14 GB |
+
+**The full version is private because it holds ICSD.** It is the complete working index the site
+serves, including 73,823 ICSD structures and the sources that permit no redistribution or only
+non-commercial use. Share it only with people who hold their own ICSD licence.
+
+**The open version is the full one minus the closed structures.** A structure that only
+restricted, non-commercial or unlicensed databases hold is left out, together with its property
+values and curves; a structure that an open and a closed database both hold stays. A structure
+row carries the most permissive open licence among the databases holding it. **A property value
+or curve carries the licence of the database it came from, which is not always open**: every row
+names its `source`, `licence` and `licence_class`, and `licence_class == "open"` selects the openly
+licensed part. Built by [`scripts/export_open_structures.py`](scripts/export_open_structures.py);
+the licence audit behind it is
+[`DATA_LICENCES_2026-10-19.zh-CN.md`](DATA_LICENCES_2026-10-19.zh-CN.md).
+
+### Completion predictions
+
+No property that needs a calculation of its own covers even one structure in fifty (see
+above). The completion run trains one CGTNet model per property on the index's own values and
+predicts that property for every structure inside the property's applicability gate. **95 of
+the run's 140 properties are finished and published in both versions** as
+`predictions/<task>.parquet` (keyed by `material_pk` in the full version, `material_id` in the
+open one) with a `<task>.json` beside it; the other 45 are training or queued and will be
+appended as they finish.
+
+- **These are model predictions, not measurements.** Each `<task>.json` records how the
+  checkpoint was chosen — on a chemical-system-disjoint holdout, so its reported accuracy is an
+  upper bound — which structures the gate admitted and why, and the warnings that travel with the
+  numbers.
+- `has_imaginary_phonon__gga` is a 0/1 indicator that was fitted as a regression: its values are
+  scores, not probabilities, and 7.7% fall outside [0, 1]. The ranking is sound (holdout AUC 0.85).
+- Resumed inference runs had written some structures twice; the packaging keeps the first copy
+  (the copies differ by floating-point noise) and records the count in `packaging`.
 
 **Code lives on GitHub, data lives on Hugging Face.** The GitHub repository holds only code, data
 schemas, the source catalog, documentation, tests and demo assets — no database files, unified
-index, render cache or partial downloads. Two index variants are published:
+index, render cache or partial downloads. The full version carries two index variants:
 
 | Variant | Size | What it is for |
 |---|---:|---|
-| `index/` | ~47 GB | the full index, what the site serves |
+| `index/` | ~50 GB | the full index, what the site serves |
 | `slice/` | ~112 MB | developing the web UI without the full download |
 
 The slice is **not** a random sample, on two counts. A greedy set cover runs first, so every
@@ -352,17 +393,18 @@ three materials have all ten. See [`scripts/export_slice.py`](scripts/export_sli
 MateriaViva's own code is released under [CC BY-NC 4.0](LICENSE) and permits non-commercial use
 only. The integrated data carries the terms of its sources, which are stricter.
 
-- Data that clearly permits redistribution — CC0, CC BY, CC BY-SA, CC BY-NC — may enter the public
-  snapshot while keeping its original authors, versions, licences and citation requirements.
-- Commercial licences, paid subscriptions, institutional licences, account-term restrictions and
-  databases without explicit redistribution permission are not open-sourced.
-- For restricted sources only the database name, official link, public metadata, source ID and
-  licence status are published, never the protected structures, property fields or raw files.
+- A structure enters the public version only when a database with an open licence — public
+  domain, CC0, CC BY, CC BY-SA and the like — holds it. Each structure row keeps the databases and
+  native ids it is credited to (`open_sources`, `open_source_ids`).
+- Structures held only by subscription, non-commercial (CC BY-NC) or unlicensed databases are not
+  published; they stay in the private full version.
+- The property values and curves of a published structure go with it whatever their source, each
+  labelled with that source's licence. Values from non-open sources stay under their sources'
+  terms; filter on `licence_class == "open"` when you need openly licensed values only.
 - A unified format does not change who owns the rights to the original data. Any future automatic
   discovery flow must clear the same licence gate first.
-- The snapshot includes CC BY-NC 4.0 sources such as ELEMENTA, so the integrated result must not
-  be used commercially. ShareAlike sources require a separate compatibility check against the NC
-  terms before they can enter the public snapshot.
+- The full version includes CC BY-NC 4.0 sources such as ELEMENTA and GNoME, so it must not be used
+  commercially. CC BY-SA rows of the public version must stay CC BY-SA in derived datasets.
 
 ## Current coverage
 
@@ -395,10 +437,25 @@ pip install -r backend/requirements.txt
 python scripts/fetch_index.py slice
 python scripts/serve.py --runtime data/slice
 
-# or the full index (~47 GB; the download needs roughly double that free,
+# or the full index (~50 GB; the download needs roughly double that free,
 # because the hub cache holds a second copy until the files are linked)
 python scripts/fetch_index.py full
 python scripts/serve.py --runtime data/index
+```
+
+The slice and the full index come from the private full version, so both need access to it. The
+open version needs none; it is plain Parquet rather than a runtime index for the site:
+
+```bash
+hf download AI4QC/MateriaViva-Open --repo-type dataset --local-dir data/open
+# or a part of it, e.g. one property and its predictions
+hf download AI4QC/MateriaViva-Open --repo-type dataset --local-dir data/open \
+    --include "properties/bulk_modulus_vrh.parquet" "predictions/bulk_modulus_vrh__gga.*"
+```
+
+```python
+from datasets import load_dataset
+structures = load_dataset("AI4QC/MateriaViva-Open", split="train")   # the data/ shards
 ```
 
 Then open <http://127.0.0.1:8000>. `--runtime` takes any directory holding `materials.sqlite`,

@@ -8,6 +8,7 @@
 
 [![CI](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2FMateriaViva-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/MateriaViva)
+[![Open dataset](https://img.shields.io/badge/Hugging%20Face-AI4QC%2FMateriaViva--Open-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/datasets/AI4QC/MateriaViva-Open)
 
 > **材料发现不该从逐个调用数据库 API 和维护多套账户开始。** MateriaViva 用一个 Hugging Face
 > 下载入口交付经过统一、去重和许可审查的数据快照。
@@ -65,7 +66,7 @@ OVITO/Tachyon 检查结构。
 | CIF、JSON、SQL、LMDB 和属性表无法直接混用 | 结构进入统一模式，来源性质保留原值、单位和 provenance |
 | 同一结构跨库重复，轨迹帧又会放大材料数量 | 只接收独特周期结构端点，统一做结构指纹去重 |
 | 实验结构和计算候选容易混在一起 | 两类记录始终分开标注、筛选和统计 |
-| 商业数据与开放数据的边界不清楚 | 许可审查先于发布；受限数据不进入公开包 |
+| 商业数据与开放数据的边界不清楚 | 许可审查先于发布；公开版只收录开源库持有的结构，每个数值都标注来源许可 |
 | 下载后仍缺少直观检查工具 | 周期表检索、组合筛选、交互式 3D 和高质量离线渲染在同一界面完成 |
 
 当前统一索引包含：
@@ -106,15 +107,17 @@ OVITO/Tachyon 检查结构。
 | 专题性质库 | 28 | 1,823,909 | Materiae、CMR、SNUMAT、phonix、Materials Cloud 归档 |
 | 多孔 / 框架材料 | 12 | 10,218,950 | Boyd–Woo 碳捕集 MOF、Deem 沸石、hMOF、QMOF |
 
-> ⚠️ **五个来源不进入任何对外发布：AFLOW、ELEMENTA、GNoME、ICSD 和 NOMAD。** 它们可以在本机
-> 自行构建的索引里检索，但在任何对外发布前都会被过滤掉——AFLOW 的学术条款以及 ELEMENTA、
-> GNoME 的 CC BY-NC 许可会让合并后的快照变成非商业用途，ICSD 数据只能由自行持有 FIZ
-> Karlsruhe 授权的人使用，而 NOMAD 根本没有统一许可：它收录的是作者自行上传的计算，条款
-> 逐个上传件而定，所以在逐条厘清之前，它的数值只留在本地。
+> ⚠️ **每个来源的许可都按提供方自己的条款核对过（2026-10-19；证据逐条记在
+> [`scripts/source_licences.json`](scripts/source_licences.json)）。** 55 个来源里 37 个是开放许可。
+> **只有 ICSD 需要购买**，而且买了也不允许再分发。ELEMENTA 和 GNoME 是 CC BY-NC 4.0（非商业）；
+> ICSD、RRUFF、IZA 沸石库和 AMDB 不允许再分发；AFLOW 和另外 11 个小来源没有可依赖的许可（大多
+> 根本没写，等于没有授予任何权利）。NOMAD 以前按“逐上传件许可”扣下，实际是 CC BY 4.0：它的条款要求每个上传者
+> 授予这一许可。
 >
-> **ICSD 完全没有贡献结构。** 它的适配器是 properties-only：只为池内材料补充化学名、矿物名和
-> 计算密度；它的 73,823 条 `origin` 引用是 provenance 指针，标记那些对应某个 ICSD 收录号的池内
-> 材料，而不是从 FIZ Karlsruhe 收进来的结构。这里既不存放也不发布任何 FIZ 结构。
+> **ICSD 结构在私有完整版里，不在公开版里。** 原始实验结构池本来就有 73,823 个 ICSD CIF，
+> ICSD 还为池内材料补充化学名、矿物名和计算密度。公开版只在某个开源库持有同一结构时才保留
+> ICSD 来源的结构（共 14,629 个，标记为 `origin_open = false`）。公开版结构对应的 ICSD 名称和
+> 密度随结构一起发布（91,995 个值，`licence_class = restricted`）。
 
 <details>
 <summary><b>全部 55 个数据库明细</b>——各自贡献什么、性质行数与许可</summary>
@@ -126,9 +129,9 @@ OVITO/Tachyon 检查结构。
 | 数据库 | 贡献内容 | 性质行数 | 许可 |
 |---|---|---:|---|
 | [Alexandria](https://alexandria.icams.rub.de/datasets.html) | PBE / PBEsol / SCAN 的三维、二维、一维晶体：形成能与凸包能、间接与直接带隙、磁化强度 | 60,588,138 | Alexandria dataset terms |
-| [AFLOW](https://aflow.org/documentation/) ⚠️ | 高通量形成焓、带隙、总能、原型标签、密度 | 18,464,119 | AFLOW academic non-commercial terms |
+| [AFLOW](https://aflow.org/documentation/) ⚠️ | 高通量形成焓、带隙、总能、原型标签、密度 | 18,464,119 | 未声明许可 |
 | [ELEMENTA / ELEMENTA Spin](https://huggingface.co/datasets/kairosmaterial/ELEMENTA) ⚠️ | 它带入基础合并的 2,005,836 个弛豫终态端点上的逐端点总能，自旋弛豫另附磁化强度 | 8,023,344 | CC BY-NC 4.0 |
-| [NOMAD](https://nomad-lab.eu/prod/v1/gui/search/entries) ⚠️ | 1,940 万条作者上传的计算，归约为每个 (材料, 性质, 方法) 一个值：按交换关联泛函族与自旋通道分列的带隙、残余力、VRH / Voigt / Reuss 模量、每格点体积；另贡献了 1,047,208 个其他来源都没有的结构 | 10,204,105 | 逐上传件许可与 NOMAD 条款 |
+| [NOMAD](https://nomad-lab.eu/prod/v1/gui/search/entries) | 1,940 万条作者上传的计算，归约为每个 (材料, 性质, 方法) 一个值：按交换关联泛函族与自旋通道分列的带隙、残余力、VRH / Voigt / Reuss 模量、每格点体积；另贡献了 1,047,208 个其他来源都没有的结构 | 10,204,105 | CC BY 4.0（NOMAD 条款） |
 | [OQMD](https://oqmd.org/download/) | 每条目一个收敛终态计算：形成能、凸包距离、带隙、磁化 | 6,086,500 | CC BY 4.0 |
 | [GNoME](https://github.com/google-deepmind/materials_discovery/blob/main/DATASET.md) ⚠️ | 形成能与分解能、带隙，另含 r2SCAN 复算子集 | 4,897,901 | CC BY-NC 4.0 |
 | [Materials Project](https://docs.materialsproject.org/downloading-data/how-do-i-download-the-materials-project-database) | PBE(+U) 带隙、能量与稳定性、VRH 模量、介电 / 压电常数、嵌入式电极电压与容量、表面能与晶界能、氧化态 | 4,291,860 | Materials Project terms |
@@ -144,7 +147,7 @@ OVITO/Tachyon 检查结构。
 | 数据库 | 贡献内容 | 性质行数 | 许可 |
 |---|---|---:|---|
 | [COD](https://wiki.crystallography.net/howtoobtaincod) | 原样发表的实验 CIF，附化学名 / 矿物名以及测量时的温度与压力 | 354,350 | CC0 |
-| [ICSD](https://icsd.products.fiz-karlsruhe.de/) ⚠️ | 为池内材料补充化学名与矿物名、计算密度；仅性质，不提供结构 | 257,558 | FIZ Karlsruhe ICSD licence |
+| [ICSD](https://icsd.products.fiz-karlsruhe.de/) ⚠️ | 原始实验结构池中的 73,823 个结构；为池内材料补充化学名与矿物名、计算密度 | 257,558 | FIZ Karlsruhe ICSD licence |
 
 #### 专题性质库——28 个来源，1,823,909 条性质行
 
@@ -224,8 +227,8 @@ OVITO/Tachyon 检查结构。
 [`docs/dataset-acquisition.zh-CN.md`](docs/dataset-acquisition.zh-CN.md) 第 7 节；每个来源贡献
 什么、如何挂接到结构池见
 [`docs/property-integration.zh-CN.md`](docs/property-integration.zh-CN.md) 第 2 节。ICSD 等受
-许可限制的来源按“版权和再分发边界”处理：本机可用于统一检索，受保护的原始文件和字段不随公开
-快照发布。
+许可限制的来源按“版权和再分发边界”处理：它们的结构只留在私有完整版里，公开版只收录有开源库
+持有的结构。
 
 [![播放 MateriaViva 2K60 演示视频](demo/MateriaViva_demo_preview.gif)](demo/MateriaViva_demo_2K60.mp4)
 
@@ -239,7 +242,8 @@ OVITO/Tachyon 检查结构。
 - 去重不等于丢数据。结构合并后仍保留每个来源的原始 ID、版本、性质、单位、许可和
   provenance。
 - 原始归档用于审计和重建，网站只读取经过校验的统一索引，不直接混读来源文件。
-- 没有明确开放再分发授权的数据不会出现在 Hugging Face 公开版本中。
+- Hugging Face 公开版只收录有开放许可数据库持有的结构；随结构一起发布的每条性质值和曲线都
+  注明来源数据库及其许可。
 
 ## 自我进化的材料整合数据库
 
@@ -276,19 +280,47 @@ MateriaViva 的长期目标不是维护一次性的静态合集，而是持续�
 在发布层，MateriaViva 取消“由每个用户分别调用传统数据库批量 API 或登录来源账户”的使用
 方式。索引整理为带版本、哈希、来源清单和许可清单的数据集，发布在：
 
-### [Hugging Face Dataset · AI4QC/MateriaViva](https://huggingface.co/datasets/AI4QC/MateriaViva)（私有）
+### Hugging Face 上的两个版本
 
-**该仓库是私有的，不是开放再分发快照。** 它包含完整的工作索引，其中含有再分发受限的来源：
-ICSD（FIZ Karlsruhe 按订阅者授权）、以及 CC BY-NC / 学术条款的 ELEMENTA、GNoME 和 AFLOW。
-访问按人授予。要做公开快照，必须先剔除这些来源——每一条性质行都记录了 `source_id`，
-所以那个过滤只是一个 `WHERE` 子句，但**目前发布的内容尚未应用它**。
+| | [AI4QC/MateriaViva](https://huggingface.co/datasets/AI4QC/MateriaViva) · 完整版 | [AI4QC/MateriaViva-Open](https://huggingface.co/datasets/AI4QC/MateriaViva-Open) · 开源版 |
+|---|---|---|
+| 访问 | 私有，按人授权 | 公开 |
+| 结构 | 全部 14,590,485 个 | 10,903,588 个（74.7%）：有开放许可数据库持有的结构 |
+| 性质值 | 全部 131,824,881 条 | 113,459,302 条——这些结构在索引里的全部性质值 |
+| 曲线（谱、态密度、能带） | 全部 1,198,897 条 | 850,417 条——同上 |
+| 补全预测 | 729,661,476 个值，95 个性质 | 521,365,770 个值，同样 95 个性质 |
+| 格式 | 网站直接使用的运行时索引（`materials.sqlite` + blob） | Parquet：`data/`、`properties/`、`curves/`、`predictions/` |
+| 体积 | 约 54 GB | 约 14 GB |
+
+**完整版是私有的，因为它含 ICSD。** 它就是网站使用的完整工作索引，含 73,823 个 ICSD 结构，
+以及不允许再分发或只允许非商业使用的来源。只能给自己持有 ICSD 授权的人。
+
+**开源版 = 完整版去掉闭源结构。** 只有受限、非商业或无许可数据库持有的结构不收录，它们的
+性质值和曲线也随之不收录；开源库和闭源库都持有的结构保留。每个结构行标注持有它的开源库中
+最宽松的许可。**性质值和曲线的许可是它所来自的数据库的许可，不一定开放**：每一行都写明
+`source`、`licence` 和 `licence_class`，筛选 `licence_class == "open"` 即得开放许可的部分。
+由 [`scripts/export_open_structures.py`](scripts/export_open_structures.py) 构建；许可审计见
+[`DATA_LICENCES_2026-10-19.zh-CN.md`](DATA_LICENCES_2026-10-19.zh-CN.md)。
+
+### 性质补全预测
+
+需要单独计算的性质，没有一个覆盖到池中五十分之一的结构（见上文）。补全运行为每个性质训练一个
+CGTNet 模型，用的是索引自己的数值，再对该性质适用域门控内的每个结构做预测。**本轮 140 个性质中
+已完成 95 个，两个版本都已发布**：`predictions/<task>.parquet`（完整版按 `material_pk`，开源版
+按 `material_id` 对应），旁边是 `<task>.json`；其余 45 个仍在训练或排队，完成后追加。
+
+- **这些是模型预测，不是测量值。** 每个 `<task>.json` 记录 checkpoint 如何选出（在化学体系不相交的
+  holdout 上选，所以报告的精度是上界）、门控收录了哪些结构及原因，以及随数值一起的警告。
+- `has_imaginary_phonon__gga` 是 0/1 指示量，但按回归拟合：数值是打分不是概率，7.7% 落在 [0, 1]
+  之外。排序是可用的（holdout AUC 0.85）。
+- 续跑推理曾把部分结构写了两遍；打包时保留第一份（两份只差浮点噪声），条数记在 `packaging` 里。
 
 **代码在 GitHub，数据在 Hugging Face。** GitHub 仓库只保存代码、数据模式、来源目录、文档、
-测试和演示资产，不包含数据库文件、统一索引、渲染缓存或未完成下载。数据集发布两个变体：
+测试和演示资产，不包含数据库文件、统一索引、渲染缓存或未完成下载。完整版含两个索引变体：
 
 | 变体 | 体积 | 用途 |
 |---|---:|---|
-| `index/` | 约 47 GB | 完整索引，线上服务使用 |
+| `index/` | 约 50 GB | 完整索引，线上服务使用 |
 | `slice/` | 约 112 MB | 不下载完整数据也能开发网页前端 |
 
 切片**在两个意义上都不是随机抽样**。先跑贪心集合覆盖，保证每个数据源、每个性质名、每种曲线
@@ -306,14 +338,14 @@ ICSD（FIZ Karlsruhe 按订阅者授权）、以及 CC BY-NC / 学术条款的 E
 MateriaViva 自身的代码按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商业使用。整合进来的数据
 沿用各自来源的条款，且更严格。
 
-- CC0、CC BY、CC BY-SA、CC BY-NC 等明确允许再分发的数据可以进入公开快照，同时保留原作者、
-  版本、许可证和引用要求。
-- 商业许可、付费订阅、机构许可、账户条款限制以及没有明确再分发授权的数据库不予开源。
-- 对受限来源只发布数据库名称、官方链接、公开元数据、来源 ID 和许可状态，不发布受保护的
-  结构、性质字段或原始文件。
+- 结构只有在某个开放许可数据库（公有领域、CC0、CC BY、CC BY-SA 等）持有时才进入公开版。每个
+  结构行保留它应署名的数据库和原始 ID（`open_sources`、`open_source_ids`）。
+- 只有订阅制、非商业（CC BY-NC）或无许可数据库持有的结构不公开，只留在私有完整版里。
+- 已公开结构的性质值和曲线不论来源都随结构一起发布，每条都标注来源库的许可。来自非开放来源的
+  值仍受其来源条款约束；只需要开放许可的值时，筛选 `licence_class == "open"`。
 - 统一格式不会改变原数据的权利归属。未来的自动发现流程同样必须先通过许可门禁。
-- 快照包含 CC BY-NC 4.0 的来源（如 ELEMENTA），因此整合结果不得用于商业用途；ShareAlike
-  来源如需接入，须单独确认其许可与 NC 条款的兼容性后再决定是否进入公开快照。
+- 完整版包含 CC BY-NC 4.0 的来源（如 ELEMENTA、GNoME），因此不得用于商业用途。公开版中
+  CC BY-SA 的行在衍生数据集中必须保持 CC BY-SA。
 
 ## 当前覆盖范围
 
@@ -342,10 +374,25 @@ pip install -r backend/requirements.txt
 python scripts/fetch_index.py slice
 python scripts/serve.py --runtime data/slice
 
-# 或完整索引（约 47 GB；下载期间需要约两倍空闲空间，
+# 或完整索引（约 50 GB；下载期间需要约两倍空闲空间，
 # 因为文件链接到位之前 hub 缓存里还有一份）
 python scripts/fetch_index.py full
 python scripts/serve.py --runtime data/index
+```
+
+切片和完整索引都来自私有的完整版，需要有访问权限。开源版不需要权限；它是普通 Parquet，
+不是给网站用的运行时索引：
+
+```bash
+hf download AI4QC/MateriaViva-Open --repo-type dataset --local-dir data/open
+# 或只取一部分，例如一个性质和它的预测
+hf download AI4QC/MateriaViva-Open --repo-type dataset --local-dir data/open \
+    --include "properties/bulk_modulus_vrh.parquet" "predictions/bulk_modulus_vrh__gga.*"
+```
+
+```python
+from datasets import load_dataset
+structures = load_dataset("AI4QC/MateriaViva-Open", split="train")   # data/ 下的分片
 ```
 
 然后打开 <http://127.0.0.1:8000>。`--runtime` 接受任何含有 `materials.sqlite`、

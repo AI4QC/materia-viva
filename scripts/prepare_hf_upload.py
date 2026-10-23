@@ -107,11 +107,12 @@ def index_facts() -> dict:
     facts["property_rows"] = int(meta.get("property_row_count", 0))
     facts["experimental"] = int(meta.get("experimental_count", 0))
     facts["candidate"] = int(meta.get("candidate_count", 0))
-    facts["licenses"] = sorted({
-        row[0] for row in db.execute(
-            "SELECT DISTINCT license FROM source_defs WHERE license IS NOT NULL"
-        )
-    })
+    # source_defs.license holds the acquisition-time placeholders ("Materials
+    # Project terms"); the checked licences live in scripts/source_licences.json.
+    checked = json.loads(
+        (PROJECT_ROOT / "scripts" / "source_licences.json").read_text())["sources"]
+    keys = [row[0] for row in db.execute("SELECT key FROM source_defs")]
+    facts["licenses"] = sorted({checked[k]["licence"] for k in keys if k in checked})
     # One grouped scan each. A correlated subquery per source re-scans
     # material_properties' 121M rows 54 times over -- roughly an hour, for a
     # manifest -- and each source ends up read from a different snapshot.

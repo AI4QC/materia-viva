@@ -1,0 +1,576 @@
+{
+ "_about": "Structure-data licence of every database that can hold a MateriaViva structure, checked against each provider's own pages on 2026-10-19. class: open = redistribution and commercial use permitted (family: public-domain | attribution | share-alike); noncommercial = redistribution only under NC terms; restricted = redistribution not permitted; unclear = no licence stated, so nothing is granted; unknown = origin not recorded. purchase: true when the provider sells access. Read by scripts/export_open_structures.py; the human-readable summary is DATA_LICENCES_2026-10-19.zh-CN.md.",
+ "sources": {
+  "cod": {
+   "name": "Crystallography Open Database",
+   "licence": "CC0-1.0",
+   "class": "open",
+   "family": "public-domain",
+   "purchase": false,
+   "url": "https://www.crystallography.net/cod/",
+   "evidence": "All data in the COD and the database itself are dedicated to the public domain and licensed under the CC0 License.",
+   "upstream": "COD 9xxxxxx ids are AMCSD structures supplied by AMCSD, so they are CC0 here."
+  },
+  "tcod": {
+   "name": "Theoretical Crystallography Open Database",
+   "licence": "CC0-1.0",
+   "class": "open",
+   "family": "public-domain",
+   "purchase": false,
+   "url": "https://www.crystallography.net/tcod/",
+   "evidence": "All data in the TCOD and the database itself are dedicated to the public domain and licensed under the CC0 License.",
+   "upstream": ""
+  },
+  "pcod": {
+   "name": "Predicted Crystallography Open Database",
+   "licence": "public-domain",
+   "class": "open",
+   "family": "public-domain",
+   "purchase": false,
+   "url": "https://www.crystallography.net/pcod/",
+   "evidence": "All data on this site have been placed in the public domain by the contributors",
+   "upstream": ""
+  },
+  "hex-high-pressure": {
+   "name": "HEX high-pressure elemental crystal structures",
+   "licence": "CC0-1.0",
+   "class": "open",
+   "family": "public-domain",
+   "purchase": false,
+   "url": "https://doi.org/10.6084/m9.figshare.25403968.v1",
+   "evidence": "figshare licence field: CC0",
+   "upstream": ""
+  },
+  "materials-project": {
+   "name": "Materials Project",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://legacy.materialsproject.org/terms",
+   "evidence": "By downloading Content from Materials Project, User agrees to accept the Creative Commons Attribution 4.0 License",
+   "upstream": "Many entries start from ICSD; MP publishes its own DFT-relaxed geometry. Records tagged BY-NC (GNoME r2SCAN subset) are non-commercial; all 154,377 docs in our 2026-07-26 dump are BY-C."
+  },
+  "oqmd": {
+   "name": "Open Quantum Materials Database",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://oqmd.org/download/",
+   "evidence": "The data in OQMD is licensed under CC-BY 4.0",
+   "upstream": "ICSD-derived entries are re-relaxed; the SQL dump's unrelaxed inputs are ICSD coordinates and were not used."
+  },
+  "alexandria": {
+   "name": "Alexandria Materials Database",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://alexandria.icams.rub.de/about.html",
+   "evidence": "Alexandria is available for use under the terms of the Creative Commons Attribution 4.0 License.",
+   "upstream": ""
+  },
+  "lemat-bulk": {
+   "name": "LeMat-Bulk (Entalpic; MP + OQMD + Alexandria)",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://huggingface.co/datasets/LeMaterial/LeMat-Bulk",
+   "evidence": "This database is licensed by Creative Commons Attribution 4.0 License.",
+   "upstream": "Pool origin, not a source_defs row: 4.27M candidates entered through LeMat-Bulk."
+  },
+  "nomad": {
+   "name": "NOMAD Repository and Archive",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://nomad-lab.eu/nomad-lab/terms.html",
+   "evidence": "By uploading Content to NOMAD Submitter agrees to and grants third parties the right to use the open access Content on the basis of the Creative Commons Attribution 4.0 License.",
+   "upstream": "Licence is fixed by NOMAD's terms (upload-level field, default CC BY 4.0, admin-only). Our 2026-09-05 export did not record it per entry; an API spot check of 2,000 public entries gave 1,995 'CC BY 4.0' and 5 null. Submitters warrant their rights to inputs."
+  },
+  "matbench-discovery": {
+   "name": "Matbench Discovery / WBM",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://figshare.com/articles/dataset/Matbench_Discovery_v1_0_0/22715158",
+   "evidence": "figshare licence field: CC BY 4.0",
+   "upstream": ""
+  },
+  "jarvis-dft": {
+   "name": "NIST JARVIS-DFT 3D",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://doi.org/10.6084/m9.figshare.6815699",
+   "evidence": "figshare licence field: CC BY 4.0",
+   "upstream": ""
+  },
+  "jarvis-qetb": {
+   "name": "NIST JARVIS-QETB tight-binding dataset",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://doi.org/10.6084/m9.figshare.15127788",
+   "evidence": "figshare licence field: CC BY 4.0",
+   "upstream": ""
+  },
+  "jarvis-specialized-structures": {
+   "name": "NIST JARVIS specialized structure datasets",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://doi.org/10.6084/m9.figshare.6815705",
+   "evidence": "figshare licence field: CC BY 4.0 (all records used)",
+   "upstream": "Some are JARVIS repacks of third-party data (mxene275 from C2DB, CC BY-SA)."
+  },
+  "carolina": {
+   "name": "Carolina Materials Database",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "http://www.carolinamatdb.org/terms/",
+   "evidence": "By using the data from Carolina Materials Database, you have to agree to accept the Creative Commons Attribution 4.0 International License.",
+   "upstream": ""
+  },
+  "snumat": {
+   "name": "SNUMAT hybrid-functional database",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://figshare.com/articles/dataset/21713885",
+   "evidence": "figshare licence field: CC BY 4.0",
+   "upstream": "ICSD compounds, distributed as SNUMAT's own relaxed geometry."
+  },
+  "csllm-negatives": {
+   "name": "CSLLM non-synthesizable screening set",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://doi.org/10.6084/m9.figshare.29086931",
+   "evidence": "figshare licence field: CC BY 4.0",
+   "upstream": "Our own deposit."
+  },
+  "3dsc": {
+   "name": "3DSC superconductors",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://github.com/aimat-lab/3DSC/blob/main/LICENSE.md",
+   "evidence": "The 3DSC_MP database is subject to the Creative Commons Attribution 4.0 License",
+   "upstream": "Covers 3DSC_MP only; 3DSC_ICSD is not distributed."
+  },
+  "aflow-prototypes": {
+   "name": "AFLOW Encyclopedia of Crystallographic Prototypes",
+   "licence": "Apache-2.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://github.com/aflow-org/aflow_prototype_encyclopedia",
+   "evidence": "Licensed under the Apache License, Version 2.0",
+   "upstream": ""
+  },
+  "2dmatpedia": {
+   "name": "2DMatPedia",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://doi.org/10.6084/m9.figshare.7699910.v3",
+   "evidence": "figshare licence field: CC BY 4.0",
+   "upstream": "Top-down entries exfoliated from MP."
+  },
+  "mc2d": {
+   "name": "Materials Cloud MC2D",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://archive.materialscloud.org/records/17gf6-84915",
+   "evidence": "Materials Cloud Archive record licence: CC BY 4.0",
+   "upstream": "Monolayers extracted from ICSD/COD/MPDS parents, published by Materials Cloud under CC BY 4.0."
+  },
+  "mc3d": {
+   "name": "Materials Cloud MC3D",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://archive.materialscloud.org/records/szjaf-cfv74",
+   "evidence": "Materials Cloud Archive record licence: CC BY 4.0",
+   "upstream": "Relaxed structures only; inputs from COD/ICSD/MPDS."
+  },
+  "materials-cloud-archive-static": {
+   "name": "Materials Cloud Archive static datasets (zt-z4, 1z-pd, ed-g2, m0-zg)",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://api.datacite.org/dois/10.24435/materialscloud:m0-zg",
+   "evidence": "rights: Creative Commons Attribution 4.0 International (all four records)",
+   "upstream": "m0-zg is ICSD-derived but published under CC BY 4.0."
+  },
+  "phonondb": {
+   "name": "NIMS MDR phonon database (phonondb)",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://mdr.nims.go.jp/collections/d7aab932-8512-4b9a-b93d-b61f6e5e7019?locale=en",
+   "evidence": "Rights: Creative Commons BY Attribution 4.0 International",
+   "upstream": ""
+  },
+  "hmof": {
+   "name": "Hypothetical MOF database (JARVIS figshare re-upload)",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://figshare.com/articles/dataset/15127758",
+   "evidence": "figshare licence field: CC BY 4.0",
+   "upstream": "Licence set by the JARVIS re-uploader, not by the original hMOF authors (whose MOFX-DB release states none). Hypothetical structures, no restricted upstream."
+  },
+  "mof-carbon-capture": {
+   "name": "Hypothetical MOFs for wet flue-gas carbon capture",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://archive.materialscloud.org/record/2018.0016/v3",
+   "evidence": "Materials Cloud Archive record licence: CC BY 4.0",
+   "upstream": ""
+  },
+  "core-mof": {
+   "name": "CoRE MOF 2019 (public ASR/FSR)",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://zenodo.org/records/3677685",
+   "evidence": "Zenodo licence: cc-by-4.0",
+   "upstream": "CSD-derived; the public archives hold only substantially modified or non-CSD structures."
+  },
+  "qmof": {
+   "name": "Quantum MOF Database",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://github.com/Andrew-S-Rosen/QMOF",
+   "evidence": "The data underlying the QMOF Database is made publicly available under a CC BY 4.0 license.",
+   "upstream": "CSD-sourced entries are released only as DFT-optimised structures."
+  },
+  "fair-mofs": {
+   "name": "FAIR-MOFs",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://zenodo.org/records/13254307",
+   "evidence": "Zenodo licence: cc-by-4.0",
+   "upstream": "RISK: the 45,699 experimental CIFs are curated CSD entries named by refcode, published under CC BY without a stated CCDC permission."
+  },
+  "deem-zeolites": {
+   "name": "Deem PCOD hypothetical zeolites v2.1",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://zenodo.org/records/8035241",
+   "evidence": "Zenodo licence: cc-by-4.0 (record by M. W. Deem)",
+   "upstream": ""
+  },
+  "open-framework-aluminophosphate": {
+   "name": "Open-framework aluminophosphate database",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://figshare.com/articles/dataset/Database_of_Open-Framework_Aluminophosphate_Structures/7822574",
+   "evidence": "figshare licence field: CC BY 4.0",
+   "upstream": ""
+  },
+  "curated-cof": {
+   "name": "CURATED-COFs",
+   "licence": "MIT",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://github.com/danieleongari/CURATED-COFs/blob/master/LICENSE",
+   "evidence": "Permission is hereby granted, free of charge, to any person obtaining a copy ... without restriction",
+   "upstream": "Registry URL (lipelopesoliveira/curatedCOFs) is dead; our copy is danieleongari/CURATED-COFs."
+  },
+  "novomag": {
+   "name": "NovoMag magnetic materials database",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://zenodo.org/records/17399362",
+   "evidence": "Zenodo licence: cc-by-4.0",
+   "upstream": ""
+  },
+  "phonix": {
+   "name": "Phonix anharmonic phonon database",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://phonix-db.org/",
+   "evidence": "This database is licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).",
+   "upstream": ""
+  },
+  "superband": {
+   "name": "SuperBand",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://github.com/ljcj007/SuperBand/blob/main/LICENSE.md",
+   "evidence": "The SuperBand database is subject to the Creative Commons Attribution 4.0 License",
+   "upstream": ""
+  },
+  "obelix": {
+   "name": "OBELiX",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://arxiv.org/abs/2502.14234",
+   "evidence": "in agreement with the ICSD, we openly publish a set of 292 CIF files for which a normally distributed random noise ... was added",
+   "upstream": "Holds no pool structure (id citations only)."
+  },
+  "c2db": {
+   "name": "Computational 2D Materials Database",
+   "licence": "CC-BY-SA-4.0",
+   "class": "open",
+   "family": "share-alike",
+   "purchase": false,
+   "url": "https://2dhub.org/",
+   "evidence": "All CMR databases are licensed under a Creative Commons Attribution-ShareAlike 4.0 International License",
+   "upstream": ""
+  },
+  "cmr-static": {
+   "name": "DTU Computational Materials Repository",
+   "licence": "CC-BY-SA-4.0",
+   "class": "open",
+   "family": "share-alike",
+   "purchase": false,
+   "url": "https://cmr.fysik.dtu.dk/",
+   "evidence": "All CMR databases are licensed under a Creative Commons Attribution-ShareAlike 4.0 International License",
+   "upstream": "CMR withholds ICSD coordinates (zeroed); none of the 33,044 CMR-origin structures here has all-zero coordinates."
+  },
+  "bidb": {
+   "name": "2DHub van der Waals Bilayer Database",
+   "licence": "CC-BY-SA-4.0",
+   "class": "open",
+   "family": "share-alike",
+   "purchase": false,
+   "url": "https://2dhub.org/",
+   "evidence": "All CMR databases are licensed under a Creative Commons Attribution-ShareAlike 4.0 International License",
+   "upstream": ""
+  },
+  "gnome": {
+   "name": "GNoME",
+   "licence": "CC-BY-NC-4.0",
+   "class": "noncommercial",
+   "purchase": false,
+   "url": "https://github.com/google-deepmind/materials_discovery#license",
+   "evidence": "available for use under the terms of the Creative Commons Attribution Noncommercial 4.0 International Licence",
+   "upstream": "No commercial licence is offered."
+  },
+  "elementa": {
+   "name": "ELEMENTA and ELEMENTA Spin",
+   "licence": "CC-BY-NC-4.0",
+   "class": "noncommercial",
+   "purchase": false,
+   "url": "https://huggingface.co/datasets/kairosmaterial/ELEMENTA",
+   "evidence": "license: cc-by-nc-4.0",
+   "upstream": "No commercial licence is offered publicly."
+  },
+  "icsd": {
+   "name": "Inorganic Crystal Structure Database",
+   "licence": "proprietary",
+   "class": "restricted",
+   "purchase": true,
+   "url": "https://www.fiz-karlsruhe.de/sites/default/files/ICSD/documents/terms/ICSD_AGB_E_2021.pdf",
+   "evidence": "Information obtained from the database must not be passed on to any third parties or unauthorized users.",
+   "upstream": "Paid annual licence; even licensed, at most 10-20 records may be passed on."
+  },
+  "rruff": {
+   "name": "RRUFF",
+   "licence": "proprietary",
+   "class": "restricted",
+   "purchase": false,
+   "url": "https://web.archive.org/web/20240101143519/https://rruff.info/",
+   "evidence": "Selling, distributing, publishing, circulating, or commercially exploiting the data in this database without the express written permission of the owners of the data is expressly prohibited.",
+   "upstream": "Coordinates are AMCSD structures."
+  },
+  "iza-zeolite": {
+   "name": "IZA Database of Zeolite Structures",
+   "licence": "proprietary",
+   "class": "restricted",
+   "purchase": false,
+   "url": "https://www.iza-structure.org/databases/DatabaseCredits.php",
+   "evidence": "The data are copyright protected, but can be used free of charge for private purposes",
+   "upstream": "Redistribution needs IZA-SC permission."
+  },
+  "amdb": {
+   "name": "Anyterial Altermagnets Database",
+   "licence": "CC-BY-SA-4.0 (single entries only)",
+   "class": "restricted",
+   "purchase": false,
+   "url": "https://altermagnets.anyterial.se/about#legal",
+   "evidence": "Individual database entries, and non-substantial sets of them ... are available under the CC BY-SA 4.0 license.",
+   "upstream": "Holds no pool structure (id citations only)."
+  },
+  "aflow": {
+   "name": "AFLOW",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://web.archive.org/web/20140307150650/http://aflowlib.org/",
+   "evidence": "No current data licence; until ~2014 the site said CC BY 3.0 'at no charge only for fair use'.",
+   "upstream": "The ICSD catalogue also ships the original ICSD geometry (geometry_orig)."
+  },
+  "odbx": {
+   "name": "Open Databases Integration for Materials Design",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://odbx.science/",
+   "evidence": "No data licence on the site or OPTIMADE /info.",
+   "upstream": "ODBX states no licence. Its CAMD and Wren entries are re-attributed by native id to their own licensed releases (keys camd, wren); law-gnn (1,707, ids cite ICSD prototypes) and odbx_main (56) stay unclear."
+  },
+  "materiae": {
+   "name": "Materiae",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://cmpdc.iphy.ac.cn/materiae/",
+   "evidence": "© 2018-2026 Copyright: Institute of Physics Chinese Academy of Sciences",
+   "upstream": "MP/ICSD-derived."
+  },
+  "amcsd": {
+   "name": "American Mineralogist Crystal Structure Database",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://rruff.geo.arizona.edu/AMS/amcsd.php",
+   "evidence": "Free download with a citation request; no licence.",
+   "upstream": "The same structures are in COD (9xxxxxx) under CC0."
+  },
+  "webmineral": {
+   "name": "Webmineral",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://webmineral.com/",
+   "evidence": "© 1997-2014 by David Barthelmy",
+   "upstream": "Holds no pool structure."
+  },
+  "sacada": {
+   "name": "Samara Carbon Allotrope Database",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://www.sacada.info/",
+   "evidence": "Copyright notice and citation request only.",
+   "upstream": ""
+  },
+  "openmx-2d-ab2": {
+   "name": "OpenMX AB2 2D structure map",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://www.openmx-square.org/2d-ab2/",
+   "evidence": "No licence; points to Mater. Adv. 2, 4392 (2021).",
+   "upstream": ""
+  },
+  "mofx-db": {
+   "name": "MOFX-DB",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://www.osti.gov/biblio/2311791",
+   "evidence": "'freely accessible' with no licence on the site, paper or repo.",
+   "upstream": "Redistributes CoRE MOF, hMOF, ToBaCCo, IZA, PCOD-syn."
+  },
+  "ec-mof": {
+   "name": "EC-MOF Phase-I",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://ec-mof.njit.edu/",
+   "evidence": "Citation request only.",
+   "upstream": ""
+  },
+  "omdb-organic": {
+   "name": "Organic Materials Database",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://omdb.mathub.io/page/terms",
+   "evidence": "Copyright © 2016-2026 ... All rights reserved.",
+   "upstream": "Structures are COD entries; our copy is a JARVIS re-upload labelled CC BY 4.0 by the re-uploader. Re-sourcing from COD by id would make them CC0."
+  },
+  "hadb": {
+   "name": "Hard-coating Alloys Database",
+   "licence": "unstated",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://doi.org/10.1016/j.tsf.2022.139627",
+   "evidence": "Data will be made available on request.",
+   "upstream": ""
+  },
+  "spse": {
+   "name": "Solid-electrolyte screening platform",
+   "licence": "CC-BY-4.0 (label)",
+   "class": "unclear",
+   "purchase": false,
+   "url": "https://www.nature.com/articles/s41597-020-0474-y",
+   "evidence": "The crystal structure data are mostly extracted from the Inorganic Crystal Structure Database (ICSD)",
+   "upstream": "91,688 of 91,763 structures are ICSD entries relabelled CC BY without FIZ permission. Holds no pool structure (id citations only)."
+  },
+  "legacy-local": {
+   "name": "Legacy local pool (unique_structs_all, merged before provenance tracking)",
+   "licence": "unknown",
+   "class": "unknown",
+   "purchase": false,
+   "url": "",
+   "evidence": "",
+   "upstream": "1.85M candidates with no recorded origin; admitted only when an open database independently holds the structure."
+  },
+  "camd": {
+   "name": "CAMD 2022 coarse-grained discovery set (Ye, Lei, Aykol, Montoya), via ODBX",
+   "licence": "CC-BY-4.0",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://doi.org/10.6084/m9.figshare.19601956.v1",
+   "evidence": "figshare licence field: CC BY 4.0 (checked via the figshare API 2026-10-19)",
+   "upstream": "Entries we took from ODBX whose native id starts camd- (camd-camd_*, camd-oqmd_*)."
+  },
+  "wren": {
+   "name": "Wren coordinate-free coarse-graining set (Goodall et al.), via ODBX",
+   "licence": "MIT",
+   "class": "open",
+   "family": "attribution",
+   "purchase": false,
+   "url": "https://doi.org/10.5281/zenodo.6345276",
+   "evidence": "Zenodo licence: mit-license (checked via the Zenodo API 2026-10-19)",
+   "upstream": "Entries we took from ODBX whose native id starts wren-scn-."
+  }
+ }
+}

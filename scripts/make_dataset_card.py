@@ -14,6 +14,7 @@ whenever the index changes.
 from __future__ import annotations
 
 import argparse
+import json
 import sqlite3
 import sys
 from pathlib import Path
@@ -22,20 +23,20 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 INDEX_DB = PROJECT_ROOT / "data" / "index" / "materials.sqlite"
 SLICE_MANIFEST = PROJECT_ROOT / "data" / "slice" / "slice-manifest.json"
 
-#: Sources whose terms do not permit redistribution, or permit it only
-#: non-commercially. Kept explicit so the card can never quietly imply the
-#: whole thing is open.
-RESTRICTED = {
-    "icsd": "FIZ Karlsruhe subscription — redistribution not permitted",
-    "aflow": "AFLOW academic non-commercial terms",
-    "elementa": "CC BY-NC 4.0 — non-commercial only",
-    "gnome": "CC BY-NC 4.0 — non-commercial only",
-    # NOMAD carries no single licence: each upload keeps the terms its depositor
-    # chose. The default for published data is CC BY 4.0, but it is not uniform
-    # and the export does not record the per-entry choice, so the whole source is
-    # withheld from redistribution until that is resolved per upload.
-    "nomad": "per-upload licence — not uniform, resolve per entry before release",
-}
+STAGE = PROJECT_ROOT / "data" / "hf-upload"
+LICENCES = PROJECT_ROOT / "scripts" / "source_licences.json"
+OPEN_REPO = "AI4QC/MateriaViva-Open"
+
+#: Sources whose terms do not permit open redistribution. Read from the licence
+#: table checked against each provider's own pages (2026-10-19), not written by
+#: hand: the hand-written list had NOMAD as restricted when its terms fix CC BY
+#: 4.0, and called AFLOW "academic non-commercial" when it states no licence.
+_LICENCE_TABLE = json.loads(LICENCES.read_text())["sources"]
+_WHY = {"restricted": "redistribution not permitted",
+        "noncommercial": "non-commercial use only",
+        "unclear": "no licence stated, so none is granted"}
+RESTRICTED = {key: f"{v['licence']} — {_WHY[v['class']]}"
+              for key, v in _LICENCE_TABLE.items() if v["class"] in _WHY}
 
 
 def facts() -> dict:
@@ -55,6 +56,8 @@ def facts() -> dict:
         "experimental": int(meta.get("experimental_count", 0)),
         "candidate": int(meta.get("candidate_count", 0)),
     }
+    out["index_bytes"] = sum((INDEX_DB.parent / name).stat().st_size for name in
+                             ("materials.sqlite", "structures.blob", "curves.blob"))
     out["shared_2plus"] = db.execute(
         "SELECT COUNT(*) FROM (SELECT material_pk FROM material_source_refs"
         " GROUP BY material_pk HAVING COUNT(DISTINCT source_id) >= 2)"
@@ -88,6 +91,44 @@ def facts() -> dict:
     )
     db.close()
     return out
+
+
+def add_predictions(add) -> None:
+    """The completion section, read from the packaged predictions' manifest."""
+    path = STAGE / "predictions" / "MANIFEST.json"
+    if not path.is_file():
+        return
+    m = json.loads(path.read_text())
+    tasks = m["tasks"]
+    done = {t: e for t, e in tasks.items() if e["state"] == "done"}
+    other = {t: e for t, e in tasks.items() if e["state"] != "done"}
+    add("## Completion predictions")
+    add("")
+    add(
+        f"**These are model predictions, not measurements.** A CGTNet model per property "
+        f"was trained on the index's own values and applied to the structures inside that "
+        f"property's applicability gate. {len(done)} of the run's {len(tasks)} properties "
+        f"are complete, giving {m['rows_total']:,} predicted values; the rest are still "
+        f"training or queued and will be added as they finish."
+    )
+    add("")
+    add(
+        "Each `<task>.json` states how the checkpoint was chosen (on a chemical-system-"
+        "disjoint holdout, so its reported accuracy is an upper bound), which structures "
+        "the gate admitted and why, and any warning that travels with the numbers. "
+        "Repeated `material_pk` rows left by resumed inference runs were removed, keeping "
+        "the first copy (`packaging.duplicates_dropped`)."
+    )
+    add("")
+    add("| Property (task) | Domain | Predicted structures |")
+    add("|---|---|---:|")
+    for task, e in sorted(done.items(), key=lambda t: -t[1]["rows"]):
+        add(f"| `{task}` | {e.get('declared_domain') or '—'} | {e['rows']:,} |")
+    add("")
+    if other:
+        add("Not yet complete: " + ", ".join(
+            f"`{t}` ({e['state']})" for t, e in sorted(other.items())) + ".")
+        add("")
 
 
 def render(f: dict, slice_bytes: int | None, slice_materials: int | None) -> str:
@@ -151,19 +192,25 @@ def render(f: dict, slice_bytes: int | None, slice_materials: int | None) -> str
         "ICSD licence."
     )
     add(
-        "- **CC BY-NC** sources (ELEMENTA, GNoME) and AFLOW's academic terms make the "
-        "combined index **non-commercial**."
+        "- **CC BY-NC** sources (ELEMENTA, GNoME) make the combined index "
+        "**non-commercial**; AFLOW and several smaller sources state no licence at all, "
+        "which grants nothing."
     )
     add(
         "- Every property row records its `source_id`, so a licence-filtered export is a "
         "single `WHERE source_id NOT IN (...)` away. Do that before any public release."
+    )
+    add(
+        f"- The redistributable subset — every structure held by at least one open-licence "
+        f"database, with all of its property values, curves and predictions — is published "
+        f"separately as [{OPEN_REPO}](https://huggingface.co/datasets/{OPEN_REPO})."
     )
     add("")
 
     add("## What is in here")
     add("")
     add("```text")
-    add("index/                the full index (~47 GB)")
+    add(f"index/                the full index ({f['index_bytes'] / 1e9:.0f} GB)")
     add("  materials.sqlite      structures, properties, provenance, curve offsets")
     add("  structures.blob       zlib-compressed CIF text")
     add("  curves.blob           zlib-compressed spectra payloads")
@@ -172,14 +219,20 @@ def render(f: dict, slice_bytes: int | None, slice_materials: int | None) -> str
     add("  structures.blob")
     add("  curves.blob")
     add("  slice-manifest.json")
+    add("predictions/          completion-run model predictions, one file per property")
+    add("  <task>.parquet        material_pk + predicted value")
+    add("  <task>.json           model selection, applicability gate, warnings")
+    add("  MANIFEST.json         every task of the run and its state")
     add("docs/                 integration and acquisition notes")
     add("```")
     add("")
+    add_predictions(add)
     if slice_materials:
         add(
             f"The **slice** holds {slice_materials:,} materials in "
             f"{slice_bytes / (1 << 20):.0f} MB and exists so the web UI can be developed "
-            "without the 47 GB download. It is not a random sample: it is a greedy set "
+            f"without the {f['index_bytes'] / 1e9:.0f} GB download. It is not a random "
+            "sample: it is a greedy set "
             "cover chosen so that **every source, every property name, every curve type "
             "and every material family appears at least once**. A random 1,000 rows out "
             "of 13.5 million would miss almost every rare property, which is exactly the "
@@ -199,7 +252,8 @@ def render(f: dict, slice_bytes: int | None, slice_materials: int | None) -> str
     add("python scripts/fetch_index.py slice")
     add("python scripts/serve.py --runtime data/slice")
     add("")
-    add("# or the full index (~47 GB, needs roughly double that free during download)")
+    add(f"# or the full index (~{f['index_bytes'] / 1e9:.0f} GB, needs roughly double that "
+        "free during download)")
     add("python scripts/fetch_index.py full")
     add("python scripts/serve.py --runtime data/index")
     add("```")
@@ -283,6 +337,7 @@ def render(f: dict, slice_bytes: int | None, slice_materials: int | None) -> str
     add("|---|---:|---:|---|")
     for key, name, lic, rows, mats in f["table"]:
         mark = " ⚠️" if key in RESTRICTED else ""
+        lic = _LICENCE_TABLE.get(key, {}).get("licence", lic)
         add(f"| {name} (`{key}`){mark} | {rows:,} | {mats:,} | {lic or '—'} |")
     add("")
     add("⚠️ marks a source with redistribution restrictions — see the licence section above.")

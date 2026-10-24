@@ -852,23 +852,6 @@ def stage_card(work: Path) -> None:
     for key, n in rep["admitted_with_restricted_origin_by_origin"].items():
         add(f"| {key} | {n:,} |")
     add("")
-    if props or curves:
-        add("## Licence of property values and curves")
-        add("")
-        add("**A value carries the licence of the database it came from, not the structure's "
-            "`licence`.** A structure is included because an open database holds it, but its "
-            "property values and curves come from every database that has it, including "
-            "non-commercial (CC BY-NC), restricted and licence-unstated ones. Each row of "
-            "`properties/` and `curves/` names its `source`, that source's `licence`, and a "
-            "`licence_class`; keep `licence_class == \"open\"` for openly licensed values only.")
-        add("")
-        add("| `licence_class` | Property values | Curves |")
-        add("|---|---:|---:|")
-        pc = props["rows_by_licence_class"] if props else {}
-        cc = curves["rows_by_licence_class"] if curves else {}
-        for cls in sorted(set(pc) | set(cc), key=lambda c: -(pc.get(c, 0) + cc.get(c, 0))):
-            add(f"| {cls} | {pc.get(cls, 0):,} | {cc.get(cls, 0):,} |")
-        add("")
     if props:
         add("## Property values")
         add("")

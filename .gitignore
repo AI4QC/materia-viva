@@ -158,8 +158,12 @@ token-usage*.json
 !*.example
 !*.example.*
 
-# Recovered CGTNet working tree: 177 MB of checkpoints, kept out of the repo
+# CGTNet research notes and the recovered working tree (177 MB of checkpoints)
+# stay local: the model is developed on the feature/cgtnet-* branches, and this
+# repository is the database.
 /cgtnet_recovered/
+/CGTNET_*.md
+/docs/plans/*cgtnet*
 
 # Superseded figure drafts and locally rendered README
 /paper/figs/draft/

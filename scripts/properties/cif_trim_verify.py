@@ -28,6 +28,7 @@ import json
 import random
 import statistics
 import sys
+import tempfile
 import warnings
 from pathlib import Path
 
@@ -351,7 +352,7 @@ def main() -> int:
     parser.add_argument(
         "--cache",
         type=Path,
-        default=Path("/tmp/materiaviva/cod_trim_sample.jsonl.gz"),
+        default=Path(tempfile.gettempdir()) / "materiaviva-cod-trim-sample.jsonl.gz",
     )
     parser.add_argument("--rebuild-sample", action="store_true")
     parser.add_argument("--selftest-only", action="store_true")

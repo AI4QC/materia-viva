@@ -12,7 +12,7 @@
 # fingerprint is trustworthy here and the normal match stage applies.
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 LOGS=data/props_work/_logs
 OUT=/tmp/local-workspace
 mkdir -p "$LOGS" "$OUT"
@@ -24,15 +24,15 @@ while pgrep -f "hmof_chain.sh|fix_framework_hash_refs.sh|load_new_extractors.sh|
   sleep 60
 done
 
-$P scripts/properties/pipeline.py core-mof --stage hash --nproc 20 \
+"$P" scripts/properties/pipeline.py core-mof --stage hash --nproc 20 \
     >> "$LOGS/coremof-chain.log" 2>&1 || {
   echo "core-mof: hash failed" >> "$LOGS/chain.log"; exit 1; }
 
-$P scripts/properties/pipeline.py core-mof --stage match \
+"$P" scripts/properties/pipeline.py core-mof --stage match \
     >> "$LOGS/coremof-chain.log" 2>&1 || {
   echo "core-mof: match failed" >> "$LOGS/chain.log"; exit 1; }
 
-$P - core-mof <<'PYEOF' >> "$LOGS/coremof-chain.log" 2>&1
+"$P" - core-mof <<'PYEOF' >> "$LOGS/coremof-chain.log" 2>&1
 import json, sys
 sys.path.insert(0, '.'); sys.path.insert(0, 'backend')
 from scripts.properties.load import connect
@@ -47,14 +47,14 @@ db.commit(); db.close()
 print(f"{source}: load marker cleared")
 PYEOF
 
-$P scripts/properties/load.py load core-mof >> "$LOGS/coremof-chain.log" 2>&1 \
+"$P" scripts/properties/load.py load core-mof >> "$LOGS/coremof-chain.log" 2>&1 \
   || echo "core-mof: load failed" >> "$LOGS/chain.log"
 
 echo "0" > "$LOGS/coremof-complete.marker"
 
-$P scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
+"$P" scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
     > "$OUT/verify-complete.txt" 2>&1
 echo "$?" > "$LOGS/verify-complete.marker"
-$P scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
+"$P" scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
 
 echo "core-mof chain finished $(date)" >> "$LOGS/chain.log"

@@ -10,7 +10,7 @@
 #   setsid nohup bash scripts/properties/recover_duplicates_chain.sh &
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 LOGS=data/props_work/_logs
 mkdir -p "$LOGS"
 rm -f "$LOGS/recover-complete.marker"
@@ -20,17 +20,17 @@ echo "duplicate recovery v2 started $(date)" >> "$LOGS/chain.log"
 rm -f data/props_work/jarvis-qetb/matched.tsv.gz \
       data/props_work/jarvis-qetb/new_structs.jsonl.gz \
       data/props_work/jarvis-qetb/alias.tsv.gz
-$P scripts/properties/run_all.py --sources jarvis-qetb --nproc 24 \
+"$P" scripts/properties/run_all.py --sources jarvis-qetb --nproc 24 \
     >> "$LOGS/recover-jarvis-qetb.log" 2>&1
 
 # aflow: re-stage, then repair the orphaned duplicates in place
-$P scripts/properties/pipeline.py aflow --stage adapt --nproc 24 \
+"$P" scripts/properties/pipeline.py aflow --stage adapt --nproc 24 \
     >> "$LOGS/recover-aflow.log" 2>&1 \
-  && $P scripts/properties/pipeline.py aflow --stage hash --nproc 24 \
+  && "$P" scripts/properties/pipeline.py aflow --stage hash --nproc 24 \
     >> "$LOGS/recover-aflow.log" 2>&1 \
-  && $P scripts/properties/repair_duplicate_props.py aflow \
+  && "$P" scripts/properties/repair_duplicate_props.py aflow \
     >> "$LOGS/recover-aflow.log" 2>&1
 
-$P scripts/properties/run_all.py --phase backfill >> "$LOGS/recover-backfill.log" 2>&1
+"$P" scripts/properties/run_all.py --phase backfill >> "$LOGS/recover-backfill.log" 2>&1
 echo "duplicate recovery v2 finished $(date)" >> "$LOGS/chain.log"
 echo "0" > "$LOGS/recover-complete.marker"

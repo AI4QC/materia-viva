@@ -1003,7 +1003,7 @@ GROUP BY sd.key;
 
 ```bash
 # 环境：pymatgen + pyarrow + numpy
-PY=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+PY=python
 
 # 服务器上如果没有索引，先拉（~47 GB；先用 slice 跑通流程只要 9 MB）
 $PY scripts/fetch_index.py --variant index --out data/index

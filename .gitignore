@@ -95,6 +95,7 @@ celerybeat.pid
 
 # Local implementation plans can contain machine-specific migration history.
 /docs/plans/
+/.local-internal/
 
 # Editors
 .idea/

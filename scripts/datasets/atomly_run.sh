@@ -6,8 +6,8 @@ if pgrep -f "atomly.py --phase all" > /dev/null 2>&1; then
     echo "harvester already running; nothing to do"
     exit 0
 fi
-cd /path/to/user/workspace/matdata || exit 1
-LOG_DIR=/path/to/user/SSD/workspace_data/matdata/data/raw/acquired/atomly/_logs
+cd "$(dirname "$0")/../.." || exit 1
+LOG_DIR=data/raw/acquired/atomly/_logs
 mkdir -p "$LOG_DIR"
 TS=$(date +%Y%m%d-%H%M%S)
 PYTHONPATH=. nohup python3 scripts/datasets/atomly.py --phase all --auth session --rps 1.8 "$@" \

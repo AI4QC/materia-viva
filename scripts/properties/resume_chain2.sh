@@ -3,7 +3,7 @@
 # Run detached:  setsid nohup bash scripts/properties/resume_chain2.sh &
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 LOGS=data/props_work/_logs
 mkdir -p "$LOGS"
 rm -f "$LOGS/chain2-complete.marker"
@@ -31,7 +31,7 @@ for s in $RERUN; do
         "data/props_work/$s/new_structs.jsonl.gz" \
         "data/props_work/$s/load_report.json"
 done
-$P - <<'PYEOF'
+"$P" - <<'PYEOF'
 import json, sys
 sys.path.insert(0, '.'); sys.path.insert(0, 'backend')
 from scripts.properties.load import connect
@@ -50,28 +50,28 @@ print('re-run markers cleared')
 PYEOF
 
 run_sources () {
-  $P scripts/properties/run_all.py --sources $1 --nproc 26 >> "$LOGS/driver-batch2.log" 2>&1
+  "$P" scripts/properties/run_all.py --sources $1 --nproc 26 >> "$LOGS/driver-batch2.log" 2>&1
 }
 
 run_sources "$RERUN" \
   && run_sources "$NEW_SMALL" \
   && run_sources "$NEW_BIG" \
-  && $P scripts/properties/carolina_refs.py >> "$LOGS/carolina-refs.log" 2>&1
+  && "$P" scripts/properties/carolina_refs.py >> "$LOGS/carolina-refs.log" 2>&1
 STATUS=$?
 
 if [ -f scripts/properties/aflow_ael_attach.py ]; then
-  $P scripts/properties/aflow_ael_attach.py >> "$LOGS/aflow-ael.log" 2>&1 \
+  "$P" scripts/properties/aflow_ael_attach.py >> "$LOGS/aflow-ael.log" 2>&1 \
     || echo "aflow ael attach failed" >> "$LOGS/chain.log"
 fi
 
-$P scripts/properties/run_all.py --phase backfill >> "$LOGS/driver-batch2.log" 2>&1
+"$P" scripts/properties/run_all.py --phase backfill >> "$LOGS/driver-batch2.log" 2>&1
 
 for s in rruff materiae phonix superband; do
-  $P scripts/properties/curves.py "$s" >> "$LOGS/curves-load.log" 2>&1 \
+  "$P" scripts/properties/curves.py "$s" >> "$LOGS/curves-load.log" 2>&1 \
     || echo "curves $s failed" >> "$LOGS/chain.log"
 done
 
-$P scripts/properties/summarize.py \
+"$P" scripts/properties/summarize.py \
   > /tmp/local-workspace/summary-batch2.md 2>/dev/null
 
 echo "chain2 finished $(date) exit=$STATUS" >> "$LOGS/chain.log"

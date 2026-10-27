@@ -12,7 +12,7 @@
 # to clear what the earlier runs already wrote.
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 LOGS=data/props_work/_logs
 OUT=/tmp/local-workspace
 mkdir -p "$LOGS" "$OUT"
@@ -23,7 +23,7 @@ while pgrep -f "load_new_extractors.sh|repair_and_verify.sh|finalize_all.sh" > /
   sleep 30
 done
 
-$P - <<'PYEOF' >> "$LOGS/frameworkfix.log" 2>&1
+"$P" - <<'PYEOF' >> "$LOGS/frameworkfix.log" 2>&1
 import sys
 sys.path.insert(0, '.'); sys.path.insert(0, 'backend')
 from scripts.properties.load import connect, FINGERPRINT_UNRELIABLE
@@ -53,7 +53,7 @@ db.close()
 PYEOF
 
 clear_marker () {
-  $P - "$1" <<'PYEOF'
+  "$P" - "$1" <<'PYEOF'
 import json, sys
 sys.path.insert(0, '.'); sys.path.insert(0, 'backend')
 from scripts.properties.load import connect
@@ -72,19 +72,19 @@ PYEOF
 for s in pcod deem-zeolites; do
   echo "=== $s clean re-load $(date) ===" >> "$LOGS/frameworkfix-$s.log"
   clear_marker "$s" >> "$LOGS/frameworkfix-$s.log" 2>&1
-  $P scripts/properties/load.py load "$s" >> "$LOGS/frameworkfix-$s.log" 2>&1 \
+  "$P" scripts/properties/load.py load "$s" >> "$LOGS/frameworkfix-$s.log" 2>&1 \
     || echo "frameworkfix: $s load failed" >> "$LOGS/chain.log"
 done
 
 # Replaces the source's curves wholesale, so the 326,663 contaminated rows go.
-$P scripts/properties/curves.py deem-zeolites >> "$LOGS/frameworkfix-deem-curves.log" 2>&1 \
+"$P" scripts/properties/curves.py deem-zeolites >> "$LOGS/frameworkfix-deem-curves.log" 2>&1 \
   || echo "frameworkfix: deem curves failed" >> "$LOGS/chain.log"
 
 echo "0" > "$LOGS/frameworkfix-complete.marker"
 
-$P scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
+"$P" scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
     > "$OUT/verify-complete.txt" 2>&1
 echo "$?" > "$LOGS/verify-complete.marker"
-$P scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
+"$P" scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
 
 echo "framework hash-ref fix finished $(date)" >> "$LOGS/chain.log"

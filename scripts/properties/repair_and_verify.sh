@@ -9,7 +9,7 @@
 # extractors land -- see docs/property-integration.md.
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 LOGS=data/props_work/_logs
 OUT=/tmp/local-workspace
 mkdir -p "$LOGS" "$OUT"
@@ -27,7 +27,7 @@ done
 echo "repair: finalize clear, starting repairs $(date)" >> "$LOGS/chain.log"
 
 clear_marker () {
-  $P - "$1" <<'PYEOF'
+  "$P" - "$1" <<'PYEOF'
 import json, sys
 sys.path.insert(0, '.'); sys.path.insert(0, 'backend')
 from scripts.properties.load import connect
@@ -54,7 +54,7 @@ PYEOF
 for s in cod cmr-static materials-cloud-archive-static; do
   echo "=== $s re-load $(date) ===" >> "$LOGS/repair-$s.log"
   clear_marker "$s" >> "$LOGS/repair-$s.log" 2>&1
-  $P scripts/properties/load.py load "$s" >> "$LOGS/repair-$s.log" 2>&1 \
+  "$P" scripts/properties/load.py load "$s" >> "$LOGS/repair-$s.log" 2>&1 \
     || echo "repair: $s re-load failed" >> "$LOGS/chain.log"
 done
 
@@ -62,7 +62,7 @@ done
 #        twice. material_source_refs deduped them via its primary key;
 #        material_properties has no uniqueness constraint, so both copies
 #        survived. Keep one row per full key.
-$P scripts/properties/dedupe_exact_props.py --source aflow \
+"$P" scripts/properties/dedupe_exact_props.py --source aflow \
     >> "$LOGS/repair-aflow-dedupe.log" 2>&1 \
   || echo "repair: aflow dedupe failed" >> "$LOGS/chain.log"
 
@@ -71,9 +71,9 @@ echo "repair: repairs done, auditing $(date)" >> "$LOGS/chain.log"
 
 # --- 3. full audit incl. the per-source field-coverage scan, plus a fresh
 #        summary table for the docs.
-$P scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
+"$P" scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
     > "$OUT/verify-complete.txt" 2>&1
 echo "$?" > "$LOGS/verify-complete.marker"
-$P scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
+"$P" scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
 
 echo "repair+verify supervisor finished $(date)" >> "$LOGS/chain.log"

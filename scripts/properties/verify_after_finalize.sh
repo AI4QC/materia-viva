@@ -4,7 +4,7 @@
 #   setsid nohup bash scripts/properties/verify_after_finalize.sh &
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 LOGS=data/props_work/_logs
 OUT=/tmp/local-workspace
 mkdir -p "$LOGS" "$OUT"
@@ -24,11 +24,11 @@ done
 echo "verify: finalize clear, auditing $(date)" >> "$LOGS/chain.log"
 
 # Full audit including the field-coverage scan of every staging file.
-$P scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
+"$P" scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
     > "$OUT/verify-complete.txt" 2>&1
 echo "$?" > "$LOGS/verify-complete.marker"
 
 # Fresh summary table for the docs, regenerated from the final index.
-$P scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
+"$P" scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
 
 echo "verify supervisor finished $(date)" >> "$LOGS/chain.log"

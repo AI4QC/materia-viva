@@ -16,7 +16,7 @@
 # existing pool material rather than be admitted. That is the point.
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 WORK=data/props_work/nomad
 LOGS=data/props_work/_logs
 STAMP=$(date +%Y%m%d-%H%M%S)
@@ -31,7 +31,7 @@ say "=== nomad chain start $STAMP ==="
 # the sqlite needs a real copy.
 if [ ! -f data/index/pre-nomad-restore-info.json ]; then
   say "snapshotting index before the load"
-  $P - <<'PYEOF' >> "$LOG" 2>&1
+  "$P" - <<'PYEOF' >> "$LOG" 2>&1
 import json, pathlib, shutil
 idx = pathlib.Path("data/index")
 info = {name: (idx / name).stat().st_size
@@ -49,7 +49,7 @@ fi
 # --- 1. catalog scalars ------------------------------------------------------
 if [ ! -f "$WORK/catalog_scalars.done" ]; then
   say "stage 1/5 catalog scalars"
-  $P scripts/properties/nomad_catalog_scalars.py \
+  "$P" scripts/properties/nomad_catalog_scalars.py \
       --out "$WORK/catalog_scalars.sqlite" >> "$LOG" 2>&1 \
     && touch "$WORK/catalog_scalars.done" \
     || { say "catalog scalars FAILED"; exit 1; }
@@ -60,7 +60,7 @@ fi
 # --- 2. adapt ----------------------------------------------------------------
 if [ ! -f "$WORK/adapt.done" ]; then
   say "stage 2/5 adapt"
-  $P scripts/properties/pipeline.py nomad --stage adapt >> "$LOG" 2>&1 \
+  "$P" scripts/properties/pipeline.py nomad --stage adapt >> "$LOG" 2>&1 \
     && touch "$WORK/adapt.done" || { say "adapt FAILED"; exit 1; }
 else
   say "stage 2/5 adapt already done"
@@ -69,7 +69,7 @@ fi
 # --- 3. hash -----------------------------------------------------------------
 if [ ! -f "$WORK/hash.done" ]; then
   say "stage 3/5 hash (the long pole)"
-  $P scripts/properties/pipeline.py nomad --stage hash --nproc 28 >> "$LOG" 2>&1 \
+  "$P" scripts/properties/pipeline.py nomad --stage hash --nproc 28 >> "$LOG" 2>&1 \
     && touch "$WORK/hash.done" || { say "hash FAILED"; exit 1; }
 else
   say "stage 3/5 hash already done"
@@ -78,7 +78,7 @@ fi
 # --- 4. match ----------------------------------------------------------------
 if [ ! -f "$WORK/match.done" ]; then
   say "stage 4/5 match"
-  $P scripts/properties/pipeline.py nomad --stage match >> "$LOG" 2>&1 \
+  "$P" scripts/properties/pipeline.py nomad --stage match >> "$LOG" 2>&1 \
     && touch "$WORK/match.done" || { say "match FAILED"; exit 1; }
 else
   say "stage 4/5 match already done"
@@ -86,14 +86,14 @@ fi
 
 # --- 5. load, backfill, audit ------------------------------------------------
 say "stage 5/5 load"
-$P scripts/properties/load.py load nomad >> "$LOG" 2>&1 \
+"$P" scripts/properties/load.py load nomad >> "$LOG" 2>&1 \
   || { say "load FAILED"; exit 1; }
 say "scalar backfill"
-$P scripts/properties/load.py backfill >> "$LOG" 2>&1 || say "backfill returned nonzero"
+"$P" scripts/properties/load.py backfill >> "$LOG" 2>&1 || say "backfill returned nonzero"
 say "completeness audit"
-$P scripts/properties/verify_complete.py >> "$LOG" 2>&1 || say "audit reported problems"
+"$P" scripts/properties/verify_complete.py >> "$LOG" 2>&1 || say "audit reported problems"
 say "summarize"
-$P scripts/properties/summarize.py >> "$LOG" 2>&1 || say "summarize returned nonzero"
+"$P" scripts/properties/summarize.py >> "$LOG" 2>&1 || say "summarize returned nonzero"
 
 say "=== nomad chain complete ==="
 touch "$LOGS/nomad-complete.marker"

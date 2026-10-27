@@ -8,7 +8,7 @@
 ## 环境
 
 ```bash
-PY=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python   # pymatgen + pyarrow + numpy
+PY=python   # pymatgen + pyarrow + numpy
 ```
 
 服务器上如果没有索引，先拉：

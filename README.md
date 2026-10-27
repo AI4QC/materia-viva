@@ -423,8 +423,7 @@ ELEMENTA is a trajectory dataset, but it is ingested under the "one endpoint per
 so intermediate frames never enter the structure pool.
 
 Full sources, licences, download status and required manual steps are in
-[`docs/dataset-acquisition.md`](docs/dataset-acquisition.md). Existing SSD data and its duplicate
-relationships are in [`docs/legacy-ssd-data-inventory.md`](docs/legacy-ssd-data-inventory.md).
+[`docs/dataset-acquisition.md`](docs/dataset-acquisition.md).
 
 ## Getting the code and data
 
@@ -488,9 +487,6 @@ stale at least once. Ask the running instance instead:
 ```bash
 curl -s http://127.0.0.1:8000/api/stats
 ```
-
-Local SSD migration and legacy path compatibility are described in
-[`docs/storage-layout.md`](docs/storage-layout.md).
 
 ## Unified data format
 

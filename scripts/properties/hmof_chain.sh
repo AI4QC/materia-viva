@@ -16,7 +16,7 @@
 # (see load.FINGERPRINT_UNRELIABLE).
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 LOGS=data/props_work/_logs
 OUT=/tmp/local-workspace
 mkdir -p "$LOGS" "$OUT"
@@ -27,29 +27,29 @@ while pgrep -f "fix_framework_hash_refs.sh|load_new_extractors.sh|repair_and_ver
   sleep 30
 done
 
-$P scripts/properties/pipeline.py hmof --stage adapt --nproc 20 \
+"$P" scripts/properties/pipeline.py hmof --stage adapt --nproc 20 \
     >> "$LOGS/hmof-chain.log" 2>&1 || {
   echo "hmof: adapt failed" >> "$LOGS/chain.log"; exit 1; }
 
-$P scripts/properties/pipeline.py hmof --stage hash --nproc 20 \
+"$P" scripts/properties/pipeline.py hmof --stage hash --nproc 20 \
     >> "$LOGS/hmof-chain.log" 2>&1 || {
   echo "hmof: hash failed" >> "$LOGS/chain.log"; exit 1; }
 
 # Dry run first: it prints the full classification without writing, so the
 # apply below is never the first time anyone sees these counters.
-$P scripts/properties/hmof_composite_admit.py \
+"$P" scripts/properties/hmof_composite_admit.py \
     >> "$LOGS/hmof-admit-dryrun.log" 2>&1 \
   || echo "hmof: dry run failed" >> "$LOGS/chain.log"
 
-$P scripts/properties/hmof_composite_admit.py --apply --purge-ambiguous-hashes \
+"$P" scripts/properties/hmof_composite_admit.py --apply --purge-ambiguous-hashes \
     >> "$LOGS/hmof-admit.log" 2>&1 \
   || echo "hmof: composite admit failed" >> "$LOGS/chain.log"
 
 echo "0" > "$LOGS/hmof-complete.marker"
 
-$P scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
+"$P" scripts/properties/verify_complete.py --json "$OUT/verify-complete.json" \
     > "$OUT/verify-complete.txt" 2>&1
 echo "$?" > "$LOGS/verify-complete.marker"
-$P scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
+"$P" scripts/properties/summarize.py > "$OUT/summary-complete.md" 2>/dev/null
 
 echo "hmof chain finished $(date)" >> "$LOGS/chain.log"

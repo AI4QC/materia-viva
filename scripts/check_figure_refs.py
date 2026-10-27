@@ -4,7 +4,7 @@ The \\PENDING* macros are defined in main.tex's preamble but expand where they
 are used in body.tex, so they are substituted in before the scan.
 """
 import re, sys, pathlib
-ROOT = pathlib.Path("/path/to/user/workspace/matdata/paper/tex")
+ROOT = pathlib.Path(__file__).resolve().parents[1] / "paper" / "tex"
 MAIN_ORDER = ["front_meta.tex", "front_body.tex", "body.tex", "discussion.tex", "methods.tex"]
 
 

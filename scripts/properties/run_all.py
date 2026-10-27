@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -28,7 +29,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 WORK = PROJECT_ROOT / "data" / "props_work"
 LOGS = WORK / "_logs"
-PYTHON = "/path/to/user/anaconda3/envs/matgenbench-py310/bin/python"
+PYTHON = os.environ.get("MATERIAVIVA_PYTHON", sys.executable)
 
 BRIDGE_FIRST = ["matbench-discovery"]
 

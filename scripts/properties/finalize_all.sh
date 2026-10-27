@@ -6,7 +6,7 @@
 #   setsid nohup bash scripts/properties/finalize_all.sh &
 set -u
 cd "$(dirname "$0")/../.."
-P=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+P="${MATERIAVIVA_PYTHON:-python3}"
 LOGS=data/props_work/_logs
 mkdir -p "$LOGS"
 rm -f "$LOGS/finalize-complete.marker"
@@ -30,10 +30,10 @@ reload_source () {
   local s="$1"
   [ -d "data/props_work/$s" ] || return 0
   echo "=== $s $(date) ===" >> "$LOGS/finalize-$s.log"
-  $P scripts/properties/pipeline.py "$s" --stage adapt --nproc 20 \
+  "$P" scripts/properties/pipeline.py "$s" --stage adapt --nproc 20 \
       >> "$LOGS/finalize-$s.log" 2>&1 || return 0
   # allow the re-load: clear the marker so load.py replaces this source's rows
-  $P - "$s" <<'PYEOF' >> "$LOGS/finalize-$s.log" 2>&1
+  "$P" - "$s" <<'PYEOF' >> "$LOGS/finalize-$s.log" 2>&1
 import json, sys
 sys.path.insert(0, '.'); sys.path.insert(0, 'backend')
 from scripts.properties.load import connect
@@ -47,7 +47,7 @@ db.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES ('loaded_propert
 db.commit(); db.close()
 print(f"{source}: load marker cleared")
 PYEOF
-  $P scripts/properties/load.py load "$s" >> "$LOGS/finalize-$s.log" 2>&1 \
+  "$P" scripts/properties/load.py load "$s" >> "$LOGS/finalize-$s.log" 2>&1 \
     || echo "load failed: $s" >> "$LOGS/chain.log"
 }
 
@@ -57,30 +57,30 @@ for s in $REMAP; do reload_source "$s"; done
 #    means nothing is ever admitted), register the id->material pairs, then re-run
 #    the sources that key on ICSD ids so they pick up the new links.
 if [ -f scripts/properties/icsd_bridge.py ]; then
-  $P scripts/properties/pipeline.py icsd --stage adapt --nproc 20 >> "$LOGS/finalize-icsd.log" 2>&1
-  $P scripts/properties/pipeline.py icsd --stage hash --nproc 20 >> "$LOGS/finalize-icsd.log" 2>&1
-  $P scripts/properties/pipeline.py icsd --stage match >> "$LOGS/finalize-icsd.log" 2>&1
-  $P scripts/properties/icsd_bridge.py >> "$LOGS/finalize-icsd.log" 2>&1
+  "$P" scripts/properties/pipeline.py icsd --stage adapt --nproc 20 >> "$LOGS/finalize-icsd.log" 2>&1
+  "$P" scripts/properties/pipeline.py icsd --stage hash --nproc 20 >> "$LOGS/finalize-icsd.log" 2>&1
+  "$P" scripts/properties/pipeline.py icsd --stage match >> "$LOGS/finalize-icsd.log" 2>&1
+  "$P" scripts/properties/icsd_bridge.py >> "$LOGS/finalize-icsd.log" 2>&1
   for s in icsd 3dsc spse webmineral amdb obelix; do reload_source "$s"; done
 fi
 
 # 2. hMOF fingerprint collisions: composite-key admission (never aliasing —
 #    these are distinct frameworks whose bonding graphs collide)
 if [ -f scripts/properties/hmof_composite_admit.py ]; then
-  $P scripts/properties/hmof_composite_admit.py >> "$LOGS/finalize-hmof.log" 2>&1 \
+  "$P" scripts/properties/hmof_composite_admit.py >> "$LOGS/finalize-hmof.log" 2>&1 \
     || echo "hmof composite admit failed" >> "$LOGS/chain.log"
 fi
 
 # 2b. Materials Project spectra: 817k curves (DOS, band structures, XAS,
 #     phonon DOS, optical absorption) from the 2026-08-19 acquisition
 if [ -f scripts/properties/curve_sources/materials_project.py ]; then
-  $P scripts/properties/curves.py materials-project >> "$LOGS/curves-load.log" 2>&1 \
+  "$P" scripts/properties/curves.py materials-project >> "$LOGS/curves-load.log" 2>&1 \
     || echo "mp curves failed" >> "$LOGS/chain.log"
 fi
 
 # 3. whole-pool backfill + fresh summary
-$P scripts/properties/run_all.py --phase backfill >> "$LOGS/finalize-backfill.log" 2>&1
-$P scripts/properties/summarize.py > /tmp/local-workspace/summary-complete.md 2>/dev/null
+"$P" scripts/properties/run_all.py --phase backfill >> "$LOGS/finalize-backfill.log" 2>&1
+"$P" scripts/properties/summarize.py > /tmp/local-workspace/summary-complete.md 2>/dev/null
 
 echo "finalize finished $(date)" >> "$LOGS/chain.log"
 echo "0" > "$LOGS/finalize-complete.marker"

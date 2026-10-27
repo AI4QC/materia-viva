@@ -11,6 +11,7 @@ structures and no properties are added — provenance only.
 from __future__ import annotations
 
 import json
+import os
 import pickle
 import sqlite3
 import sys
@@ -26,7 +27,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "backend"))
 
-LMDB_PATH = "/path/to/user/SSD/material_data/carolina_matdb_structs.lmdb"
+LMDB_PATH = os.environ.get(
+    "MATERIAVIVA_CAROLINA_LMDB",
+    str(PROJECT_ROOT / "data" / "raw" / "legacy-material-data" / "carolina_matdb_structs.lmdb"),
+)
 MATCH_MAP = PROJECT_ROOT / "data" / "props_work" / "match_map.sqlite"
 INDEX_DB = PROJECT_ROOT / "data" / "index" / "materials.sqlite"
 

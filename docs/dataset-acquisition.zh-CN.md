@@ -13,7 +13,7 @@
 所有数据库文件，包括 `.part` 断点文件、API 分页、压缩包、收据和后续标准化结果，都只放在：
 
 ```text
-/path/to/user/SSD/workspace_data/materia-viva/data
+/path/to/data
 ```
 
 仓库中的 `data` 是指向上述目录的符号链接。下载器默认保留至少 50 GiB 空闲空间，目标文件先写成 `.part`，完成并检查字节数后再原子改名。大文件的重试由 Python 外层启动新的 curl 进程完成；每个 curl 进程禁用内部重试并从 `.part` 的当前实际字节偏移续传，避免 SSL 中断后内部重试重新打开并截断文件。每个完成的静态文件旁边都有 `*.receipt.json`，记录来源 URL、字节数、SHA-256 和完成时间。
@@ -138,14 +138,14 @@
 | [PowBase](https://www.cristal.org/powbase/index.html) | 169 个 CIF/粉末图谱 ZIP | 官网明确请镜像方联系维护者，故先登记未批量抓取 | 获得镜像许可后再收静态结构/图谱，不从编号序列强行下载 |
 | [NIST Crystal Data](https://www.nist.gov/publications/nist-3-nist-crystal-data) / [NIST Surface Structure Database](https://www.nist.gov/publications/nist-42-nist-surface-structure-database-version-30) | 237,671 个晶体记录；近 1,400 个实验表面结构 | 均为 NIST SRD 许可/遗留产品，需要购买或联系 NIST | 取得机构许可后导入最终结构，不绕过许可复制 |
 
-`/path/to/user/SSD/material_data` 的 245 GiB 既有数据已通过 `data/raw/legacy-material-data` 符号链接登记，没有复制。文件级完全重复、MP/OQMD/ICSD/JARVIS 的内容级重合和性质保留规则，以及 OMat24 的排除说明见 [`legacy-ssd-data-inventory.zh-CN.md`](legacy-ssd-data-inventory.zh-CN.md)。
+既有数据已通过 `data/raw/legacy-material-data` 符号链接登记，没有复制。
 
 Materials Project 这里的“全量”是当前主 API 的全部材料级 `SummaryDoc`，不是原始 VASP 任务、构建中间对象、图片及所有用户附件的无差别复制。[MP AWS Open Data](https://docs.materialsproject.org/downloading-data/aws-opendata) 的旧版 parsed/build 对象已有约 55.9 GB，结构图片另约 58 GB；这些内容与材料级结构/性质检索大量重复，本轮不下载。MPContribs 还包含按项目独立维护的公开、私有和不同许可数据；官方建议通过 `mpcontribs-client` 按项目调用 `download_contributions()`。本轮单独收集 QMOF 等独特结构项目，明确排除 MPtrj 等轨迹项目，也不会越权下载私有项目或把不同项目附件混为主库数据。
 
 下载命令均可重复运行，已完成文件会跳过，未完成文件从 `.part` 继续：
 
 ```bash
-cd /path/to/user/workspace/materia-viva
+cd /path/to/materia-viva
 
 # 查看全部来源
 PYTHONPATH=. python scripts/datasets/acquire.py --list
@@ -285,7 +285,7 @@ ICSD 的批量和 API 使用需要相应授权；离线保存和再分发须遵�
 ```bash
 find -L data/raw/acquired -type f -name '*.receipt.json' -print
 find -L data/raw/acquired -type f -name '*.part' -print
-df -h /path/to/user/SSD
+df -h /path/to/data
 ```
 
 API 任务以 `manifest.json` 中的 `complete: true`、`downloaded_documents == total_documents` 为完成条件。压缩包随后使用 `gzip -t`、`bzip2 -t`、`unzip -t` 或 `tar -tzf` 做全文件校验；数据库内容通过各来源适配器转换后，再进行结构解析、元素/化学式一致性、单位和重复结构检查。

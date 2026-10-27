@@ -22,6 +22,7 @@ both rows are kept and matching attaches properties to every one.
 from __future__ import annotations
 
 import argparse
+import os
 import sqlite3
 import sys
 import time
@@ -31,9 +32,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA = PROJECT_ROOT / "data"
 DEFAULT_OUT = DATA / "props_work" / "match_map.sqlite"
 
-LOCAL_HASH_LEGACY = Path(
-    "/path/to/user/SSD/workspace_data/matgenbench/data/lemat_merge_work"
-)
+LOCAL_HASH_LEGACY = Path(os.environ.get(
+    "MATERIAVIVA_LOCAL_HASH_DIR", str(DATA / "lemat_merge_work")
+))
 
 
 def _ensure_local_meta() -> list[tuple[Path, str]]:
@@ -45,7 +46,10 @@ def _ensure_local_meta() -> list[tuple[Path, str]]:
         if not dest.exists():
             source = LOCAL_HASH_LEGACY / f"local_hashes_{split}.tsv"
             if not source.exists():
-                raise SystemExit(f"missing local hash file: {source}")
+                raise SystemExit(
+                    f"missing local hash file: {source}; set MATERIAVIVA_LOCAL_HASH_DIR "
+                    "to the directory containing the legacy hash files"
+                )
             dest.write_bytes(source.read_bytes())
         out.append((dest, split))
     return out

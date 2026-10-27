@@ -360,8 +360,7 @@ MateriaViva 自身的代码按 [CC BY-NC 4.0](LICENSE) 发布，只允许非商�
 其中 ELEMENTA 是轨迹数据集，但按“每条弛豫只取终点”的规则接入，中间帧不计入结构库。
 
 完整来源、许可、下载状态和人工操作说明见
-[`docs/dataset-acquisition.zh-CN.md`](docs/dataset-acquisition.zh-CN.md)。既有 SSD 数据及重复关系见
-[`docs/legacy-ssd-data-inventory.zh-CN.md`](docs/legacy-ssd-data-inventory.zh-CN.md)。
+[`docs/dataset-acquisition.zh-CN.md`](docs/dataset-acquisition.zh-CN.md)。
 
 ## 获取代码和数据
 
@@ -423,8 +422,6 @@ data/
 ```bash
 curl -s http://127.0.0.1:8000/api/stats
 ```
-
-本机 SSD 迁移和旧路径兼容关系见 [`docs/storage-layout.zh-CN.md`](docs/storage-layout.zh-CN.md)。
 
 ## 统一数据格式
 

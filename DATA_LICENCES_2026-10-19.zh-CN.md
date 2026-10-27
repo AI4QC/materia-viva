@@ -206,7 +206,7 @@ data/open-release/
 重建：
 
 ```bash
-PY=/path/to/user/anaconda3/envs/matgenbench-py310/bin/python
+PY=python
 $PY scripts/export_open_structures.py provenance   # ~1 分钟
 $PY scripts/export_open_structures.py classify
 $PY scripts/export_open_structures.py export       # ~8 分钟

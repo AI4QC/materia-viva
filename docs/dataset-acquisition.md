@@ -16,7 +16,7 @@ All database files — including `.part` resume files, API pages, archives, rece
 normalisation results — live only under:
 
 ```text
-/path/to/user/SSD/workspace_data/materia-viva/data
+/path/to/data
 ```
 
 `data` in the repository is a symlink to that directory. The downloader keeps at least 50 GiB free
@@ -162,10 +162,7 @@ into crystal records.
 | [PowBase](https://www.cristal.org/powbase/index.html) | 169 CIF/powder pattern ZIPs | The site explicitly asks mirrors to contact the maintainer, so it is registered without bulk fetching | Collect static structures/patterns after mirroring permission, never by brute-forcing a number sequence |
 | [NIST Crystal Data](https://www.nist.gov/publications/nist-3-nist-crystal-data) / [NIST Surface Structure Database](https://www.nist.gov/publications/nist-42-nist-surface-structure-database-version-30) | 237,671 crystal records; nearly 1,400 experimental surface structures | Both are NIST SRD licensed/legacy products requiring purchase or contact with NIST | Import final structures after obtaining an institutional licence, never copy around the licence |
 
-The 245 GiB of existing data in `/path/to/user/SSD/material_data` is registered through the
-`data/raw/legacy-material-data` symlink without copying. Exact file-level duplicates, content-level
-overlap for MP/OQMD/ICSD/JARVIS, property retention rules and the OMat24 exclusion are described in
-[`legacy-ssd-data-inventory.md`](legacy-ssd-data-inventory.md).
+Existing data is registered through the `data/raw/legacy-material-data` symlink without copying.
 
 "Full" for Materials Project here means all material-level `SummaryDoc` records from the current
 main API, not an indiscriminate copy of raw VASP tasks, build intermediates, images and every user
@@ -183,7 +180,7 @@ All download commands are re-runnable: completed files are skipped and unfinishe
 `.part`:
 
 ```bash
-cd /path/to/user/workspace/materia-viva
+cd /path/to/materia-viva
 
 # list all sources
 PYTHONPATH=. python scripts/datasets/acquire.py --list
@@ -427,7 +424,7 @@ After static files complete:
 ```bash
 find -L data/raw/acquired -type f -name '*.receipt.json' -print
 find -L data/raw/acquired -type f -name '*.part' -print
-df -h /path/to/user/SSD
+df -h /path/to/data
 ```
 
 API tasks count as complete when `manifest.json` holds `complete: true` and

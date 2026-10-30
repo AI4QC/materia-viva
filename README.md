@@ -13,7 +13,22 @@ MateriaViva brings crystal structures and properties from multiple materials dat
 
 The same crystal may appear in several databases under different identifiers and with different properties. MateriaViva connects these records so researchers can search a chemical space, inspect structures and compare the available evidence in one place.
 
-[![Watch the MateriaViva demo](demo/MateriaViva_demo_preview.gif)](demo/MateriaViva_demo_2K60.mp4)
+## Introduction and walkthrough videos
+
+Explore MateriaViva from searching and filtering materials to inspecting structures with OVITO, comparing properties and spectra, tracing sources, downloading CIF files and using the personal workspace.
+
+[![Preview of the English MateriaViva introduction and walkthrough](demo/MateriaViva_demo_preview.gif)](https://github.com/AI4QC/materia-viva/releases/download/tutorials-2026.10.30/MateriaViva-EN.mp4)
+
+The GIF above is a short preview from the English edition. Click it to open the full video, or choose a language below.
+
+| Edition | Narration and captions | Duration | Full video |
+|---|---|---|---|
+| English | English narration and English captions | 9:11 | [Watch / download MP4](https://github.com/AI4QC/materia-viva/releases/download/tutorials-2026.10.30/MateriaViva-EN.mp4) |
+| 简体中文 | Chinese narration and Chinese captions | 9:06 | [观看／下载 MP4](https://github.com/AI4QC/materia-viva/releases/download/tutorials-2026.10.30/MateriaViva-ZH.mp4) |
+
+Both videos are 1080p at 30 fps and cover 25 scenes, with real OVITO crystal animations, chapter transitions and close-ups of key controls. They use the original web interface and public catalog in a local demonstration environment with OVITO/Tachyon enabled; availability on the live site may differ.
+
+[Subtitles, chapter lists and checksums](https://github.com/AI4QC/materia-viva/releases/tag/tutorials-2026.10.30) · [Video details](demo/README.md)
 
 ## What MateriaViva offers
 

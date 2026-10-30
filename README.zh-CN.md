@@ -13,7 +13,22 @@ MateriaViva 将多个材料数据库中的晶体结构和性质整合为统一�
 
 同一种晶体可能在不同数据库中使用不同的标识，并带有不同的性质数据。MateriaViva 将这些记录关联起来，方便研究者在同一入口检索化学空间、查看结构和比较已有数据。
 
-[![观看 MateriaViva 演示](demo/MateriaViva_demo_preview.gif)](demo/MateriaViva_demo_2K60.mp4)
+## 介绍与操作视频
+
+通过完整视频了解 MateriaViva：从材料检索与筛选，到 OVITO 结构检查、性质与谱图比较、来源追溯、CIF 下载和个人工作区使用。
+
+[![MateriaViva 英文介绍与操作视频预览](demo/MateriaViva_demo_preview.gif)](https://github.com/AI4QC/materia-viva/releases/download/tutorials-2026.10.30/MateriaViva-EN.mp4)
+
+上方 GIF 取自英文成片的精选片段，点击可打开完整英文视频；也可在下表选择中文版。
+
+| 版本 | 配音与字幕 | 时长 | 完整视频 |
+|---|---|---|---|
+| English | 英文配音＋英文字幕 | 9 分 11 秒 | [观看／下载 MP4](https://github.com/AI4QC/materia-viva/releases/download/tutorials-2026.10.30/MateriaViva-EN.mp4) |
+| 简体中文 | 中文配音＋中文字幕 | 9 分 6 秒 | [观看／下载 MP4](https://github.com/AI4QC/materia-viva/releases/download/tutorials-2026.10.30/MateriaViva-ZH.mp4) |
+
+两版均为 1080p、30 fps，包含 25 个场景，配有真实 OVITO 晶体动画、章节转场和关键操作特写。演示使用原始网页界面及公开目录数据，在本地环境中真实启用 OVITO/Tachyon；线上网站的功能可用状态可能不同。
+
+[字幕、章节表与校验文件](https://github.com/AI4QC/materia-viva/releases/tag/tutorials-2026.10.30) · [视频详情](demo/README.md)
 
 ## MateriaViva 提供什么
 

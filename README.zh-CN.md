@@ -4,6 +4,8 @@
 
 # MateriaViva
 
+**在线网站：[materia-viva.org](https://materia-viva.org/)**
+
 **简体中文** · [English](README.md)
 
 [![CI](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml)
@@ -19,7 +21,7 @@ MateriaViva 将多个材料数据库中的晶体结构和性质整合为统一�
 
 [![MateriaViva 英文介绍与操作视频预览](demo/MateriaViva_demo_preview.gif)](https://github.com/AI4QC/materia-viva/releases/download/tutorials-2026.10.30/MateriaViva-EN.mp4)
 
-上方 GIF 取自英文成片的精选片段，点击可打开完整英文视频；也可在下表选择中文版。
+上方 GIF 展示网站页面总览及英文成片中的精选操作，点击可打开完整英文视频；也可在下表选择中文版。
 
 | 版本 | 配音与字幕 | 时长 | 完整视频 |
 |---|---|---|---|

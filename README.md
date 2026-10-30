@@ -4,6 +4,8 @@
 
 # MateriaViva
 
+**Website: [materia-viva.org](https://materia-viva.org/)**
+
 **English** · [简体中文](README.zh-CN.md)
 
 [![CI](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml/badge.svg)](https://github.com/AI4QC/materia-viva/actions/workflows/ci.yml)
@@ -19,7 +21,7 @@ Explore MateriaViva from searching and filtering materials to inspecting structu
 
 [![Preview of the English MateriaViva introduction and walkthrough](demo/MateriaViva_demo_preview.gif)](https://github.com/AI4QC/materia-viva/releases/download/tutorials-2026.10.30/MateriaViva-EN.mp4)
 
-The GIF above is a short preview from the English edition. Click it to open the full video, or choose a language below.
+The GIF above previews the website overview and selected workflows from the English edition. Click it to open the full video, or choose a language below.
 
 | Edition | Narration and captions | Duration | Full video |
 |---|---|---|---|

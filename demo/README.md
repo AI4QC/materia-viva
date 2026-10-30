@@ -13,7 +13,7 @@ The 25 scenes cover search, element and property filters, result comparison, OVI
 
 The videos use the original web interface and public catalog in an isolated local demonstration environment. OVITO/Tachyon was actually run for the structure views and crystal animation. This does not imply that server-side OVITO is enabled on the public site.
 
-`MateriaViva_demo_preview.gif` is a compact, silent highlight reel extracted from the English edition. Click the preview in either README to open the full English video. The complete English and Chinese MP4s are hosted as release assets.
+`MateriaViva_demo_preview.gif` combines a wide overview of the English website with selected scenes from the English edition. The overview appears after the opening and remains visible for six seconds before the detailed workflows. Click the preview in either README to open the full English video. The complete English and Chinese MP4s are hosted as release assets.
 
 Captions are already burned into each video; use the SRT files for editing or accessibility workflows without adding duplicate captions during normal playback. Scientific tables are best viewed full-screen.
 
